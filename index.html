@@ -60,7 +60,7 @@
 
     <div id="toast-container"></div>
     <div id="app" class="flex-1 flex flex-col w-full z-10 relative pb-24">
-        <!-- Rendered via JS -->
+        <div class="flex-1 flex items-center justify-center min-h-[60vh]"><div class="w-16 h-16 border-t-4 border-l-4 border-[#ff4d00] rounded-full animate-spin"></div></div>
     </div>
 
     <script type="module">
@@ -68,17 +68,11 @@
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Firebase Setup (Canvas Compliant)
-        let firebaseConfig;
-        try {
-            firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-        } catch(e) {
-            firebaseConfig = {
-                apiKey: "AIzaSyDPlRSi2R32NQAm5-DO6SU8Qftj9pGcFDs",
-                authDomain: "grindappde.firebaseapp.com",
-                projectId: "grindappde"
-            };
-        }
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "AIzaSyDPlRSi2R32NQAm5-DO6SU8Qftj9pGcFDs",
+            authDomain: "grindappde.firebaseapp.com",
+            projectId: "grindappde"
+        };
         
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'grind-local';
         const appInit = initializeApp(firebaseConfig);
@@ -104,24 +98,24 @@
             { lvl: 30, pro: 'BLACK KEY' }
         ];
 
-        // Missionen mit Fokus Gesundheit, Fitness & Echte Verbindungen
+        // Fokus auf Gesundheit & Beziehungen
         const weeklyData = {
             1: { title: "Awakening", startOffset: 0, missions: [
-                { id: 'w1m1', name: 'Midnight Run', desc: '5km Lauf zwischen 00:00 - 03:00 Uhr.', xp: 500 },
-                { id: 'w1m2', name: 'Cold Start', desc: '3 Min. Eisbad. Körperliche Resilienz.', xp: 300 },
-                { id: 'w1m3', name: 'Deep Talk', desc: '1 Stunde intensives Gespräch mit einer wichtigen Person. Keine Handys.', xp: 400 }
+                { id: 'w1m1', name: 'Morning Light', desc: '15 Min. spazieren direkt nach dem Aufstehen. Circadian Reset.', xp: 400 },
+                { id: 'w1m2', name: 'Cold Start', desc: '3 Min. kalt duschen oder Eisbad. Nervensystem trainieren.', xp: 300 },
+                { id: 'w1m3', name: 'Deep Talk', desc: '1 Stunde tiefes Gespräch mit einer wichtigen Person. Keine Handys.', xp: 500 }
             ]},
             2: { title: "Grit", startOffset: 7, missions: [
-                { id: 'w2m1', name: 'Stairway', desc: '150 Stockwerke. Physisches Limit.', xp: 600 },
-                { id: 'w2m2', name: 'Digital Fast', desc: '4 Stunden absoluter Verzicht auf jegliche Bildschirme.', xp: 500 }
+                { id: 'w2m1', name: 'Physical Limit', desc: 'Ein Workout bis zum absoluten Muskelversagen.', xp: 600 },
+                { id: 'w2m2', name: 'Digital Fast', desc: '4 Stunden absoluter Verzicht auf Bildschirme. Zeit für dich.', xp: 500 }
             ]},
             3: { title: "Infil", startOffset: 14, missions: [
-                { id: 'w3m1', name: 'The Vault', desc: 'QR Scan im Gym.', xp: 400 },
-                { id: 'w3m2', name: 'Recovery Phase', desc: '8+ Stunden qualitativer Schlaf getrackt.', xp: 300 }
+                { id: 'w3m1', name: 'Community', desc: 'Unterstütze jemanden aktiv bei einem seiner Ziele.', xp: 500 },
+                { id: 'w3m2', name: 'Recovery Phase', desc: '8+ Stunden qualitativer Schlaf getrackt.', xp: 400 }
             ]},
             4: { title: "Peak", startOffset: 21, missions: [
-                { id: 'w4m1', name: '180 Heart', desc: '10 Min > 170 BPM.', xp: 800 },
-                { id: 'w4m2', name: 'Inner Circle', desc: 'Plane und hoste ein echtes Dinner für deine engsten Freunde.', xp: 700 }
+                { id: 'w4m1', name: '180 Heart', desc: '10 Min Puls > 170 BPM. Kardiovaskulärer Peak.', xp: 800 },
+                { id: 'w4m2', name: 'Inner Circle', desc: 'Hoste ein echtes, ablenkungsfreies Dinner für Freunde.', xp: 700 }
             ]}
         };
 
@@ -134,40 +128,36 @@
             const icon = type === 'error' 
                 ? `<svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`
                 : `<svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>`;
-            toast.innerHTML = `${icon} <div><div class="font-black text-[10px] uppercase tracking-widest text-gray-400 mb-0.5">System Update</div><div>${msg}</div></div>`;
+            toast.innerHTML = `${icon} <div><div class="font-black text-[10px] uppercase tracking-widest text-gray-400 mb-0.5">System</div><div>${msg}</div></div>`;
             container.appendChild(toast);
             setTimeout(() => toast.classList.add('show'), 10);
             setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 4000);
         };
 
-        // Der Pfad MUSS eine gerade Anzahl an Segmenten haben.
-        // collection(db, 'artifacts', appId, 'users', user.uid, 'player_data') -> doc('profile')
-        const getProfileRef = (uid) => doc(db, 'artifacts', appId, 'users', uid, 'player_data', 'profile');
+        const getProfileRef = (uid) => doc(db, 'artifacts', appId, 'users', uid, 'data', 'profile');
 
         onAuthStateChanged(auth, async (user) => {
             state.user = user;
             if (user) {
                 try {
                     const profileRef = getProfileRef(user.uid);
-                    
                     onSnapshot(profileRef, (docSnap) => {
                         if (docSnap.exists()) {
                             state.profile = docSnap.data();
                         } else {
+                            // Initialer Datensatz
                             state.profile = { xp: 0, lvl: 1, completed: [] };
                             setDoc(profileRef, state.profile);
                         }
                         state.view = 'dashboard';
                         render();
                     }, (error) => {
-                        console.error("Datenbank Fehler:", error);
-                        window.showToast("Datenbank-Zugriff verweigert.", "error");
+                        console.error("DB Error:", error);
                         state.view = 'auth';
                         render();
                     });
                 } catch (err) {
                     console.error("Setup error:", err);
-                    window.showToast("Fehler beim Laden des Profils.", "error");
                     state.view = 'auth';
                     render();
                 }
@@ -187,13 +177,12 @@
                 }
             } catch (e) {
                 console.error("Auth failed:", e);
-                window.showToast("Login fehlgeschlagen.", "error");
                 state.view = 'auth';
                 render();
             }
         };
 
-        // Initiiere beim ersten Laden
+        // Start App
         initAuth();
 
         window.handleLogin = () => {
@@ -215,7 +204,8 @@
 
         window.verifyMission = async (mid, xp) => {
             if (!state.user || !state.profile) return;
-            if (state.profile.completed.includes(mid)) return;
+            const completedList = state.profile.completed || [];
+            if (completedList.includes(mid)) return;
             
             const btn = document.getElementById(`btn-${mid}`);
             if (btn) { btn.innerText = "Verifying..."; btn.disabled = true; }
@@ -224,10 +214,9 @@
                 try {
                     const newXp = (state.profile.xp || 0) + xp;
                     const newLvl = Math.floor(newXp / 1000) + 1;
-                    const newCompleted = [...(state.profile.completed || []), mid];
+                    const newCompleted = [...completedList, mid];
 
-                    const profileRef = getProfileRef(state.user.uid);
-                    await setDoc(profileRef, {
+                    await setDoc(getProfileRef(state.user.uid), {
                         xp: newXp,
                         lvl: newLvl,
                         completed: newCompleted
@@ -235,7 +224,7 @@
 
                     window.showToast(`Mission verified. +${xp} XP`, 'success');
                     
-                    if (newLvl > state.profile.lvl) {
+                    if (newLvl > (state.profile.lvl || 1)) {
                         setTimeout(() => window.showToast(`RANK UP! You reached LVL ${newLvl}.`, 'success'), 1000);
                     }
                 } catch (e) {
@@ -253,165 +242,182 @@
         function render() {
             const appDiv = document.getElementById('app');
 
-            if (state.view === 'loading') {
-                appDiv.innerHTML = `<div class="flex-1 flex items-center justify-center min-h-[60vh]"><div class="w-16 h-16 border-t-4 border-l-4 border-[#ff4d00] rounded-full animate-spin"></div></div>`;
-                return;
-            }
+            try {
+                if (state.view === 'loading') {
+                    appDiv.innerHTML = `<div class="flex-1 flex items-center justify-center min-h-[60vh]"><div class="w-16 h-16 border-t-4 border-l-4 border-[#ff4d00] rounded-full animate-spin"></div></div>`;
+                    return;
+                }
 
-            if (state.view === 'auth') {
-                appDiv.innerHTML = `
-                    <div class="flex-1 flex flex-col items-center justify-center p-6 min-h-[80vh] text-center">
-                        <h1 class="text-6xl md:text-8xl font-black italic tracking-tighter mb-2">GRIND<span class="text-[#ff4d00]">.</span></h1>
-                        <p class="text-gray-500 font-bold uppercase tracking-widest text-xs mb-12 max-w-sm leading-relaxed">
-                            Gesundheit. Beziehungen. Execution.<br> Season 01 beginnt jetzt.
-                        </p>
-                        <button onclick="window.handleLogin()" class="btn-grind text-lg px-12 py-5 rounded-sm">
-                            Enter the Grind
-                        </button>
-                    </div>
-                `;
-                return;
-            }
-
-            const p = state.profile || { xp: 0, lvl: 1, completed: [] };
-            const currentRank = RANKS[Math.min(Math.floor((p.lvl - 1) / 5), RANKS.length - 1)];
-            const xpProgress = (p.xp % 1000) / 10;
-            const now = new Date();
-
-            let html = `
-                <header class="p-6 max-w-6xl mx-auto flex justify-between items-center w-full">
-                    <h1 class="text-3xl font-black italic tracking-tighter">GRIND<span class="text-[#ff4d00]">.</span></h1>
-                    <button onclick="window.handleLogout()" class="text-[10px] uppercase font-bold text-gray-500 hover:text-white transition tracking-widest border border-gray-800 px-3 py-1 rounded-sm">Exit</button>
-                </header>
-
-                <main class="max-w-6xl mx-auto px-6 w-full">
-                    
-                    <!-- Status Panel -->
-                    <section class="mb-12 flex flex-col md:flex-row gap-8 items-center bg-[#0a0a0a] p-8 border border-[#1f1f1f] rounded-lg shadow-2xl relative overflow-hidden group">
-                        <div class="absolute inset-0 bg-gradient-to-r from-[#ff4d00] to-transparent opacity-0 group-hover:opacity-5 transition duration-1000"></div>
-                        <div class="flex-shrink-0 text-center md:text-left relative z-10">
-                            <p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-[0.4em] mb-2">Standing</p>
-                            <h2 class="text-6xl font-black italic tracking-tighter leading-none ${xpProgress > 90 ? 'animate-level-up' : ''}">LVL ${p.lvl}</h2>
-                            <p class="text-gray-500 font-mono mt-3 text-xs tracking-widest uppercase"><span class="text-white">${currentRank}</span></p>
-                        </div>
-                        <div class="flex-grow w-full relative z-10">
-                            <div class="flex justify-between text-[10px] font-bold uppercase text-gray-500 mb-3 tracking-widest italic">
-                                <span>XP: <span class="text-white">${p.xp}</span> / ${(p.lvl) * 1000}</span>
-                                <span>${xpProgress.toFixed(0)}%</span>
-                            </div>
-                            <div class="w-full bg-gray-900 h-3 rounded-full overflow-hidden border border-white/5">
-                                <div class="grind-gradient h-full transition-all duration-1000" style="width: ${xpProgress}%"></div>
-                            </div>
-                        </div>
-                    </section>
-
-                    <!-- Battle Pass (Grind Track) -->
-                    <section class="mb-16">
-                        <div class="flex justify-between items-center mb-6 px-2">
-                            <div>
-                                <h3 class="text-2xl font-black italic uppercase tracking-tighter">Grind Track <span class="text-[#ff4d00]">S01</span></h3>
-                                <p class="text-gray-500 text-[10px] font-bold tracking-widest mt-1">Season 01 | Active</p>
-                            </div>
-                            <div class="flex gap-2">
-                                <button onclick="window.scrollPass(-1)" class="bg-white/5 p-2 px-4 border border-white/10 text-xs font-black hover:bg-white/10 transition">&larr;</button>
-                                <button onclick="window.scrollPass(1)" class="bg-white/5 p-2 px-4 border border-white/10 text-xs font-black hover:bg-white/10 transition">&rarr;</button>
-                            </div>
-                        </div>
-
-                        <div id="pass-viewport" class="no-scrollbar overflow-x-auto py-8 relative flex items-center min-h-[280px] border-y border-white/5 bg-black/40 shadow-inner">
-                            <div class="flex items-center px-[40vw]">
-            `;
-
-            for (let i = 1; i <= 30; i++) {
-                const r = rewardData.find(x => x.lvl === i);
-                const isUnlocked = i <= p.lvl;
-                const lineClass = i < p.lvl ? 'active' : '';
-                html += `
-                    <div class="level-node flex flex-col items-center">
-                        <div class="level-line ${lineClass}"></div>
-                        <div class="reward-box mb-4 ${isUnlocked ? 'unlocked' : 'opacity-20 scale-90'}">
-                            <span class="tag-free">FREE</span>
-                            <span class="text-[9px] font-black uppercase text-center px-2 text-white">${r?.free || '-'}</span>
-                        </div>
-                        <div class="relative z-20 w-10 h-10 rounded-full flex items-center justify-center font-black italic text-xs ${isUnlocked ? 'grind-gradient text-black scale-110 shadow-[0_0_15px_rgba(255,77,0,0.5)]' : 'bg-gray-800 text-gray-500 border border-white/10'}">
-                            ${i}
-                        </div>
-                        <div class="reward-box pro mt-4 ${isUnlocked ? 'unlocked' : 'opacity-10 scale-90'}">
-                            <span class="tag-pro italic">PRO</span>
-                            <span class="text-[9px] font-black uppercase text-center px-2 text-purple-400">${r?.pro || '-'}</span>
-                        </div>
-                    </div>
-                `;
-            }
-
-            html += `
-                            </div>
-                        </div>
-                    </section>
-
-                    <!-- Weekly Missions -->
-                    <section class="max-w-3xl mx-auto mb-12">
-                        <div class="flex flex-col gap-6 mb-10">
-                            <div class="flex justify-between items-end border-b border-white/10 pb-4">
-                                <div>
-                                    <p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">Operations</p>
-                                    <h3 class="text-3xl font-black uppercase italic tracking-tighter">Woche ${state.currentWeekTab}: ${weeklyData[state.currentWeekTab].title}</h3>
-                                </div>
-                                <span class="text-[10px] font-black bg-[#ff4d00] text-white px-3 py-1 italic shadow-[0_0_10px_rgba(255,77,0,0.4)]">LIVE</span>
-                            </div>
-                            
-                            <div class="flex flex-wrap gap-2">
-            `;
-
-            Object.keys(weeklyData).forEach(w => {
-                const weekNum = parseInt(w);
-                const unlockDate = new Date(SEASON_START);
-                unlockDate.setDate(unlockDate.getDate() + weeklyData[weekNum].startOffset);
-                const isLocked = now < unlockDate;
-                
-                html += `<button onclick="window.setWeek(${weekNum})" class="week-btn px-5 py-2 text-[10px] font-black uppercase transition rounded-sm ${state.currentWeekTab === weekNum ? 'active' : ''} ${isLocked ? 'week-locked' : ''}">W0${weekNum}</button>`;
-            });
-
-            html += `
-                            </div>
-                        </div>
-                        <div class="space-y-4">
-            `;
-
-            const week = weeklyData[state.currentWeekTab];
-            week.missions.forEach(m => {
-                const isCompleted = p.completed.includes(m.id);
-                html += `
-                    <div class="card p-6 rounded-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4 group relative overflow-hidden ${isCompleted ? 'is-completed border-[#ff4d00]/30' : ''}">
-                        <div class="absolute left-0 top-0 bottom-0 w-1 bg-[#ff4d00] opacity-0 group-hover:opacity-100 transition"></div>
-                        
-                        <div class="completed-overlay">
-                            <span class="text-[#ff4d00] font-black italic uppercase tracking-widest flex items-center gap-2">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Verified
-                            </span>
-                        </div>
-
-                        <div class="pr-6 relative z-0 flex-1">
-                            <h4 class="font-black italic uppercase text-lg group-hover:text-[#ff4d00] transition tracking-tighter">${m.name}</h4>
-                            <p class="text-gray-400 text-xs mt-1 font-medium leading-relaxed">${m.desc}</p>
-                        </div>
-                        <div class="text-left md:text-right flex-shrink-0 relative z-0 flex flex-col items-start md:items-end w-full md:w-auto">
-                            <span class="block text-[#ff4d00] font-black text-2xl italic tracking-tighter mb-2">+${m.xp}</span>
-                            <button id="btn-${m.id}" onclick="window.verifyMission('${m.id}', ${m.xp})" class="btn-grind w-full md:w-auto" ${isCompleted ? 'disabled' : ''}>
-                                Verify
+                if (state.view === 'auth') {
+                    appDiv.innerHTML = `
+                        <div class="flex-1 flex flex-col items-center justify-center p-6 min-h-[80vh] text-center">
+                            <h1 class="text-6xl md:text-8xl font-black italic tracking-tighter mb-2">GRIND<span class="text-[#ff4d00]">.</span></h1>
+                            <p class="text-gray-500 font-bold uppercase tracking-widest text-xs mb-12 max-w-sm leading-relaxed">
+                                Gesundheit. Echte Connections. Execution.<br> Season 01 beginnt.
+                            </p>
+                            <button onclick="window.handleLogin()" class="btn-grind text-lg px-12 py-5 rounded-sm">
+                                Enter the Grind
                             </button>
                         </div>
-                    </div>
+                    `;
+                    return;
+                }
+
+                // Sichere Fallbacks für Profil-Daten
+                const p = state.profile || { xp: 0, lvl: 1, completed: [] };
+                const safeXp = p.xp || 0;
+                const safeLvl = p.lvl || 1;
+                const safeCompleted = p.completed || [];
+                
+                const currentRank = RANKS[Math.min(Math.floor((safeLvl - 1) / 5), RANKS.length - 1)];
+                const xpProgress = (safeXp % 1000) / 10;
+                const now = new Date();
+
+                let html = `
+                    <header class="p-6 max-w-6xl mx-auto flex justify-between items-center w-full">
+                        <h1 class="text-3xl font-black italic tracking-tighter">GRIND<span class="text-[#ff4d00]">.</span></h1>
+                        <button onclick="window.handleLogout()" class="text-[10px] uppercase font-bold text-gray-500 hover:text-white transition tracking-widest border border-gray-800 px-3 py-1 rounded-sm">Exit</button>
+                    </header>
+
+                    <main class="max-w-6xl mx-auto px-6 w-full">
+                        
+                        <!-- Status Panel -->
+                        <section class="mb-12 flex flex-col md:flex-row gap-8 items-center bg-[#0a0a0a] p-8 border border-[#1f1f1f] rounded-lg shadow-2xl relative overflow-hidden group">
+                            <div class="absolute inset-0 bg-gradient-to-r from-[#ff4d00] to-transparent opacity-0 group-hover:opacity-5 transition duration-1000"></div>
+                            <div class="flex-shrink-0 text-center md:text-left relative z-10">
+                                <p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-[0.4em] mb-2">Standing</p>
+                                <h2 class="text-6xl font-black italic tracking-tighter leading-none ${xpProgress > 90 ? 'animate-level-up' : ''}">LVL ${safeLvl}</h2>
+                                <p class="text-gray-500 font-mono mt-3 text-xs tracking-widest uppercase"><span class="text-white">${currentRank}</span></p>
+                            </div>
+                            <div class="flex-grow w-full relative z-10">
+                                <div class="flex justify-between text-[10px] font-bold uppercase text-gray-500 mb-3 tracking-widest italic">
+                                    <span>XP: <span class="text-white">${safeXp}</span> / ${(safeLvl) * 1000}</span>
+                                    <span>${xpProgress.toFixed(0)}%</span>
+                                </div>
+                                <div class="w-full bg-gray-900 h-3 rounded-full overflow-hidden border border-white/5">
+                                    <div class="grind-gradient h-full transition-all duration-1000" style="width: ${xpProgress}%"></div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Battle Pass (Grind Track) -->
+                        <section class="mb-16">
+                            <div class="flex justify-between items-center mb-6 px-2">
+                                <div>
+                                    <h3 class="text-2xl font-black italic uppercase tracking-tighter">Grind Track <span class="text-[#ff4d00]">S01</span></h3>
+                                    <p class="text-gray-500 text-[10px] font-bold tracking-widest mt-1">Season 01 | Active</p>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button onclick="window.scrollPass(-1)" class="bg-white/5 p-2 px-4 border border-white/10 text-xs font-black hover:bg-white/10 transition">&larr;</button>
+                                    <button onclick="window.scrollPass(1)" class="bg-white/5 p-2 px-4 border border-white/10 text-xs font-black hover:bg-white/10 transition">&rarr;</button>
+                                </div>
+                            </div>
+
+                            <div id="pass-viewport" class="no-scrollbar overflow-x-auto py-8 relative flex items-center min-h-[280px] border-y border-white/5 bg-black/40 shadow-inner">
+                                <div class="flex items-center px-[40vw]">
                 `;
-            });
 
-            html += `
+                for (let i = 1; i <= 30; i++) {
+                    const r = rewardData.find(x => x.lvl === i);
+                    const isUnlocked = i <= safeLvl;
+                    const lineClass = i < safeLvl ? 'active' : '';
+                    html += `
+                        <div class="level-node flex flex-col items-center">
+                            <div class="level-line ${lineClass}"></div>
+                            <div class="reward-box mb-4 ${isUnlocked ? 'unlocked' : 'opacity-20 scale-90'}">
+                                <span class="tag-free">FREE</span>
+                                <span class="text-[9px] font-black uppercase text-center px-2 text-white">${r?.free || '-'}</span>
+                            </div>
+                            <div class="relative z-20 w-10 h-10 rounded-full flex items-center justify-center font-black italic text-xs ${isUnlocked ? 'grind-gradient text-black scale-110 shadow-[0_0_15px_rgba(255,77,0,0.5)]' : 'bg-gray-800 text-gray-500 border border-white/10'}">
+                                ${i}
+                            </div>
+                            <div class="reward-box pro mt-4 ${isUnlocked ? 'unlocked' : 'opacity-10 scale-90'}">
+                                <span class="tag-pro italic">PRO</span>
+                                <span class="text-[9px] font-black uppercase text-center px-2 text-purple-400">${r?.pro || '-'}</span>
+                            </div>
                         </div>
-                    </section>
-                </main>
-            `;
+                    `;
+                }
 
-            appDiv.innerHTML = html;
+                html += `
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Weekly Missions -->
+                        <section class="max-w-3xl mx-auto mb-12">
+                            <div class="flex flex-col gap-6 mb-10">
+                                <div class="flex justify-between items-end border-b border-white/10 pb-4">
+                                    <div>
+                                        <p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">Operations</p>
+                                        <h3 class="text-3xl font-black uppercase italic tracking-tighter">Woche ${state.currentWeekTab}: ${weeklyData[state.currentWeekTab].title}</h3>
+                                    </div>
+                                    <span class="text-[10px] font-black bg-[#ff4d00] text-white px-3 py-1 italic shadow-[0_0_10px_rgba(255,77,0,0.4)]">LIVE</span>
+                                </div>
+                                
+                                <div class="flex flex-wrap gap-2">
+                `;
+
+                Object.keys(weeklyData).forEach(w => {
+                    const weekNum = parseInt(w);
+                    const unlockDate = new Date(SEASON_START);
+                    unlockDate.setDate(unlockDate.getDate() + weeklyData[weekNum].startOffset);
+                    const isLocked = now < unlockDate;
+                    
+                    html += `<button onclick="window.setWeek(${weekNum})" class="week-btn px-5 py-2 text-[10px] font-black uppercase transition rounded-sm ${state.currentWeekTab === weekNum ? 'active' : ''} ${isLocked ? 'week-locked' : ''}">W0${weekNum}</button>`;
+                });
+
+                html += `
+                                </div>
+                            </div>
+                            <div class="space-y-4">
+                `;
+
+                const week = weeklyData[state.currentWeekTab];
+                week.missions.forEach(m => {
+                    const isCompleted = safeCompleted.includes(m.id);
+                    html += `
+                        <div class="card p-6 rounded-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4 group relative overflow-hidden ${isCompleted ? 'is-completed border-[#ff4d00]/30' : ''}">
+                            <div class="absolute left-0 top-0 bottom-0 w-1 bg-[#ff4d00] opacity-0 group-hover:opacity-100 transition"></div>
+                            
+                            <div class="completed-overlay">
+                                <span class="text-[#ff4d00] font-black italic uppercase tracking-widest flex items-center gap-2">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Verified
+                                </span>
+                            </div>
+
+                            <div class="pr-6 relative z-0 flex-1">
+                                <h4 class="font-black italic uppercase text-lg group-hover:text-[#ff4d00] transition tracking-tighter">${m.name}</h4>
+                                <p class="text-gray-400 text-xs mt-1 font-medium leading-relaxed">${m.desc}</p>
+                            </div>
+                            <div class="text-left md:text-right flex-shrink-0 relative z-0 flex flex-col items-start md:items-end w-full md:w-auto">
+                                <span class="block text-[#ff4d00] font-black text-2xl italic tracking-tighter mb-2">+${m.xp}</span>
+                                <button id="btn-${m.id}" onclick="window.verifyMission('${m.id}', ${m.xp})" class="btn-grind w-full md:w-auto" ${isCompleted ? 'disabled' : ''}>
+                                    Verify
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += `
+                            </div>
+                        </section>
+                    </main>
+                `;
+
+                appDiv.innerHTML = html;
+
+            } catch (err) {
+                appDiv.innerHTML = `
+                    <div class="flex-1 flex flex-col items-center justify-center p-6 min-h-[60vh] text-center">
+                        <div class="bg-[#1f1f1f] border border-red-500 text-red-400 p-8 rounded-lg max-w-lg">
+                            <h2 class="font-black uppercase tracking-widest mb-4">System Error</h2>
+                            <p class="font-mono text-xs text-left overflow-hidden break-words">${err.message}</p>
+                            <button onclick="window.handleLogout()" class="mt-6 btn-grind text-xs">Reset Login</button>
+                        </div>
+                    </div>`;
+            }
         }
     </script>
 </body>
