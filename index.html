@@ -66,7 +66,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
             apiKey: "AIzaSyDPlRSi2R32NQAm5-DO6SU8Qftj9pGcFDs",
@@ -134,30 +134,36 @@
             setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 4000);
         };
 
-        const getProfileRef = (uid) => doc(db, 'artifacts', appId, 'users', uid, 'data', 'profile');
+        const getProfileRef = (uid) => doc(db, 'artifacts', appId, 'users', uid, 'grind_data', 'profile');
 
         onAuthStateChanged(auth, async (user) => {
             state.user = user;
             if (user) {
                 try {
                     const profileRef = getProfileRef(user.uid);
+                    
+                    // Lade Daten erst sicher runter, um Permissions-Fehler zu vermeiden
+                    const snap = await getDoc(profileRef);
+                    if (!snap.exists()) {
+                        await setDoc(profileRef, { xp: 0, lvl: 1, completed: [] });
+                    }
+
                     onSnapshot(profileRef, (docSnap) => {
                         if (docSnap.exists()) {
                             state.profile = docSnap.data();
-                        } else {
-                            // Initialer Datensatz
-                            state.profile = { xp: 0, lvl: 1, completed: [] };
-                            setDoc(profileRef, state.profile);
+                            state.view = 'dashboard';
+                            render();
                         }
-                        state.view = 'dashboard';
-                        render();
                     }, (error) => {
                         console.error("DB Error:", error);
-                        state.view = 'auth';
+                        window.showToast("Sync Error: " + error.message, "error");
+                        // Wichtig: Verhindert den Loop zurück zum Auth-Screen
+                        state.view = 'dashboard'; 
                         render();
                     });
                 } catch (err) {
                     console.error("Setup error:", err);
+                    window.showToast("Ladefehler. Bitte Seite neu laden.", "error");
                     state.view = 'auth';
                     render();
                 }
@@ -171,12 +177,18 @@
         const initAuth = async () => {
             try {
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
+                    try {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } catch(tokenErr) {
+                        console.warn("Token-Login fehlgeschlagen, versuche anonym...", tokenErr);
+                        await signInAnonymously(auth);
+                    }
                 } else {
                     await signInAnonymously(auth);
                 }
             } catch (e) {
                 console.error("Auth failed:", e);
+                window.showToast("Login-System fehlgeschlagen.", "error");
                 state.view = 'auth';
                 render();
             }
@@ -185,10 +197,10 @@
         // Start App
         initAuth();
 
-        window.handleLogin = () => {
+        window.handleLogin = async () => {
             state.view = 'loading';
             render();
-            initAuth();
+            await initAuth();
         };
 
         window.handleLogout = () => {
@@ -422,5 +434,3 @@
     </script>
 </body>
 </html>
-
-
