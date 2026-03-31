@@ -43,8 +43,9 @@
         .toast { pointer-events: auto; background: #0a0a0a; border: 1px solid #1f1f1f; color: white; padding: 16px 24px; border-radius: 4px; font-size: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.8); transform: translateX(120%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: flex; align-items: center; gap: 12px; }
         .toast.show { transform: translateX(0); }
         .toast.success { border-left: 4px solid #ff4d00; }
+        .toast.error { border-left: 4px solid #dc2626; }
         
-        .btn-grind { background: white; color: black; font-weight: 900; font-style: italic; text-transform: uppercase; padding: 8px 24px; font-size: 12px; transition: all 0.2s; box-shadow: 0 4px 15px rgba(255,255,255,0.1); }
+        .btn-grind { background: white; color: black; font-weight: 900; font-style: italic; text-transform: uppercase; padding: 8px 24px; font-size: 12px; transition: all 0.2s; box-shadow: 0 4px 15px rgba(255,255,255,0.1); cursor: pointer; }
         .btn-grind:hover { background: #ff4d00; color: white; box-shadow: 0 4px 20px rgba(255, 77, 0, 0.4); }
         .btn-grind:disabled { background: #1f1f1f; color: #555; cursor: not-allowed; box-shadow: none; border-color: #1f1f1f; }
         
@@ -64,34 +65,26 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithPopup, GoogleAuthProvider, signInWithCustomToken, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Firebase Setup (Canvas & GitHub Pages Compliant)
-        let firebaseConfig = {
-            apiKey: "AIzaSyDPlRSi2R32NQAm5-DO6SU8Qftj9pGcFDs",
-            authDomain: "grindappde.firebaseapp.com",
-            projectId: "grindappde",
-            storageBucket: "grindappde.firebasestorage.app",
-            messagingSenderId: "461725243209",
-            appId: "1:461725243209:web:d70693ecf6ee7a0dba6c98"
-        };
-
+        // Firebase Setup (Canvas Compliant)
+        let firebaseConfig;
         try {
-            if (typeof __firebase_config !== 'undefined' && __firebase_config && __firebase_config !== '{}') {
-                firebaseConfig = JSON.parse(__firebase_config);
-            }
+            firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
         } catch(e) {
-            console.warn("Using default config for GitHub Pages.");
+            firebaseConfig = {
+                apiKey: "AIzaSyDPlRSi2R32NQAm5-DO6SU8Qftj9pGcFDs",
+                authDomain: "grindappde.firebaseapp.com",
+                projectId: "grindappde"
+            };
         }
         
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'grind-local';
         const appInit = initializeApp(firebaseConfig);
         const auth = getAuth(appInit);
         const db = getFirestore(appInit);
-        const provider = new GoogleAuthProvider();
 
-        // State Management (Adapted from "The Plot")
         let state = {
             user: null,
             profile: null,
@@ -111,7 +104,7 @@
             { lvl: 30, pro: 'BLACK KEY' }
         ];
 
-        // Erweiterte Missionen mit Fokus auf Gesundheit & Beziehungen
+        // Missionen mit Fokus Gesundheit, Fitness & Echte Verbindungen
         const weeklyData = {
             1: { title: "Awakening", startOffset: 0, missions: [
                 { id: 'w1m1', name: 'Midnight Run', desc: '5km Lauf zwischen 00:00 - 03:00 Uhr.', xp: 500 },
@@ -134,35 +127,50 @@
 
         const RANKS = ["Novice", "Grinder", "Hustler", "Soldier", "Ghost", "Legend"];
 
-        // Utility: Toast Notifications
         window.showToast = (msg, type = 'success') => {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
-            const icon = `<svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>`;
+            const icon = type === 'error' 
+                ? `<svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`
+                : `<svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>`;
             toast.innerHTML = `${icon} <div><div class="font-black text-[10px] uppercase tracking-widest text-gray-400 mb-0.5">System Update</div><div>${msg}</div></div>`;
             container.appendChild(toast);
             setTimeout(() => toast.classList.add('show'), 10);
             setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 4000);
         };
 
-        // Auth Listener & Realtime Updates
+        // Der Pfad MUSS eine gerade Anzahl an Segmenten haben.
+        // collection(db, 'artifacts', appId, 'users', user.uid, 'player_data') -> doc('profile')
+        const getProfileRef = (uid) => doc(db, 'artifacts', appId, 'users', uid, 'player_data', 'profile');
+
         onAuthStateChanged(auth, async (user) => {
             state.user = user;
             if (user) {
-                const profileRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile');
-                
-                onSnapshot(profileRef, (docSnap) => {
-                    if (docSnap.exists()) {
-                        state.profile = docSnap.data();
+                try {
+                    const profileRef = getProfileRef(user.uid);
+                    
+                    onSnapshot(profileRef, (docSnap) => {
+                        if (docSnap.exists()) {
+                            state.profile = docSnap.data();
+                        } else {
+                            state.profile = { xp: 0, lvl: 1, completed: [] };
+                            setDoc(profileRef, state.profile);
+                        }
                         state.view = 'dashboard';
-                    } else {
-                        // Create initial profile
-                        state.profile = { xp: 0, lvl: 1, completed: [] };
-                        setDoc(profileRef, state.profile);
-                    }
+                        render();
+                    }, (error) => {
+                        console.error("Datenbank Fehler:", error);
+                        window.showToast("Datenbank-Zugriff verweigert.", "error");
+                        state.view = 'auth';
+                        render();
+                    });
+                } catch (err) {
+                    console.error("Setup error:", err);
+                    window.showToast("Fehler beim Laden des Profils.", "error");
+                    state.view = 'auth';
                     render();
-                });
+                }
             } else {
                 state.profile = null;
                 state.view = 'auth';
@@ -170,41 +178,28 @@
             }
         });
 
-        // Initialization Rule 3
         const initAuth = async () => {
             try {
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     await signInWithCustomToken(auth, __initial_auth_token);
                 } else {
-                    // Auf GitHub Pages warten wir auf den manuellen Login-Klick
-                    state.view = 'auth';
-                    render();
+                    await signInAnonymously(auth);
                 }
             } catch (e) {
                 console.error("Auth failed:", e);
+                window.showToast("Login fehlgeschlagen.", "error");
                 state.view = 'auth';
                 render();
             }
         };
+
+        // Initiiere beim ersten Laden
         initAuth();
 
-        // Actions
-        window.handleLogin = async () => {
+        window.handleLogin = () => {
             state.view = 'loading';
             render();
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    // Google Login für GitHub Pages
-                    await signInWithPopup(auth, provider);
-                }
-            } catch (e) {
-                console.error(e);
-                window.showToast("Login abgebrochen.", "error");
-                state.view = 'auth';
-                render();
-            }
+            initAuth();
         };
 
         window.handleLogout = () => {
@@ -225,24 +220,29 @@
             const btn = document.getElementById(`btn-${mid}`);
             if (btn) { btn.innerText = "Verifying..."; btn.disabled = true; }
 
-            // Simulierte Verzögerung für das "Hacking/Grind" Feeling
             setTimeout(async () => {
-                const newXp = (state.profile.xp || 0) + xp;
-                const newLvl = Math.floor(newXp / 1000) + 1;
-                const newCompleted = [...(state.profile.completed || []), mid];
+                try {
+                    const newXp = (state.profile.xp || 0) + xp;
+                    const newLvl = Math.floor(newXp / 1000) + 1;
+                    const newCompleted = [...(state.profile.completed || []), mid];
 
-                await setDoc(doc(db, 'artifacts', appId, 'users', state.user.uid, 'profile'), {
-                    xp: newXp,
-                    lvl: newLvl,
-                    completed: newCompleted
-                }, { merge: true });
+                    const profileRef = getProfileRef(state.user.uid);
+                    await setDoc(profileRef, {
+                        xp: newXp,
+                        lvl: newLvl,
+                        completed: newCompleted
+                    }, { merge: true });
 
-                window.showToast(`Mission verified. +${xp} XP`, 'success');
-                
-                if (newLvl > state.profile.lvl) {
-                    setTimeout(() => window.showToast(`RANK UP! You reached LVL ${newLvl}.`, 'success'), 1000);
+                    window.showToast(`Mission verified. +${xp} XP`, 'success');
+                    
+                    if (newLvl > state.profile.lvl) {
+                        setTimeout(() => window.showToast(`RANK UP! You reached LVL ${newLvl}.`, 'success'), 1000);
+                    }
+                } catch (e) {
+                    window.showToast("Fehler bei der Verifizierung.", "error");
+                    if (btn) { btn.innerText = "Verify"; btn.disabled = false; }
                 }
-            }, 800);
+            }, 600);
         };
 
         window.scrollPass = (dir) => {
@@ -250,27 +250,29 @@
             if (viewport) viewport.scrollBy({ left: dir * 300, behavior: 'smooth' });
         };
 
-        // Render Engine
         function render() {
             const appDiv = document.getElementById('app');
 
             if (state.view === 'loading') {
-                appDiv.innerHTML = `<div class="flex-1 flex items-center justify-center min-h-[60vh]"><div class="w-16 h-16 border-t-2 border-l-2 border-[#ff4d00] rounded-full animate-spin"></div></div>`;
+                appDiv.innerHTML = `<div class="flex-1 flex items-center justify-center min-h-[60vh]"><div class="w-16 h-16 border-t-4 border-l-4 border-[#ff4d00] rounded-full animate-spin"></div></div>`;
                 return;
             }
 
             if (state.view === 'auth') {
                 appDiv.innerHTML = `
-                    <div class="flex-1 flex flex-col items-center justify-center p-6 min-h-[80vh]">
-                        <h1 class="text-6xl font-black italic tracking-tighter mb-2">GRIND<span class="text-[#ff4d00]">.</span></h1>
-                        <p class="text-gray-500 font-bold uppercase tracking-widest text-xs mb-12 text-center max-w-xs leading-relaxed">Health. Relationships. Relentless execution. Season 01 begins.</p>
-                        <button onclick="window.handleLogin()" class="btn-grind text-lg px-10 py-4">Enter the Grind</button>
+                    <div class="flex-1 flex flex-col items-center justify-center p-6 min-h-[80vh] text-center">
+                        <h1 class="text-6xl md:text-8xl font-black italic tracking-tighter mb-2">GRIND<span class="text-[#ff4d00]">.</span></h1>
+                        <p class="text-gray-500 font-bold uppercase tracking-widest text-xs mb-12 max-w-sm leading-relaxed">
+                            Gesundheit. Beziehungen. Execution.<br> Season 01 beginnt jetzt.
+                        </p>
+                        <button onclick="window.handleLogin()" class="btn-grind text-lg px-12 py-5 rounded-sm">
+                            Enter the Grind
+                        </button>
                     </div>
                 `;
                 return;
             }
 
-            // Dashboard View
             const p = state.profile || { xp: 0, lvl: 1, completed: [] };
             const currentRank = RANKS[Math.min(Math.floor((p.lvl - 1) / 5), RANKS.length - 1)];
             const xpProgress = (p.xp % 1000) / 10;
@@ -320,7 +322,6 @@
                             <div class="flex items-center px-[40vw]">
             `;
 
-            // Render Nodes
             for (let i = 1; i <= 30; i++) {
                 const r = rewardData.find(x => x.lvl === i);
                 const isUnlocked = i <= p.lvl;
@@ -362,12 +363,11 @@
                             <div class="flex flex-wrap gap-2">
             `;
 
-            // Week Selector
             Object.keys(weeklyData).forEach(w => {
                 const weekNum = parseInt(w);
                 const unlockDate = new Date(SEASON_START);
                 unlockDate.setDate(unlockDate.getDate() + weeklyData[weekNum].startOffset);
-                const isLocked = now < unlockDate; // For demo, you can toggle this logic
+                const isLocked = now < unlockDate;
                 
                 html += `<button onclick="window.setWeek(${weekNum})" class="week-btn px-5 py-2 text-[10px] font-black uppercase transition rounded-sm ${state.currentWeekTab === weekNum ? 'active' : ''} ${isLocked ? 'week-locked' : ''}">W0${weekNum}</button>`;
             });
@@ -375,32 +375,29 @@
             html += `
                             </div>
                         </div>
-                        
                         <div class="space-y-4">
             `;
 
-            // Mission Cards
             const week = weeklyData[state.currentWeekTab];
             week.missions.forEach(m => {
                 const isCompleted = p.completed.includes(m.id);
                 html += `
-                    <div class="card p-6 rounded-sm flex justify-between items-center group relative overflow-hidden ${isCompleted ? 'is-completed border-[#ff4d00]/30' : ''}">
+                    <div class="card p-6 rounded-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4 group relative overflow-hidden ${isCompleted ? 'is-completed border-[#ff4d00]/30' : ''}">
                         <div class="absolute left-0 top-0 bottom-0 w-1 bg-[#ff4d00] opacity-0 group-hover:opacity-100 transition"></div>
                         
-                        <!-- Overlay when completed -->
                         <div class="completed-overlay">
                             <span class="text-[#ff4d00] font-black italic uppercase tracking-widest flex items-center gap-2">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Verified
                             </span>
                         </div>
 
-                        <div class="pr-6 relative z-0">
+                        <div class="pr-6 relative z-0 flex-1">
                             <h4 class="font-black italic uppercase text-lg group-hover:text-[#ff4d00] transition tracking-tighter">${m.name}</h4>
                             <p class="text-gray-400 text-xs mt-1 font-medium leading-relaxed">${m.desc}</p>
                         </div>
-                        <div class="text-right flex-shrink-0 relative z-0 flex flex-col items-end">
+                        <div class="text-left md:text-right flex-shrink-0 relative z-0 flex flex-col items-start md:items-end w-full md:w-auto">
                             <span class="block text-[#ff4d00] font-black text-2xl italic tracking-tighter mb-2">+${m.xp}</span>
-                            <button id="btn-${m.id}" onclick="window.verifyMission('${m.id}', ${m.xp})" class="btn-grind" ${isCompleted ? 'disabled' : ''}>
+                            <button id="btn-${m.id}" onclick="window.verifyMission('${m.id}', ${m.xp})" class="btn-grind w-full md:w-auto" ${isCompleted ? 'disabled' : ''}>
                                 Verify
                             </button>
                         </div>
