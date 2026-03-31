@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Insel-Gossip Tracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Tomodachi Style Farbpalette */
+            --bg-color: #e0f7fa;
+            --grid-color: rgba(255, 255, 255, 0.6);
+            --ui-bg: #ffffff;
+            --text-main: #5d4037;
+            --btn-green: #aed581;
+            --btn-green-hover: #9ccc65;
+            --btn-blue: #81d4fa;
+            --btn-blue-hover: #4fc3f7;
+            --btn-orange: #ffb74d;
+            --btn-orange-hover: #ffa726;
+            --btn-red: #ff8a65;
+            --btn-red-hover: #ff7043;
+            --shadow: 0 4px 8px rgba(0,0,0,0.1);
+            --border-radius: 20px;
+        }
+
+        * { 
+            box-sizing: border-box; 
+            font-family: 'Varela Round', sans-serif; 
+            user-select: none; /* Verhindert Textmarkierung beim Ziehen */
+        }
+
+        body {
+            margin: 0; 
+            padding: 0;
+            background-color: var(--bg-color);
+            /* Niedliches Karo-Muster im Hintergrund */
+            background-image: 
+                linear-gradient(var(--grid-color) 2px, transparent 2px),
+                linear-gradient(90deg, var(--grid-color) 2px, transparent 2px);
+            background-size: 30px 30px;
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        header {
+            background-color: var(--ui-bg);
+            padding: 12px 20px;
+            text-align: center;
+            font-size: 1.8rem;
+            color: #ff6b81;
+            border-bottom: 4px solid #ffeb3b;
+            box-shadow: var(--shadow);
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .controls {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            z-index: 10;
+            backdrop-filter: blur(5px);
+        }
+
+        input, select, button {
+            padding: 10px 15px;
+            border-radius: 25px;
+            border: 2px solid #e0e0e0;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        input {
+            width: 180px;
+            color: var(--text-main);
+            background: #f9f9f9;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--btn-blue);
+            box-shadow: 0 0 0 3px rgba(129, 212, 250, 0.3);
+        }
+
+        select {
+            background-color: #fff;
+            cursor: pointer;
+            appearance: none;
+            padding-right: 30px;
+            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%235d4037%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px top 50%;
+            background-size: 12px auto;
+        }
+
+        button {
+            cursor: pointer;
+            font-weight: bold;
+            border: none;
+            color: var(--text-main);
+            box-shadow: 0 4px 0 rgba(0,0,0,0.1);
+        }
+
+        button:active {
+            transform: translateY(4px);
+            box-shadow: none;
+        }
+
+        #addCharBtn { background-color: var(--btn-green); }
+        #addCharBtn:hover { background-color: var(--btn-green-hover); }
+
+        #connectBtn { background-color: var(--btn-blue); }
+        #connectBtn:hover { background-color: var(--btn-blue-hover); }
+        #connectBtn.active {
+            background-color: var(--btn-red);
+            color: white;
+            animation: pulse 1.5s infinite;
+        }
+
+        #exportBtn { background-color: var(--btn-orange); }
+        #exportBtn:hover { background-color: var(--btn-orange-hover); }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 138, 101, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 138, 101, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 138, 101, 0); }
+        }
+
+        .divider {
+            width: 2px; height: 30px; background: #e0e0e0; border-radius: 2px;
+        }
+
+        .canvas-container {
+            flex-grow: 1;
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            cursor: grab;
+            touch-action: none; /* Verhindert Scrollen beim Swipen auf Canvas */
+        }
+        
+        canvas:active { cursor: grabbing; }
+
+        .instructions {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px 20px;
+            border-radius: var(--border-radius);
+            pointer-events: none;
+            color: var(--text-main);
+            font-size: 0.9rem;
+            box-shadow: var(--shadow);
+            border: 2px solid var(--btn-blue);
+            max-width: 300px;
+            line-height: 1.5;
+        }
+
+        .instructions strong {
+            color: var(--btn-red);
+            font-size: 1.1rem;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .controls { padding: 10px; gap: 5px; }
+            input { width: 140px; }
+            button, select, input { padding: 8px 12px; font-size: 0.9rem; }
+            .divider { display: none; }
+            .instructions { display: none; } /* Auf Mobile ausblenden für mehr Platz */
+            header { font-size: 1.4rem; padding: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>✨ Insel-Gossip ✨</header>
+
+    <div class="controls">
+        <input type="text" id="charName" placeholder="Name (z.B. Anna)" autocomplete="off">
+        <button id="addCharBtn">➕ Neu</button>
+        
+        <div class="divider"></div>
+        
+        <select id="relType">
+            <option value="love">💖 Verliebt / Paar</option>
+            <option value="bestie">👯 Besties</option>
+            <option value="hate">🌩️ Feinde</option>
+            <option value="ex">💔 Ex-Partner</option>
+        </select>
+        <button id="connectBtn">🔗 Verbinden</button>
+        
+        <div class="divider"></div>
+        
+        <button id="exportBtn">📸 Foto schießen</button>
+    </div>
+
+    <div class="canvas-container">
+        <canvas id="dramaCanvas"></canvas>
+        <div class="instructions">
+            <strong>So geht's:</strong>
+            1. Namen tippen & ➕ klicken.<br>
+            2. Blasen frei umherziehen.<br>
+            3. "Verbinden" aktivieren, Beziehungs-Art wählen und zwei Personen antippen.<br>
+            4. Doppelklick auf eine Blase = Löschen.<br>
+            5. Am Ende ein "Foto schießen"!
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('dramaCanvas');
+        const ctx = canvas.getContext('2d');
+        let dpr = window.devicePixelRatio || 1;
+        
+        // Canvas Größe gestochen scharf anpassen (Retina Display Support)
+        function resize() {
+            const container = canvas.parentElement;
+            const rect = container.getBoundingClientRect();
+            
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            
+            ctx.scale(dpr, dpr);
+            draw();
+        }
+        window.addEventListener('resize', resize);
+
+        // Datenstrukturen
+        let nodes = [];
+        let edges = [];
+        
+        // Status für Interaktionen
+        let isDragging = false;
+        let draggedNode = null;
+        let isConnectingMode = false;
+        let connectStartNode = null;
+
+        // Verspielte Tomodachi-Pastellfarben für neue Charaktere
+        const pastelColors = [
+            '#ffb3ba', '#ffdfba', '#ffffba', '#baffc9', '#bae1ff', 
+            '#f3c4fb', '#ffd1dc', '#d4f0f0', '#ffcbf2', '#e2f0cb'
+        ];
+
+        // Beziehungen Styling
+        const relColors = {
+            love:   { color: '#ff5252', dash: [], label: '💖 Liebe', width: 4 },
+            bestie: { color: '#ffb142', dash: [], label: '👯 Besties', width: 3 },
+            hate:   { color: '#706fd3', dash: [10, 5], label: '🌩️ Feinde', width: 3 },
+            ex:     { color: '#84817a', dash: [5, 10], label: '💔 Ex', width: 2 }
+        };
+
+        // UI Elemente
+        const charNameInput = document.getElementById('charName');
+        const addCharBtn = document.getElementById('addCharBtn');
+        const connectBtn = document.getElementById('connectBtn');
+        const relTypeSelect = document.getElementById('relType');
+        const exportBtn = document.getElementById('exportBtn');
+
+        // Initialer Knoten für den Start (als Beispiel)
+        function initDemo() {
+            addNode("Ich", canvas.width / dpr / 2 - 100, canvas.height / dpr / 2);
+            addNode("Schwarm", canvas.width / dpr / 2 + 100, canvas.height / dpr / 2);
+            edges.push({ source: nodes[0], target: nodes[1], type: 'love' });
+            draw();
+        }
+
+        function addNode(name, x, y) {
+            nodes.push({
+                id: Date.now() + Math.random(),
+                name: name,
+                x: x || Math.random() * (canvas.width/dpr - 160) + 80,
+                y: y || Math.random() * (canvas.height/dpr - 160) + 80,
+                radius: 45,
+                color: pastelColors[nodes.length % pastelColors.length]
+            });
+        }
+
+        // Knoten hinzufügen (Enter-Taste oder Button)
+        function handleAddChar() {
+            const name = charNameInput.value.trim();
+            if(!name) return;
+            addNode(name);
+            charNameInput.value = '';
+            charNameInput.focus();
+            draw();
+        }
+        
+        addCharBtn.addEventListener('click', handleAddChar);
+        charNameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleAddChar();
+        });
+
+        // Verbinden-Modus umschalten
+        connectBtn.addEventListener('click', () => {
+            isConnectingMode = !isConnectingMode;
+            connectStartNode = null;
+            connectBtn.textContent = isConnectingMode ? '❌ Abbrechen' : '🔗 Verbinden';
+            connectBtn.classList.toggle('active', isConnectingMode);
+            draw();
+        });
+
+        // Bild exportieren (mit Hintergrund)
+        exportBtn.addEventListener('click', () => {
+            // Temporäres Canvas für den Export erstellen (um das CSS-Grid nachzubauen)
+            const exportCanvas = document.createElement('canvas');
+            exportCanvas.width = canvas.width;
+            exportCanvas.height = canvas.height;
+            const eCtx = exportCanvas.getContext('2d');
+            
+            // Hintergrundfarbe
+            eCtx.fillStyle = '#e0f7fa';
+            eCtx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
+            
+            // Gitter zeichnen (wie im CSS)
+            eCtx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+            eCtx.lineWidth = 2 * dpr;
+            const gridSize = 30 * dpr;
+            
+            eCtx.beginPath();
+            for (let x = 0; x <= exportCanvas.width; x += gridSize) {
+                eCtx.moveTo(x, 0); eCtx.lineTo(x, exportCanvas.height);
+            }
+            for (let y = 0; y <= exportCanvas.height; y += gridSize) {
+                eCtx.moveTo(0, y); eCtx.lineTo(exportCanvas.width, y);
+            }
+            eCtx.stroke();
+
+            // Aktuelles Canvas darüber zeichnen
+            eCtx.drawImage(canvas, 0, 0);
+            
+            // Wasserzeichen
+            eCtx.fillStyle = '#ff6b81';
+            eCtx.font = `bold ${24 * dpr}px 'Varela Round', sans-serif`;
+            eCtx.fillText('✨ Insel-Gossip Tracker', 20 * dpr, 40 * dpr);
+
+            // Herunterladen
+            const link = document.createElement('a');
+            link.download = `Insel_Gossip_${new Date().getTime()}.png`;
+            link.href = exportCanvas.toDataURL('image/png');
+            link.click();
+        });
+
+        // --- Pointer Events für universellen Support (Maus & Touch) ---
+        let lastClickTime = 0;
+
+        canvas.addEventListener('pointerdown', (e) => {
+            const pos = getMousePos(e);
+            const clickedNodeIndex = nodes.findIndex(n => Math.hypot(n.x - pos.x, n.y - pos.y) <= n.radius);
+            const clickedNode = clickedNodeIndex !== -1 ? nodes[clickedNodeIndex] : null;
+
+            // Doppelklick/Doppeltap zum Löschen
+            const currentTime = new Date().getTime();
+            if (clickedNode && currentTime - lastClickTime < 300) {
+                // Kanten löschen, die mit dem Knoten verbunden sind
+                edges = edges.filter(edge => edge.source !== clickedNode && edge.target !== clickedNode);
+                // Knoten löschen
+                nodes.splice(clickedNodeIndex, 1);
+                connectStartNode = null;
+                draw();
+                return;
+            }
+            lastClickTime = currentTime;
+
+            if (isConnectingMode) {
+                if (clickedNode) {
+                    if (!connectStartNode) {
+                        connectStartNode = clickedNode; // Erster Klick
+                    } else if (connectStartNode !== clickedNode) {
+                        // Prüfen ob Verbindung schon existiert
+                        const exists = edges.some(e => 
+                            (e.source === connectStartNode && e.target === clickedNode) ||
+                            (e.target === connectStartNode && e.source === clickedNode)
+                        );
+                        
+                        if (!exists) {
+                            edges.push({
+                                source: connectStartNode,
+                                target: clickedNode,
+                                type: relTypeSelect.value
+                            });
+                        }
+                        // Modus beenden nach erfolgreicher Verbindung
+                        connectStartNode = null;
+                        isConnectingMode = false;
+                        connectBtn.textContent = '🔗 Verbinden';
+                        connectBtn.classList.remove('active');
+                    }
+                }
+            } else {
+                if (clickedNode) {
+                    isDragging = true;
+                    draggedNode = clickedNode;
+                    canvas.setPointerCapture(e.pointerId); // Fängt den Pointer ein, auch wenn er das Canvas kurz verlässt
+                }
+            }
+            draw();
+        });
+
+        canvas.addEventListener('pointermove', (e) => {
+            if (isDragging && draggedNode) {
+                const pos = getMousePos(e);
+                // Begrenzung auf Canvas
+                draggedNode.x = Math.max(draggedNode.radius, Math.min(canvas.width / dpr - draggedNode.radius, pos.x));
+                draggedNode.y = Math.max(draggedNode.radius, Math.min(canvas.height / dpr - draggedNode.radius, pos.y));
+                draw();
+            }
+        });
+
+        canvas.addEventListener('pointerup', (e) => {
+            isDragging = false;
+            draggedNode = null;
+            canvas.releasePointerCapture(e.pointerId);
+        });
+
+        // Hilfsfunktion: Maus/Touch-Position (angepasst an dpr)
+        function getMousePos(evt) {
+            const rect = canvas.getBoundingClientRect();
+            return {
+                x: (evt.clientX - rect.left),
+                y: (evt.clientY - rect.top)
+            };
+        }
+
+        // --- Haupt-Zeichenfunktion ---
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr);
+
+            // Linien (Beziehungen) zeichnen
+            edges.forEach(edge => {
+                const style = relColors[edge.type];
+                ctx.beginPath();
+                ctx.moveTo(edge.source.x, edge.source.y);
+                ctx.lineTo(edge.target.x, edge.target.y);
+                ctx.strokeStyle = style.color;
+                ctx.lineWidth = style.width;
+                ctx.setLineDash(style.dash);
+                ctx.stroke();
+
+                // Text-Label (Pille auf der Linie)
+                const midX = (edge.source.x + edge.target.x) / 2;
+                const midY = (edge.source.y + edge.target.y) / 2;
+                
+                ctx.font = 'bold 12px "Varela Round", sans-serif';
+                ctx.setLineDash([]); // Reset Dash
+                
+                const paddingX = 10;
+                const paddingY = 6;
+                const textWidth = ctx.measureText(style.label).width;
+                const boxWidth = textWidth + paddingX * 2;
+                const boxHeight = 24;
+
+                // Pillen-Hintergrund für Text
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.roundRect(midX - boxWidth/2, midY - boxHeight/2, boxWidth, boxHeight, 12);
+                ctx.fill();
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = style.color;
+                ctx.stroke();
+                
+                // Text
+                ctx.fillStyle = style.color;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(style.label, midX, midY + 1); // +1 für optische Mitte bei Varela
+            });
+            ctx.setLineDash([]); // Reset für den Rest
+
+            // Hervorhebung, wenn ein Knoten für Verbindung ausgewählt ist
+            if (connectStartNode) {
+                ctx.beginPath();
+                ctx.arc(connectStartNode.x, connectStartNode.y, connectStartNode.radius + 8, 0, Math.PI * 2);
+                ctx.strokeStyle = '#ff8a65';
+                ctx.lineWidth = 4;
+                ctx.setLineDash([8, 6]);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+
+            // Knoten (Charaktere) zeichnen
+            nodes.forEach(node => {
+                // Schatten (Tomodachi-mäßiger weicher Schatten)
+                ctx.shadowColor = 'rgba(0,0,0,0.15)';
+                ctx.shadowBlur = 10;
+                ctx.shadowOffsetY = 5;
+
+                // Kreis (Basis)
+                ctx.beginPath();
+                ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
+                ctx.fillStyle = node.color;
+                ctx.fill();
+                
+                // Schatten zurücksetzen für den Rand
+                ctx.shadowColor = 'transparent';
+                ctx.shadowBlur = 0;
+                ctx.shadowOffsetY = 0;
+
+                // Dicker weißer Rand (Sticker-Look)
+                ctx.lineWidth = 5;
+                ctx.strokeStyle = '#ffffff';
+                ctx.stroke();
+
+                // Name formatieren (Falls zu lang, abkürzen oder zweizeilig - hier einfache Skalierung)
+                ctx.fillStyle = '#5d4037'; // Dunkles Braun für gute Lesbarkeit
+                let fontSize = 16;
+                ctx.font = `bold ${fontSize}px "Varela Round", sans-serif`;
+                
+                // Text verkleinern, falls er nicht in die Blase passt
+                let textWidth = ctx.measureText(node.name).width;
+                while (textWidth > node.radius * 2 - 15 && fontSize > 10) {
+                    fontSize--;
+                    ctx.font = `bold ${fontSize}px "Varela Round", sans-serif`;
+                    textWidth = ctx.measureText(node.name).width;
+                }
+
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(node.name, node.x, node.y);
+            });
+        }
+
+        // Setup starten
+        setTimeout(() => {
+            resize();
+            initDemo();
+        }, 100);
+
+    </script>
+</body>
+</html>
+
