@@ -136,36 +136,37 @@
 
         const getProfileRef = (uid) => doc(db, 'artifacts', appId, 'users', uid, 'grind_data', 'profile');
 
-        onAuthStateChanged(auth, async (user) => {
+        const setupProfileListener = (user) => {
+            try {
+                const profileRef = getProfileRef(user.uid);
+                onSnapshot(profileRef, (docSnap) => {
+                    if (docSnap.exists()) {
+                        state.profile = docSnap.data();
+                    } else {
+                        state.profile = { xp: 0, lvl: 1, completed: [] };
+                        setDoc(profileRef, state.profile);
+                    }
+                    state.view = 'dashboard';
+                    render();
+                }, (error) => {
+                    console.warn("DB Error, switching to local state:", error);
+                    state.profile = state.profile || { xp: 0, lvl: 1, completed: [] };
+                    state.user = { ...user, isOffline: true };
+                    state.view = 'dashboard'; 
+                    render();
+                });
+            } catch (err) {
+                console.error("Setup error:", err);
+                state.view = 'auth';
+                render();
+            }
+        };
+
+        onAuthStateChanged(auth, (user) => {
             if (user) {
                 state.user = user;
-                try {
-                    const profileRef = getProfileRef(user.uid);
-                    
-                    const snap = await getDoc(profileRef);
-                    if (!snap.exists()) {
-                        await setDoc(profileRef, { xp: 0, lvl: 1, completed: [] });
-                    }
-
-                    onSnapshot(profileRef, (docSnap) => {
-                        if (docSnap.exists()) {
-                            state.profile = docSnap.data();
-                            state.view = 'dashboard';
-                            render();
-                        }
-                    }, (error) => {
-                        console.error("DB Error:", error);
-                        window.showToast("Sync Error: " + error.message, "error");
-                        state.view = 'dashboard'; 
-                        render();
-                    });
-                } catch (err) {
-                    console.error("Setup error:", err);
-                    window.showToast("Ladefehler. Bitte Seite neu laden.", "error");
-                    state.view = 'auth';
-                    render();
-                }
-            } else if (!state.user || !state.user.isOffline) {
+                setupProfileListener(user);
+            } else if (!state.user?.isOffline) {
                 state.profile = null;
                 state.view = 'auth';
                 render();
@@ -184,22 +185,24 @@
                     await signInAnonymously(auth);
                 }
             } catch (e) {
-                console.warn("Firebase Auth disabled. Switching to Offline Mode.", e);
+                console.warn("Auth failed. Offline Mode.");
                 state.user = { uid: 'offline-grinder', isOffline: true };
                 state.profile = { xp: 0, lvl: 1, completed: [] };
                 state.view = 'dashboard';
-                window.showToast("Offline Modus aktiv (Firebase Auth fehlt).", "success");
                 render();
             }
         };
 
-        // Start App
         initAuth();
 
         window.handleLogin = async () => {
             state.view = 'loading';
             render();
-            await initAuth();
+            if (auth.currentUser) {
+                setupProfileListener(auth.currentUser);
+            } else {
+                await initAuth();
+            }
         };
 
         window.handleLogout = () => {
@@ -450,6 +453,8 @@
     </script>
 </body>
 </html>
+
+
 
 
 
