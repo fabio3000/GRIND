@@ -64,26 +64,32 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, signInWithPopup, GoogleAuthProvider, signInWithCustomToken, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Firebase Setup (Canvas Compliant)
-        let firebaseConfig;
+        // Firebase Setup (Canvas & GitHub Pages Compliant)
+        let firebaseConfig = {
+            apiKey: "AIzaSyDPlRSi2R32NQAm5-DO6SU8Qftj9pGcFDs",
+            authDomain: "grindappde.firebaseapp.com",
+            projectId: "grindappde",
+            storageBucket: "grindappde.firebasestorage.app",
+            messagingSenderId: "461725243209",
+            appId: "1:461725243209:web:d70693ecf6ee7a0dba6c98"
+        };
+
         try {
-            firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+            if (typeof __firebase_config !== 'undefined' && __firebase_config && __firebase_config !== '{}') {
+                firebaseConfig = JSON.parse(__firebase_config);
+            }
         } catch(e) {
-            // Fallback config falls nicht im Canvas
-            firebaseConfig = {
-                apiKey: "AIzaSyDPlRSi2R32NQAm5-DO6SU8Qftj9pGcFDs",
-                authDomain: "grindappde.firebaseapp.com",
-                projectId: "grindappde"
-            };
+            console.warn("Using default config for GitHub Pages.");
         }
         
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'grind-local';
         const appInit = initializeApp(firebaseConfig);
         const auth = getAuth(appInit);
         const db = getFirestore(appInit);
+        const provider = new GoogleAuthProvider();
 
         // State Management (Adapted from "The Plot")
         let state = {
@@ -170,7 +176,9 @@
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     await signInWithCustomToken(auth, __initial_auth_token);
                 } else {
-                    await signInAnonymously(auth);
+                    // Auf GitHub Pages warten wir auf den manuellen Login-Klick
+                    state.view = 'auth';
+                    render();
                 }
             } catch (e) {
                 console.error("Auth failed:", e);
@@ -181,10 +189,22 @@
         initAuth();
 
         // Actions
-        window.handleLogin = () => {
+        window.handleLogin = async () => {
             state.view = 'loading';
             render();
-            initAuth();
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    // Google Login für GitHub Pages
+                    await signInWithPopup(auth, provider);
+                }
+            } catch (e) {
+                console.error(e);
+                window.showToast("Login abgebrochen.", "error");
+                state.view = 'auth';
+                render();
+            }
         };
 
         window.handleLogout = () => {
@@ -399,4 +419,5 @@
     </script>
 </body>
 </html>
+
 
