@@ -137,12 +137,11 @@
         const getProfileRef = (uid) => doc(db, 'artifacts', appId, 'users', uid, 'grind_data', 'profile');
 
         onAuthStateChanged(auth, async (user) => {
-            state.user = user;
             if (user) {
+                state.user = user;
                 try {
                     const profileRef = getProfileRef(user.uid);
                     
-                    // Lade Daten erst sicher runter, um Permissions-Fehler zu vermeiden
                     const snap = await getDoc(profileRef);
                     if (!snap.exists()) {
                         await setDoc(profileRef, { xp: 0, lvl: 1, completed: [] });
@@ -157,7 +156,6 @@
                     }, (error) => {
                         console.error("DB Error:", error);
                         window.showToast("Sync Error: " + error.message, "error");
-                        // Wichtig: Verhindert den Loop zurück zum Auth-Screen
                         state.view = 'dashboard'; 
                         render();
                     });
@@ -167,7 +165,7 @@
                     state.view = 'auth';
                     render();
                 }
-            } else {
+            } else if (!state.user || !state.user.isOffline) {
                 state.profile = null;
                 state.view = 'auth';
                 render();
@@ -180,16 +178,17 @@
                     try {
                         await signInWithCustomToken(auth, __initial_auth_token);
                     } catch(tokenErr) {
-                        console.warn("Token-Login fehlgeschlagen, versuche anonym...", tokenErr);
                         await signInAnonymously(auth);
                     }
                 } else {
                     await signInAnonymously(auth);
                 }
             } catch (e) {
-                console.error("Auth failed:", e);
-                window.showToast("Login-System fehlgeschlagen.", "error");
-                state.view = 'auth';
+                console.warn("Firebase Auth disabled. Switching to Offline Mode.", e);
+                state.user = { uid: 'offline-grinder', isOffline: true };
+                state.profile = { xp: 0, lvl: 1, completed: [] };
+                state.view = 'dashboard';
+                window.showToast("Offline Modus aktiv (Firebase Auth fehlt).", "success");
                 render();
             }
         };
@@ -206,7 +205,14 @@
         window.handleLogout = () => {
             state.view = 'loading';
             render();
-            signOut(auth);
+            if (state.user && state.user.isOffline) {
+                state.user = null;
+                state.profile = null;
+                state.view = 'auth';
+                render();
+            } else {
+                signOut(auth);
+            }
         };
 
         window.setWeek = (weekNum) => {
@@ -223,11 +229,21 @@
             if (btn) { btn.innerText = "Verifying..."; btn.disabled = true; }
 
             setTimeout(async () => {
-                try {
-                    const newXp = (state.profile.xp || 0) + xp;
-                    const newLvl = Math.floor(newXp / 1000) + 1;
-                    const newCompleted = [...completedList, mid];
+                const newXp = (state.profile.xp || 0) + xp;
+                const newLvl = Math.floor(newXp / 1000) + 1;
+                const newCompleted = [...completedList, mid];
 
+                if (state.user.isOffline) {
+                    state.profile = { xp: newXp, lvl: newLvl, completed: newCompleted };
+                    window.showToast(`Mission verified. +${xp} XP`, 'success');
+                    if (newLvl > (state.profile.lvl || 1)) {
+                        setTimeout(() => window.showToast(`RANK UP! You reached LVL ${newLvl}.`, 'success'), 1000);
+                    }
+                    render();
+                    return;
+                }
+
+                try {
                     await setDoc(getProfileRef(state.user.uid), {
                         xp: newXp,
                         lvl: newLvl,
@@ -434,3 +450,7 @@
     </script>
 </body>
 </html>
+
+
+
+
