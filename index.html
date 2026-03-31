@@ -10,87 +10,85 @@
         body { font-family: 'Inter', sans-serif; background-color: #050505; color: #ffffff; overflow-x: hidden; }
         .grind-gradient { background: linear-gradient(90deg, #ff4d00, #ff8800); }
         .card { background: #0f0f0f; border: 1px solid #1f1f1f; transition: all 0.3s ease; }
-        .card:hover { border-color: #ff4d00; transform: translateY(-2px); }
-        .glow { box-shadow: 0 0 20px rgba(255, 77, 0, 0.2); }
-        .btn-grind { background: #ffffff; color: #000000; font-weight: 900; text-transform: uppercase; letter-spacing: -0.05em; transition: all 0.2s; }
-        .btn-grind:hover { background: #ff4d00; color: #ffffff; }
+        .glow-orange { box-shadow: 0 0 20px rgba(255, 77, 0, 0.15); }
+        
+        /* Battle Pass Styling */
+        .pass-container::-webkit-scrollbar { height: 4px; }
+        .pass-container::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+        .level-col { width: 140px; flex-shrink: 0; border-right: 1px solid rgba(255,255,255,0.05); }
+        .reward-slot { height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; padding: 10px; }
+        .reward-icon { width: 50px; height: 50px; background: #1a1a1a; border: 1px solid #333; border-radius: 4px; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; }
+        .locked { opacity: 0.3; filter: grayscale(1); }
+        .current-lvl-marker { background: rgba(255, 77, 0, 0.1); border-left: 2px solid #ff4d00; border-right: 2px solid #ff4d00; }
     </style>
 </head>
-<body class="min-h-screen">
+<body class="min-h-screen pb-24">
 
     <!-- Navbar -->
     <header class="p-6 max-w-5xl mx-auto flex justify-between items-center">
         <h1 class="text-4xl font-black italic tracking-tighter">GRIND<span class="text-orange-600">.</span></h1>
         <div id="auth-controls">
-            <button id="login-btn" class="btn-grind px-6 py-2 rounded-sm text-sm">Join the Drop</button>
-            <button id="logout-btn" class="hidden text-xs text-gray-500 hover:text-white transition">Exit System</button>
+            <button id="login-btn" class="bg-white text-black font-black uppercase px-6 py-2 text-sm tracking-tighter hover:bg-orange-600 hover:text-white transition">Join System</button>
+            <button id="logout-btn" class="hidden text-[10px] text-gray-600 uppercase font-bold tracking-widest">Terminate</button>
         </div>
     </header>
 
-    <main class="max-w-xl mx-auto px-6 pb-20">
+    <main class="max-w-5xl mx-auto px-6">
         
-        <!-- Status Panel -->
-        <section id="status-panel" class="hidden mb-12">
-            <div class="card p-8 rounded-sm glow">
+        <!-- Status Display -->
+        <section id="status-panel" class="hidden grid md:grid-cols-3 gap-6 mb-12">
+            <div class="card p-6 rounded-sm col-span-2">
                 <div class="flex justify-between items-end mb-4">
-                    <div>
-                        <p class="text-orange-600 text-xs font-black uppercase tracking-widest mb-1">Current Standing</p>
-                        <h2 class="text-5xl font-black italic tracking-tighter">LVL <span id="lvl-display">1</span></h2>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-gray-500 text-xs font-bold uppercase">Experience</p>
-                        <p class="font-mono text-xl"><span id="xp-display">0</span> <span class="text-gray-600 text-sm">/ 1000</span></p>
-                    </div>
+                    <h2 class="text-4xl font-black italic italic tracking-tighter">LVL <span id="lvl-display">1</span></h2>
+                    <p class="font-mono text-orange-600 font-bold"><span id="xp-display">0</span> XP</p>
                 </div>
-                <div class="w-full bg-gray-900 h-2 rounded-full overflow-hidden">
+                <div class="w-full bg-gray-900 h-1.5 rounded-full overflow-hidden">
                     <div id="xp-bar" class="grind-gradient h-full transition-all duration-1000" style="width: 0%"></div>
+                </div>
+            </div>
+            <div class="card p-6 flex flex-col justify-center items-center">
+                <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest">Season Ending</p>
+                <p class="text-2xl font-black italic">22D : 14H : 05M</p>
+            </div>
+        </section>
+
+        <!-- THE PASS (Horizontal Scroll) -->
+        <section id="pass-section" class="hidden mb-12">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-2xl font-black italic uppercase tracking-tighter">The <span class="text-orange-600">Pass</span></h3>
+                <div class="flex gap-4 text-[10px] font-black uppercase tracking-widest">
+                    <span class="flex items-center"><span class="w-2 h-2 bg-gray-600 mr-2"></span> Free</span>
+                    <span class="flex items-center"><span class="w-2 h-2 bg-orange-600 mr-2"></span> Pro</span>
+                </div>
+            </div>
+
+            <div class="pass-container overflow-x-auto relative pb-4" id="pass-scroll">
+                <div class="flex min-w-max" id="pass-track">
+                    <!-- Levels 1 to 50 will be injected here -->
                 </div>
             </div>
         </section>
 
-        <!-- Mission Drop -->
-        <div id="drop-header" class="mb-6">
-            <h3 class="text-xl font-black uppercase italic tracking-tight">Active Drop: <span class="text-orange-600 underline">Season 01</span></h3>
-            <p class="text-gray-500 text-xs mt-1">Status: Operational. Complete missions to unlock rewards.</p>
+        <!-- Missions -->
+        <div id="missions-header" class="mb-4">
+            <h3 class="text-xl font-black uppercase italic tracking-tight underline decoration-orange-600 decoration-4">Active Operations</h3>
         </div>
 
-        <div id="missions-container" class="space-y-4">
-            
-            <!-- Mission 1 -->
-            <div class="card p-5 rounded-sm flex justify-between items-center">
-                <div class="pr-4">
-                    <h4 class="font-black italic uppercase text-lg">The Midnight Run</h4>
-                    <p class="text-gray-500 text-xs mt-1 leading-relaxed">Renne 5km zwischen 00:00 und 03:00 Uhr.</p>
+        <div id="missions-container" class="grid md:grid-cols-2 gap-4">
+            <div class="card p-5 rounded-sm flex justify-between items-center border-r-4 border-orange-600">
+                <div>
+                    <h4 class="font-black italic uppercase text-lg">Midnight Run</h4>
+                    <p class="text-gray-500 text-[10px] mt-1">5KM | 00:00 - 03:00</p>
                 </div>
-                <div class="text-right flex-shrink-0">
-                    <span class="block text-orange-600 font-black text-xl">+500</span>
-                    <button onclick="attemptVerify('midnight', 500)" class="mt-2 bg-white/5 hover:bg-orange-600 px-3 py-1 text-[10px] font-black uppercase border border-white/10 transition">Verify</button>
-                </div>
+                <button onclick="attemptVerify('midnight', 500)" class="bg-white/5 border border-white/10 px-4 py-2 text-[10px] font-black uppercase hover:bg-orange-600 transition">Verify</button>
             </div>
-
-            <!-- Mission 2 -->
-            <div class="card p-5 rounded-sm flex justify-between items-center border-l-2 border-orange-600">
-                <div class="pr-4">
-                    <h4 class="font-black italic uppercase text-lg">Cold Start</h4>
-                    <p class="text-gray-500 text-xs mt-1 leading-relaxed">3 Min. Eisbad bei Partner-Location.</p>
+            <div class="card p-5 rounded-sm flex justify-between items-center border-r-4 border-white/10">
+                <div>
+                    <h4 class="font-black italic uppercase text-lg">Oxygen Debt</h4>
+                    <p class="text-gray-500 text-[10px] mt-1">10 MIN | >175 BPM</p>
                 </div>
-                <div class="text-right flex-shrink-0">
-                    <span class="block text-orange-600 font-black text-xl">+300</span>
-                    <button onclick="attemptVerify('cold', 300)" class="mt-2 bg-white/5 hover:bg-orange-600 px-3 py-1 text-[10px] font-black uppercase border border-white/10 transition">Verify</button>
-                </div>
+                <button onclick="attemptVerify('pulse', 400)" class="bg-white/5 border border-white/10 px-4 py-2 text-[10px] font-black uppercase hover:bg-orange-600 transition">Verify</button>
             </div>
-
-            <!-- Mission 3 -->
-            <div class="card p-5 rounded-sm flex justify-between items-center opacity-50 grayscale">
-                <div class="pr-4">
-                    <h4 class="font-black italic uppercase text-lg">The Vault</h4>
-                    <p class="text-gray-500 text-xs mt-1 leading-relaxed">Finde den QR-Code im Gym.</p>
-                </div>
-                <div class="text-right flex-shrink-0">
-                    <span class="text-[10px] font-black uppercase bg-gray-800 px-2 py-1">Locked</span>
-                </div>
-            </div>
-
         </div>
 
     </main>
@@ -114,9 +112,21 @@
         const db = getFirestore(app);
         const provider = new GoogleAuthProvider();
 
+        // UI Elements
         const loginBtn = document.getElementById('login-btn');
         const logoutBtn = document.getElementById('logout-btn');
         const statusPanel = document.getElementById('status-panel');
+        const passSection = document.getElementById('pass-section');
+        const passTrack = document.getElementById('pass-track');
+
+        // Rewards Demo Data
+        const rewards = {
+            5: { free: "Vinyl Sticker", pro: "Performance Shot" },
+            10: { free: "Bronze Badge", pro: "Grit Shaker" },
+            20: { free: "Coffee Credit", pro: "Season 01 Shirt" },
+            30: { free: "Discord Access", pro: "The Black Key" },
+            50: { free: "Elite Badge", pro: "Secret Event Pass" }
+        };
 
         loginBtn.onclick = () => signInWithPopup(auth, provider);
         logoutBtn.onclick = () => signOut(auth);
@@ -126,21 +136,58 @@
                 loginBtn.classList.add('hidden');
                 logoutBtn.classList.remove('hidden');
                 statusPanel.classList.remove('hidden');
+                passSection.classList.remove('hidden');
                 await syncUser(user);
             } else {
                 loginBtn.classList.remove('hidden');
                 logoutBtn.classList.add('hidden');
                 statusPanel.classList.add('hidden');
+                passSection.classList.add('hidden');
             }
         });
 
         async function syncUser(user) {
             const userRef = doc(db, "users", user.uid);
-            const snap = await getDoc(userRef);
+            let snap = await getDoc(userRef);
             if (!snap.exists()) {
-                await setDoc(userRef, { xp: 0, lvl: 1, name: user.displayName });
+                await setDoc(userRef, { xp: 0, lvl: 1 });
+                snap = await getDoc(userRef);
             }
-            updateDisplay(snap.exists() ? snap.data() : { xp: 0, lvl: 1 });
+            const data = snap.data();
+            renderPass(data.lvl);
+            updateDisplay(data);
+            scrollToLevel(data.lvl);
+        }
+
+        function renderPass(currentLvl) {
+            passTrack.innerHTML = '';
+            for (let i = 1; i <= 50; i++) {
+                const isLocked = i > currentLvl;
+                const hasReward = rewards[i];
+                const col = document.createElement('div');
+                col.className = `level-col ${i === currentLvl ? 'current-lvl-marker' : ''}`;
+                
+                col.innerHTML = `
+                    <div class="reward-slot border-b border-white/5 ${isLocked ? 'locked' : ''}">
+                        <div class="reward-icon">${hasReward ? '🎁' : ''}</div>
+                        <span class="text-[8px] font-bold uppercase text-gray-500">${hasReward ? hasReward.free : ''}</span>
+                    </div>
+                    <div class="h-8 flex items-center justify-center bg-black font-black italic text-xs border-b border-white/5">
+                        ${i}
+                    </div>
+                    <div class="reward-slot ${isLocked ? 'locked' : ''}">
+                        <div class="reward-icon border-orange-900">${hasReward ? '🔥' : ''}</div>
+                        <span class="text-[8px] font-bold uppercase text-orange-600">${hasReward ? hasReward.pro : ''}</span>
+                    </div>
+                `;
+                passTrack.appendChild(col);
+            }
+        }
+
+        function scrollToLevel(lvl) {
+            const container = document.getElementById('pass-scroll');
+            const target = (lvl - 1) * 140;
+            container.scrollLeft = target - 140; // Center it a bit
         }
 
         function updateDisplay(data) {
@@ -151,28 +198,18 @@
         }
 
         window.attemptVerify = async (type, amount) => {
-            if (!auth.currentUser) return alert("System-Access denied. Login first.");
-
-            // Demo-Logik für Midnight Run
-            if (type === 'midnight') {
-                const hour = new Date().getHours();
-                if (hour < 0 || hour > 3) {
-                    alert("Verification Failed. System time shows: " + hour + ":00. Mission only active between 00:00 - 03:00.");
-                    return;
-                }
-            }
-
+            if (!auth.currentUser) return;
             const userRef = doc(db, "users", auth.currentUser.uid);
             await updateDoc(userRef, { xp: increment(amount) });
-            
             const snap = await getDoc(userRef);
             const newXp = snap.data().xp;
             const newLvl = Math.floor(newXp / 1000) + 1;
             await updateDoc(userRef, { lvl: newLvl });
-
             updateDisplay({ xp: newXp, lvl: newLvl });
-            alert("Mission Cleared. +" + amount + " XP injected.");
-        }
+            renderPass(newLvl);
+            scrollToLevel(newLvl);
+            alert("GRIND SYNCED: +" + amount + " XP");
+        };
     </script>
 </body>
 </html>
