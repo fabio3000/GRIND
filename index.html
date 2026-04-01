@@ -28,11 +28,11 @@
         
         .reward-box { width: 100px; height: 85px; border: 1px solid #1f1f1f; background: #0a0a0a; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; z-index: 10; border-radius: 4px; transition: all 0.3s ease; }
         .reward-box.unlocked { border-color: #ff4d00; background: #140a00; box-shadow: 0 0 15px rgba(255, 77, 0, 0.15); }
-        .reward-box.pro { border-color: #4c1d95; }
-        .reward-box.pro.unlocked { background: #1a0a2e; border-color: #7c3aed; box-shadow: 0 0 15px rgba(124, 58, 237, 0.15); }
+        .reward-box.pro { border-color: #6d28d9; height: 95px; width: 110px; box-shadow: 0 0 10px rgba(109, 40, 217, 0.05); }
+        .reward-box.pro.unlocked { background: #1a0a2e; border-color: #a855f7; box-shadow: 0 0 20px rgba(168, 85, 247, 0.25); }
 
         .tag-free { background: #333; color: white; font-size: 7px; font-weight: 900; padding: 1px 5px; position: absolute; top: -8px; left: 50%; transform: translateX(-50%); text-transform: uppercase; border-radius: 2px; }
-        .tag-pro { background: #7c3aed; color: white; font-size: 7px; font-weight: 900; padding: 1px 4px; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); text-transform: uppercase; border-radius: 2px; }
+        .tag-pro { background: linear-gradient(90deg, #7c3aed, #9333ea); color: white; font-size: 8px; font-weight: 900; padding: 2px 6px; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); text-transform: uppercase; border-radius: 3px; box-shadow: 0 2px 8px rgba(124,58,237,0.4); }
         
         .week-btn { border: 1px solid #1f1f1f; background: #0a0a0a; transition: all 0.2s; }
         .week-btn.active { background: #ff4d00; color: white; border-color: #ff4d00; font-weight: 900; box-shadow: 0 0 15px rgba(255, 77, 0, 0.2); }
@@ -647,9 +647,9 @@
                         <div id="circle-node-${i}" class="relative w-10 h-10 rounded-full flex items-center justify-center font-black italic text-xs ${isUnlocked ? 'grind-gradient text-black scale-110 shadow-[0_0_15px_rgba(255,77,0,0.5)]' : 'bg-gray-800 text-gray-500 border border-white/10'}">
                             ${i}
                         </div>
-                        <div class="reward-box pro mt-4 ${isProUnlocked ? 'unlocked' : 'opacity-10 scale-90'}">
+                        <div class="reward-box pro mt-5 ${isProUnlocked ? 'unlocked scale-105' : 'opacity-[0.35] scale-[0.98] hover:opacity-60'}">
                             <span class="tag-pro italic">PRO</span>
-                            <span class="text-[9px] font-black uppercase text-center px-2 ${isProUnlocked ? 'text-[#a855f7]' : 'text-purple-400'}">${r?.pro || '-'}</span>
+                            <span class="text-[10px] font-black uppercase text-center px-2 ${isProUnlocked ? 'text-[#d8b4fe]' : 'text-purple-400'}">${r?.pro || '-'}</span>
                         </div>
                     </div>
                 `;
@@ -728,10 +728,29 @@
                 }
 
                 const topBar = document.getElementById('top-xp-bar');
-                if (topBar) topBar.style.width = `${targetXpProgress}%`;
-                
                 const trackLine = document.getElementById('track-line');
+                
                 if (trackLine) trackLine.style.width = `calc(140px * ${targetTrackProgress})`;
+
+                // Level Up Logic: Balken füllt sich auf 100%, resettet unsichtbar und geht auf neuen Wert
+                if (state.prevLvl !== null && safeLvl > state.prevLvl) {
+                    if (topBar) {
+                        topBar.style.transition = 'width 1000ms ease-out';
+                        topBar.style.width = '100%';
+                        setTimeout(() => {
+                            topBar.style.transition = 'none';
+                            topBar.style.width = '0%';
+                            void topBar.offsetWidth; // Force Layout-Reflow
+                            topBar.style.transition = 'width 1000ms ease-out';
+                            topBar.style.width = `${targetXpProgress}%`;
+                        }, 1000); // Wartet bis 100% Animation durch ist
+                    }
+                } else {
+                    if (topBar) {
+                        topBar.style.transition = 'width 1000ms ease-out';
+                        topBar.style.width = `${targetXpProgress}%`;
+                    }
+                }
 
                 if (state.prevXp !== null && state.prevXp < safeXp) {
                     animateValue('xp-counter-num', state.prevXp, safeXp, 1000);
@@ -754,5 +773,6 @@
     </script>
 </body>
 </html>
+
 
 
