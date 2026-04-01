@@ -89,11 +89,15 @@
         const auth = getAuth(appInit);
         const db = getFirestore(appInit);
 
+        const nowTime = new Date();
+        let currentMonthWeekInit = Math.ceil(nowTime.getDate() / 7);
+        if (currentMonthWeekInit > 4) currentMonthWeekInit = 4;
+
         let state = {
             user: null,
             profile: null,
             view: 'loading',
-            currentWeekTab: 1,
+            currentWeekTab: currentMonthWeekInit,
             authStep: 'phone',
             tempPhone: ''
         };
@@ -524,33 +528,25 @@
                                 <h3 class="text-2xl font-black italic uppercase tracking-tighter">Grind Track <span class="text-[#ff4d00]">S01</span></h3>
                                 <p class="text-gray-500 text-[10px] font-bold tracking-widest mt-1">Season 01 | Active</p>
                             </div>
-                            <div class="flex gap-2">
-                                <button onclick="window.scrollPass(-1)" class="bg-white/5 p-2 px-4 border border-white/10 text-xs font-black hover:bg-white/10 transition">&larr;</button>
-                                <button onclick="window.scrollPass(1)" class="bg-white/5 p-2 px-4 border border-white/10 text-xs font-black hover:bg-white/10 transition">&rarr;</button>
-                            </div>
                         </div>
 
                         <div id="pass-viewport" class="no-scrollbar overflow-x-auto py-8 relative flex items-center min-h-[280px] border-y border-white/5 bg-black/40 shadow-inner">
-                            <div class="flex items-center px-6">
+                            <div class="flex items-center px-6 relative" style="min-width: max-content;">
+                                <div class="absolute top-1/2 left-[94px] right-[94px] h-[1px] bg-[#1f1f1f] z-0 -translate-y-1/2"></div>
+                                <div class="absolute top-1/2 left-[94px] h-[2px] bg-[#ff4d00] shadow-[0_0_10px_rgba(255,77,0,0.5)] z-0 transition-all duration-1000 -translate-y-1/2" style="width: calc(140px * ${Math.min(29, safeLvl - 1 + xpProgress / 100)}); display: ${safeXp > 0 ? 'block' : 'none'};"></div>
             `;
 
             for (let i = 1; i <= 30; i++) {
                 const r = rewardData.find(x => x.lvl === i);
                 const isUnlocked = i <= safeLvl;
-                const lineClass = i < safeLvl ? 'active' : '';
-                
-                let lineStyle = '';
-                if (i === 1) lineStyle = 'left: 50%;';
-                if (i === 30) lineStyle = 'right: 50%;';
 
                 html += `
-                    <div id="level-node-${i}" class="level-node flex flex-col items-center">
-                        <div class="level-line ${lineClass}" style="${lineStyle}"></div>
+                    <div id="level-node-${i}" class="level-node flex flex-col items-center relative z-10">
                         <div class="reward-box mb-4 ${isUnlocked ? 'unlocked' : 'opacity-20 scale-90'}">
                             <span class="tag-free">FREE</span>
                             <span class="text-[9px] font-black uppercase text-center px-2 text-white">${r?.free || '-'}</span>
                         </div>
-                        <div class="relative z-20 w-10 h-10 rounded-full flex items-center justify-center font-black italic text-xs ${isUnlocked ? 'grind-gradient text-black scale-110 shadow-[0_0_15px_rgba(255,77,0,0.5)]' : 'bg-gray-800 text-gray-500 border border-white/10'}">
+                        <div class="relative w-10 h-10 rounded-full flex items-center justify-center font-black italic text-xs ${isUnlocked ? 'grind-gradient text-black scale-110 shadow-[0_0_15px_rgba(255,77,0,0.5)]' : 'bg-gray-800 text-gray-500 border border-white/10'}">
                             ${i}
                         </div>
                         <div class="reward-box pro mt-4 ${isUnlocked ? 'unlocked' : 'opacity-10 scale-90'}">
@@ -580,13 +576,14 @@
                             <div class="flex flex-wrap gap-2">
             `;
 
+            let currentMonthWeek = Math.ceil(now.getDate() / 7);
+            if (currentMonthWeek > 4) currentMonthWeek = 4;
+
             Object.keys(weeklyData).forEach(w => {
                 const weekNum = parseInt(w);
-                const unlockDate = new Date(SEASON_START);
-                unlockDate.setDate(unlockDate.getDate() + weeklyData[weekNum].startOffset);
-                const isLocked = now < unlockDate;
+                const isLocked = weekNum > currentMonthWeek;
                 
-                html += `<button onclick="window.setWeek(${weekNum})" class="week-btn px-5 py-2 text-[10px] font-black uppercase transition rounded-sm ${state.currentWeekTab === weekNum ? 'active' : ''} ${isLocked ? 'week-locked' : ''}">W0${weekNum}</button>`;
+                html += `<button ${isLocked ? '' : `onclick="window.setWeek(${weekNum})"`} class="week-btn px-5 py-2 text-[10px] font-black uppercase transition rounded-sm ${state.currentWeekTab === weekNum ? 'active' : ''} ${isLocked ? 'week-locked' : ''}">W0${weekNum}</button>`;
             });
 
             html += `
@@ -640,6 +637,7 @@
     </script>
 </body>
 </html>
+
 
 
 
