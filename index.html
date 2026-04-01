@@ -45,6 +45,7 @@
         .toast.show { transform: translateX(0); }
         .toast.success { border-left: 4px solid #ff4d00; }
         .toast.error { border-left: 4px solid #dc2626; }
+        .toast.info { border-left: 4px solid #3b82f6; }
         
         .btn-grind { background: white; color: black; font-weight: 900; font-style: italic; text-transform: uppercase; padding: 12px 24px; font-size: 12px; transition: all 0.2s; box-shadow: 0 4px 15px rgba(255,255,255,0.1); cursor: pointer; border-radius: 4px; border: none; }
         .btn-grind:hover { background: #ff4d00; color: white; box-shadow: 0 4px 20px rgba(255, 77, 0, 0.4); }
@@ -160,6 +161,8 @@
             toast.className = `toast ${type}`;
             const icon = type === 'error' 
                 ? `<svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`
+                : type === 'info'
+                ? `<svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`
                 : `<svg class="w-5 h-5 text-[#ff4d00]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>`;
             toast.innerHTML = `${icon} <div><div class="font-black text-[10px] uppercase tracking-widest text-gray-400 mb-0.5">System</div><div>${msg}</div></div>`;
             container.appendChild(toast);
@@ -201,6 +204,17 @@
             if (user) {
                 state.user = user;
                 setupProfileListener(user);
+                
+                // Preis Listener
+                onSnapshot(doc(db, 'system', 'pricing'), (docSnap) => {
+                    if (docSnap.exists()) { 
+                        state.bundlePrice = docSnap.data().bundlePrice; 
+                    } else { 
+                        state.bundlePrice = '19.00'; 
+                        setDoc(doc(db, 'system', 'pricing'), { bundlePrice: '19.00' }); 
+                    } 
+                    if (state.view === 'paywall') render(); 
+                });
             } else {
                 state.user = null;
                 state.profile = null;
@@ -324,7 +338,6 @@
             if(btn) { btn.innerText = "Transmitting..."; btn.disabled = true; }
             
             try {
-                // Sende Proof an Admin Warteschlange
                 await addDoc(collection(db, 'plot_pending_proofs'), {
                     uid: state.user.uid,
                     alias: state.profile.alias || 'Grinder',
@@ -445,15 +458,309 @@
         window.setView = (view) => { state.view = view; render(); };
         window.handleLogout = () => { state.view = 'loading'; render(); signOut(auth); };
         window.setWeek = (weekNum) => { state.currentWeekTab = weekNum; render(); };
-        window.sendSMS = async (e) => { /* Wie bisher, Code wegen Länge verkürzt, läuft im Hintergrund ganz normal weiter */ };
-        // ... (Die Auth & Share Funktionen bleiben exakt gleich wie in meiner vorherigen Antwort)
+        
+        window.sendSMS = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('auth_submit_btn');
+            const prefix = document.getElementById('auth_prefix').value;
+            const rawPhone = document.getElementById('auth_phone').value.trim();
+            const cleanPhone = rawPhone.replace(/^0+/, '');
+            const fullPhone = prefix + cleanPhone;
+            state.tempPhone = fullPhone;
+            
+            btn.disabled = true; 
+            btn.innerText = "Transmitting...";
+            
+            try {
+                if (!window.recaptchaVerifier) { 
+                    window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { size: 'invisible' }); 
+                }
+                window.confirmationResult = await signInWithPhoneNumber(auth, fullPhone, window.recaptchaVerifier);
+                state.authStep = 'code'; 
+                window.showToast("System Access Code sent.", "success"); 
+                render();
+            } catch (err) {
+                if(window.recaptchaVerifier) { window.recaptchaVerifier.clear(); window.recaptchaVerifier = null; }
+                window.showToast(err.message, "error"); 
+                btn.disabled = false; 
+                btn.innerText = "Enter The Drop";
+            }
+        };
 
-        // Renderer
+        window.verifyCode = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('verify_submit_btn');
+            const code = document.getElementById('auth_code').value;
+            btn.disabled = true; btn.innerText = "Verifying...";
+            try {
+                await window.confirmationResult.confirm(code);
+                if (window.recaptchaVerifier) { window.recaptchaVerifier.clear(); window.recaptchaVerifier = null; }
+            } catch (err) { 
+                window.showToast("Invalid sequence.", "error"); 
+                btn.disabled = false; 
+                btn.innerText = "Verify Access"; 
+            }
+        };
+
+        window.goBackToPhone = () => { state.authStep = 'phone'; render(); };
+
+        window.submitOnboarding = async (e) => {
+            e.preventDefault();
+            const nameInput = document.getElementById('onboard_name').value.trim();
+            if(!nameInput) return window.showToast("Bitte gib einen Namen ein.", "error");
+            
+            const btn = e.target.querySelector('button');
+            btn.disabled = true;
+            btn.innerText = "Registering...";
+            
+            try {
+                state.profile = { xp: 0, lvl: 1, completed: [], alias: nameInput, hasPremium: false };
+                await setDoc(doc(db, 'plot_users', state.user.uid), state.profile);
+                window.showToast(`Willkommen im Grind, ${nameInput}.`, "success");
+                state.view = 'dashboard';
+                render();
+            } catch (err) {
+                window.showToast("Fehler bei der Registrierung.", "error");
+                btn.disabled = false;
+                btn.innerText = "Confirm Identity";
+            }
+        };
+
+        window.generateShareCard = async () => {
+            if (!state.profile) return;
+            const canvas = document.createElement('canvas'); 
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = 1080; 
+            canvas.height = 1920; 
+            const centerY = canvas.height / 2; 
+            const bottomY = canvas.height;
+            
+            ctx.fillStyle = '#050505'; 
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            const aura = ctx.createRadialGradient(540, centerY, 0, 540, centerY, 800);
+            aura.addColorStop(0, 'rgba(255, 77, 0, 0.15)'); 
+            aura.addColorStop(1, 'transparent');
+            ctx.fillStyle = aura; 
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.globalAlpha = 0.05;
+            for (let i = 0; i < 50000; i++) { 
+                ctx.fillStyle = Math.random() > 0.5 ? '#ffffff' : '#000000'; 
+                ctx.fillRect(Math.random() * canvas.width, Math.random() * canvas.height, 2, 2); 
+            }
+            ctx.globalAlpha = 1.0;
+
+            ctx.fillStyle = '#ffffff'; 
+            ctx.font = 'italic 900 120px "Inter", sans-serif'; 
+            ctx.textAlign = 'center'; 
+            ctx.fillText('GRIND.', 540, canvas.height * 0.15); 
+            ctx.fillStyle = '#ff4d00';
+            ctx.fillText('.', 540 + (ctx.measureText('GRIND').width / 2) + 15, canvas.height * 0.15);
+
+            const userAlias = state.profile.alias || 'Stranger';
+            ctx.fillStyle = '#ffffff'; 
+            ctx.font = 'italic 900 80px "Inter", sans-serif';
+            ctx.fillText(userAlias.toUpperCase(), 540, centerY - 80);
+
+            const safeLvl = state.profile.lvl || 1;
+            const safeXp = state.profile.xp || 0;
+            const completedCount = state.profile.completed?.length || 0;
+            const currentRank = RANKS[Math.min(Math.floor((safeLvl - 1) / 5), RANKS.length - 1)];
+            
+            ctx.fillStyle = '#ff4d00'; 
+            ctx.font = '900 70px "Inter", sans-serif'; 
+            ctx.letterSpacing = "5px"; 
+            ctx.fillText(`LVL ${safeLvl} • ${currentRank.toUpperCase()}`, 540, centerY + 30);
+
+            const barWidth = 800;
+            const barHeight = 15;
+            const startX = 540 - (barWidth / 2);
+            const barY = centerY + 100;
+            
+            ctx.fillStyle = '#1f1f1f';
+            ctx.fillRect(startX, barY, barWidth, barHeight);
+            
+            const xpProgress = (safeXp % 1000) / 1000;
+            ctx.fillStyle = '#ff4d00';
+            ctx.fillRect(startX, barY, barWidth * xpProgress, barHeight);
+
+            ctx.fillStyle = '#666666'; 
+            ctx.letterSpacing = "3px"; 
+            ctx.font = '700 25px "Inter", sans-serif'; 
+            ctx.fillText(`XP: ${safeXp} / ${safeLvl * 1000}  •  ${completedCount} OPERATIONS CLEARED`, 540, barY + 60);
+            
+            ctx.fillStyle = '#444444';
+            ctx.font = '400 24px "Inter", sans-serif'; 
+            ctx.fillText(`SEASON 01 • ACTIVE`, 540, bottomY - 120);
+
+            let fileName = `GRIND_S01_${userAlias.replace(/\s+/g, '')}.png`; 
+            let shareText = `My standing in the Grind. Level ${safeLvl}.`;
+
+            canvas.toBlob(async (blob) => {
+                if (!blob) return window.showToast("Fehler bei der Bildgenerierung.", "error");
+                const file = new File([blob], fileName, { type: 'image/png' });
+                const downloadFallback = () => { 
+                    const link = document.createElement('a'); 
+                    link.download = fileName; 
+                    link.href = canvas.toDataURL('image/png'); 
+                    link.click(); 
+                    window.showToast("Status exportiert.", "success"); 
+                };
+                
+                if (navigator.canShare && navigator.canShare({ files: [file] })) { 
+                    try { 
+                        await navigator.share({ files: [file], title: 'GRIND.', text: shareText }); 
+                    } catch (err) { 
+                        if (err.name !== 'AbortError') downloadFallback(); 
+                    } 
+                } else { 
+                    downloadFallback(); 
+                }
+            }, 'image/png');
+        };
+
+        function animateValue(id, start, end, duration) {
+            const obj = document.getElementById(id);
+            if (!obj) return;
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                obj.innerHTML = Math.floor(progress * (end - start) + start);
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                } else {
+                    obj.innerHTML = end;
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        // --- Render Engine ---
         function render() {
             const appDiv = document.getElementById('app');
 
             if (state.view === 'loading') {
                 appDiv.innerHTML = `<div class="flex-1 flex items-center justify-center min-h-[60vh]"><div class="w-16 h-16 border-t-4 border-l-4 border-[#ff4d00] rounded-full animate-spin"></div></div>`;
+                return;
+            }
+
+            if (state.view === 'paywall') {
+                const displayPrice = state.bundlePrice ? state.bundlePrice.replace('.', ',') : '19,00';
+                const checkoutPrice = state.bundlePrice || '19.00';
+                
+                if (document.getElementById('paypal-button-container')) { 
+                    const priceEl = document.getElementById('dynamic-price-display'); 
+                    if (priceEl) priceEl.innerText = displayPrice + ' €'; 
+                    return; 
+                }
+
+                appDiv.innerHTML = `
+                    <div class="flex-1 flex flex-col items-center justify-center p-6 min-h-[80vh] text-center animate-fade-in relative z-20">
+                        <div class="w-16 h-16 border-2 border-[#ff4d00] rounded-full flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(255,77,0,0.3)] bg-[#0a0a0a]">
+                            <svg class="w-8 h-8 text-[#ff4d00]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        </div>
+                        <h2 class="text-4xl font-black italic tracking-tighter mb-2">GRIND <span class="text-[#ff4d00]">PRO</span></h2>
+                        <p class="text-gray-400 font-bold uppercase tracking-widest text-[10px] mb-8 max-w-xs leading-relaxed">
+                            Schalte alle Premium-Rewards der Season 01 frei und maximiere deinen Progress.
+                        </p>
+
+                        <div class="bg-[#0a0a0a] border border-[#1f1f1f] p-8 rounded-sm mb-6 w-full max-w-sm shadow-2xl relative overflow-hidden group">
+                            <div class="absolute inset-0 bg-gradient-to-t from-[#ff4d00]/10 to-transparent opacity-50"></div>
+                            <div class="relative z-10">
+                                <div class="text-[10px] uppercase tracking-[0.2em] text-gray-500 font-bold mb-2">Season Pass</div>
+                                <div id="dynamic-price-display" class="text-5xl font-black text-white italic tracking-tighter mb-8">${displayPrice} €</div>
+                                <div id="paypal-button-container" class="w-full min-h-[150px] relative z-50 flex items-center justify-center"></div>
+                            </div>
+                        </div>
+
+                        <button onclick="window.setView('dashboard')" class="text-gray-600 hover:text-white text-[10px] uppercase tracking-[0.2em] font-bold transition mt-2">Zurück zum Grind</button>
+                    </div>
+                `;
+
+                setTimeout(() => {
+                    if (window.paypal && document.getElementById('paypal-button-container') && !document.getElementById('paypal-button-container').innerHTML) {
+                        paypal.Buttons({ 
+                            createOrder: function(data, actions) { 
+                                return actions.order.create({ 
+                                    purchase_units: [{ amount: { value: checkoutPrice, currency_code: 'EUR' }, custom_id: state.user.uid }] 
+                                }); 
+                            }, 
+                            onApprove: function(data, actions) { 
+                                return actions.order.capture().then(async function(details) { 
+                                    window.showToast("Zahlung autorisiert! PRO Pass aktiviert.", "success"); 
+                                    try {
+                                        await setDoc(doc(db, 'plot_users', state.user.uid), { hasPremium: true }, { merge: true });
+                                    } catch(e) { console.error(e); }
+                                    window.setView('dashboard'); 
+                                }); 
+                            } 
+                        }).render('#paypal-button-container');
+                    } else if (!window.paypal) { 
+                        document.getElementById('paypal-button-container').innerHTML = '<div class="text-red-500 text-xs italic font-bold">Zahlungssystem blockiert. Bitte Seite neu laden.</div>'; 
+                    }
+                }, 100);
+                return;
+            }
+
+            if (state.view === 'onboarding') {
+                appDiv.innerHTML = `
+                    <div class="flex-1 flex flex-col items-center justify-center p-6 min-h-[80vh] text-center">
+                        <h1 class="text-4xl md:text-5xl font-black italic tracking-tighter mb-2">IDENTIFICATION<span class="text-[#ff4d00]">.</span></h1>
+                        <p class="text-gray-500 font-bold uppercase tracking-widest text-[10px] mb-12 max-w-sm leading-relaxed">
+                            Trage deinen Vornamen ein, um die Registrierung abzuschließen.
+                        </p>
+                        <form onsubmit="window.submitOnboarding(event)" class="w-full max-w-sm space-y-4">
+                            <input id="onboard_name" type="text" placeholder="Dein Name" required class="w-full p-4 bg-[#0f0f0f] border border-[#1f1f1f] rounded-sm outline-none focus:border-[#ff4d00] text-white transition text-center text-xl tracking-widest uppercase font-black italic">
+                            <button type="submit" class="w-full btn-grind py-4">Confirm Identity</button>
+                        </form>
+                    </div>
+                `;
+                return;
+            }
+
+            if (state.view === 'auth') {
+                let authHtml = `
+                    <div class="flex-1 flex flex-col items-center justify-center p-6 min-h-[80vh] text-center">
+                        <h1 class="text-6xl md:text-8xl font-black italic tracking-tighter mb-2">GRIND<span class="text-[#ff4d00]">.</span></h1>
+                        <p class="text-gray-500 font-bold uppercase tracking-widest text-xs mb-12 max-w-sm leading-relaxed">
+                            Season 01
+                        </p>
+                        <div class="w-full max-w-sm">
+                `;
+
+                if (state.authStep === 'phone') {
+                    authHtml += `
+                            <form onsubmit="window.sendSMS(event)" class="space-y-4">
+                                <div class="flex gap-2">
+                                    <select id="auth_prefix" class="w-24 p-4 bg-[#0f0f0f] border border-[#1f1f1f] rounded-sm outline-none focus:border-[#ff4d00] text-gray-400 text-center font-bold appearance-none cursor-pointer">
+                                        <option value="+49">🇩🇪 +49</option>
+                                        <option value="+43">🇦🇹 +43</option>
+                                        <option value="+41">🇨🇭 +41</option>
+                                    </select>
+                                    <input id="auth_phone" type="tel" placeholder="170 1234567" required class="flex-1 p-4 bg-[#0f0f0f] border border-[#1f1f1f] rounded-sm outline-none focus:border-[#ff4d00] text-white transition text-center text-lg tracking-widest">
+                                </div>
+                                <button id="auth_submit_btn" type="submit" class="w-full btn-grind py-4">Enter The Drop</button>
+                            </form>
+                    `;
+                } else {
+                    authHtml += `
+                            <form onsubmit="window.verifyCode(event)" class="space-y-4">
+                                <div class="text-center mb-6">
+                                    <p class="text-gray-500 text-xs uppercase tracking-widest font-bold">Code gesendet an</p>
+                                    <p class="text-[#ff4d00] font-black tracking-widest mt-1 text-lg">${state.tempPhone}</p>
+                                </div>
+                                <input id="auth_code" type="text" placeholder="123456" required class="w-full p-4 bg-[#0f0f0f] border border-[#1f1f1f] rounded-sm outline-none focus:border-[#ff4d00] text-white transition text-center text-3xl font-mono tracking-[0.3em]">
+                                <button id="verify_submit_btn" type="submit" class="w-full btn-grind py-4">Verify Access</button>
+                                <button type="button" onclick="window.goBackToPhone()" class="w-full text-center mt-4 text-xs text-gray-500 hover:text-white uppercase tracking-widest transition font-bold">Cancel</button>
+                            </form>
+                    `;
+                }
+
+                authHtml += `</div></div>`;
+                appDiv.innerHTML = authHtml;
                 return;
             }
 
@@ -463,13 +770,13 @@
                 
                 let html = `
                     <header class="p-6 max-w-6xl mx-auto w-full relative z-20"><h1 class="text-3xl font-black italic tracking-tighter">GRIND<span class="text-[#ff4d00]">.</span></h1></header>
-                    <main class="max-w-6xl mx-auto px-6 w-full relative z-10">
+                    <main class="max-w-6xl mx-auto px-6 w-full relative z-10 pb-20">
                         <div class="mb-6 flex items-center justify-between">
                             <h2 class="text-4xl font-black italic tracking-tighter">COMMAND <span class="text-[#ff4d00]">CENTER</span></h2>
                             <button onclick="window.setView('dashboard')" class="text-xs text-gray-500 uppercase font-bold tracking-widest hover:text-white transition">&larr; Back to Grind</button>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pb-20">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <!-- AI Mission Generator -->
                             <div class="card p-6 rounded-sm self-start">
                                 <h3 class="text-lg font-black uppercase tracking-widest text-[#ff4d00] mb-4">AI Mission Architect</h3>
@@ -513,48 +820,215 @@
             }
 
             // --- Dashboard Render ---
-            // Um den Code hier kurz zu halten, übernimmt der Renderer exakt das alte Design, 
-            // aber wir müssen die Missions-Buttons so anpassen, dass sie das Modal öffnen.
-
             const p = state.profile || { xp: 0, lvl: 1, completed: [], alias: 'Stranger', hasPremium: false };
             const safeXp = p.xp || 0;
             const safeLvl = p.lvl || 1;
             const safeCompleted = p.completed || [];
-            
+            const hasPremium = p.hasPremium || false;
+
+            const currentRank = RANKS[Math.min(Math.floor((safeLvl - 1) / 5), RANKS.length - 1)];
+
+            const now = new Date();
+            let currentMonthWeek = Math.ceil(now.getDate() / 7);
+            if (currentMonthWeek > 4) currentMonthWeek = 4;
+
+            const displayXp = state.prevXp !== null ? state.prevXp : safeXp;
+            const targetXpProgress = (safeXp % 1000) / 10;
+            const oldXpProgress = state.prevXp !== null ? (state.prevXp % 1000) / 10 : targetXpProgress;
+
+            const targetTrackProgress = Math.min(29, safeLvl - 1 + (safeXp % 1000) / 1000);
+            const oldTrackProgress = state.prevXp !== null ? Math.min(29, (state.prevLvl || 1) - 1 + (state.prevXp % 1000) / 1000) : targetTrackProgress;
+
             let html = `
                 <header class="p-6 max-w-6xl mx-auto flex justify-between items-center w-full relative z-20">
                     <h1 class="text-3xl font-black italic tracking-tighter">GRIND<span class="text-[#ff4d00]">.</span></h1>
                     <div class="flex gap-3">
                         ${state.isAdmin ? `<button onclick="window.setView('admin')" class="text-[10px] uppercase font-bold text-[#ff4d00] hover:text-white transition tracking-widest border border-[#ff4d00]/30 hover:border-[#ff4d00] px-3 py-1 rounded-sm bg-[#ff4d00]/10">Command Center</button>` : ''}
-                        <button class="text-[10px] uppercase font-bold text-gray-500 hover:text-white transition tracking-widest border border-gray-800 px-3 py-1 rounded-sm bg-[#0a0a0a]">Exit</button>
+                        <button onclick="window.generateShareCard()" class="text-[10px] uppercase font-bold text-gray-400 hover:text-white transition tracking-widest border border-gray-800 hover:border-[#ff4d00] px-3 py-1 rounded-sm bg-[#0a0a0a]">Export</button>
+                        <button onclick="window.handleLogout()" class="text-[10px] uppercase font-bold text-gray-500 hover:text-red-500 transition tracking-widest border border-gray-800 px-3 py-1 rounded-sm bg-[#0a0a0a]">Exit</button>
                     </div>
                 </header>
+
                 <main class="max-w-6xl mx-auto px-6 w-full relative z-10 pb-20">
-                    <div class="mb-12"><h2 class="text-5xl font-black italic tracking-tighter">LVL ${safeLvl}</h2><p class="text-[#ff4d00] font-mono text-xs">XP: ${safeXp}</p></div>
-                    <div class="space-y-4">
+                    
+                    <!-- Status Panel -->
+                    <section class="mb-12 flex flex-col md:flex-row gap-8 items-center bg-[#0a0a0a] p-8 border border-[#1f1f1f] rounded-lg shadow-2xl relative overflow-hidden group">
+                        <div class="absolute inset-0 bg-gradient-to-r from-[#ff4d00] to-transparent opacity-0 group-hover:opacity-5 transition duration-1000"></div>
+                        <div class="flex-shrink-0 text-center md:text-left relative z-10">
+                            <p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-[0.4em] mb-2">Standing</p>
+                            <h2 id="main-lvl-text" class="text-6xl font-black italic tracking-tighter leading-none inline-block">LVL ${safeLvl}</h2>
+                            <p class="text-gray-500 font-mono mt-3 text-xs tracking-widest uppercase"><span class="text-white">${currentRank}</span></p>
+                            <p class="text-gray-600 font-bold italic mt-1 text-[10px] uppercase tracking-widest">${p.alias}</p>
+                        </div>
+                        <div class="flex-grow w-full relative z-10">
+                            <div class="flex justify-between text-[10px] font-bold uppercase text-gray-500 mb-3 tracking-widest italic">
+                                <span>XP: <span class="text-white" id="xp-counter-num">${displayXp}</span> / ${(safeLvl) * 1000}</span>
+                            </div>
+                            <div class="w-full bg-gray-900 h-3 rounded-full overflow-hidden border border-white/5 relative">
+                                <div id="top-xp-bar" class="grind-gradient h-full transition-all duration-1000 ease-out xp-bar-glow" style="width: ${oldXpProgress}%"></div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Grind Track -->
+                    <section class="mb-16">
+                        <div class="flex justify-between items-center mb-6 px-2">
+                            <div>
+                                <h3 class="text-2xl font-black italic uppercase tracking-tighter">Grind Track <span class="text-[#ff4d00]">S01</span></h3>
+                                <p class="text-gray-500 text-[10px] font-bold tracking-widest mt-1">Season 01 | Active</p>
+                            </div>
+                            <div>
+                                ${hasPremium 
+                                    ? '<span class="bg-[#ff4d00]/10 text-[#ff4d00] border border-[#ff4d00]/30 px-3 py-1.5 rounded-sm text-[9px] font-black uppercase tracking-widest shadow-[0_0_10px_rgba(255,77,0,0.1)]">PRO ACTIVE</span>'
+                                    : '<button onclick="window.setView(\'paywall\')" class="btn-grind px-4 py-2 text-[10px]">Get Pro Pass</button>'
+                                }
+                            </div>
+                        </div>
+
+                        <div id="pass-viewport" class="no-scrollbar overflow-x-auto py-8 relative flex items-center min-h-[280px] border-y border-white/5 bg-black/40 shadow-inner">
+                            <div class="flex items-center px-6 relative" style="min-width: max-content;">
+                                <div class="absolute top-1/2 left-[94px] right-[94px] h-[1px] bg-[#1f1f1f] z-0 -translate-y-1/2"></div>
+                                <div id="track-line" class="absolute top-1/2 left-[94px] h-[2px] bg-[#ff4d00] shadow-[0_0_10px_rgba(255,77,0,0.5)] z-0 transition-all duration-1000 ease-out -translate-y-1/2" style="width: calc(140px * ${oldTrackProgress}); display: ${safeXp > 0 || state.prevXp > 0 ? 'block' : 'none'};"></div>
+            `;
+
+            for (let i = 1; i <= 30; i++) {
+                const r = rewardData.find(x => x.lvl === i);
+                const isUnlocked = i <= safeLvl;
+                const isProUnlocked = isUnlocked && hasPremium;
+
+                html += `
+                    <div id="level-node-${i}" class="level-node flex flex-col items-center relative z-10">
+                        <div ${isUnlocked && r?.free ? `onclick="window.openClaimModal('${r.free}', false)" class="reward-box mb-4 unlocked cursor-pointer hover:scale-105"` : `class="reward-box mb-4 opacity-60 scale-95"`}>
+                            <span class="tag-free">FREE</span>
+                            <span class="text-[10px] font-bold uppercase text-center px-2 text-gray-200">${r?.free || '-'}</span>
+                        </div>
+                        <div id="circle-node-${i}" class="relative w-10 h-10 rounded-full flex items-center justify-center font-black italic text-xs ${isUnlocked ? 'grind-gradient text-black scale-110 shadow-[0_0_15px_rgba(255,77,0,0.5)]' : 'bg-gray-800 text-gray-400 border border-white/20'}">
+                            ${i}
+                        </div>
+                        <div ${isProUnlocked && r?.pro ? `onclick="window.openClaimModal('${r.pro}', true)" class="reward-box pro mt-5 unlocked scale-105 cursor-pointer"` : `class="reward-box pro mt-5 opacity-70 scale-[0.98] hover:opacity-100"`}>
+                            <span class="tag-pro italic">PRO</span>
+                            <span class="text-[10px] font-bold uppercase text-center px-2 ${isProUnlocked ? 'text-[#d8b4fe]' : 'text-purple-300'}">${r?.pro || '-'}</span>
+                        </div>
+                    </div>
+                `;
+            }
+
+            html += `
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Operations -->
+                    <section class="max-w-3xl mx-auto mb-12">
+                        <div class="flex flex-col gap-6 mb-10">
+                            <div class="flex justify-between items-end border-b border-white/10 pb-4">
+                                <div>
+                                    <p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">Operations</p>
+                                    <h3 class="text-3xl font-black uppercase italic tracking-tighter">Woche ${state.currentWeekTab}: ${weeklyData[state.currentWeekTab].title}</h3>
+                                </div>
+                                <span class="text-[10px] font-black bg-[#ff4d00] text-white px-3 py-1 italic shadow-[0_0_10px_rgba(255,77,0,0.4)]">LIVE</span>
+                            </div>
+                            
+                            <div class="flex flex-wrap gap-2">
+            `;
+
+            Object.keys(weeklyData).forEach(w => {
+                const weekNum = parseInt(w);
+                const isLocked = weekNum > currentMonthWeek;
+                html += `<button ${isLocked ? '' : `onclick="window.setWeek(${weekNum})"`} class="week-btn px-5 py-2 text-[10px] font-black uppercase transition rounded-sm ${state.currentWeekTab === weekNum ? 'active' : ''} ${isLocked ? 'week-locked' : ''}">W0${weekNum}</button>`;
+            });
+
+            html += `
+                            </div>
+                        </div>
+                        <div class="space-y-4">
             `;
 
             weeklyData[state.currentWeekTab].missions.forEach(m => {
                 const isCompleted = safeCompleted.includes(m.id);
-                // Der Check, ob in Queue, erfordert mehr Logik, wir machen es hier visuell simpel:
+                
                 html += `
                     <div class="card p-6 rounded-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4 group relative overflow-hidden ${isCompleted ? 'is-completed border-[#ff4d00]/30' : ''}">
-                        <div class="completed-overlay"><span class="text-[#ff4d00] font-black italic uppercase tracking-widest flex items-center gap-2">VERIFIED</span></div>
+                        <div class="absolute left-0 top-0 bottom-0 w-1 bg-[#ff4d00] opacity-0 group-hover:opacity-100 transition"></div>
+                        
+                        <div class="completed-overlay">
+                            <span class="text-[#ff4d00] font-black italic uppercase tracking-widest flex items-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Verified
+                            </span>
+                        </div>
+
                         <div class="pr-6 relative z-0 flex-1">
                             <h4 class="font-black italic uppercase text-lg group-hover:text-[#ff4d00] transition tracking-tighter">${m.name}</h4>
                             <p class="text-gray-400 text-xs mt-1 font-medium leading-relaxed">${m.desc}</p>
-                            ${!isCompleted ? `<span class="inline-block mt-3 border border-gray-700 bg-black px-2 py-0.5 text-[8px] font-bold uppercase tracking-widest text-gray-400">${m.type === 'qr' ? '📍 QR Scan' : '📷 Upload'}</span>` : ''}
+                            ${!isCompleted ? `<span class="inline-block mt-3 border border-gray-700 bg-black px-2 py-0.5 text-[8px] font-bold uppercase tracking-widest text-gray-400">${m.type === 'qr' ? '📍 QR Scan' : '📷 Photo Upload'}</span>` : ''}
                         </div>
-                        <div class="text-left md:text-right flex-shrink-0 relative z-0">
+                        <div class="text-left md:text-right flex-shrink-0 relative z-0 flex flex-col items-start md:items-end w-full md:w-auto mt-4 md:mt-0">
                             <span class="block text-[#ff4d00] font-black text-2xl italic tracking-tighter mb-2">+${m.xp}</span>
-                            <button onclick="window.openVerifyModal('${m.id}', ${m.xp}, '${m.type}', '${m.name}')" class="btn-grind w-full md:w-auto py-3 text-[10px]" ${isCompleted ? 'disabled' : ''}>Verify</button>
+                            <button id="btn-${m.id}" onclick="window.openVerifyModal('${m.id}', ${m.xp}, '${m.type}', '${m.name}')" class="btn-grind w-full md:w-auto py-3 text-[10px]" ${isCompleted ? 'disabled' : ''}>
+                                Verify Operation
+                            </button>
                         </div>
                     </div>
                 `;
             });
 
-            html += `</main>`;
+            html += `
+                        </div>
+                    </section>
+                </main>
+            `;
+
             appDiv.innerHTML = html;
+
+            setTimeout(() => {
+                const currentNode = document.getElementById(`level-node-${safeLvl}`);
+                if (currentNode && state.prevLvl === null) {
+                    currentNode.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                }
+
+                const topBar = document.getElementById('top-xp-bar');
+                const trackLine = document.getElementById('track-line');
+                
+                if (trackLine) trackLine.style.width = `calc(140px * ${targetTrackProgress})`;
+
+                if (state.prevLvl !== null && safeLvl > state.prevLvl) {
+                    if (topBar) {
+                        topBar.style.transition = 'width 1000ms ease-out';
+                        topBar.style.width = '100%';
+                        setTimeout(() => {
+                            topBar.style.transition = 'none';
+                            topBar.style.width = '0%';
+                            void topBar.offsetWidth; 
+                            topBar.style.transition = 'width 1000ms ease-out';
+                            topBar.style.width = `${targetXpProgress}%`;
+                        }, 1000); 
+                    }
+                } else {
+                    if (topBar) {
+                        topBar.style.transition = 'width 1000ms ease-out';
+                        topBar.style.width = `${targetXpProgress}%`;
+                    }
+                }
+
+                if (state.prevXp !== null && state.prevXp < safeXp) {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+                    animateValue('xp-counter-num', state.prevXp, safeXp, 1000);
+                    
+                    if (state.prevLvl !== null && safeLvl > state.prevLvl) {
+                        const lvlText = document.getElementById('main-lvl-text');
+                        if (lvlText) lvlText.classList.add('animate-pop');
+                        
+                        const newCircle = document.getElementById(`circle-node-${safeLvl}`);
+                        if (newCircle) newCircle.classList.add('animate-pop');
+                        
+                        if (currentNode) currentNode.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                    }
+                }
+
+                state.prevXp = safeXp;
+                state.prevLvl = safeLvl;
+            }, 50);
         }
     </script>
 </body>
