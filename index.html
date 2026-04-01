@@ -283,10 +283,32 @@
             if(!file) return;
             const reader = new FileReader();
             reader.onload = (ev) => {
-                document.getElementById('upload-preview').src = ev.target.result;
-                document.getElementById('upload-preview').classList.remove('hidden');
-                document.getElementById('upload-placeholder').classList.add('hidden');
-                state.tempUploadData = ev.target.result;
+                const img = new Image();
+                img.onload = () => {
+                    // Komprimiert das Bild extrem runter, damit das Firebase 1MB Limit nie gebrochen wird!
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+                    const MAX_SIZE = 800;
+                    if (width > height && width > MAX_SIZE) {
+                        height *= MAX_SIZE / width;
+                        width = MAX_SIZE;
+                    } else if (height > MAX_SIZE) {
+                        width *= MAX_SIZE / height;
+                        height = MAX_SIZE;
+                    }
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    const compressedData = canvas.toDataURL('image/jpeg', 0.7);
+                    
+                    document.getElementById('upload-preview').src = compressedData;
+                    document.getElementById('upload-preview').classList.remove('hidden');
+                    document.getElementById('upload-placeholder').classList.add('hidden');
+                    state.tempUploadData = compressedData;
+                };
+                img.src = ev.target.result;
             };
             reader.readAsDataURL(file);
         };
@@ -337,6 +359,14 @@
             const btn = document.querySelector('#modal-container button.btn-grind');
             if(btn) { btn.innerText = "Transmitting..."; btn.disabled = true; }
             
+            const timeout = setTimeout(() => {
+                if(btn && btn.innerText === "Transmitting...") {
+                    btn.disabled = false;
+                    btn.innerText = "Erneut Senden";
+                    window.showToast("Zeitüberschreitung. Bitte Netzwerk prüfen.", "error");
+                }
+            }, 10000);
+
             try {
                 await addDoc(collection(db, 'plot_pending_proofs'), {
                     uid: state.user.uid,
@@ -348,11 +378,17 @@
                     data: data,
                     timestamp: new Date()
                 });
+                clearTimeout(timeout);
                 window.showToast("Proof gesendet. Warte auf Admin Freigabe.", "info");
                 window.closeModal();
             } catch(e) {
+                clearTimeout(timeout);
                 console.error(e);
-                window.showToast("Systemfehler beim Senden.", "error");
+                if (e.message && e.message.includes('permission')) {
+                    window.showToast("Datenbank-Rechte fehlen (plot_pending_proofs).", "error");
+                } else {
+                    window.showToast("Systemfehler beim Senden.", "error");
+                }
                 if(btn) { btn.innerText = "Erneut Senden"; btn.disabled = false; }
             }
         };
@@ -462,6 +498,12 @@
         window.sendSMS = async (e) => {
             e.preventDefault();
             const btn = document.getElementById('auth_submit_btn');
+            
+            if (window.location.protocol === 'file:') {
+                window.showToast("Lokale Datei (file://) blockiert SMS. Bitte hosten oder Live Server nutzen.", "error");
+                return;
+            }
+
             const prefix = document.getElementById('auth_prefix').value;
             const rawPhone = document.getElementById('auth_phone').value.trim();
             const cleanPhone = rawPhone.replace(/^0+/, '');
@@ -471,15 +513,25 @@
             btn.disabled = true; 
             btn.innerText = "Transmitting...";
             
+            const timeout = setTimeout(() => {
+                if(btn.innerText === "Transmitting...") {
+                    btn.disabled = false;
+                    btn.innerText = "Enter The Drop";
+                    window.showToast("Zeitüberschreitung beim SMS-Dienst.", "error");
+                }
+            }, 10000);
+
             try {
                 if (!window.recaptchaVerifier) { 
                     window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { size: 'invisible' }); 
                 }
                 window.confirmationResult = await signInWithPhoneNumber(auth, fullPhone, window.recaptchaVerifier);
+                clearTimeout(timeout);
                 state.authStep = 'code'; 
                 window.showToast("System Access Code sent.", "success"); 
                 render();
             } catch (err) {
+                clearTimeout(timeout);
                 if(window.recaptchaVerifier) { window.recaptchaVerifier.clear(); window.recaptchaVerifier = null; }
                 window.showToast(err.message, "error"); 
                 btn.disabled = false; 
@@ -1033,5 +1085,6 @@
     </script>
 </body>
 </html>
+
 
 
