@@ -73,6 +73,37 @@
 
         .grecaptcha-badge { filter: invert(1) grayscale(0.2) opacity(0.3); transition: all 0.5s ease !important; bottom: 20px !important; }
         .grecaptcha-badge:hover { filter: invert(1) grayscale(0) opacity(0.8); }
+		
+		/* --- Onboarding Intro Animation --- */
+#intro-layer {
+    position: fixed; inset: 0; z-index: 999999;
+    background-color: #050505;
+    display: flex; align-items: center; justify-content: center;
+    transition: opacity 0.8s ease;
+}
+.word-flash {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 10vw;
+    font-weight: 900;
+    font-style: italic;
+    text-transform: uppercase;
+    white-space: nowrap;
+    opacity: 0;
+    letter-spacing: -0.05em;
+    text-align: center;
+}
+@media (min-width: 768px) { .word-flash { font-size: 6vw; } }
+
+@keyframes flashInOut {
+    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); filter: blur(4px); }
+    10% { opacity: 1; transform: translate(-50%, -50%) scale(1); filter: blur(0px); }
+    90% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); filter: blur(0px); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(1.1); filter: blur(4px); }
+}
+
+
     </style>
 </head>
 <body class="flex flex-col relative">
@@ -553,28 +584,61 @@
         };
 
         window.goBackToPhone = () => { state.authStep = 'phone'; render(); };
+		
+		window.playGrindIntro = () => {
+    const layer = document.createElement('div');
+    layer.id = 'intro-layer';
+    layer.innerHTML = `
+        <div id="word1" class="word-flash text-gray-500">DISCONNECT.</div>
+        <div id="word2" class="word-flash text-white">FIND YOUR TRIBE.</div>
+        <div id="word3" class="word-flash text-white">PHYSICAL LIMITS.</div>
+        <div id="word4" class="word-flash grind-gradient" style="text-shadow: 0 0 40px rgba(255,77,0,0.5);">GRIND.</div>
+    `;
+    document.body.appendChild(layer);
 
-        window.submitOnboarding = async (e) => {
-            e.preventDefault();
-            const nameInput = document.getElementById('onboard_name').value.trim();
-            if(!nameInput) return window.showToast("Bitte gib einen Namen ein.", "error");
-            
-            const btn = e.target.querySelector('button');
-            btn.disabled = true;
-            btn.innerText = "Registering...";
-            
-            try {
-                state.profile = { xp: 0, lvl: 1, completed: [], alias: nameInput, hasPremium: false };
-                await setDoc(doc(db, 'plot_users', state.user.uid), state.profile);
-                window.showToast(`Willkommen im Grind, ${nameInput}.`, "success");
-                state.view = 'dashboard';
-                render();
-            } catch (err) {
-                window.showToast("Fehler bei der Registrierung.", "error");
-                btn.disabled = false;
-                btn.innerText = "Confirm Identity";
-            }
-        };
+    const w1 = document.getElementById('word1');
+    const w2 = document.getElementById('word2');
+    const w3 = document.getElementById('word3');
+    const w4 = document.getElementById('word4');
+
+    const timing = 700;
+    setTimeout(() => { w1.style.animation = `flashInOut ${timing}ms forwards`; }, 200);
+    setTimeout(() => { w2.style.animation = `flashInOut ${timing}ms forwards`; }, 200 + timing);
+    setTimeout(() => { w3.style.animation = `flashInOut ${timing}ms forwards`; }, 200 + (timing * 2));
+    setTimeout(() => { w4.style.animation = `flashInOut ${timing * 1.5}ms forwards`; }, 200 + (timing * 3));
+
+    setTimeout(() => {
+        layer.style.opacity = "0";
+        setTimeout(() => layer.remove(), 800);
+    }, 200 + (timing * 4.2));
+};
+
+
+   window.submitOnboarding = async (e) => {
+    e.preventDefault();
+    const nameInput = document.getElementById('onboard_name').value.trim();
+    if(!nameInput) return window.showToast("Bitte gib einen Namen ein.", "error");
+    
+    const btn = e.target.querySelector('button');
+    btn.disabled = true;
+    btn.innerText = "Registering...";
+    
+    try {
+        state.profile = { xp: 0, lvl: 1, completed: [], alias: nameInput, hasPremium: false, isAdmin: true };
+        await setDoc(doc(db, 'plot_users', state.user.uid), state.profile);
+        
+        // HIER STARTET DIE ANIMATION
+        window.playGrindIntro();
+
+        window.showToast(`Willkommen im Grind, ${nameInput}.`, "success");
+        state.view = 'dashboard';
+        render();
+    } catch (err) {
+        window.showToast("Fehler bei der Registrierung.", "error");
+        btn.disabled = false;
+        btn.innerText = "Confirm Identity";
+    }
+};
 
         window.generateShareCard = async () => {
             if (!state.profile) return;
@@ -1117,4 +1181,3 @@
     </script>
 </body>
 </html>
-
