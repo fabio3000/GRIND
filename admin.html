@@ -49,7 +49,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot, collection, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, onSnapshot, collection, getDoc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDtwsvmYSONjFufhbJ5I8G_RAMffnh7re0",
@@ -67,9 +67,12 @@
         let state = {
             user: null, profile: null, view: 'loading',
             authStep: 'phone', tempPhone: '',
-            adminTab: 'proofs', adminEditWeek: 1,
+            adminTab: 'control', adminEditWeek: 1, // Standardmäßig auf Control für sofortige Edits
             pendingProofs: [], weeklyData: {}, rewardData: []
         };
+
+        // Verhindert mehrfache Listener-Bindings (Behebt den Render-Loop)
+        let isSubscribed = false;
 
         window.showToast = (msg, type = 'success') => {
             const container = document.getElementById('toast-container');
@@ -80,19 +83,6 @@
             setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 4000);
         };
 
-        const setupSeasonData = () => {
-            onSnapshot(doc(db, 'system', 'grind_season'), (docSnap) => {
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    state.weeklyData = data.weeklyData || {}; state.rewardData = data.rewardData || [];
-                    if(state.view === 'admin') render();
-                } else {
-                    // Seed Data, damit es nicht leer ist
-                    setDoc(doc(db, 'system', 'grind_season'), { weeklyData: {}, rewardData: [] }, { merge: true });
-                }
-            });
-        };
-
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 state.user = user;
@@ -100,12 +90,33 @@
                     if (docSnap.exists()) {
                         const profile = docSnap.data();
                         if (profile.isAdmin) {
-                            state.profile = profile; state.view = 'admin';
-                            setupSeasonData();
-                            onSnapshot(collection(db, 'plot_pending_proofs'), (snap) => {
-                                state.pendingProofs = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                                if(state.view === 'admin') render();
-                            });
+                            state.profile = profile; 
+                            state.view = 'admin';
+                            
+                            // Nur einmal abonnieren, um Render-Schleifen zu verhindern
+                            if(!isSubscribed) {
+                                isSubscribed = true;
+                                
+                                onSnapshot(doc(db, 'system', 'grind_season'), (sSnap) => {
+                                    if (sSnap.exists()) {
+                                        const data = sSnap.data();
+                                        state.weeklyData = data.weeklyData || {}; 
+                                        state.rewardData = data.rewardData || [];
+                                        // Nur rendern, wenn wir im Control-Tab sind (Schützt Fokus beim Proof-Eingang)
+                                        if(state.view === 'admin' && state.adminTab === 'control') render();
+                                    } else {
+                                        setDoc(doc(db, 'system', 'grind_season'), { weeklyData: {}, rewardData: [] }, { merge: true });
+                                    }
+                                });
+
+                                onSnapshot(collection(db, 'plot_pending_proofs'), (pSnap) => {
+                                    state.pendingProofs = pSnap.docs.map(d => ({id: d.id, ...d.data()}));
+                                    // Nur rendern, wenn wir im Proof-Tab sind
+                                    if(state.view === 'admin' && state.adminTab === 'proofs') render();
+                                });
+                            }
+                            // Initiales Rendern
+                            render();
                         } else { state.view = 'denied'; render(); }
                     } else { state.view = 'denied'; render(); }
                 });
@@ -116,7 +127,7 @@
         window.setAdminEditWeek = (week) => { state.adminEditWeek = week; render(); };
         window.handleLogout = () => { state.view = 'loading'; render(); signOut(auth); };
 
-        // --- Core Admin Logic: Proofs ---
+        // --- Proof Management ---
         window.acceptProof = async (proofId, uid, mid, xp) => {
             try {
                 const userRef = doc(db, 'plot_users', uid); const snap = await getDoc(userRef);
@@ -137,10 +148,10 @@
             try { await deleteDoc(doc(db, 'plot_pending_proofs', proofId)); window.showToast("Proof gelöscht.", "info"); } catch(e) { window.showToast("Fehler bei Ablehnung.", "error"); }
         };
 
-        // --- AI Proof Checking ---
+        // --- AI Proof Check ---
         window.aiCheckProof = async (proofId, missionName, type, base64SafeString) => {
             const apiKey = localStorage.getItem('gemini_api_key') || '';
-            if(!apiKey) return window.showToast("Bitte API Key eintragen.", "error");
+            if(!apiKey) return window.showToast("Bitte API Key im Control Tab eintragen.", "error");
             
             const btn = document.getElementById(`ai_btn_${proofId}`);
             const resDiv = document.getElementById(`ai_res_${proofId}`);
@@ -148,7 +159,7 @@
             
             try {
                 const data = decodeURIComponent(atob(base64SafeString));
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
                 let contents = [];
 
                 if (type === 'upload') {
@@ -156,13 +167,13 @@
                     const mimeType = data.split(';')[0].split(':')[1];
                     contents = [{
                         parts: [
-                            { text: `Prüfe dieses Beweisfoto für die Fitness-Mission: "${missionName}". Ist das ein authentischer und valider Beweis für diese Herausforderung? Antworte sehr kurz mit "JA:" oder "NEIN:" und einem Satz Begründung.` },
+                            { text: `Prüfe dieses Beweisfoto für die Fitness-Mission: "${missionName}". Ist das ein authentischer Beweis für diese Herausforderung? Antworte kurz mit "JA:" oder "NEIN:" und einem Satz Begründung.` },
                             { inlineData: { mimeType: mimeType, data: base64Data } }
                         ]
                     }];
                 } else {
                     contents = [{
-                        parts: [{ text: `Prüfe diesen Scan für die Fitness-Mission: "${missionName}". Der eingereichte Code lautet: "${data}". Macht dieser Code Sinn für die Aufgabe? Antworte kurz mit "JA:" oder "NEIN:" und Begründung.` }]
+                        parts: [{ text: `Macht der eingereichte QR/Barcode "${data}" Sinn für die Aufgabe "${missionName}"? Antworte kurz mit JA oder NEIN und Begründung.` }]
                     }];
                 }
 
@@ -172,57 +183,70 @@
                 const text = resData.candidates?.[0]?.content?.parts?.[0]?.text;
 
                 if(text) {
-                    resDiv.innerHTML = `<span class="font-bold">🤖 KI Analyse:</span> ${text}`;
+                    resDiv.innerHTML = `<span class="font-bold">🤖 KI Coach:</span> ${text}`;
                     resDiv.classList.remove('hidden');
                 }
-            } catch (err) {
-                console.error(err);
-                window.showToast("KI Analyse fehlgeschlagen.", "error");
-            } finally {
-                if(btn) btn.innerHTML = `🤖`;
-            }
+            } catch (err) { window.showToast("KI Analyse fehlgeschlagen.", "error"); } 
+            finally { if(btn) btn.innerHTML = `🤖`; }
         };
 
-        // --- Core Admin Logic: Missions ---
+        // --- Mission Control ---
         window.addManualMission = async (e) => {
             e.preventDefault();
-            const newMission = { id: 'm_' + Date.now(), name: document.getElementById('new_mis_name').value, desc: document.getElementById('new_mis_desc').value, xp: parseInt(document.getElementById('new_mis_xp').value), type: document.getElementById('new_mis_type').value };
+            const newMission = { 
+                id: 'm_' + Date.now(), 
+                name: document.getElementById('new_mis_name').value, 
+                desc: document.getElementById('new_mis_desc').value, 
+                xp: parseInt(document.getElementById('new_mis_xp').value), 
+                type: document.getElementById('new_mis_type').value 
+            };
             const updatedWeekly = JSON.parse(JSON.stringify(state.weeklyData));
             if(!updatedWeekly[state.adminEditWeek]) updatedWeekly[state.adminEditWeek] = { title: "Woche " + state.adminEditWeek, missions: [] };
             if(!updatedWeekly[state.adminEditWeek].missions) updatedWeekly[state.adminEditWeek].missions = [];
             updatedWeekly[state.adminEditWeek].missions.push(newMission);
             
-            // FIX: setDoc mit merge: true erzwingt das Speichern, auch wenn das Dokument leer ist
             try {
                 await setDoc(doc(db, 'system', 'grind_season'), { weeklyData: updatedWeekly }, { merge: true });
-                window.showToast("Operation hinzugefügt.", "success");
-            } catch(err) {
-                window.showToast("Fehler beim Speichern.", "error");
-            }
+                window.showToast("Operation live geschaltet.", "success");
+                // Manuell das Formular leeren ohne kompletten Rerender
+                document.getElementById('new_mis_name').value = '';
+                document.getElementById('new_mis_desc').value = '';
+                document.getElementById('new_mis_xp').value = '';
+            } catch(err) { window.showToast("Fehler beim Speichern.", "error"); }
         };
 
         window.deleteMission = async (week, missionId) => {
             if(!confirm("Operation wirklich löschen?")) return;
             const updatedWeekly = JSON.parse(JSON.stringify(state.weeklyData));
             updatedWeekly[week].missions = updatedWeekly[week].missions.filter(m => m.id !== missionId);
-            
             await setDoc(doc(db, 'system', 'grind_season'), { weeklyData: updatedWeekly }, { merge: true });
-            window.showToast("Operation gelöscht.", "success");
+            window.showToast("Operation entfernt.", "success");
         };
 
-        // --- Core Admin Logic: AI Generation ---
+        // --- AI Mission Generator ---
         window.saveApiKey = (e) => { localStorage.setItem('gemini_api_key', e.target.value); };
 
         window.generateAIQuests = async () => {
-            const apiKey = localStorage.getItem('gemini_api_key') || ''; if(!apiKey) return window.showToast("Bitte API Key eintragen.", "error");
-            const btn = document.getElementById('ai-gen-btn'); const resultBox = document.getElementById('ai-result');
-            btn.innerText = "Processing..."; btn.disabled = true;
+            const apiKey = localStorage.getItem('gemini_api_key') || ''; 
+            if(!apiKey) return window.showToast("Bitte API Key eintragen.", "error");
+            
+            const btn = document.getElementById('ai-gen-btn'); 
+            const resultBox = document.getElementById('ai-result');
+            btn.innerText = "Processing System Data..."; btn.disabled = true;
+            
             try {
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-                const payload = { contents: [{ parts: [{ text: "Generiere 3 neue Grind-Missionen zum Thema Run Club, Gym, High Protein und reale Hustle Events. Formatiere als JSON." }] }], systemInstruction: { parts: [{ text: "Du bist der Operations Director einer Hardcore Fitness App. Erstelle 3 Missionen. Erlaubte Typen: 'qr' oder 'upload'. XP zwischen 300 und 1000." }] }, generationConfig: { responseMimeType: "application/json", responseSchema: { type: "OBJECT", properties: { missions: { type: "ARRAY", items: { type: "OBJECT", properties: { name: {type: "STRING"}, desc: {type: "STRING"}, xp: {type: "INTEGER"}, type: {type: "STRING"} } } } } } } };
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+                const payload = { 
+                    contents: [{ parts: [{ text: "Generiere 3 neue Grind-Missionen zum Thema Run Club, Gesundheit (Eisbaden, Nutrition) und echte Connections (Deep Talks). Formatiere exakt als JSON." }] }], 
+                    systemInstruction: { parts: [{ text: "Du bist der Operations Director einer Health & Hustle App. Erstelle 3 Missionen. Typen: 'qr' oder 'upload'. XP zwischen 300 und 1000." }] }, 
+                    generationConfig: { responseMimeType: "application/json", responseSchema: { type: "OBJECT", properties: { missions: { type: "ARRAY", items: { type: "OBJECT", properties: { name: {type: "STRING"}, desc: {type: "STRING"}, xp: {type: "INTEGER"}, type: {type: "STRING"} } } } } } } 
+                };
+                
                 const res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
                 if (!res.ok) throw new Error("API Fetch failed");
-                const data = await res.json(); const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                const data = await res.json(); 
+                const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                
                 if(text) {
                     resultBox.innerHTML = JSON.parse(text).missions.map(m => {
                         const safeString = btoa(encodeURIComponent(JSON.stringify(m)));
@@ -233,11 +257,13 @@
                                 <span class="text-[#ff4d00] text-[10px] font-bold">+${m.xp} XP | ${m.type.toUpperCase()}</span>
                             </div>
                             <p class="text-xs text-gray-500 mb-3">${m.desc}</p>
-                            <button onclick="window.acceptAiMission('${safeString}')" class="w-full bg-[#ff4d00]/20 hover:bg-[#ff4d00]/40 text-[#ff4d00] border border-[#ff4d00]/30 py-2 rounded-sm text-[10px] font-bold uppercase tracking-widest transition">+ Add to Week ${state.adminEditWeek}</button>
+                            <button type="button" onclick="window.acceptAiMission('${safeString}')" class="w-full bg-[#ff4d00]/20 hover:bg-[#ff4d00]/40 text-[#ff4d00] border border-[#ff4d00]/30 py-2 rounded-sm text-[10px] font-bold uppercase tracking-widest transition">+ Add to Week ${state.adminEditWeek}</button>
                         </div>`;
                     }).join('');
+                    window.showToast("KI hat Operations entworfen.", "success");
                 }
-            } catch (err) { window.showToast("KI Fehler.", "error"); } finally { btn.innerText = "KI: Generiere Ops"; btn.disabled = false; }
+            } catch (err) { window.showToast("KI Fehler: Key prüfen.", "error"); } 
+            finally { btn.innerText = "KI: Generiere Ops"; btn.disabled = false; }
         };
 
         window.acceptAiMission = async (base64String) => {
@@ -248,11 +274,11 @@
             updatedWeekly[state.adminEditWeek].missions.push(mission);
             
             await setDoc(doc(db, 'system', 'grind_season'), { weeklyData: updatedWeekly }, { merge: true });
-            window.showToast("KI Operation hinzugefügt!", "success");
+            window.showToast("KI Operation zur Season hinzugefügt!", "success");
             document.getElementById('ai-result').innerHTML = '<p class="text-[10px] text-gray-600 uppercase font-bold text-center italic mt-6">Warte auf Input...</p>';
         };
 
-        // --- Core Admin Logic: Visual Reward Editor ---
+        // --- Visual Reward Editor ---
         window.addReward = async (e) => {
             e.preventDefault();
             const lvl = parseInt(document.getElementById('rew_lvl').value);
@@ -269,9 +295,8 @@
             updatedRewards.sort((a, b) => a.lvl - b.lvl);
 
             try {
-                // FIX: setDoc mit merge: true
                 await setDoc(doc(db, 'system', 'grind_season'), { rewardData: updatedRewards }, { merge: true });
-                window.showToast(`Level ${lvl} ${tier.toUpperCase()} Reward gespeichert.`, "success");
+                window.showToast(`Level ${lvl} Reward gespeichert.`, "success");
                 e.target.reset();
             } catch (err) { window.showToast("Fehler beim Speichern.", "error"); }
         };
@@ -283,7 +308,6 @@
             if(existing) {
                 delete existing[tier]; delete existing[`${tier}_type`]; delete existing[`${tier}_info`];
                 if(!existing.free && !existing.pro) updatedRewards = updatedRewards.filter(r => r.lvl !== lvl);
-                
                 await setDoc(doc(db, 'system', 'grind_season'), { rewardData: updatedRewards }, { merge: true });
                 window.showToast("Reward entfernt.", "success");
             }
@@ -296,9 +320,10 @@
             else input.placeholder = "Einlöse-Anweisung (z.B. Zeige dies an der Kasse)";
         };
 
-        // --- Auth SMS Logic ---
+        // --- Auth SMS ---
         window.sendSMS = async (e) => {
             e.preventDefault(); const btn = document.getElementById('auth_submit_btn');
+            if (window.location.protocol === 'file:') return window.showToast("Bitte über localhost testen (file:// blockiert SMS).", "error");
             const fullPhone = document.getElementById('auth_prefix').value + document.getElementById('auth_phone').value.trim().replace(/^0+/, '');
             state.tempPhone = fullPhone; btn.disabled = true; btn.innerText = "Transmitting...";
             try {
@@ -340,15 +365,15 @@
                 html += `
                     <div class="mb-6"><h2 class="text-4xl font-black italic tracking-tighter">COMMAND <span class="text-[#ff4d00]">CENTER</span></h2></div>
                     <div class="flex gap-4 border-b border-[#1f1f1f] mb-8">
-                        <div onclick="window.setAdminTab('proofs')" class="admin-tab ${state.adminTab === 'proofs' ? 'active' : ''}">Pending Proofs <span class="bg-[#ff4d00]/20 text-[#ff4d00] px-1.5 py-0.5 rounded-sm ml-1">${state.pendingProofs.length}</span></div>
-                        <div onclick="window.setAdminTab('control')" class="admin-tab ${state.adminTab === 'control' ? 'active' : ''}">Season Control</div>
+                        <button type="button" onclick="window.setAdminTab('control')" class="admin-tab ${state.adminTab === 'control' ? 'active' : ''}">Season Control</button>
+                        <button type="button" onclick="window.setAdminTab('proofs')" class="admin-tab ${state.adminTab === 'proofs' ? 'active' : ''}">Pending Proofs <span class="bg-[#ff4d00]/20 text-[#ff4d00] px-1.5 py-0.5 rounded-sm ml-1">${state.pendingProofs.length}</span></button>
                     </div>
                 `;
 
                 if (state.adminTab === 'proofs') {
                     html += `
                         <div class="card p-6 rounded-sm max-w-3xl mx-auto">
-                            <h3 class="text-lg font-black uppercase tracking-widest text-[#ff4d00] mb-4">Verifizierungs-Queue</h3>
+                            <h3 class="text-lg font-black uppercase tracking-widest text-[#ff4d00] mb-4">Health & Hustle - Verifizierungen</h3>
                             <div class="space-y-4">
                                 ${state.pendingProofs.length === 0 ? '<p class="text-xs text-gray-600 italic">Keine anstehenden Freigaben.</p>' : ''}
                                 ${state.pendingProofs.map(p => {
@@ -362,9 +387,9 @@
                                                 <p class="text-[9px] text-gray-500 uppercase tracking-widest mt-1">${p.alias} • <span class="text-[#ff4d00]">+${p.xp} XP</span></p>
                                             </div>
                                             <div class="flex gap-2">
-                                                <button id="ai_btn_${p.id}" onclick="window.aiCheckProof('${p.id}', '${p.missionName}', '${p.type}', '${safeData}')" class="w-8 h-8 rounded-sm bg-blue-900/30 hover:bg-blue-600 border border-blue-900/50 text-white flex items-center justify-center transition" title="KI Analyse">🤖</button>
-                                                <button onclick="window.rejectProof('${p.id}')" class="w-8 h-8 rounded-sm bg-red-900/30 hover:bg-red-600 border border-red-900/50 text-white flex items-center justify-center transition"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
-                                                <button onclick="window.acceptProof('${p.id}', '${p.uid}', '${p.mid}', ${p.xp})" class="w-8 h-8 rounded-sm bg-green-900/30 hover:bg-[#ff4d00] border border-green-900/50 text-white flex items-center justify-center transition"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></button>
+                                                <button type="button" id="ai_btn_${p.id}" onclick="window.aiCheckProof('${p.id}', '${p.missionName}', '${p.type}', '${safeData}')" class="w-8 h-8 rounded-sm bg-blue-900/30 hover:bg-blue-600 border border-blue-900/50 text-white flex items-center justify-center transition" title="KI Analyse">🤖</button>
+                                                <button type="button" onclick="window.rejectProof('${p.id}')" class="w-8 h-8 rounded-sm bg-red-900/30 hover:bg-red-600 border border-red-900/50 text-white flex items-center justify-center transition"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                                                <button type="button" onclick="window.acceptProof('${p.id}', '${p.uid}', '${p.mid}', ${p.xp})" class="w-8 h-8 rounded-sm bg-green-900/30 hover:bg-[#ff4d00] border border-green-900/50 text-white flex items-center justify-center transition"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></button>
                                             </div>
                                         </div>
                                         <div id="ai_res_${p.id}" class="text-[10px] text-blue-300 bg-blue-900/10 border border-blue-900/30 p-2 rounded-sm hidden leading-relaxed"></div>
@@ -391,16 +416,16 @@
                                         ${(currentWeekData.missions || []).map(m => `
                                             <div class="bg-[#050505] p-3 border border-white/10 rounded-sm flex justify-between items-start">
                                                 <div><div class="font-black italic uppercase text-sm">${m.name}</div><div class="text-[9px] text-[#ff4d00] font-bold uppercase tracking-widest mt-1">${m.xp} XP | ${m.type}</div></div>
-                                                <button onclick="window.deleteMission(${state.adminEditWeek}, '${m.id}')" class="text-gray-600 hover:text-red-500 transition ml-4"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+                                                <button type="button" onclick="window.deleteMission(${state.adminEditWeek}, '${m.id}')" class="text-gray-600 hover:text-red-500 transition ml-4"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
                                             </div>
                                         `).join('')}
                                     </div>
                                     <div class="border-t border-[#1f1f1f] pt-6">
                                         <h4 class="text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-4">Manuell hinzufügen</h4>
                                         <form onsubmit="window.addManualMission(event)" class="space-y-3">
-                                            <input id="new_mis_name" required placeholder="Titel" class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none">
-                                            <input id="new_mis_desc" required placeholder="Beschreibung" class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none">
-                                            <div class="flex gap-3"><input id="new_mis_xp" type="number" required placeholder="XP" class="w-1/2 p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none"><select id="new_mis_type" class="w-1/2 p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white appearance-none outline-none"><option value="qr">QR Scan</option><option value="upload">Upload</option></select></div>
+                                            <input id="new_mis_name" required placeholder="Titel (z.B. Morning Run)" class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00]">
+                                            <input id="new_mis_desc" required placeholder="Beschreibung" class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00]">
+                                            <div class="flex gap-3"><input id="new_mis_xp" type="number" required placeholder="XP" class="w-1/2 p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00]"><select id="new_mis_type" class="w-1/2 p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white appearance-none outline-none focus:border-[#ff4d00]"><option value="qr">QR Scan</option><option value="upload">Upload</option></select></div>
                                             <button type="submit" class="w-full bg-white text-black font-black uppercase text-[10px] tracking-widest py-3 rounded-sm hover:bg-[#ff4d00] hover:text-white transition">Hinzufügen</button>
                                         </form>
                                     </div>
@@ -416,12 +441,12 @@
                                             ${r.free ? `
                                             <div class="bg-[#050505] p-2 border border-white/5 rounded-sm flex justify-between items-center">
                                                 <div><span class="bg-gray-800 text-white px-1.5 py-0.5 rounded-sm text-[8px] font-black mr-2">LVL ${r.lvl}</span><span class="bg-[#ff4d00]/20 text-[#ff4d00] px-1.5 py-0.5 rounded-sm text-[8px] font-black mr-2 uppercase">FREE</span><span class="text-xs text-gray-300">${r.free}</span></div>
-                                                <button onclick="window.deleteReward(${r.lvl}, 'free')" class="text-gray-600 hover:text-red-500"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                                                <button type="button" onclick="window.deleteReward(${r.lvl}, 'free')" class="text-gray-600 hover:text-red-500"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
                                             </div>` : ''}
                                             ${r.pro ? `
                                             <div class="bg-[#050505] p-2 border border-white/5 rounded-sm flex justify-between items-center">
                                                 <div><span class="bg-gray-800 text-white px-1.5 py-0.5 rounded-sm text-[8px] font-black mr-2">LVL ${r.lvl}</span><span class="bg-[#a855f7]/20 text-[#a855f7] px-1.5 py-0.5 rounded-sm text-[8px] font-black mr-2 uppercase">PRO</span><span class="text-xs text-gray-300">${r.pro}</span></div>
-                                                <button onclick="window.deleteReward(${r.lvl}, 'pro')" class="text-gray-600 hover:text-red-500"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                                                <button type="button" onclick="window.deleteReward(${r.lvl}, 'pro')" class="text-gray-600 hover:text-red-500"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
                                             </div>` : ''}
                                         `).join('')}
                                     </div>
@@ -429,16 +454,16 @@
                                         <h4 class="text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-4">Neuen Reward einstellen</h4>
                                         <form onsubmit="window.addReward(event)" class="space-y-3">
                                             <div class="flex gap-2">
-                                                <input id="rew_lvl" type="number" min="1" max="30" placeholder="Level" required class="w-1/3 p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none">
-                                                <select id="rew_tier" class="w-2/3 p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none appearance-none"><option value="free">FREE Tier</option><option value="pro">PRO Tier</option></select>
+                                                <input id="rew_lvl" type="number" min="1" max="30" placeholder="Level" required class="w-1/3 p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00]">
+                                                <select id="rew_tier" class="w-2/3 p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00] appearance-none"><option value="free">FREE Tier</option><option value="pro">PRO Tier</option></select>
                                             </div>
-                                            <input id="rew_title" placeholder="Titel (z.B. Free ESN Bar)" required class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none">
-                                            <select id="rew_type" onchange="window.updateRewardInfoPlaceholder(this.value)" class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none appearance-none">
+                                            <input id="rew_title" placeholder="Titel (z.B. Free ESN Bar)" required class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00]">
+                                            <select id="rew_type" onchange="window.updateRewardInfoPlaceholder(this.value)" class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00] appearance-none">
                                                 <option value="qr">Lokal einlösen (QR Scan)</option>
                                                 <option value="shipping">Physischer Versand</option>
                                                 <option value="link">Digital (Link / Code)</option>
                                             </select>
-                                            <input id="rew_info" placeholder="Einlöse-Anweisung" required class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none">
+                                            <input id="rew_info" placeholder="Einlöse-Anweisung" required class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00]">
                                             <button type="submit" class="w-full bg-[#1f1f1f] hover:bg-[#ff4d00] text-white font-bold py-3 rounded-sm text-xs uppercase tracking-widest transition">Speichern</button>
                                         </form>
                                     </div>
@@ -446,8 +471,9 @@
 
                                 <div class="card p-6 rounded-sm">
                                     <h3 class="text-lg font-black uppercase tracking-widest text-[#ff4d00] mb-4">AI Mission Architect</h3>
-                                    <input type="password" id="ai_key" value="${savedKey}" onchange="window.saveApiKey(event)" placeholder="Gemini API Key..." class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-xs mb-4 text-gray-400 outline-none focus:border-[#ff4d00]">
-                                    <button id="ai-gen-btn" onclick="window.generateAIQuests()" class="w-full btn-grind mb-4 text-xs py-3">KI: Generiere neue Ops</button>
+                                    <!-- oninput sorgt dafür, dass der Key sofort in den localStorage wandert, auch beim Tippen -->
+                                    <input type="password" id="ai_key" value="${savedKey}" oninput="window.saveApiKey(event)" placeholder="Gemini API Key..." class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-xs mb-4 text-gray-400 outline-none focus:border-[#ff4d00]">
+                                    <button type="button" id="ai-gen-btn" onclick="window.generateAIQuests()" class="w-full btn-grind mb-4 text-xs py-3">KI: Generiere neue Ops</button>
                                     <div id="ai-result" class="min-h-[100px] border border-white/5 bg-[#050505] p-4 rounded-sm"><p class="text-[10px] text-gray-600 uppercase font-bold text-center italic mt-6">Warte auf Input...</p></div>
                                 </div>
                             </div>
