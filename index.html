@@ -75,35 +75,33 @@
         .grecaptcha-badge:hover { filter: invert(1) grayscale(0) opacity(0.8); }
 		
 		/* --- Onboarding Intro Animation --- */
-#intro-layer {
-    position: fixed; inset: 0; z-index: 999999;
-    background-color: #050505;
-    display: flex; align-items: center; justify-content: center;
-    transition: opacity 0.8s ease;
-}
-.word-flash {
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 10vw;
-    font-weight: 900;
-    font-style: italic;
-    text-transform: uppercase;
-    white-space: nowrap;
-    opacity: 0;
-    letter-spacing: -0.05em;
-    text-align: center;
-}
-@media (min-width: 768px) { .word-flash { font-size: 6vw; } }
+        #intro-layer {
+            position: fixed; inset: 0; z-index: 999999;
+            background-color: #050505;
+            display: flex; align-items: center; justify-content: center;
+            transition: opacity 0.8s ease;
+        }
+        .word-flash {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 10vw;
+            font-weight: 900;
+            font-style: italic;
+            text-transform: uppercase;
+            white-space: nowrap;
+            opacity: 0;
+            letter-spacing: -0.05em;
+            text-align: center;
+        }
+        @media (min-width: 768px) { .word-flash { font-size: 6vw; } }
 
-@keyframes flashInOut {
-    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); filter: blur(4px); }
-    10% { opacity: 1; transform: translate(-50%, -50%) scale(1); filter: blur(0px); }
-    90% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); filter: blur(0px); }
-    100% { opacity: 0; transform: translate(-50%, -50%) scale(1.1); filter: blur(4px); }
-}
-
-
+        @keyframes flashInOut {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); filter: blur(4px); }
+            10% { opacity: 1; transform: translate(-50%, -50%) scale(1); filter: blur(0px); }
+            90% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); filter: blur(0px); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(1.1); filter: blur(4px); }
+        }
     </style>
 </head>
 <body class="flex flex-col relative">
@@ -419,7 +417,7 @@
             }
         };
 
-        // --- Admin Proof Management (Updated with Endless Support) ---
+        // --- Admin Proof Management ---
         window.acceptProof = async (proofId, uid, mid, xp) => {
             try {
                 const userRef = doc(db, 'plot_users', uid);
@@ -468,10 +466,11 @@
             btn.disabled = true;
 
             try {
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+                // FIXED: Changed to stable gemini-2.5-flash model
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
                 const payload = {
                     contents: [{ parts: [{ text: "Generiere 3 neue Grind-Missionen zum Thema Run Club, Gym, High Protein und reale Hustle Events. Formatiere als JSON." }] }],
-                    systemInstruction: { parts: [{ text: "Du bist der Operations Director einer Hardcore Fitness & Hustle App. Erstelle 3 Missionen. Erlaubte Typen: 'qr' (QR scannen) oder 'upload' (Beweisfoto). XP zwischen 300 und 1000." }] },
+                    systemInstruction: { parts: [{ text: "Du bist der Operations Director einer Hardcore Fitness App. Erstelle 3 Missionen. Erlaubte Typen: 'qr' (QR scannen) oder 'upload' (Beweisfoto). XP zwischen 300 und 1000." }] },
                     generationConfig: { 
                         responseMimeType: "application/json", 
                         responseSchema: { type: "OBJECT", properties: { missions: { type: "ARRAY", items: { type: "OBJECT", properties: { name: {type: "STRING"}, desc: {type: "STRING"}, xp: {type: "INTEGER"}, type: {type: "STRING"} } } } } } 
@@ -479,10 +478,15 @@
                 };
 
                 const res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
-                if (!res.ok) throw new Error("API Fetch failed");
-                const data = await res.json();
                 
+                if (!res.ok) {
+                    const errData = await res.json();
+                    throw new Error(errData.error?.message || "API Fetch failed");
+                }
+                
+                const data = await res.json();
                 const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                
                 if(text) {
                     const parsed = JSON.parse(text);
                     resultBox.innerHTML = parsed.missions.map(m => `
@@ -497,7 +501,8 @@
                     window.showToast("KI hat neue Ops generiert.", "success");
                 }
             } catch (err) {
-                window.showToast("KI Generierung fehlgeschlagen. Key prüfen.", "error");
+                console.error("AI Error:", err);
+                window.showToast("KI Fehler: " + err.message.substring(0, 60), "error");
             } finally {
                 btn.innerText = "KI: Generiere neue Ops";
                 btn.disabled = false;
@@ -586,59 +591,58 @@
         window.goBackToPhone = () => { state.authStep = 'phone'; render(); };
 		
 		window.playGrindIntro = () => {
-    const layer = document.createElement('div');
-    layer.id = 'intro-layer';
-    layer.innerHTML = `
-        <div id="word1" class="word-flash text-gray-500">DISCONNECT.</div>
-        <div id="word2" class="word-flash text-white">FIND YOUR TRIBE.</div>
-        <div id="word3" class="word-flash text-white">PHYSICAL LIMITS.</div>
-        <div id="word4" class="word-flash grind-gradient" style="text-shadow: 0 0 40px rgba(255,77,0,0.5);">GRIND.</div>
-    `;
-    document.body.appendChild(layer);
+            const layer = document.createElement('div');
+            layer.id = 'intro-layer';
+            layer.innerHTML = `
+                <div id="word1" class="word-flash text-gray-500">DISCONNECT.</div>
+                <div id="word2" class="word-flash text-white">FIND YOUR TRIBE.</div>
+                <div id="word3" class="word-flash text-white">PHYSICAL LIMITS.</div>
+                <div id="word4" class="word-flash grind-gradient" style="text-shadow: 0 0 40px rgba(255,77,0,0.5);">GRIND.</div>
+            `;
+            document.body.appendChild(layer);
 
-    const w1 = document.getElementById('word1');
-    const w2 = document.getElementById('word2');
-    const w3 = document.getElementById('word3');
-    const w4 = document.getElementById('word4');
+            const w1 = document.getElementById('word1');
+            const w2 = document.getElementById('word2');
+            const w3 = document.getElementById('word3');
+            const w4 = document.getElementById('word4');
 
-    const timing = 700;
-    setTimeout(() => { w1.style.animation = `flashInOut ${timing}ms forwards`; }, 200);
-    setTimeout(() => { w2.style.animation = `flashInOut ${timing}ms forwards`; }, 200 + timing);
-    setTimeout(() => { w3.style.animation = `flashInOut ${timing}ms forwards`; }, 200 + (timing * 2));
-    setTimeout(() => { w4.style.animation = `flashInOut ${timing * 1.5}ms forwards`; }, 200 + (timing * 3));
+            const timing = 700;
+            setTimeout(() => { w1.style.animation = `flashInOut ${timing}ms forwards`; }, 200);
+            setTimeout(() => { w2.style.animation = `flashInOut ${timing}ms forwards`; }, 200 + timing);
+            setTimeout(() => { w3.style.animation = `flashInOut ${timing}ms forwards`; }, 200 + (timing * 2));
+            setTimeout(() => { w4.style.animation = `flashInOut ${timing * 1.5}ms forwards`; }, 200 + (timing * 3));
 
-    setTimeout(() => {
-        layer.style.opacity = "0";
-        setTimeout(() => layer.remove(), 800);
-    }, 200 + (timing * 4.2));
-};
+            setTimeout(() => {
+                layer.style.opacity = "0";
+                setTimeout(() => layer.remove(), 800);
+            }, 200 + (timing * 4.2));
+        };
 
+        window.submitOnboarding = async (e) => {
+            e.preventDefault();
+            const nameInput = document.getElementById('onboard_name').value.trim();
+            if(!nameInput) return window.showToast("Bitte gib einen Namen ein.", "error");
+            
+            const btn = e.target.querySelector('button');
+            btn.disabled = true;
+            btn.innerText = "Registering...";
+            
+            try {
+                state.profile = { xp: 0, lvl: 1, completed: [], alias: nameInput, hasPremium: false, isAdmin: true };
+                await setDoc(doc(db, 'plot_users', state.user.uid), state.profile);
+                
+                // HIER STARTET DIE ANIMATION
+                window.playGrindIntro();
 
-   window.submitOnboarding = async (e) => {
-    e.preventDefault();
-    const nameInput = document.getElementById('onboard_name').value.trim();
-    if(!nameInput) return window.showToast("Bitte gib einen Namen ein.", "error");
-    
-    const btn = e.target.querySelector('button');
-    btn.disabled = true;
-    btn.innerText = "Registering...";
-    
-    try {
-        state.profile = { xp: 0, lvl: 1, completed: [], alias: nameInput, hasPremium: false, isAdmin: true };
-        await setDoc(doc(db, 'plot_users', state.user.uid), state.profile);
-        
-        // HIER STARTET DIE ANIMATION
-        window.playGrindIntro();
-
-        window.showToast(`Willkommen im Grind, ${nameInput}.`, "success");
-        state.view = 'dashboard';
-        render();
-    } catch (err) {
-        window.showToast("Fehler bei der Registrierung.", "error");
-        btn.disabled = false;
-        btn.innerText = "Confirm Identity";
-    }
-};
+                window.showToast(`Willkommen im Grind, ${nameInput}.`, "success");
+                state.view = 'dashboard';
+                render();
+            } catch (err) {
+                window.showToast("Fehler bei der Registrierung.", "error");
+                btn.disabled = false;
+                btn.innerText = "Confirm Identity";
+            }
+        };
 
         window.generateShareCard = async () => {
             if (!state.profile) return;
@@ -1181,3 +1185,4 @@
     </script>
 </body>
 </html>
+
