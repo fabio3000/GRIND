@@ -49,7 +49,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot, collection, getDoc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, onSnapshot, collection, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDtwsvmYSONjFufhbJ5I8G_RAMffnh7re0",
@@ -86,6 +86,9 @@
                     const data = docSnap.data();
                     state.weeklyData = data.weeklyData || {}; state.rewardData = data.rewardData || [];
                     if(state.view === 'admin') render();
+                } else {
+                    // Seed Data, damit es nicht leer ist
+                    setDoc(doc(db, 'system', 'grind_season'), { weeklyData: {}, rewardData: [] }, { merge: true });
                 }
             });
         };
@@ -188,15 +191,22 @@
             if(!updatedWeekly[state.adminEditWeek]) updatedWeekly[state.adminEditWeek] = { title: "Woche " + state.adminEditWeek, missions: [] };
             if(!updatedWeekly[state.adminEditWeek].missions) updatedWeekly[state.adminEditWeek].missions = [];
             updatedWeekly[state.adminEditWeek].missions.push(newMission);
-            await updateDoc(doc(db, 'system', 'grind_season'), { weeklyData: updatedWeekly });
-            window.showToast("Operation hinzugefügt.", "success");
+            
+            // FIX: setDoc mit merge: true erzwingt das Speichern, auch wenn das Dokument leer ist
+            try {
+                await setDoc(doc(db, 'system', 'grind_season'), { weeklyData: updatedWeekly }, { merge: true });
+                window.showToast("Operation hinzugefügt.", "success");
+            } catch(err) {
+                window.showToast("Fehler beim Speichern.", "error");
+            }
         };
 
         window.deleteMission = async (week, missionId) => {
             if(!confirm("Operation wirklich löschen?")) return;
             const updatedWeekly = JSON.parse(JSON.stringify(state.weeklyData));
             updatedWeekly[week].missions = updatedWeekly[week].missions.filter(m => m.id !== missionId);
-            await updateDoc(doc(db, 'system', 'grind_season'), { weeklyData: updatedWeekly });
+            
+            await setDoc(doc(db, 'system', 'grind_season'), { weeklyData: updatedWeekly }, { merge: true });
             window.showToast("Operation gelöscht.", "success");
         };
 
@@ -236,7 +246,8 @@
             if(!updatedWeekly[state.adminEditWeek]) updatedWeekly[state.adminEditWeek] = { title: "Woche " + state.adminEditWeek, missions: [] };
             if(!updatedWeekly[state.adminEditWeek].missions) updatedWeekly[state.adminEditWeek].missions = [];
             updatedWeekly[state.adminEditWeek].missions.push(mission);
-            await updateDoc(doc(db, 'system', 'grind_season'), { weeklyData: updatedWeekly });
+            
+            await setDoc(doc(db, 'system', 'grind_season'), { weeklyData: updatedWeekly }, { merge: true });
             window.showToast("KI Operation hinzugefügt!", "success");
             document.getElementById('ai-result').innerHTML = '<p class="text-[10px] text-gray-600 uppercase font-bold text-center italic mt-6">Warte auf Input...</p>';
         };
@@ -258,7 +269,8 @@
             updatedRewards.sort((a, b) => a.lvl - b.lvl);
 
             try {
-                await updateDoc(doc(db, 'system', 'grind_season'), { rewardData: updatedRewards });
+                // FIX: setDoc mit merge: true
+                await setDoc(doc(db, 'system', 'grind_season'), { rewardData: updatedRewards }, { merge: true });
                 window.showToast(`Level ${lvl} ${tier.toUpperCase()} Reward gespeichert.`, "success");
                 e.target.reset();
             } catch (err) { window.showToast("Fehler beim Speichern.", "error"); }
@@ -271,7 +283,8 @@
             if(existing) {
                 delete existing[tier]; delete existing[`${tier}_type`]; delete existing[`${tier}_info`];
                 if(!existing.free && !existing.pro) updatedRewards = updatedRewards.filter(r => r.lvl !== lvl);
-                await updateDoc(doc(db, 'system', 'grind_season'), { rewardData: updatedRewards });
+                
+                await setDoc(doc(db, 'system', 'grind_season'), { rewardData: updatedRewards }, { merge: true });
                 window.showToast("Reward entfernt.", "success");
             }
         };
