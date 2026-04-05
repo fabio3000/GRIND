@@ -30,7 +30,12 @@
         
         .admin-tab { padding: 12px 24px; font-size: 10px; text-transform: uppercase; font-weight: 900; letter-spacing: 0.1em; border-bottom: 2px solid transparent; color: #666; cursor: pointer; transition: all 0.3s; }
         .admin-tab.active { color: #ff4d00; border-bottom-color: #ff4d00; }
-        .grecaptcha-badge { filter: invert(1) grayscale(0.2) opacity(0.3); bottom: 20px !important; }
+        
+        /* Scrollbars für Container */
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-track { background: #050505; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #1f1f1f; border-radius: 2px; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: #ff4d00; }
     </style>
 </head>
 <body class="flex flex-col relative">
@@ -109,7 +114,7 @@
         window.setAdminEditWeek = (week) => { state.adminEditWeek = week; render(); };
         window.handleLogout = () => { state.view = 'loading'; render(); signOut(auth); };
 
-        // --- Firebase Admin Actions ---
+        // --- Core Admin Logic: Proofs ---
         window.acceptProof = async (proofId, uid, mid, xp) => {
             try {
                 const userRef = doc(db, 'plot_users', uid); const snap = await getDoc(userRef);
@@ -130,6 +135,7 @@
             try { await deleteDoc(doc(db, 'plot_pending_proofs', proofId)); window.showToast("Proof gelöscht.", "info"); } catch(e) { window.showToast("Fehler bei Ablehnung.", "error"); }
         };
 
+        // --- Core Admin Logic: Missions ---
         window.addManualMission = async (e) => {
             e.preventDefault();
             const newMission = { id: 'm_' + Date.now(), name: document.getElementById('new_mis_name').value, desc: document.getElementById('new_mis_desc').value, xp: parseInt(document.getElementById('new_mis_xp').value), type: document.getElementById('new_mis_type').value };
@@ -149,25 +155,7 @@
             window.showToast("Operation gelöscht.", "success");
         };
 
-        window.saveRewardsJSON = async () => {
-            const rawJson = document.getElementById('rewards_json_editor').value;
-            try {
-                const parsed = JSON.parse(rawJson); await updateDoc(doc(db, 'system', 'grind_season'), { rewardData: parsed });
-                window.showToast("Rewards erfolgreich geupdatet.", "success");
-            } catch (e) { window.showToast("Ungültiges JSON Format.", "error"); }
-        };
-
-        window.acceptAiMission = async (jsonString) => {
-            const mission = JSON.parse(decodeURIComponent(jsonString)); mission.id = 'ai_' + Date.now();
-            const updatedWeekly = JSON.parse(JSON.stringify(state.weeklyData));
-            if(!updatedWeekly[state.adminEditWeek]) updatedWeekly[state.adminEditWeek] = { title: "Woche " + state.adminEditWeek, missions: [] };
-            if(!updatedWeekly[state.adminEditWeek].missions) updatedWeekly[state.adminEditWeek].missions = [];
-            updatedWeekly[state.adminEditWeek].missions.push(mission);
-            await updateDoc(doc(db, 'system', 'grind_season'), { weeklyData: updatedWeekly });
-            window.showToast("KI Operation hinzugefügt!", "success");
-            document.getElementById('ai-result').innerHTML = '<p class="text-[10px] text-gray-600 uppercase font-bold text-center italic mt-6">Warte auf Input...</p>';
-        };
-
+        // --- Core Admin Logic: AI Generation ---
         window.saveApiKey = (e) => { localStorage.setItem('gemini_api_key', e.target.value); };
 
         window.generateAIQuests = async () => {
@@ -181,10 +169,94 @@
                 if (!res.ok) throw new Error("API Fetch failed");
                 const data = await res.json(); const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
                 if(text) {
-                    resultBox.innerHTML = JSON.parse(text).missions.map(m => `<div class="bg-black/50 p-3 mb-2 border border-white/10 rounded-sm"><div class="flex justify-between items-center mb-1"><span class="font-black italic uppercase text-sm">${m.name}</span><span class="text-[#ff4d00] text-[10px] font-bold">+${m.xp} XP | ${m.type.toUpperCase()}</span></div><p class="text-xs text-gray-500 mb-3">${m.desc}</p><button onclick="window.acceptAiMission('${encodeURIComponent(JSON.stringify(m))}')" class="w-full bg-[#ff4d00]/20 hover:bg-[#ff4d00]/40 text-[#ff4d00] border border-[#ff4d00]/30 py-2 rounded-sm text-[10px] font-bold uppercase tracking-widest transition">+ Add to Week ${state.adminEditWeek}</button></div>`).join('');
+                    resultBox.innerHTML = JSON.parse(text).missions.map(m => {
+                        // FIX: Base64 Verschlüsselung, damit Anführungszeichen das HTML nicht zerschießen!
+                        const safeString = btoa(encodeURIComponent(JSON.stringify(m)));
+                        return `
+                        <div class="bg-black/50 p-3 mb-2 border border-white/10 rounded-sm">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="font-black italic uppercase text-sm">${m.name}</span>
+                                <span class="text-[#ff4d00] text-[10px] font-bold">+${m.xp} XP | ${m.type.toUpperCase()}</span>
+                            </div>
+                            <p class="text-xs text-gray-500 mb-3">${m.desc}</p>
+                            <button onclick="window.acceptAiMission('${safeString}')" class="w-full bg-[#ff4d00]/20 hover:bg-[#ff4d00]/40 text-[#ff4d00] border border-[#ff4d00]/30 py-2 rounded-sm text-[10px] font-bold uppercase tracking-widest transition">+ Add to Week ${state.adminEditWeek}</button>
+                        </div>`;
+                    }).join('');
                 }
             } catch (err) { window.showToast("KI Fehler.", "error"); } finally { btn.innerText = "KI: Generiere Ops"; btn.disabled = false; }
         };
+
+        window.acceptAiMission = async (base64String) => {
+            // FIX: Entschlüsseln und sicher einfügen
+            const mission = JSON.parse(decodeURIComponent(atob(base64String))); 
+            mission.id = 'ai_' + Date.now();
+            const updatedWeekly = JSON.parse(JSON.stringify(state.weeklyData));
+            if(!updatedWeekly[state.adminEditWeek]) updatedWeekly[state.adminEditWeek] = { title: "Woche " + state.adminEditWeek, missions: [] };
+            if(!updatedWeekly[state.adminEditWeek].missions) updatedWeekly[state.adminEditWeek].missions = [];
+            updatedWeekly[state.adminEditWeek].missions.push(mission);
+            await updateDoc(doc(db, 'system', 'grind_season'), { weeklyData: updatedWeekly });
+            window.showToast("KI Operation hinzugefügt!", "success");
+            document.getElementById('ai-result').innerHTML = '<p class="text-[10px] text-gray-600 uppercase font-bold text-center italic mt-6">Warte auf Input...</p>';
+        };
+
+        // --- Core Admin Logic: Visual Reward Editor ---
+        window.addReward = async (e) => {
+            e.preventDefault();
+            const lvl = parseInt(document.getElementById('rew_lvl').value);
+            const tier = document.getElementById('rew_tier').value; // 'free' oder 'pro'
+            const title = document.getElementById('rew_title').value;
+            const type = document.getElementById('rew_type').value; // 'qr', 'shipping', 'link'
+            const info = document.getElementById('rew_info').value; // Instruktionen oder URL
+
+            let updatedRewards = JSON.parse(JSON.stringify(state.rewardData));
+            let existing = updatedRewards.find(r => r.lvl === lvl);
+
+            if (!existing) {
+                existing = { lvl: lvl };
+                updatedRewards.push(existing);
+            }
+
+            existing[tier] = title;
+            existing[`${tier}_type`] = type;
+            existing[`${tier}_info`] = info;
+
+            updatedRewards.sort((a, b) => a.lvl - b.lvl);
+
+            try {
+                await updateDoc(doc(db, 'system', 'grind_season'), { rewardData: updatedRewards });
+                window.showToast(`Level ${lvl} ${tier.toUpperCase()} Reward gespeichert.`, "success");
+                e.target.reset();
+            } catch (err) { window.showToast("Fehler beim Speichern.", "error"); }
+        };
+
+        window.deleteReward = async (lvl, tier) => {
+            if(!confirm(`Reward für Level ${lvl} (${tier.toUpperCase()}) wirklich löschen?`)) return;
+            
+            let updatedRewards = JSON.parse(JSON.stringify(state.rewardData));
+            let existing = updatedRewards.find(r => r.lvl === lvl);
+            
+            if(existing) {
+                delete existing[tier];
+                delete existing[`${tier}_type`];
+                delete existing[`${tier}_info`];
+                
+                // Falls weder Free noch Pro existieren, lösche das ganze Level-Objekt
+                if(!existing.free && !existing.pro) {
+                    updatedRewards = updatedRewards.filter(r => r.lvl !== lvl);
+                }
+                
+                await updateDoc(doc(db, 'system', 'grind_season'), { rewardData: updatedRewards });
+                window.showToast("Reward entfernt.", "success");
+            }
+        };
+
+        window.updateRewardInfoPlaceholder = (val) => {
+            const input = document.getElementById('rew_info');
+            if(val === 'link') input.placeholder = "URL eintragen (z.B. https://hyrox.com/discount)";
+            else if(val === 'shipping') input.placeholder = "Versand-Anweisung (z.B. Schick uns deine Größe)";
+            else input.placeholder = "Einlöse-Anweisung (z.B. Zeige dies an der Kasse)";
+        };
+
 
         // --- Auth SMS Logic ---
         window.sendSMS = async (e) => {
@@ -261,6 +333,7 @@
                     const currentWeekData = state.weeklyData[state.adminEditWeek] || { missions: [] };
                     html += `
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            <!-- Operations Manager -->
                             <div class="space-y-8">
                                 <div class="card p-6 rounded-sm">
                                     <div class="flex justify-between items-center mb-6">
@@ -288,19 +361,60 @@
                                         </form>
                                     </div>
                                 </div>
-                                
-                                <div class="card p-6 rounded-sm">
-                                    <h3 class="text-lg font-black uppercase tracking-widest text-[#ff4d00] mb-2">Rewards JSON Editor</h3>
-                                    <textarea id="rewards_json_editor" class="w-full h-48 bg-[#050505] border border-[#1f1f1f] rounded-sm p-3 text-[10px] font-mono text-gray-300 outline-none focus:border-[#ff4d00]">${JSON.stringify(state.rewardData, null, 2)}</textarea>
-                                    <button id="save_rewards_btn" onclick="window.saveRewardsJSON()" class="w-full mt-3 bg-[#1f1f1f] hover:bg-[#ff4d00] text-white font-bold py-3 rounded-sm text-xs uppercase tracking-widest transition">Save JSON</button>
-                                </div>
                             </div>
 
-                            <div class="card p-6 rounded-sm self-start">
-                                <h3 class="text-lg font-black uppercase tracking-widest text-[#ff4d00] mb-4">AI Mission Architect</h3>
-                                <input type="password" id="ai_key" value="${savedKey}" onchange="window.saveApiKey(event)" placeholder="Gemini API Key..." class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-xs mb-4 text-gray-400">
-                                <button id="ai-gen-btn" onclick="window.generateAIQuests()" class="w-full btn-grind mb-4 text-xs py-3">KI: Generiere neue Ops</button>
-                                <div id="ai-result" class="min-h-[100px] border border-white/5 bg-[#050505] p-4 rounded-sm"><p class="text-[10px] text-gray-600 uppercase font-bold text-center italic mt-6">Warte auf Input...</p></div>
+                            <!-- Reward Manager & AI -->
+                            <div class="space-y-8">
+                                <!-- Reward Visual Editor -->
+                                <div class="card p-6 rounded-sm">
+                                    <h3 class="text-lg font-black uppercase tracking-widest text-[#ff4d00] mb-4">Loot Manager</h3>
+                                    
+                                    <!-- Liste der aktuellen Rewards -->
+                                    <div class="max-h-48 overflow-y-auto custom-scroll pr-2 space-y-2 mb-6">
+                                        ${state.rewardData.length === 0 ? '<p class="text-xs text-gray-600 italic">Keine Rewards konfiguriert.</p>' : ''}
+                                        ${state.rewardData.sort((a,b)=>a.lvl-b.lvl).map(r => `
+                                            ${r.free ? `
+                                            <div class="bg-[#050505] p-2 border border-white/5 rounded-sm flex justify-between items-center">
+                                                <div><span class="bg-gray-800 text-white px-1.5 py-0.5 rounded-sm text-[8px] font-black mr-2">LVL ${r.lvl}</span><span class="bg-[#ff4d00]/20 text-[#ff4d00] px-1.5 py-0.5 rounded-sm text-[8px] font-black mr-2 uppercase">FREE</span><span class="text-xs text-gray-300">${r.free}</span></div>
+                                                <button onclick="window.deleteReward(${r.lvl}, 'free')" class="text-gray-600 hover:text-red-500"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                                            </div>` : ''}
+                                            ${r.pro ? `
+                                            <div class="bg-[#050505] p-2 border border-white/5 rounded-sm flex justify-between items-center">
+                                                <div><span class="bg-gray-800 text-white px-1.5 py-0.5 rounded-sm text-[8px] font-black mr-2">LVL ${r.lvl}</span><span class="bg-[#a855f7]/20 text-[#a855f7] px-1.5 py-0.5 rounded-sm text-[8px] font-black mr-2 uppercase">PRO</span><span class="text-xs text-gray-300">${r.pro}</span></div>
+                                                <button onclick="window.deleteReward(${r.lvl}, 'pro')" class="text-gray-600 hover:text-red-500"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                                            </div>` : ''}
+                                        `).join('')}
+                                    </div>
+
+                                    <!-- Neues Formular -->
+                                    <div class="border-t border-[#1f1f1f] pt-6">
+                                        <h4 class="text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-4">Neuen Reward einstellen</h4>
+                                        <form onsubmit="window.addReward(event)" class="space-y-3">
+                                            <div class="flex gap-2">
+                                                <input id="rew_lvl" type="number" min="1" max="30" placeholder="Level" required class="w-1/3 p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00]">
+                                                <select id="rew_tier" class="w-2/3 p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00] appearance-none">
+                                                    <option value="free">FREE Tier</option>
+                                                    <option value="pro">PRO Tier</option>
+                                                </select>
+                                            </div>
+                                            <input id="rew_title" placeholder="Titel (z.B. Free ESN Bar)" required class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00]">
+                                            <select id="rew_type" onchange="window.updateRewardInfoPlaceholder(this.value)" class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00] appearance-none">
+                                                <option value="qr">Lokal einlösen (QR an der Kasse zeigen)</option>
+                                                <option value="shipping">Physischer Versand (Lieferung)</option>
+                                                <option value="link">Digital (Link / Rabattcode / E-Book)</option>
+                                            </select>
+                                            <input id="rew_info" placeholder="Einlöse-Anweisung (z.B. Zeige dies an der Kasse)" required class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00]">
+                                            <button type="submit" class="w-full bg-[#1f1f1f] hover:bg-[#ff4d00] text-white font-bold py-3 rounded-sm text-xs uppercase tracking-widest transition">Reward speichern</button>
+                                        </form>
+                                    </div>
+                                </div>
+
+                                <div class="card p-6 rounded-sm">
+                                    <h3 class="text-lg font-black uppercase tracking-widest text-[#ff4d00] mb-4">AI Mission Architect</h3>
+                                    <input type="password" id="ai_key" value="${savedKey}" onchange="window.saveApiKey(event)" placeholder="Gemini API Key..." class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-xs mb-4 text-gray-400">
+                                    <button id="ai-gen-btn" onclick="window.generateAIQuests()" class="w-full btn-grind mb-4 text-xs py-3">KI: Generiere neue Ops</button>
+                                    <div id="ai-result" class="min-h-[100px] border border-white/5 bg-[#050505] p-4 rounded-sm"><p class="text-[10px] text-gray-600 uppercase font-bold text-center italic mt-6">Warte auf Input...</p></div>
+                                </div>
                             </div>
                         </div>
                     `;
@@ -312,4 +426,5 @@
     </script>
 </body>
 </html>
+
 
