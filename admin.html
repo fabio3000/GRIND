@@ -67,11 +67,10 @@
         let state = {
             user: null, profile: null, view: 'loading',
             authStep: 'phone', tempPhone: '',
-            adminTab: 'control', adminEditWeek: 1, // Standardmäßig auf Control für sofortige Edits
+            adminTab: 'control', adminEditWeek: 1, 
             pendingProofs: [], weeklyData: {}, rewardData: []
         };
 
-        // Verhindert mehrfache Listener-Bindings (Behebt den Render-Loop)
         let isSubscribed = false;
 
         window.showToast = (msg, type = 'success') => {
@@ -83,6 +82,15 @@
             setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 4000);
         };
 
+        // --- Safe Render Guard (Verhindert Fokus-Verlust beim Tippen) ---
+        function safeRender() {
+            const active = document.activeElement;
+            const isTyping = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.tagName === 'SELECT');
+            if (!isTyping) {
+                render();
+            }
+        }
+
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 state.user = user;
@@ -93,7 +101,6 @@
                             state.profile = profile; 
                             state.view = 'admin';
                             
-                            // Nur einmal abonnieren, um Render-Schleifen zu verhindern
                             if(!isSubscribed) {
                                 isSubscribed = true;
                                 
@@ -102,8 +109,7 @@
                                         const data = sSnap.data();
                                         state.weeklyData = data.weeklyData || {}; 
                                         state.rewardData = data.rewardData || [];
-                                        // Nur rendern, wenn wir im Control-Tab sind (Schützt Fokus beim Proof-Eingang)
-                                        if(state.view === 'admin' && state.adminTab === 'control') render();
+                                        if(state.view === 'admin') safeRender();
                                     } else {
                                         setDoc(doc(db, 'system', 'grind_season'), { weeklyData: {}, rewardData: [] }, { merge: true });
                                     }
@@ -111,12 +117,10 @@
 
                                 onSnapshot(collection(db, 'plot_pending_proofs'), (pSnap) => {
                                     state.pendingProofs = pSnap.docs.map(d => ({id: d.id, ...d.data()}));
-                                    // Nur rendern, wenn wir im Proof-Tab sind
-                                    if(state.view === 'admin' && state.adminTab === 'proofs') render();
+                                    if(state.view === 'admin') safeRender();
                                 });
                             }
-                            // Initiales Rendern
-                            render();
+                            safeRender();
                         } else { state.view = 'denied'; render(); }
                     } else { state.view = 'denied'; render(); }
                 });
@@ -148,32 +152,34 @@
             try { await deleteDoc(doc(db, 'plot_pending_proofs', proofId)); window.showToast("Proof gelöscht.", "info"); } catch(e) { window.showToast("Fehler bei Ablehnung.", "error"); }
         };
 
-        // --- AI Proof Check ---
-        window.aiCheckProof = async (proofId, missionName, type, base64SafeString) => {
+        // --- AI Proof Check (Gefixt: Keine HTML-Überlastung mehr) ---
+        window.aiCheckProof = async (proofId) => {
             const apiKey = localStorage.getItem('gemini_api_key') || '';
             if(!apiKey) return window.showToast("Bitte API Key im Control Tab eintragen.", "error");
             
+            const proof = state.pendingProofs.find(p => p.id === proofId);
+            if(!proof) return window.showToast("Beweis nicht gefunden.", "error");
+
             const btn = document.getElementById(`ai_btn_${proofId}`);
             const resDiv = document.getElementById(`ai_res_${proofId}`);
             if(btn) btn.innerHTML = `<svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>`;
             
             try {
-                const data = decodeURIComponent(atob(base64SafeString));
                 const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
                 let contents = [];
 
-                if (type === 'upload') {
-                    const base64Data = data.split(',')[1];
-                    const mimeType = data.split(';')[0].split(':')[1];
+                if (proof.type === 'upload') {
+                    const base64Data = proof.data.split(',')[1];
+                    const mimeType = proof.data.split(';')[0].split(':')[1];
                     contents = [{
                         parts: [
-                            { text: `Prüfe dieses Beweisfoto für die Fitness-Mission: "${missionName}". Ist das ein authentischer Beweis für diese Herausforderung? Antworte kurz mit "JA:" oder "NEIN:" und einem Satz Begründung.` },
+                            { text: `Prüfe dieses Beweisfoto für die Fitness-Mission: "${proof.missionName}". Ist das ein authentischer Beweis für diese Herausforderung? Antworte kurz mit "JA:" oder "NEIN:" und einem Satz Begründung.` },
                             { inlineData: { mimeType: mimeType, data: base64Data } }
                         ]
                     }];
                 } else {
                     contents = [{
-                        parts: [{ text: `Macht der eingereichte QR/Barcode "${data}" Sinn für die Aufgabe "${missionName}"? Antworte kurz mit JA oder NEIN und Begründung.` }]
+                        parts: [{ text: `Macht der eingereichte QR/Barcode "${proof.data}" Sinn für die Aufgabe "${proof.missionName}"? Antworte kurz mit JA oder NEIN und Begründung.` }]
                     }];
                 }
 
@@ -192,7 +198,6 @@
 
         // --- Mission Control ---
         window.addManualMission = async (e) => {
-            e.preventDefault();
             const newMission = { 
                 id: 'm_' + Date.now(), 
                 name: document.getElementById('new_mis_name').value, 
@@ -208,7 +213,6 @@
             try {
                 await setDoc(doc(db, 'system', 'grind_season'), { weeklyData: updatedWeekly }, { merge: true });
                 window.showToast("Operation live geschaltet.", "success");
-                // Manuell das Formular leeren ohne kompletten Rerender
                 document.getElementById('new_mis_name').value = '';
                 document.getElementById('new_mis_desc').value = '';
                 document.getElementById('new_mis_xp').value = '';
@@ -280,7 +284,6 @@
 
         // --- Visual Reward Editor ---
         window.addReward = async (e) => {
-            e.preventDefault();
             const lvl = parseInt(document.getElementById('rew_lvl').value);
             const tier = document.getElementById('rew_tier').value;
             const title = document.getElementById('rew_title').value;
@@ -321,8 +324,8 @@
         };
 
         // --- Auth SMS ---
-        window.sendSMS = async (e) => {
-            e.preventDefault(); const btn = document.getElementById('auth_submit_btn');
+        window.sendSMS = async () => {
+            const btn = document.getElementById('auth_submit_btn');
             if (window.location.protocol === 'file:') return window.showToast("Bitte über localhost testen (file:// blockiert SMS).", "error");
             const fullPhone = document.getElementById('auth_prefix').value + document.getElementById('auth_phone').value.trim().replace(/^0+/, '');
             state.tempPhone = fullPhone; btn.disabled = true; btn.innerText = "Transmitting...";
@@ -333,8 +336,8 @@
             } catch (err) { window.showToast(err.message, "error"); btn.disabled = false; btn.innerText = "Admin Login"; }
         };
 
-        window.verifyCode = async (e) => {
-            e.preventDefault(); const btn = document.getElementById('verify_submit_btn'); btn.disabled = true; btn.innerText = "Verifying...";
+        window.verifyCode = async () => {
+            const btn = document.getElementById('verify_submit_btn'); btn.disabled = true; btn.innerText = "Verifying...";
             try { await window.confirmationResult.confirm(document.getElementById('auth_code').value); } 
             catch (err) { window.showToast("Invalid sequence.", "error"); btn.disabled = false; btn.innerText = "Verify Access"; }
         };
@@ -347,20 +350,20 @@
             if (state.view === 'loading') { appDiv.innerHTML = `<div class="flex-1 flex items-center justify-center min-h-[60vh]"><div class="w-16 h-16 border-t-4 border-l-4 border-[#ff4d00] rounded-full animate-spin"></div></div>`; return; }
 
             if (state.view === 'denied') {
-                appDiv.innerHTML = `<div class="flex-1 flex flex-col items-center justify-center p-6 text-center"><h1 class="text-4xl font-black text-red-600 mb-2">ACCESS DENIED</h1><p class="text-gray-500 text-xs uppercase tracking-widest mb-6">You lack Command Center privileges.</p><button onclick="window.handleLogout()" class="btn-grind py-3">Exit System</button></div>`;
+                appDiv.innerHTML = `<div class="flex-1 flex flex-col items-center justify-center p-6 text-center"><h1 class="text-4xl font-black text-red-600 mb-2">ACCESS DENIED</h1><p class="text-gray-500 text-xs uppercase tracking-widest mb-6">You lack Command Center privileges.</p><button type="button" onclick="window.handleLogout()" class="btn-grind py-3">Exit System</button></div>`;
                 return;
             }
 
             if (state.view === 'auth') {
                 let authHtml = `<div class="flex-1 flex flex-col items-center justify-center p-6 min-h-[80vh] text-center"><h1 class="text-4xl font-black italic tracking-tighter mb-2">COMMAND <span class="text-[#ff4d00]">CENTER</span></h1><p class="text-gray-500 font-bold uppercase tracking-widest text-[10px] mb-12">Authorized Personnel Only</p><div class="w-full max-w-sm">`;
-                if (state.authStep === 'phone') { authHtml += `<form onsubmit="window.sendSMS(event)" class="space-y-4"><div class="flex gap-2"><select id="auth_prefix" class="w-24 p-4 bg-[#0f0f0f] border border-[#1f1f1f] rounded-sm outline-none text-gray-400 text-center font-bold"><option value="+49">🇩🇪 +49</option></select><input id="auth_phone" type="tel" placeholder="170 1234567" required class="flex-1 p-4 bg-[#0f0f0f] border border-[#1f1f1f] rounded-sm text-white text-center tracking-widest"></div><button id="auth_submit_btn" type="submit" class="w-full btn-grind py-4">Admin Login</button></form>`; } 
-                else { authHtml += `<form onsubmit="window.verifyCode(event)" class="space-y-4"><input id="auth_code" type="text" placeholder="123456" required class="w-full p-4 bg-[#0f0f0f] border border-[#1f1f1f] rounded-sm text-white text-center text-3xl font-mono tracking-[0.3em]"><button id="verify_submit_btn" type="submit" class="w-full btn-grind py-4">Verify Identity</button><button type="button" onclick="window.goBackToPhone()" class="text-xs text-gray-500">Cancel</button></form>`; }
+                if (state.authStep === 'phone') { authHtml += `<form onsubmit="event.preventDefault(); window.sendSMS();" class="space-y-4"><div class="flex gap-2"><select id="auth_prefix" class="w-24 p-4 bg-[#0f0f0f] border border-[#1f1f1f] rounded-sm outline-none text-gray-400 text-center font-bold"><option value="+49">🇩🇪 +49</option></select><input id="auth_phone" type="tel" placeholder="170 1234567" required class="flex-1 p-4 bg-[#0f0f0f] border border-[#1f1f1f] rounded-sm text-white text-center tracking-widest"></div><button id="auth_submit_btn" type="submit" class="w-full btn-grind py-4">Admin Login</button></form>`; } 
+                else { authHtml += `<form onsubmit="event.preventDefault(); window.verifyCode();" class="space-y-4"><input id="auth_code" type="text" placeholder="123456" required class="w-full p-4 bg-[#0f0f0f] border border-[#1f1f1f] rounded-sm text-white text-center text-3xl font-mono tracking-[0.3em]"><button id="verify_submit_btn" type="submit" class="w-full btn-grind py-4">Verify Identity</button><button type="button" onclick="window.goBackToPhone()" class="text-xs text-gray-500">Cancel</button></form>`; }
                 authHtml += `</div></div>`; appDiv.innerHTML = authHtml; return;
             }
 
             if (state.view === 'admin') {
                 const savedKey = localStorage.getItem('gemini_api_key') || '';
-                let html = `<header class="p-6 max-w-6xl mx-auto w-full flex justify-between items-center"><h1 class="text-2xl font-black italic tracking-tighter">GRIND<span class="text-[#ff4d00]">.</span></h1><button onclick="window.handleLogout()" class="text-[10px] uppercase font-bold text-gray-500 border border-gray-800 px-3 py-1 rounded-sm hover:text-white transition">Logout</button></header><main class="max-w-6xl mx-auto px-6 w-full pb-20">`;
+                let html = `<header class="p-6 max-w-6xl mx-auto w-full flex justify-between items-center"><h1 class="text-2xl font-black italic tracking-tighter">GRIND<span class="text-[#ff4d00]">.</span></h1><button type="button" onclick="window.handleLogout()" class="text-[10px] uppercase font-bold text-gray-500 border border-gray-800 px-3 py-1 rounded-sm hover:text-white transition">Logout</button></header><main class="max-w-6xl mx-auto px-6 w-full pb-20">`;
                 
                 html += `
                     <div class="mb-6"><h2 class="text-4xl font-black italic tracking-tighter">COMMAND <span class="text-[#ff4d00]">CENTER</span></h2></div>
@@ -377,7 +380,6 @@
                             <div class="space-y-4">
                                 ${state.pendingProofs.length === 0 ? '<p class="text-xs text-gray-600 italic">Keine anstehenden Freigaben.</p>' : ''}
                                 ${state.pendingProofs.map(p => {
-                                    const safeData = btoa(encodeURIComponent(p.data));
                                     return `
                                     <div class="bg-[#050505] border border-white/10 p-4 rounded-sm flex flex-col gap-3">
                                         <div class="flex items-center gap-4">
@@ -387,7 +389,7 @@
                                                 <p class="text-[9px] text-gray-500 uppercase tracking-widest mt-1">${p.alias} • <span class="text-[#ff4d00]">+${p.xp} XP</span></p>
                                             </div>
                                             <div class="flex gap-2">
-                                                <button type="button" id="ai_btn_${p.id}" onclick="window.aiCheckProof('${p.id}', '${p.missionName}', '${p.type}', '${safeData}')" class="w-8 h-8 rounded-sm bg-blue-900/30 hover:bg-blue-600 border border-blue-900/50 text-white flex items-center justify-center transition" title="KI Analyse">🤖</button>
+                                                <button type="button" id="ai_btn_${p.id}" onclick="window.aiCheckProof('${p.id}')" class="w-8 h-8 rounded-sm bg-blue-900/30 hover:bg-blue-600 border border-blue-900/50 text-white flex items-center justify-center transition" title="KI Analyse">🤖</button>
                                                 <button type="button" onclick="window.rejectProof('${p.id}')" class="w-8 h-8 rounded-sm bg-red-900/30 hover:bg-red-600 border border-red-900/50 text-white flex items-center justify-center transition"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
                                                 <button type="button" onclick="window.acceptProof('${p.id}', '${p.uid}', '${p.mid}', ${p.xp})" class="w-8 h-8 rounded-sm bg-green-900/30 hover:bg-[#ff4d00] border border-green-900/50 text-white flex items-center justify-center transition"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></button>
                                             </div>
@@ -422,7 +424,7 @@
                                     </div>
                                     <div class="border-t border-[#1f1f1f] pt-6">
                                         <h4 class="text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-4">Manuell hinzufügen</h4>
-                                        <form onsubmit="window.addManualMission(event)" class="space-y-3">
+                                        <form onsubmit="event.preventDefault(); window.addManualMission(event);" class="space-y-3">
                                             <input id="new_mis_name" required placeholder="Titel (z.B. Morning Run)" class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00]">
                                             <input id="new_mis_desc" required placeholder="Beschreibung" class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00]">
                                             <div class="flex gap-3"><input id="new_mis_xp" type="number" required placeholder="XP" class="w-1/2 p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00]"><select id="new_mis_type" class="w-1/2 p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white appearance-none outline-none focus:border-[#ff4d00]"><option value="qr">QR Scan</option><option value="upload">Upload</option></select></div>
@@ -452,7 +454,7 @@
                                     </div>
                                     <div class="border-t border-[#1f1f1f] pt-6">
                                         <h4 class="text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-4">Neuen Reward einstellen</h4>
-                                        <form onsubmit="window.addReward(event)" class="space-y-3">
+                                        <form onsubmit="event.preventDefault(); window.addReward(event);" class="space-y-3">
                                             <div class="flex gap-2">
                                                 <input id="rew_lvl" type="number" min="1" max="30" placeholder="Level" required class="w-1/3 p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00]">
                                                 <select id="rew_tier" class="w-2/3 p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00] appearance-none"><option value="free">FREE Tier</option><option value="pro">PRO Tier</option></select>
@@ -471,7 +473,6 @@
 
                                 <div class="card p-6 rounded-sm">
                                     <h3 class="text-lg font-black uppercase tracking-widest text-[#ff4d00] mb-4">AI Mission Architect</h3>
-                                    <!-- oninput sorgt dafür, dass der Key sofort in den localStorage wandert, auch beim Tippen -->
                                     <input type="password" id="ai_key" value="${savedKey}" oninput="window.saveApiKey(event)" placeholder="Gemini API Key..." class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-xs mb-4 text-gray-400 outline-none focus:border-[#ff4d00]">
                                     <button type="button" id="ai-gen-btn" onclick="window.generateAIQuests()" class="w-full btn-grind mb-4 text-xs py-3">KI: Generiere neue Ops</button>
                                     <div id="ai-result" class="min-h-[100px] border border-white/5 bg-[#050505] p-4 rounded-sm"><p class="text-[10px] text-gray-600 uppercase font-bold text-center italic mt-6">Warte auf Input...</p></div>
