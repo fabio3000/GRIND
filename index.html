@@ -6,7 +6,6 @@
     <title>GRIND. | Season 01</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&display=swap" rel="stylesheet">
-    <script src="https://www.paypal.com/sdk/js?client-id=AboxAT2qskA0lY5-23Kj2tu_qY3bOK57rq_LbhtE_cdVOBT37fSHGacBKjgl-zx1XcJM9AZql96OCwc8&currency=EUR"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
         body { 
@@ -16,7 +15,6 @@
             overflow-x: hidden; 
             background-image: radial-gradient(circle at 50% 0%, #1a0a00 0%, #050505 60%);
             min-height: 100vh;
-            overscroll-behavior-y: none;
         }
         
         .grind-gradient { background: linear-gradient(90deg, #ff4d00, #ff8800); }
@@ -28,7 +26,7 @@
         
         .level-node { min-width: 140px; position: relative; }
         
-        .reward-box { width: 100px; height: 85px; border: 1px solid #1f1f1f; background: #0a0a0a; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; z-index: 10; border-radius: 4px; transition: all 0.3s ease; overflow: hidden; }
+        .reward-box { width: 100px; height: 85px; border: 1px solid #1f1f1f; background: #0a0a0a; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; z-index: 10; border-radius: 4px; transition: all 0.3s ease; }
         .reward-box.unlocked { border-color: #ff4d00; background: #140a00; box-shadow: 0 0 15px rgba(255, 77, 0, 0.15); }
         .reward-box.pro { border-color: #6d28d9; height: 95px; width: 110px; box-shadow: 0 0 10px rgba(109, 40, 217, 0.05); }
         .reward-box.pro.unlocked { background: #1a0a2e; border-color: #a855f7; box-shadow: 0 0 20px rgba(168, 85, 247, 0.25); }
@@ -90,7 +88,7 @@
         }
     </style>
 </head>
-<body class="flex flex-col relative select-none">
+<body class="flex flex-col relative">
 
     <div id="toast-container"></div>
     <div id="recaptcha-container"></div>
@@ -132,11 +130,6 @@
 
         const RANKS = ["Novice", "Grinder", "Hustler", "Soldier", "Ghost", "Legend"];
 
-        // Variables for Hold-to-Redeem Animation
-        let holdTimer = null;
-        let holdProgress = 0;
-        let isRedeeming = false;
-
         window.showToast = (msg, type = 'success') => {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div'); toast.className = `toast ${type}`;
@@ -176,7 +169,6 @@
         });
 
         window.closeModal = () => {
-            window.stopRedeemHold(); // Reset any active animation
             const container = document.getElementById('modal-container');
             if(window.html5QrCode) { window.html5QrCode.stop().catch(e=>console.log(e)); window.html5QrCode = null; }
             if(container) { container.classList.remove('opacity-100'); container.classList.add('opacity-0', 'pointer-events-none'); setTimeout(() => container.innerHTML = '', 300); }
@@ -189,7 +181,6 @@
             setTimeout(() => { container.classList.remove('opacity-0', 'pointer-events-none'); container.classList.add('opacity-100'); container.firstElementChild.classList.remove('scale-95'); container.firstElementChild.classList.add('scale-100'); }, 10);
         };
 
-        // --- Proof Functions ---
         window.startQRScanner = () => {
             document.getElementById('qr-placeholder').classList.add('hidden'); document.getElementById('qr-reader').classList.remove('hidden');
             window.html5QrCode = new Html5Qrcode("qr-reader");
@@ -227,123 +218,32 @@
             } catch(e) { clearTimeout(timeout); window.showToast("Systemfehler beim Senden.", "error"); if(btn) { btn.innerText = "Erneut Senden"; btn.disabled = false; } }
         };
 
-        // --- Ticket System (Hold to Redeem) ---
-        window.startRedeemHold = (lvl, tier, event) => {
-            if(isRedeeming) return;
-            // Verhindert Touch-Probleme auf Mobile
-            if(event && event.type === 'touchstart') {
-                event.preventDefault(); 
-            }
-
-            const btn = document.getElementById('redeem-btn-fill');
-            const text = document.getElementById('redeem-btn-text');
-            if(!btn || !text) return;
-            
-            text.innerText = "HOLDING...";
-            let lastTime = performance.now();
-
-            const updateFill = (currentTime) => {
-                const deltaTime = currentTime - lastTime;
-                lastTime = currentTime;
-                // Dauert 1.5 Sekunden bis voll
-                holdProgress += (deltaTime / 1500) * 100; 
-
-                if(holdProgress >= 100) {
-                    holdProgress = 100;
-                    btn.style.width = "100%";
-                    window.executeRedeem(lvl, tier);
-                    return;
-                }
-
-                btn.style.width = `${holdProgress}%`;
-                holdTimer = requestAnimationFrame(updateFill);
-            };
-
-            holdTimer = requestAnimationFrame(updateFill);
-        };
-
-        window.stopRedeemHold = () => {
-            if(isRedeeming) return;
-            cancelAnimationFrame(holdTimer);
-            holdProgress = 0;
-            const btn = document.getElementById('redeem-btn-fill');
-            const text = document.getElementById('redeem-btn-text');
-            if(btn) btn.style.width = "0%";
-            if(text) text.innerText = "HOLD TO REDEEM";
-        };
-
-        window.executeRedeem = async (lvl, tier) => {
-            isRedeeming = true;
-            const text = document.getElementById('redeem-btn-text');
-            if(text) text.innerText = "VERIFYING...";
-            
-            const rewardId = `lvl${lvl}_${tier}`;
-
-            try {
-                // Update Firestore: Markiere Reward als eingelöst
-                const currentRedeemed = state.profile.redeemed || [];
-                if(!currentRedeemed.includes(rewardId)) {
-                    currentRedeemed.push(rewardId);
-                    await setDoc(doc(db, 'plot_users', state.user.uid), { redeemed: currentRedeemed }, { merge: true });
-                }
-
-                // Success Animation
-                const container = document.getElementById('redeem-container');
-                if(container) {
-                    container.innerHTML = `
-                        <div class="flex flex-col items-center justify-center py-6 animate-pop">
-                            <div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mb-4 shadow-[0_0_30px_rgba(34,197,94,0.5)]">
-                                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
-                            </div>
-                            <h4 class="text-white font-black italic text-xl uppercase tracking-widest text-center">Ticket<br>eingelöst</h4>
-                            <p class="text-gray-400 text-xs mt-3 text-center">Dieser Loot wurde erfolgreich<br>von deinem Konto abgebucht.</p>
-                        </div>
-                    `;
-                }
-                window.showToast("Erfolgreich eingelöst!", "success");
-            } catch (e) {
-                window.showToast("Fehler beim Einlösen.", "error");
-                window.stopRedeemHold();
-            } finally {
-                isRedeeming = false;
-            }
-        };
-
         // --- Dynamic Loot Redemption System ---
         window.openClaimModal = (lvl, tier) => {
-            isRedeeming = false; // Reset state
-            holdProgress = 0;
-            
             const reward = state.rewardData.find(r => r.lvl === lvl);
             if(!reward) return;
             
             const title = reward[tier];
             const type = reward[`${tier}_type`] || 'qr';
-            const info = reward[`${tier}_info`] || 'Zeige diesen Screen beim Partner vor Ort vor.';
+            const info = reward[`${tier}_info`] || 'Zeige diesen Code beim Partner vor Ort vor.';
             
             const isPro = tier === 'pro';
             const textClass = isPro ? 'text-[#a855f7]' : 'text-[#ff4d00]';
             const bgClass = isPro ? 'bg-[#a855f7]' : 'bg-[#ff4d00]';
             const borderClass = isPro ? 'border-[#a855f7]/30' : 'border-[#ff4d00]/30';
 
-            const rewardId = `lvl${lvl}_${tier}`;
-            const isAlreadyRedeemed = (state.profile.redeemed || []).includes(rewardId);
-
             let contentHtml = '';
 
-            // Wenn bereits lokal (qr) oder Versand (shipping) angefordert wurde
-            if (isAlreadyRedeemed && (type === 'qr' || type === 'shipping')) {
+            if (type === 'qr') {
                 contentHtml = `
-                    <div class="bg-[#111] p-8 rounded-sm flex flex-col items-center justify-center mb-6 border border-white/5 shadow-inner">
-                        <div class="w-12 h-12 rounded-full border-2 border-gray-600 flex items-center justify-center mb-4 opacity-50">
-                            <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    <div class="bg-white p-4 rounded-sm flex justify-center mb-6">
+                        <div class="w-full h-16 bg-black flex items-center justify-around px-2">
+                            ${[...Array(30)].map(() => `<div class="bg-white h-full" style="width: ${Math.random() * 4 + 1}px;"></div>`).join('')}
                         </div>
-                        <p class="text-xs text-gray-500 uppercase tracking-widest font-bold text-center">Bereits eingelöst<br><span class="font-normal text-[10px] mt-1 block">Dieser Loot ist nicht mehr verfügbar.</span></p>
                     </div>
+                    <p class="text-xs text-gray-500 mb-6 text-center leading-relaxed">${info}</p>
                 `;
-            } 
-            // Falls Link (digital) - bleibt immer abrufbar, wird nicht geblockt
-            else if (type === 'link') {
+            } else if (type === 'link') {
                 const isUrl = info.startsWith('http');
                 contentHtml = `
                     <div class="bg-[#1f1f1f] p-6 rounded-sm flex flex-col items-center justify-center mb-6 border ${borderClass}">
@@ -354,33 +254,9 @@
                         }
                     </div>
                 `;
-            } 
-            // Neues lokales Ticket System (Hold to Redeem)
-            else if (type === 'qr') {
+            } else if (type === 'shipping') {
                 contentHtml = `
-                    <div id="redeem-container" class="bg-[#1f1f1f] p-6 rounded-sm flex flex-col mb-6 border ${borderClass} shadow-2xl relative overflow-hidden">
-                        <div class="absolute top-0 right-0 bg-[#000] px-2 py-1 text-[8px] font-bold text-gray-500 uppercase tracking-widest rounded-bl-sm">One-Time Use</div>
-                        <p class="text-[11px] text-gray-300 mb-8 leading-relaxed text-center font-medium">${info}<br><span class="text-white font-black uppercase tracking-widest block mt-3 border-t border-white/10 pt-3">Das Personal muss das Einlösen bestätigen!</span></p>
-                        
-                        <div 
-                            onmousedown="window.startRedeemHold(${lvl}, '${tier}', event)" 
-                            onmouseup="window.stopRedeemHold()" 
-                            onmouseleave="window.stopRedeemHold()" 
-                            ontouchstart="window.startRedeemHold(${lvl}, '${tier}', event)" 
-                            ontouchend="window.stopRedeemHold()" 
-                            class="relative w-full h-16 bg-black border border-white/20 rounded-sm overflow-hidden cursor-pointer flex items-center justify-center group"
-                        >
-                            <div id="redeem-btn-fill" class="absolute left-0 top-0 bottom-0 w-0 ${bgClass} z-0" style="transition: none;"></div>
-                            <span id="redeem-btn-text" class="relative z-10 text-white font-black italic uppercase tracking-widest text-sm pointer-events-none drop-shadow-md">Hold to Redeem</span>
-                        </div>
-                    </div>
-                `;
-            } 
-            // Physischer Versand
-            else if (type === 'shipping') {
-                contentHtml = `
-                    <div class="bg-[#1f1f1f] p-6 rounded-sm flex flex-col mb-6 border border-white/10 relative">
-                        <div class="absolute top-0 right-0 bg-[#000] px-2 py-1 text-[8px] font-bold text-gray-500 uppercase tracking-widest rounded-bl-sm">One-Time Request</div>
+                    <div class="bg-[#1f1f1f] p-6 rounded-sm flex flex-col mb-6 border border-white/10">
                         <p class="text-xs text-gray-400 mb-4 leading-relaxed">${info}</p>
                         <input id="shipping_address" type="text" placeholder="Adresse oder Shirt-Größe..." class="w-full p-3 bg-black border border-white/20 rounded-sm text-sm text-white outline-none focus:border-white mb-4">
                         <button onclick="window.submitShipping(${lvl}, '${tier}')" class="w-full ${bgClass} text-white font-black py-3 px-4 rounded-sm text-xs uppercase tracking-widest hover:opacity-80 transition">Versand anfordern</button>
@@ -389,10 +265,10 @@
             }
 
             let innerHtml = `
-                <p class="${textClass} text-[10px] font-black uppercase tracking-widest mb-1">Loot Stash</p>
+                <p class="${textClass} text-[10px] font-black uppercase tracking-widest mb-1">Claim Loot</p>
                 <h3 class="text-2xl font-black italic uppercase tracking-tighter mb-6">${title}</h3>
                 ${contentHtml}
-                <button onclick="window.closeModal()" class="w-full bg-[#111] text-gray-400 hover:bg-white hover:text-black font-black italic uppercase py-3 transition text-xs border border-white/5 rounded-sm">Schließen</button>
+                <button onclick="window.closeModal()" class="w-full bg-[#1f1f1f] text-white hover:bg-white hover:text-black font-black italic uppercase py-4 transition text-sm">Schließen</button>
             `;
             window.openModal(innerHtml);
         };
@@ -404,10 +280,7 @@
             const btn = document.querySelector('#modal-container button.bg-\\[\\#ff4d00\\], #modal-container button.bg-\\[\\#a855f7\\]');
             if(btn) { btn.innerText = "Senden..."; btn.disabled = true; }
 
-            const rewardId = `lvl${lvl}_${tier}`;
-
             try {
-                // 1. Speichere die Versand-Anfrage
                 await addDoc(collection(db, 'plot_shipping_requests'), {
                     uid: state.user.uid,
                     alias: state.profile.alias,
@@ -417,14 +290,6 @@
                     timestamp: new Date(),
                     status: 'pending'
                 });
-
-                // 2. Markiere im Profil als eingelöst, damit es nicht nochmal angefordert wird
-                const currentRedeemed = state.profile.redeemed || [];
-                if(!currentRedeemed.includes(rewardId)) {
-                    currentRedeemed.push(rewardId);
-                    await setDoc(doc(db, 'plot_users', state.user.uid), { redeemed: currentRedeemed }, { merge: true });
-                }
-
                 window.showToast("Anfrage für physical Loot gesendet!", "success");
                 window.closeModal();
             } catch(e) {
@@ -470,17 +335,11 @@
         };
 
         window.submitOnboarding = async (e) => {
-            e.preventDefault(); 
-            const nameInput = document.getElementById('onboard_name').value.trim();
-            const cityInput = document.getElementById('onboard_city').value;
-            
+            e.preventDefault(); const nameInput = document.getElementById('onboard_name').value.trim();
             if(!nameInput) return window.showToast("Bitte gib einen Namen ein.", "error");
-            if(!cityInput || cityInput === "locked") return window.showToast("Bitte wähle deine Base.", "error");
-
             const btn = e.target.querySelector('button'); btn.disabled = true; btn.innerText = "Registering...";
             try {
-                // Initialize user profile with 'redeemed' array and 'city'
-                state.profile = { xp: 0, lvl: 1, completed: [], redeemed: [], alias: nameInput, city: cityInput, hasPremium: false };
+                state.profile = { xp: 0, lvl: 1, completed: [], alias: nameInput, hasPremium: false };
                 await setDoc(doc(db, 'plot_users', state.user.uid), state.profile);
                 window.playGrindIntro(); window.showToast(`Willkommen, ${nameInput}.`, "success");
                 state.view = 'dashboard'; render();
@@ -551,22 +410,8 @@
             if (state.view === 'onboarding') {
                 appDiv.innerHTML = `
                     <div class="flex-1 flex flex-col items-center justify-center p-6 min-h-[80vh] text-center">
-                        <h1 class="text-4xl md:text-5xl font-black italic tracking-tighter mb-2">IDENTIFICATION<span class="text-[#ff4d00]">.</span></h1>
-                        <p class="text-gray-500 font-bold uppercase tracking-widest text-[10px] mb-12 max-w-sm leading-relaxed">Wähle deine Base und finde deinen Health Tribe.</p>
-                        <form onsubmit="window.submitOnboarding(event)" class="w-full max-w-sm space-y-4">
-                            <input id="onboard_name" type="text" placeholder="Dein Name" required class="w-full p-4 bg-[#0f0f0f] border border-[#1f1f1f] rounded-sm outline-none focus:border-[#ff4d00] text-white transition text-center text-xl tracking-widest uppercase font-black italic">
-                            <div class="relative">
-                                <select id="onboard_city" required class="w-full p-4 bg-[#0f0f0f] border border-[#1f1f1f] rounded-sm outline-none focus:border-[#ff4d00] text-white transition text-center text-lg tracking-widest uppercase font-bold appearance-none cursor-pointer">
-                                    <option value="" disabled selected class="text-gray-600">Base wählen</option>
-                                    <option value="Köln">📍 Köln (S01 Active)</option>
-                                    <option value="locked" disabled class="text-gray-600">Weitere Städte in Kürze...</option>
-                                </select>
-                                <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                                </div>
-                            </div>
-                            <button type="submit" class="w-full btn-grind py-4 mt-2">Confirm Identity</button>
-                        </form>
+                        <h1 class="text-4xl md:text-5xl font-black italic tracking-tighter mb-2">IDENTIFICATION<span class="text-[#ff4d00]">.</span></h1><p class="text-gray-500 font-bold uppercase tracking-widest text-[10px] mb-12 max-w-sm leading-relaxed">Trage deinen Vornamen ein, um die Registrierung abzuschließen.</p>
+                        <form onsubmit="window.submitOnboarding(event)" class="w-full max-w-sm space-y-4"><input id="onboard_name" type="text" placeholder="Dein Name" required class="w-full p-4 bg-[#0f0f0f] border border-[#1f1f1f] rounded-sm outline-none focus:border-[#ff4d00] text-white transition text-center text-xl tracking-widest uppercase font-black italic"><button type="submit" class="w-full btn-grind py-4">Confirm Identity</button></form>
                     </div>
                 `; return;
             }
@@ -578,16 +423,10 @@
                 authHtml += `</div></div>`; appDiv.innerHTML = authHtml; return;
             }
 
-            const p = state.profile || { xp: 0, lvl: 1, completed: [], redeemed: [], alias: 'Stranger', city: 'Köln', hasPremium: false };
-            const safeXp = p.xp || 0; 
-            const safeLvl = p.lvl || 1; 
-            const safeCompleted = p.completed || []; 
-            const safeRedeemed = p.redeemed || [];
-            const hasPremium = p.hasPremium || false;
-
+            const p = state.profile || { xp: 0, lvl: 1, completed: [], alias: 'Stranger', hasPremium: false };
+            const safeXp = p.xp || 0; const safeLvl = p.lvl || 1; const safeCompleted = p.completed || []; const hasPremium = p.hasPremium || false;
             const currentRank = RANKS[Math.min(Math.floor((safeLvl - 1) / 5), RANKS.length - 1)];
             const now = new Date(); let currentMonthWeek = Math.ceil(now.getDate() / 7); if (currentMonthWeek > 4) currentMonthWeek = 4;
-
             const displayXp = state.prevXp !== null ? state.prevXp : safeXp;
             const targetXpProgress = (safeXp % 1000) / 10;
             const oldXpProgress = state.prevXp !== null ? (state.prevXp % 1000) / 10 : targetXpProgress;
@@ -610,7 +449,7 @@
                             <p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-[0.4em] mb-2">Standing</p>
                             <h2 id="main-lvl-text" class="text-6xl font-black italic tracking-tighter leading-none inline-block">LVL ${safeLvl}</h2>
                             <p class="text-gray-500 font-mono mt-3 text-xs tracking-widest uppercase"><span class="text-white">${currentRank}</span></p>
-                            <p class="text-gray-600 font-bold italic mt-1 text-[10px] uppercase tracking-widest">${p.alias} <span class="ml-1 opacity-50">| ${p.city || 'Köln'}</span></p>
+                            <p class="text-gray-600 font-bold italic mt-1 text-[10px] uppercase tracking-widest">${p.alias}</p>
                         </div>
                         <div class="flex-grow w-full relative z-10">
                             <div class="flex justify-between text-[10px] font-bold uppercase text-gray-500 mb-3 tracking-widest italic">
@@ -636,26 +475,16 @@
 
             for (let i = 1; i <= 30; i++) {
                 const r = state.rewardData.find(x => x.lvl === i);
-                const isUnlocked = i <= safeLvl; 
-                const isProUnlocked = isUnlocked && hasPremium;
-                
-                const freeClaimed = safeRedeemed.includes(`lvl${i}_free`);
-                const proClaimed = safeRedeemed.includes(`lvl${i}_pro`);
+                const isUnlocked = i <= safeLvl; const isProUnlocked = isUnlocked && hasPremium;
 
                 html += `
                     <div id="level-node-${i}" class="level-node flex flex-col items-center relative z-10">
-                        <div ${isUnlocked && r?.free && !freeClaimed ? `onclick="window.openClaimModal(${i}, 'free')" class="reward-box mb-4 unlocked cursor-pointer hover:scale-105"` : (freeClaimed ? `onclick="window.openClaimModal(${i}, 'free')" class="reward-box mb-4 unlocked opacity-50 cursor-pointer"` : `class="reward-box mb-4 opacity-60 scale-95"`)}>
-                            <span class="tag-free">FREE</span>
-                            ${freeClaimed && r?.free ? `<span class="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-[1px] text-green-500 z-20 font-black text-xs uppercase italic transform -rotate-12"><svg class="w-6 h-6 drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></span>` : ''}
-                            <span class="text-[10px] font-bold uppercase text-center px-2 text-gray-200">${r?.free || '-'}</span>
+                        <div ${isUnlocked && r?.free ? `onclick="window.openClaimModal(${i}, 'free')" class="reward-box mb-4 unlocked cursor-pointer hover:scale-105"` : `class="reward-box mb-4 opacity-60 scale-95"`}>
+                            <span class="tag-free">FREE</span><span class="text-[10px] font-bold uppercase text-center px-2 text-gray-200">${r?.free || '-'}</span>
                         </div>
-                        
                         <div id="circle-node-${i}" class="relative w-10 h-10 rounded-full flex items-center justify-center font-black italic text-xs ${isUnlocked ? 'grind-gradient text-black scale-110 shadow-[0_0_15px_rgba(255,77,0,0.5)]' : 'bg-gray-800 text-gray-400 border border-white/20'}">${i}</div>
-                        
-                        <div ${isProUnlocked && r?.pro && !proClaimed ? `onclick="window.openClaimModal(${i}, 'pro')" class="reward-box pro mt-5 unlocked scale-105 cursor-pointer"` : (proClaimed ? `onclick="window.openClaimModal(${i}, 'pro')" class="reward-box pro mt-5 unlocked opacity-50 cursor-pointer"` : `class="reward-box pro mt-5 opacity-70 scale-[0.98] hover:opacity-100"`)}>
-                            <span class="tag-pro italic">PRO</span>
-                            ${proClaimed && r?.pro ? `<span class="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-[1px] text-[#a855f7] z-20 font-black text-xs uppercase italic transform -rotate-12"><svg class="w-6 h-6 drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></span>` : ''}
-                            <span class="text-[10px] font-bold uppercase text-center px-2 ${isProUnlocked ? 'text-[#d8b4fe]' : 'text-purple-300'}">${r?.pro || '-'}</span>
+                        <div ${isProUnlocked && r?.pro ? `onclick="window.openClaimModal(${i}, 'pro')" class="reward-box pro mt-5 unlocked scale-105 cursor-pointer"` : `class="reward-box pro mt-5 opacity-70 scale-[0.98] hover:opacity-100"`}>
+                            <span class="tag-pro italic">PRO</span><span class="text-[10px] font-bold uppercase text-center px-2 ${isProUnlocked ? 'text-[#d8b4fe]' : 'text-purple-300'}">${r?.pro || '-'}</span>
                         </div>
                     </div>
                 `;
@@ -758,5 +587,4 @@
     </script>
 </body>
 </html>
-
 
