@@ -154,16 +154,11 @@
         };
 
         const getActiveWeek = () => {
-            if(!state.seasonConfig || !state.seasonConfig.start) return 1;
             const now = new Date();
-            const start = new Date(state.seasonConfig.start);
-            if(now < start) return 1;
-            
-            const diffTime = Math.abs(now - start);
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
-            let week = Math.floor((diffDays - 1) / 7) + 1;
-            
-            return Math.max(1, Math.min(week, 4));
+            const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+            const firstDayOfWeek = (firstDay.getDay() + 6) % 7; 
+            let week = Math.floor((now.getDate() + firstDayOfWeek - 1) / 7) + 1;
+            return week > 4 ? 4 : week; 
         };
 
         const getSeasonStatus = () => {
@@ -709,7 +704,8 @@
                     endDate.setHours(23, 59, 59, 999);
                     const diffTime = endDate.getTime() - new Date().getTime();
                     if (diffTime > 0) {
-                        seasonDaysLeftText = `NOCH ${Math.ceil(diffTime / (1000 * 60 * 60 * 24))} TAGE LEFT`;
+                        const dLeft = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                        seasonDaysLeftText = `NOCH ${dLeft} TAG${dLeft === 1 ? '' : 'E'} LEFT`;
                     } else {
                         seasonDaysLeftText = "SEASON ENDED";
                     }
@@ -717,17 +713,16 @@
 
                 // --- CALCULATE DAYS LEFT FOR WEEK ---
                 let weekDaysLeftText = "";
-                if (state.seasonConfig && state.seasonConfig.start) {
-                    const startDate = new Date(state.seasonConfig.start);
-                    startDate.setHours(0, 0, 0, 0);
-                    // End of the current week (e.g. week 1 = day 1-7, end is at the end of day 7)
-                    const weekEndDate = new Date(startDate.getTime() + (currentMonthWeek * 7 * 24 * 60 * 60 * 1000) - 1);
-                    const diffTimeWeek = weekEndDate.getTime() - new Date().getTime();
-                    if (diffTimeWeek > 0) {
-                        weekDaysLeftText = `NOCH ${Math.ceil(diffTimeWeek / (1000 * 60 * 60 * 24))} TAGE LEFT`;
-                    } else {
-                        weekDaysLeftText = "WOCHE ABGELAUFEN";
-                    }
+                const nowForWeek = new Date();
+                const daysUntilSunday = nowForWeek.getDay() === 0 ? 0 : 7 - nowForWeek.getDay();
+                const weekEndDate = new Date(nowForWeek.getFullYear(), nowForWeek.getMonth(), nowForWeek.getDate() + daysUntilSunday, 23, 59, 59, 999);
+                const diffTimeWeek = weekEndDate.getTime() - nowForWeek.getTime();
+                
+                if (diffTimeWeek > 0) {
+                    const dLeftWeek = Math.ceil(diffTimeWeek / (1000 * 60 * 60 * 24));
+                    weekDaysLeftText = `NOCH ${dLeftWeek} TAG${dLeftWeek === 1 ? '' : 'E'} LEFT`;
+                } else {
+                    weekDaysLeftText = "WOCHE ABGELAUFEN";
                 }
 
                 let html = `
@@ -942,6 +937,7 @@
     </script>
 </body>
 </html>
+
 
 
 ```
