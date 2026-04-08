@@ -470,7 +470,7 @@
             const glow = ctx.createRadialGradient(540, centerY, 0, 540, centerY, 900); glow.addColorStop(0, 'rgba(255, 77, 0, 0.15)'); glow.addColorStop(1, 'transparent'); ctx.fillStyle = glow; ctx.fillRect(0, 0, canvas.width, canvas.height);
             ctx.globalAlpha = 0.03; for (let i = 0; i < 70000; i++) { ctx.fillStyle = Math.random() > 0.5 ? '#ffffff' : '#000000'; ctx.fillRect(Math.random() * canvas.width, Math.random() * canvas.height, 2, 2); } ctx.globalAlpha = 1.0; 
 
-            ctx.font = 'italic 900 130px "Inter", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                     ctx.font = 'italic 900 130px "Inter", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
             const textGrind = 'GRIND'; const textDot = '.'; const wGrind = ctx.measureText(textGrind).width; const wDot = ctx.measureText(textDot).width;
             ctx.fillStyle = '#ffffff'; ctx.fillText(textGrind, 540 - (wDot / 2), 280); ctx.fillStyle = '#ff4d00'; ctx.fillText(textDot, 540 + (wGrind / 2), 280);
 
@@ -486,22 +486,19 @@
 
             ctx.fillStyle = '#777777'; ctx.font = '700 26px "Inter", sans-serif'; if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "4px"; ctx.fillText(`XP: ${safeXp} / ${safeLvl * 1000}   •   ${opsCount} OPERATIONS CLEARED`, 540, barY + 70); if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "0px";
             
-            let daysLeftText = `SEASON 0${seasonNum} • ACTIVE`; // Fallback
-if (state.seasonConfig && state.seasonConfig.end) {
-    const endDate = new Date(state.seasonConfig.end);
-    endDate.setHours(23, 59, 59, 999);
-    const diffTime = endDate.getTime() - new Date().getTime();
-    
-    if (diffTime > 0) {
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        daysLeftText = `NOCH ${diffDays} TAGE LEFT`;
-    } else {
-        daysLeftText = "SEASON ENDED";
-    }
-}
-
-ctx.fillStyle = '#333333'; ctx.font = '700 24px "Inter", sans-serif'; if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "8px"; ctx.fillText(daysLeftText, 540, 1800); if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "0px";
-
+            let daysLeftText = `SEASON 0${seasonNum} • ACTIVE`;
+            if (state.seasonConfig && state.seasonConfig.end) {
+                const endDate = new Date(state.seasonConfig.end);
+                endDate.setHours(23, 59, 59, 999);
+                const diffTime = endDate.getTime() - new Date().getTime();
+                if (diffTime > 0) {
+                    daysLeftText = `NOCH ${Math.ceil(diffTime / (1000 * 60 * 60 * 24))} TAGE LEFT`;
+                } else {
+                    daysLeftText = "SEASON ENDED";
+                }
+            }
+            
+            ctx.fillStyle = '#333333'; ctx.font = '700 24px "Inter", sans-serif'; if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "8px"; ctx.fillText(daysLeftText, 540, 1800); if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "0px";
 
             let fileName = `GRIND_S0${seasonNum}_${(p.alias || 'Stranger').replace(/\s+/g, '')}.png`; 
             canvas.toBlob(async (blob) => {
@@ -510,6 +507,7 @@ ctx.fillStyle = '#333333'; ctx.font = '700 24px "Inter", sans-serif'; if (ctx.le
                 if (navigator.canShare && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: 'GRIND.', text: `Join the Hustle. My standing in Season ${seasonNum}: Level ${safeLvl}.` }); } catch (err) { if (err.name !== 'AbortError') fallback(); } } else fallback();
             }, 'image/png');
         };
+
 
         function animateValue(id, start, end, duration) {
             const obj = document.getElementById(id); if (!obj) return; let startTimestamp = null;
