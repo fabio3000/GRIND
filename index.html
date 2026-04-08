@@ -1,4 +1,4 @@
-```html
+
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -485,7 +485,23 @@
             const progress = (safeXp % 1000) / 1000; ctx.fillStyle = '#ff4d00'; ctx.fillRect(startX, barY, barW * progress, barH);
 
             ctx.fillStyle = '#777777'; ctx.font = '700 26px "Inter", sans-serif'; if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "4px"; ctx.fillText(`XP: ${safeXp} / ${safeLvl * 1000}   •   ${opsCount} OPERATIONS CLEARED`, 540, barY + 70); if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "0px";
-            ctx.fillStyle = '#333333'; ctx.font = '700 24px "Inter", sans-serif'; if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "8px"; ctx.fillText(`SEASON 0${seasonNum} • ACTIVE`, 540, 1800); if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "0px";
+            
+            let daysLeftText = `SEASON 0${seasonNum} • ACTIVE`; // Fallback
+if (state.seasonConfig && state.seasonConfig.end) {
+    const endDate = new Date(state.seasonConfig.end);
+    endDate.setHours(23, 59, 59, 999);
+    const diffTime = endDate.getTime() - new Date().getTime();
+    
+    if (diffTime > 0) {
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        daysLeftText = `NOCH ${diffDays} TAGE LEFT`;
+    } else {
+        daysLeftText = "SEASON ENDED";
+    }
+}
+
+ctx.fillStyle = '#333333'; ctx.font = '700 24px "Inter", sans-serif'; if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "8px"; ctx.fillText(daysLeftText, 540, 1800); if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "0px";
+
 
             let fileName = `GRIND_S0${seasonNum}_${(p.alias || 'Stranger').replace(/\s+/g, '')}.png`; 
             canvas.toBlob(async (blob) => {
@@ -649,7 +665,7 @@
                             <div class="relative">
                                 <select id="onboard_city" required class="w-full p-4 bg-[#0f0f0f] border border-[#1f1f1f] rounded-sm outline-none focus:border-[#ff4d00] text-white transition text-center text-lg tracking-widest uppercase font-bold appearance-none cursor-pointer">
                                     <option value="" disabled selected class="text-gray-600">Base wählen</option>
-                                    <option value="Köln">📍 Köln (S01 Active)</option>
+                                    <option value="Köln">Köln</option>
                                     <option value="locked" disabled class="text-gray-600">Weitere Städte in Kürze...</option>
                                 </select>
                                 <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
@@ -901,5 +917,3 @@
 </body>
 </html>
 
-
-```
