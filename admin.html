@@ -69,7 +69,8 @@
             user: null, profile: null, view: 'loading',
             authStep: 'phone', tempPhone: '',
             adminTab: 'control', adminEditWeek: 1, 
-            pendingProofs: [], weeklyData: {}, rewardData: []
+            pendingProofs: [], weeklyData: {}, rewardData: [],
+            seasonConfig: { number: 1, active: true, start: '', end: '' }
         };
 
         let isSubscribed = false;
@@ -83,7 +84,6 @@
             setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 4000);
         };
 
-        // --- Safe Render Guard (Verhindert Fokus-Verlust beim Tippen) ---
         function safeRender() {
             const active = document.activeElement;
             const isTyping = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.tagName === 'SELECT');
@@ -110,9 +110,10 @@
                                         const data = sSnap.data();
                                         state.weeklyData = data.weeklyData || {}; 
                                         state.rewardData = data.rewardData || [];
+                                        state.seasonConfig = data.seasonConfig || { number: 1, active: true, start: '', end: '' };
                                         if(state.view === 'admin') safeRender();
                                     } else {
-                                        setDoc(doc(db, 'system', 'grind_season'), { weeklyData: {}, rewardData: [] }, { merge: true });
+                                        setDoc(doc(db, 'system', 'grind_season'), { weeklyData: {}, rewardData: [], seasonConfig: state.seasonConfig }, { merge: true });
                                     }
                                 });
 
@@ -131,6 +132,29 @@
         window.setAdminTab = (tab) => { state.adminTab = tab; render(); };
         window.setAdminEditWeek = (week) => { state.adminEditWeek = week; render(); };
         window.handleLogout = () => { state.view = 'loading'; render(); signOut(auth); };
+
+        // --- Season Configuration ---
+        window.saveSeasonSetup = async (e) => {
+            e.preventDefault();
+            const config = {
+                number: parseInt(document.getElementById('cfg_num').value) || 1,
+                start: document.getElementById('cfg_start').value,
+                end: document.getElementById('cfg_end').value,
+                active: document.getElementById('cfg_active').value === 'true'
+            };
+            
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.innerText = "Speichern...";
+            
+            try {
+                await setDoc(doc(db, 'system', 'grind_season'), { seasonConfig: config }, { merge: true });
+                window.showToast("Season Setup erfolgreich gespeichert.", "success");
+            } catch(err) { 
+                window.showToast("Fehler beim Speichern des Setups.", "error"); 
+            } finally {
+                btn.innerText = "Config Speichern";
+            }
+        };
 
         // --- Proof Management ---
         window.acceptProof = async (proofId, uid, mid, xp) => {
@@ -410,6 +434,37 @@
                     html += `
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                             <div class="space-y-8">
+                            
+                                <!-- NEU: Season Configuration -->
+                                <div class="card p-6 rounded-sm border-[#ff4d00]/20 shadow-[0_0_15px_rgba(255,77,0,0.05)]">
+                                    <h3 class="text-lg font-black uppercase tracking-widest text-[#ff4d00] mb-4">Season Setup</h3>
+                                    <form onsubmit="window.saveSeasonSetup(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1 block">Season Nummer</label>
+                                            <input id="cfg_num" type="number" min="1" value="${state.seasonConfig.number}" required class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00]">
+                                        </div>
+                                        <div>
+                                            <label class="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1 block">Status</label>
+                                            <select id="cfg_active" class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00] appearance-none cursor-pointer">
+                                                <option value="true" ${state.seasonConfig.active ? 'selected' : ''}>LIVE (Aktiv)</option>
+                                                <option value="false" ${!state.seasonConfig.active ? 'selected' : ''}>OFFLINE (Pausiert)</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1 block">Startdatum</label>
+                                            <input id="cfg_start" type="date" value="${state.seasonConfig.start}" required style="color-scheme: dark;" class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00] cursor-pointer">
+                                        </div>
+                                        <div>
+                                            <label class="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1 block">Enddatum</label>
+                                            <input id="cfg_end" type="date" value="${state.seasonConfig.end}" required style="color-scheme: dark;" class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00] cursor-pointer">
+                                        </div>
+                                        <div class="md:col-span-2 mt-2">
+                                            <button type="submit" class="w-full bg-[#1f1f1f] hover:bg-[#ff4d00] text-white font-bold py-3 rounded-sm text-xs uppercase tracking-widest transition">Config Speichern</button>
+                                        </div>
+                                    </form>
+                                </div>
+                                <!-- Ende: Season Configuration -->
+
                                 <div class="card p-6 rounded-sm">
                                     <div class="flex justify-between items-center mb-6">
                                         <h3 class="text-lg font-black uppercase tracking-widest text-[#ff4d00]">Operations Manager</h3>
