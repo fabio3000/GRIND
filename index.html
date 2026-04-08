@@ -709,10 +709,11 @@
 
                 // --- CALCULATE DAYS LEFT FOR SEASON ---
                 let seasonDaysLeftText = `SEASON 0${seasonNum} | ACTIVE`;
+                let seasonEndDate = null;
                 if (state.seasonConfig && state.seasonConfig.end) {
-                    const endDate = new Date(state.seasonConfig.end);
-                    endDate.setHours(23, 59, 59, 999);
-                    const diffTime = endDate.getTime() - new Date().getTime();
+                    seasonEndDate = new Date(state.seasonConfig.end);
+                    seasonEndDate.setHours(23, 59, 59, 999);
+                    const diffTime = seasonEndDate.getTime() - new Date().getTime();
                     if (diffTime > 0) {
                         const dLeft = Math.floor(diffTime / (1000 * 60 * 60 * 24));
                         if (dLeft > 0) {
@@ -729,10 +730,22 @@
                 let weekDaysLeftText = "";
                 const nowForWeek = new Date();
                 const daysUntilSunday = nowForWeek.getDay() === 0 ? 0 : 7 - nowForWeek.getDay();
-                if (daysUntilSunday > 0) {
-                    weekDaysLeftText = `NOCH ${daysUntilSunday} TAG${daysUntilSunday === 1 ? '' : 'E'} LEFT`;
+                let weekEndDate = new Date(nowForWeek.getFullYear(), nowForWeek.getMonth(), nowForWeek.getDate() + daysUntilSunday, 23, 59, 59, 999);
+                
+                if (seasonEndDate && seasonEndDate.getTime() < weekEndDate.getTime()) {
+                    weekEndDate = seasonEndDate;
+                }
+
+                const diffTimeWeek = weekEndDate.getTime() - nowForWeek.getTime();
+                if (diffTimeWeek > 0) {
+                    const dLeftWeek = Math.floor(diffTimeWeek / (1000 * 60 * 60 * 24));
+                    if (dLeftWeek > 0) {
+                        weekDaysLeftText = `NOCH ${dLeftWeek} TAG${dLeftWeek === 1 ? '' : 'E'} LEFT`;
+                    } else {
+                        weekDaysLeftText = "WOCHE ENDET HEUTE";
+                    }
                 } else {
-                    weekDaysLeftText = "WOCHE ENDET HEUTE";
+                    weekDaysLeftText = "WOCHE ABGELAUFEN";
                 }
 
                 let html = `
@@ -947,6 +960,7 @@
     </script>
 </body>
 </html>
+
 
 
 ```
