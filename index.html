@@ -487,7 +487,7 @@
                 endDate.setHours(23, 59, 59, 999);
                 const diffTime = endDate.getTime() - new Date().getTime();
                 if (diffTime > 0) {
-                    daysLeftText = `NOCH ${Math.ceil(diffTime / (1000 * 60 * 60 * 24))} TAGE LEFT`;
+                    daysLeftText = `NOCH ${Math.ceil(diffTime / (1000 * 60 * 60 * 24 - 1))} TAGE`;
                 } else {
                     daysLeftText = "SEASON ENDED";
                 }
@@ -704,7 +704,7 @@
                     endDate.setHours(23, 59, 59, 999);
                     const diffTime = endDate.getTime() - new Date().getTime();
                     if (diffTime > 0) {
-                        const dLeft = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                        const dLeft = Math.ceil(diffTime / (1000 * 60 * 60 * 24 - 1));
                         seasonDaysLeftText = `NOCH ${dLeft} TAG${dLeft === 1 ? '' : 'E'} LEFT`;
                     } else {
                         seasonDaysLeftText = "SEASON ENDED";
@@ -719,7 +719,7 @@
                 const diffTimeWeek = weekEndDate.getTime() - nowForWeek.getTime();
                 
                 if (diffTimeWeek > 0) {
-                    const dLeftWeek = Math.ceil(diffTimeWeek / (1000 * 60 * 60 * 24));
+                    const dLeftWeek = Math.ceil(diffTimeWeek / (1000 * 60 * 60 * 24 -1));
                     weekDaysLeftText = `NOCH ${dLeftWeek} TAG${dLeftWeek === 1 ? '' : 'E'} LEFT`;
                 } else {
                     weekDaysLeftText = "WOCHE ABGELAUFEN";
