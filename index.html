@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -30,7 +31,6 @@
         
         .level-node { min-width: 140px; position: relative; }
         
-        /* FIX: overflow: hidden entfernt, damit die FREE/PRO Badges nicht abgeschnitten werden */
         .reward-box { width: 100px; height: 85px; border: 1px solid #1f1f1f; background: #0a0a0a; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; z-index: 10; border-radius: 4px; transition: all 0.3s ease; }
         .reward-box.unlocked { border-color: #ff4d00; background: #140a00; box-shadow: 0 0 15px rgba(255, 77, 0, 0.15); }
         .reward-box.pro { border-color: #6d28d9; height: 95px; width: 110px; box-shadow: 0 0 10px rgba(109, 40, 217, 0.05); }
@@ -115,15 +115,11 @@
         const auth = getAuth(appInit);
         const db = getFirestore(appInit);
 
-        // --- FIX: Strikte Monatliche Kalenderwochen-Berechnung ---
-        // Jeder 1. des Monats startet Woche 1. Jeder folgende Montag schaltet eine Woche weiter.
         const getActiveWeek = () => {
             const now = new Date();
             const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
-            // Umrechnung: 0 = Montag, 1 = Dienstag ... 6 = Sonntag
             const firstDayOfWeek = (firstDay.getDay() + 6) % 7; 
             let week = Math.floor((now.getDate() + firstDayOfWeek - 1) / 7) + 1;
-            // Wir kappen bei max 4 Wochen fürs Interface
             return week > 4 ? 4 : week; 
         };
 
@@ -132,7 +128,7 @@
         let state = {
             user: null, profile: null, prevXp: null, prevLvl: null,
             bundlePrice: '19.00', view: 'loading',
-            currentWeekTab: activeWeekInit, // Fixiert auf berechnete Kalenderwoche
+            currentWeekTab: activeWeekInit,
             authStep: 'phone', tempPhone: '', tempUploadData: null,
             weeklyData: { 1: { title: "Loading...", startOffset: 0, missions: [] } },
             rewardData: []
@@ -141,6 +137,7 @@
         const RANKS = ["Rookie", "Grinder", "Hustler", "Athlete", "Machine", "Legend"];
 
         let holdTimer = null; let holdProgress = 0; let isRedeeming = false;
+        window.currentVerify = null;
 
         window.showToast = (msg, type = 'success') => {
             const container = document.getElementById('toast-container');
@@ -262,7 +259,12 @@
                     { fps: 10, qrbox: { width: 250, height: 250 } },
                     (decodedText) => {
                         document.getElementById('verify_code_input').value = decodedText;
-                        window.showToast("Code erfolgreich erfasst!", "success");
+                        
+                        if (window.currentVerify && window.currentVerify.qrSolution) {
+                            window.checkCode(decodedText);
+                        } else {
+                            window.showToast("Code erfolgreich erfasst!", "success");
+                        }
                         
                         try {
                             if(window.html5QrCode) {
@@ -296,16 +298,62 @@
             reader.onload = (ev) => { const img = new Image(); img.onload = () => { const canvas = document.createElement('canvas'); let width = img.width; let height = img.height; const MAX_SIZE = 800; if (width > height && width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } else if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } canvas.width = width; canvas.height = height; canvas.getContext('2d').drawImage(img, 0, 0, width, height); const compressedData = canvas.toDataURL('image/jpeg', 0.7); document.getElementById('upload-preview').src = compressedData; document.getElementById('upload-preview').classList.remove('hidden'); document.getElementById('upload-placeholder').classList.add('hidden'); state.tempUploadData = compressedData; }; img.src = ev.target.result; }; reader.readAsDataURL(file);
         };
 
-        window.openVerifyModal = (mid, xp, type, name) => {
+        window.openVerifyModal = (mid, xp, type, name, qrSolution = '') => {
             state.tempUploadData = null;
+            window.currentVerify = { mid, xp, name, type, qrSolution };
+
             let innerHtml = `<p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">Verify Operation</p><h3 class="text-2xl font-black italic uppercase tracking-tighter mb-6">${name}</h3>`;
             if(type === 'qr') {
                 innerHtml += `<div id="qr-placeholder" onclick="window.startQRScanner()" class="border-2 border-dashed border-[#1f1f1f] p-8 mb-4 flex flex-col items-center justify-center bg-black/50 rounded-sm hover:border-[#ff4d00] cursor-pointer transition"><svg class="w-12 h-12 text-[#ff4d00] mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg><p class="text-xs text-white font-bold uppercase tracking-widest text-center">Kamera aktivieren</p></div><div id="qr-reader" class="hidden w-full mb-4 rounded-sm overflow-hidden border border-[#1f1f1f]"></div><input id="verify_code_input" type="text" placeholder="Oder Code manuell eingeben" class="w-full p-4 bg-[#0f0f0f] border border-[#1f1f1f] rounded-sm outline-none focus:border-[#ff4d00] text-white text-center text-sm tracking-widest uppercase mb-6">`;
             } else {
                 innerHtml += `<input type="file" id="proof_file_input" accept="image/*" class="hidden" onchange="window.handleFileSelect(event)"><div onclick="window.triggerFileInput()" class="border-2 border-dashed border-[#1f1f1f] min-h-[150px] p-2 mb-6 flex flex-col items-center justify-center bg-black/50 rounded-sm hover:border-[#ff4d00] transition cursor-pointer overflow-hidden relative"><div id="upload-placeholder" class="text-center"><svg class="w-12 h-12 text-[#ff4d00] mb-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg><p class="text-xs text-white font-bold uppercase tracking-widest">Beweisfoto hochladen</p></div><img id="upload-preview" class="hidden absolute inset-0 w-full h-full object-cover"></div>`;
             }
-            innerHtml += `<button type="button" onclick="window.submitVerification('${mid}', ${xp}, '${type}', '${name.replace(/'/g, "\\'")}')" class="w-full btn-grind py-4">Senden zur Prüfung</button>`;
+
+            if (type === 'qr' && qrSolution) {
+                innerHtml += `<button type="button" onclick="window.checkCode()" class="w-full btn-grind py-4">Code Prüfen</button>`;
+            } else {
+                innerHtml += `<button type="button" onclick="window.submitVerification('${mid}', ${xp}, '${type}', '${name.replace(/'/g, "\\'")}')" class="w-full btn-grind py-4">Senden zur Prüfung</button>`;
+            }
+            
             window.openModal(innerHtml);
+        };
+
+        window.checkCode = async (scannedValue = null) => {
+            const val = scannedValue || document.getElementById('verify_code_input').value.trim();
+            if(!window.currentVerify) return;
+            const { mid, xp, name, qrSolution } = window.currentVerify;
+
+            if(!val) return window.showToast("Bitte Code eingeben.", "error");
+
+            if (val.toLowerCase() === qrSolution.toLowerCase()) {
+                const btn = document.querySelector('#modal-container button.btn-grind');
+                if(btn) { btn.innerText = "Verifying..."; btn.disabled = true; }
+
+                try {
+                    const currentCompleted = state.profile.completed || [];
+                    const isRepeatable = String(mid).startsWith('rep_');
+
+                    if(isRepeatable || !currentCompleted.includes(mid)) {
+                        const newXp = (state.profile.xp || 0) + xp;
+                        const newCompleted = [...currentCompleted];
+                        if(!isRepeatable) newCompleted.push(mid);
+
+                        await setDoc(doc(db, 'plot_users', state.user.uid), {
+                            xp: newXp,
+                            lvl: Math.floor(newXp / 1000) + 1,
+                            completed: newCompleted
+                        }, { merge: true });
+
+                        window.showToast(`+${xp} XP für ${name}! Code verifiziert.`, "success");
+                    }
+                    window.closeModal();
+                } catch(e) {
+                    window.showToast("Systemfehler beim Einlösen.", "error");
+                    if(btn) { btn.innerText = "Code Prüfen"; btn.disabled = false; }
+                }
+            } else {
+                window.showToast("Falscher Code. Try again.", "error");
+            }
         };
 
         window.submitVerification = async (mid, xp, type, name) => {
@@ -563,7 +611,6 @@
 
             const currentRank = RANKS[Math.min(Math.floor((safeLvl - 1) / 5), RANKS.length - 1)];
             
-            // --- STRICT WEEK CALCULATION ---
             const currentMonthWeek = getActiveWeek();
             state.currentWeekTab = currentMonthWeek;
 
@@ -654,7 +701,6 @@
                             <div class="flex flex-wrap gap-2">
             `;
 
-            // --- FIX: Strict Weeks Render ---
             Object.keys(state.weeklyData).forEach(w => {
                 const weekNum = parseInt(w); 
                 const isCurrent = weekNum === currentMonthWeek;
@@ -682,9 +728,11 @@
                 else badgeText = '⚡ Action';
 
                 const safeName = m.name.replace(/'/g, "\\'");
+                const safeQrSolution = m.qr_solution ? m.qr_solution.replace(/'/g, "\\'") : '';
+                
                 const btnAction = m.type === 'instant' 
                     ? `window.claimInstantMission('${m.id}', ${m.xp}, '${safeName}')` 
-                    : `window.openVerifyModal('${m.id}', ${m.xp}, '${m.type}', '${safeName}')`;
+                    : `window.openVerifyModal('${m.id}', ${m.xp}, '${m.type}', '${safeName}', '${safeQrSolution}')`;
                 
                 const btnText = m.type === 'instant' ? 'Claim XP' : 'Verify Operation';
 
@@ -722,7 +770,7 @@
                                     <h4 class="font-black italic uppercase text-lg group-hover:text-[#ff4d00] transition tracking-tighter">Urban Sports Club</h4><p class="text-gray-400 text-xs mt-1 font-medium leading-relaxed">Lade einen Screenshot deines erfolgreichen USC Check-Ins hoch.</p><span class="inline-block mt-3 border border-gray-700 bg-black px-2 py-0.5 text-[8px] font-bold uppercase tracking-widest text-gray-400">📷 Photo Upload</span>
                                 </div>
                                 <div class="text-left md:text-right flex-shrink-0 relative z-0 flex flex-col items-start md:items-end w-full md:w-auto mt-4 md:mt-0">
-                                    <span class="block text-[#ff4d00] font-black text-2xl italic tracking-tighter mb-2">+25</span><button type="button" onclick="window.openVerifyModal('rep_usc', 25, 'upload', 'Urban Sports Check-in')" class="btn-grind w-full md:w-auto py-3 text-[10px] bg-white text-black hover:bg-[#ff4d00] hover:text-white transition">Verify Habit</button>
+                                    <span class="block text-[#ff4d00] font-black text-2xl italic tracking-tighter mb-2">+25</span><button type="button" onclick="window.openVerifyModal('rep_usc', 25, 'upload', 'Urban Sports Check-in', '')" class="btn-grind w-full md:w-auto py-3 text-[10px] bg-white text-black hover:bg-[#ff4d00] hover:text-white transition">Verify Habit</button>
                                 </div>
                             </div>
                         </div>
@@ -760,4 +808,4 @@
 </body>
 </html>
 
-
+```
