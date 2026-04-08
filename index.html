@@ -1,4 +1,4 @@
-
+```html
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -702,6 +702,34 @@
                 const targetTrackProgress = Math.min(29, safeLvl - 1 + (safeXp % 1000) / 1000);
                 const oldTrackProgress = state.prevXp !== null ? Math.min(29, (state.prevLvl || 1) - 1 + (state.prevXp % 1000) / 1000) : targetTrackProgress;
 
+                // --- CALCULATE DAYS LEFT FOR SEASON ---
+                let seasonDaysLeftText = `SEASON 0${seasonNum} | ACTIVE`;
+                if (state.seasonConfig && state.seasonConfig.end) {
+                    const endDate = new Date(state.seasonConfig.end);
+                    endDate.setHours(23, 59, 59, 999);
+                    const diffTime = endDate.getTime() - new Date().getTime();
+                    if (diffTime > 0) {
+                        seasonDaysLeftText = `NOCH ${Math.ceil(diffTime / (1000 * 60 * 60 * 24))} TAGE LEFT`;
+                    } else {
+                        seasonDaysLeftText = "SEASON ENDED";
+                    }
+                }
+
+                // --- CALCULATE DAYS LEFT FOR WEEK ---
+                let weekDaysLeftText = "";
+                if (state.seasonConfig && state.seasonConfig.start) {
+                    const startDate = new Date(state.seasonConfig.start);
+                    startDate.setHours(0, 0, 0, 0);
+                    // End of the current week (e.g. week 1 = day 1-7, end is at the end of day 7)
+                    const weekEndDate = new Date(startDate.getTime() + (currentMonthWeek * 7 * 24 * 60 * 60 * 1000) - 1);
+                    const diffTimeWeek = weekEndDate.getTime() - new Date().getTime();
+                    if (diffTimeWeek > 0) {
+                        weekDaysLeftText = `NOCH ${Math.ceil(diffTimeWeek / (1000 * 60 * 60 * 24))} TAGE LEFT`;
+                    } else {
+                        weekDaysLeftText = "WOCHE ABGELAUFEN";
+                    }
+                }
+
                 let html = `
                     <header class="p-6 max-w-6xl mx-auto flex justify-between items-center w-full relative z-20">
                         <h1 class="text-3xl font-black italic tracking-tighter">GRIND<span class="text-[#ff4d00]">.</span></h1>
@@ -732,7 +760,7 @@
 
                         <section class="mb-16">
                             <div class="flex justify-between items-center mb-6 px-2">
-                                <div><h3 class="text-2xl font-black italic uppercase tracking-tighter">Grind Track <span class="text-[#ff4d00]">S0${seasonNum}</span></h3><p class="text-gray-500 text-[10px] font-bold tracking-widest mt-1">Season 0${seasonNum} | Active</p></div>
+                                <div><h3 class="text-2xl font-black italic uppercase tracking-tighter">Grind Track <span class="text-[#ff4d00]">S0${seasonNum}</span></h3><p class="text-gray-500 text-[10px] font-bold tracking-widest mt-1">${seasonDaysLeftText}</p></div>
                                 <div>${hasPremium ? '<span class="bg-[#ff4d00]/10 text-[#ff4d00] border border-[#ff4d00]/30 px-3 py-1.5 rounded-sm text-[9px] font-black uppercase tracking-widest shadow-[0_0_10px_rgba(255,77,0,0.1)]">PRO ACTIVE</span>' : '<button type="button" onclick="window.setView(\'paywall\')" class="btn-grind px-4 py-2 text-[10px]">Get Pro Pass</button>'}</div>
                             </div>
 
@@ -777,7 +805,7 @@
                         <section class="max-w-3xl mx-auto mb-12">
                             <div class="flex flex-col gap-6 mb-10">
                                 <div class="flex justify-between items-end border-b border-white/10 pb-4">
-                                    <div><p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">Operations</p><h3 class="text-3xl font-black uppercase italic tracking-tighter">${(state.weeklyData[currentMonthWeek] || {title: 'Active Week'}).title}</h3></div>
+                                    <div><p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">Operations</p><h3 class="text-3xl font-black uppercase italic tracking-tighter">${(state.weeklyData[currentMonthWeek] || {title: 'Active Week'}).title}</h3><p class="text-gray-500 text-[10px] font-bold tracking-widest mt-1">${weekDaysLeftText}</p></div>
                                     <span class="text-[10px] font-black bg-[#ff4d00] text-white px-3 py-1 italic shadow-[0_0_10px_rgba(255,77,0,0.4)]">LIVE</span>
                                 </div>
                                 <div class="flex flex-wrap gap-2">
@@ -915,3 +943,5 @@
 </body>
 </html>
 
+
+```
