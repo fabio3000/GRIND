@@ -51,6 +51,10 @@
         .btn-grind { background: white; color: black; font-weight: 900; font-style: italic; text-transform: uppercase; padding: 12px 24px; font-size: 12px; transition: all 0.2s; box-shadow: 0 4px 15px rgba(255,255,255,0.1); cursor: pointer; border-radius: 4px; border: none; }
         .btn-grind:hover { background: #ff4d00; color: white; box-shadow: 0 4px 20px rgba(255, 77, 0, 0.4); }
         .btn-grind:disabled { background: #1f1f1f; color: #555; cursor: not-allowed; box-shadow: none; border-color: #1f1f1f; }
+
+        /* PRO Button in Lila */
+        .btn-pro { background: #1a0a2e; color: #a855f7; font-weight: 900; font-style: italic; text-transform: uppercase; padding: 12px 24px; font-size: 12px; transition: all 0.2s; box-shadow: 0 4px 15px rgba(168,85,247,0.1); cursor: pointer; border-radius: 4px; border: 1px solid rgba(168,85,247,0.3); }
+        .btn-pro:hover { background: #a855f7; color: white; box-shadow: 0 4px 20px rgba(168,85,247,0.4); border-color: #a855f7; }
         
         .completed-overlay { position: absolute; inset: 0; background: rgba(5,5,5,0.8); z-index: 10; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px); opacity: 0; transition: opacity 0.3s; pointer-events: none; }
         .card.is-completed .completed-overlay { opacity: 1; pointer-events: auto; }
@@ -716,10 +720,10 @@
 
                 appDiv.innerHTML = `
                     <div class="flex-1 flex flex-col items-center justify-center p-6 min-h-[80vh] text-center animate-fade-in relative z-20">
-                        <div class="w-16 h-16 border-2 border-[#ff4d00] rounded-full flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(255,77,0,0.3)] bg-[#0a0a0a]"><svg class="w-8 h-8 text-[#ff4d00]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg></div>
-                        <h2 class="text-4xl font-black italic tracking-tighter mb-2">GRIND <span class="text-[#ff4d00]">PRO</span></h2><p class="text-gray-400 font-bold uppercase tracking-widest text-[10px] mb-8 max-w-xs leading-relaxed">Schalte alle Premium-Rewards der Season 0${seasonNum} frei und maximiere deinen Progress.</p>
-                        <div class="bg-[#0a0a0a] border border-[#1f1f1f] p-8 rounded-sm mb-6 w-full max-w-sm shadow-2xl relative overflow-hidden group"><div class="absolute inset-0 bg-gradient-to-t from-[#ff4d00]/10 to-transparent opacity-50"></div><div class="relative z-10"><div class="text-[10px] uppercase tracking-[0.2em] text-gray-500 font-bold mb-2">Season Pass</div><div id="dynamic-price-display" class="text-5xl font-black text-white italic tracking-tighter mb-8">${displayPrice} €</div><div id="paypal-button-container" class="w-full min-h-[150px] relative z-50 flex items-center justify-center"></div></div></div>
-                        <p class="text-[9px] text-gray-600 uppercase tracking-widest mt-2 mb-6 max-w-xs mx-auto leading-relaxed">Mit dem Kauf stimmst du unseren <span class="text-white underline cursor-pointer hover:text-[#ff4d00]" onclick="window.setView('agb')">AGB</span> zu und verzichtest auf das Widerrufsrecht für diesen digitalen Inhalt.</p>
+                        <div class="w-16 h-16 border-2 border-[#a855f7] rounded-full flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(168,85,247,0.3)] bg-[#0a0a0a]"><svg class="w-8 h-8 text-[#a855f7]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg></div>
+                        <h2 class="text-4xl font-black italic tracking-tighter mb-2">GRIND <span class="text-[#a855f7]">PRO</span></h2><p class="text-gray-400 font-bold uppercase tracking-widest text-[10px] mb-8 max-w-xs leading-relaxed">Schalte alle Premium-Rewards der Season 0${seasonNum} frei und maximiere deinen Progress.</p>
+                        <div class="bg-[#0a0a0a] border border-[#1f1f1f] p-8 rounded-sm mb-6 w-full max-w-sm shadow-2xl relative overflow-hidden group"><div class="absolute inset-0 bg-gradient-to-t from-[#a855f7]/10 to-transparent opacity-50"></div><div class="relative z-10"><div class="text-[10px] uppercase tracking-[0.2em] text-gray-500 font-bold mb-2">Season Pass</div><div id="dynamic-price-display" class="text-5xl font-black text-white italic tracking-tighter mb-8">${displayPrice} €</div><div id="paypal-button-container" class="w-full min-h-[150px] relative z-50 flex items-center justify-center"></div></div></div>
+                        <p class="text-[9px] text-gray-600 uppercase tracking-widest mt-2 mb-6 max-w-xs mx-auto leading-relaxed">Mit dem Kauf stimmst du unseren <span class="text-white underline cursor-pointer hover:text-[#a855f7]" onclick="window.setView('agb')">AGB</span> zu und verzichtest auf das Widerrufsrecht für diesen digitalen Inhalt.</p>
                         <button type="button" onclick="window.setView('dashboard')" class="text-gray-600 hover:text-white text-[10px] uppercase tracking-[0.2em] font-bold transition">Zurück zum Grind</button>
                     </div>
                     ${getFooterHTML()}
@@ -852,7 +856,7 @@
                         <section class="mb-16">
                             <div class="flex justify-between items-center mb-6 px-2">
                                 <div><h3 class="text-2xl font-black italic uppercase tracking-tighter">Grind Track <span class="text-[#ff4d00]">S0${seasonNum}</span></h3><p class="text-gray-500 text-[10px] font-bold tracking-widest mt-1">${seasonDaysLeftText}</p></div>
-                                <div>${hasPremium ? '<span class="bg-[#ff4d00]/10 text-[#ff4d00] border border-[#ff4d00]/30 px-3 py-1.5 rounded-sm text-[9px] font-black uppercase tracking-widest shadow-[0_0_10px_rgba(255,77,0,0.1)]">PRO ACTIVE</span>' : '<button type="button" onclick="window.setView(\'paywall\')" class="btn-grind px-4 py-2 text-[10px]">Get Pro Pass</button>'}</div>
+                                <div>${hasPremium ? '<span class="bg-[#a855f7]/10 text-[#a855f7] border border-[#a855f7]/30 px-3 py-1.5 rounded-sm text-[9px] font-black uppercase tracking-widest shadow-[0_0_10px_rgba(168,85,247,0.2)]">PRO ACTIVE</span>' : '<button type="button" onclick="window.setView(\'paywall\')" class="btn-pro">Get Pro Pass</button>'}</div>
                             </div>
 
                             <div id="pass-viewport" class="no-scrollbar overflow-x-auto py-8 relative flex items-center min-h-[280px] border-y border-white/5 bg-black/40 shadow-inner">
