@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -69,7 +68,7 @@
             user: null, profile: null, view: 'loading',
             authStep: 'phone', tempPhone: '',
             adminTab: 'control', adminEditWeek: 1, 
-            pendingProofs: [], weeklyData: {}, rewardData: [],
+            pendingProofs: [], weeklyData: {}, rewardData: [], habitData: [],
             seasonConfig: { number: 1, active: true, start: '', end: '' }
         };
 
@@ -110,10 +109,11 @@
                                         const data = sSnap.data();
                                         state.weeklyData = data.weeklyData || {}; 
                                         state.rewardData = data.rewardData || [];
+                                        state.habitData = data.habitData || [];
                                         state.seasonConfig = data.seasonConfig || { number: 1, active: true, start: '', end: '' };
                                         if(state.view === 'admin') safeRender();
                                     } else {
-                                        setDoc(doc(db, 'system', 'grind_season'), { weeklyData: {}, rewardData: [], seasonConfig: state.seasonConfig }, { merge: true });
+                                        setDoc(doc(db, 'system', 'grind_season'), { weeklyData: {}, rewardData: [], habitData: [], seasonConfig: state.seasonConfig }, { merge: true });
                                     }
                                 });
 
@@ -159,17 +159,56 @@
         // --- Proof Management ---
         window.acceptProof = async (proofId, uid, mid, xp) => {
             try {
+                const proof = state.pendingProofs.find(p => p.id === proofId) || {};
+                const submissionDate = proof.submissionDate || new Date().toISOString().split('T')[0];
+                
                 const userRef = doc(db, 'plot_users', uid); const snap = await getDoc(userRef);
                 if(snap.exists()) {
-                    const data = snap.data(); const isRepeatable = String(mid).startsWith('rep_');
-                    if(isRepeatable || !(data.completed || []).includes(mid)) {
-                        const newXp = (data.xp || 0) + xp; const newCompleted = [...(data.completed || [])];
-                        if(!isRepeatable) newCompleted.push(mid);
-                        await setDoc(userRef, { xp: newXp, lvl: Math.floor(newXp / 1000) + 1, completed: newCompleted }, { merge: true });
+                    const data = snap.data(); 
+                    const isRepeatable = String(mid).startsWith('rep_');
+                    
+                    let finalXp = xp;
+                    let updateData = {};
+                    let newCompleted = [...(data.completed || [])];
+                    
+                    if (isRepeatable) {
+                        const habit = state.habitData.find(h => h.id === mid);
+                        const streakBonus = habit ? (parseInt(habit.streakBonus) || 0) : 0;
+                        const streaks = data.streaks || {};
+                        const habitStreak = streaks[mid] || { streak: 0, lastDate: '' };
+                        
+                        let newStreak = 1;
+                        if (habitStreak.lastDate) {
+                            const sub = new Date(submissionDate);
+                            const last = new Date(habitStreak.lastDate);
+                            const diffDays = Math.round(Math.abs((sub - last) / (1000 * 60 * 60 * 24)));
+                            if (diffDays === 0) newStreak = habitStreak.streak; // Duplicate for same day
+                            else if (diffDays === 1) newStreak = habitStreak.streak + 1;
+                            else newStreak = 1;
+                        }
+                        
+                        if (habitStreak.lastDate !== submissionDate) {
+                            streaks[mid] = { streak: newStreak, lastDate: submissionDate };
+                            updateData.streaks = streaks;
+                            finalXp = xp + (newStreak > 1 ? (newStreak - 1) * streakBonus : 0);
+                        } else {
+                            finalXp = 0; // Already claimed this day via another proof
+                        }
+                    } else {
+                        if (!newCompleted.includes(mid)) newCompleted.push(mid);
+                        else finalXp = 0; // Normal mission already completed
+                    }
+                    
+                    if (finalXp > 0 || Object.keys(updateData).length > 0) {
+                        const newXp = (data.xp || 0) + finalXp;
+                        updateData.xp = newXp;
+                        updateData.lvl = Math.floor(newXp / 1000) + 1;
+                        updateData.completed = newCompleted;
+                        await setDoc(userRef, updateData, { merge: true });
                     }
                 }
                 await deleteDoc(doc(db, 'plot_pending_proofs', proofId));
-                window.showToast("Proof akzeptiert. XP verteilt.", "success");
+                window.showToast("Proof akzeptiert. XP & Streaks aktualisiert.", "success");
             } catch(e) { window.showToast("Fehler bei Akzeptanz.", "error"); }
         };
 
@@ -253,6 +292,37 @@
             updatedWeekly[week].missions = updatedWeekly[week].missions.filter(m => m.id !== missionId);
             await setDoc(doc(db, 'system', 'grind_season'), { weeklyData: updatedWeekly }, { merge: true });
             window.showToast("Operation entfernt.", "success");
+        };
+
+        // --- Habit Control ---
+        window.addManualHabit = async (e) => {
+            const type = document.getElementById('new_hab_type').value;
+            const newHabit = { 
+                id: 'rep_' + Date.now(), 
+                name: document.getElementById('new_hab_name').value, 
+                desc: document.getElementById('new_hab_desc').value, 
+                xp: parseInt(document.getElementById('new_hab_xp').value), 
+                streakBonus: parseInt(document.getElementById('new_hab_streak').value) || 0,
+                endDate: document.getElementById('new_hab_end').value,
+                type: type,
+                qr_solution: type === 'qr' ? document.getElementById('new_hab_qr').value.trim() : ''
+            };
+            const updatedHabits = JSON.parse(JSON.stringify(state.habitData));
+            updatedHabits.push(newHabit);
+            
+            try {
+                await setDoc(doc(db, 'system', 'grind_season'), { habitData: updatedHabits }, { merge: true });
+                window.showToast("Daily Habit live geschaltet.", "success");
+                e.target.reset();
+                document.getElementById('new_hab_qr').style.display = 'none';
+            } catch(err) { window.showToast("Fehler beim Speichern.", "error"); }
+        };
+
+        window.deleteHabit = async (habitId) => {
+            if(!confirm("Habit wirklich löschen?")) return;
+            const updatedHabits = state.habitData.filter(h => h.id !== habitId);
+            await setDoc(doc(db, 'system', 'grind_season'), { habitData: updatedHabits }, { merge: true });
+            window.showToast("Habit entfernt.", "success");
         };
 
         // --- AI Mission Generator ---
@@ -348,6 +418,8 @@
             const input = document.getElementById('rew_info');
             if(val === 'link') input.placeholder = "URL eintragen (z.B. https://hyrox.com/discount)";
             else if(val === 'shipping') input.placeholder = "Versand-Anweisung (z.B. Schick uns deine Größe)";
+            else if(val === 'xp') input.placeholder = "XP Menge (z.B. 500)";
+            else if(val === 'lvl') input.placeholder = "Level Menge (z.B. 1)";
             else input.placeholder = "Einlöse-Anweisung (z.B. Zeige dies an der Kasse)";
         };
 
@@ -435,7 +507,7 @@
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                             <div class="space-y-8">
                             
-                                <!-- NEU: Season Configuration -->
+                                <!-- Season Configuration -->
                                 <div class="card p-6 rounded-sm border-[#ff4d00]/20 shadow-[0_0_15px_rgba(255,77,0,0.05)]">
                                     <h3 class="text-lg font-black uppercase tracking-widest text-[#ff4d00] mb-4">Season Setup</h3>
                                     <form onsubmit="window.saveSeasonSetup(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -501,6 +573,46 @@
                                         </form>
                                     </div>
                                 </div>
+
+                                <!-- Endless Grind Manager -->
+                                <div class="card p-6 rounded-sm border-blue-900/20 shadow-[0_0_15px_rgba(59,130,246,0.05)]">
+                                    <div class="flex justify-between items-center mb-6">
+                                        <h3 class="text-lg font-black uppercase tracking-widest text-[#3b82f6]">Daily Habits Manager</h3>
+                                    </div>
+                                    <div class="space-y-3 mb-8">
+                                        ${state.habitData.length === 0 ? '<p class="text-xs text-gray-600 italic">Keine Daily Habits aktiv.</p>' : ''}
+                                        ${state.habitData.map(h => `
+                                            <div class="bg-[#050505] p-3 border border-white/10 rounded-sm flex justify-between items-start">
+                                                <div>
+                                                    <div class="font-black italic uppercase text-sm">${h.name}</div>
+                                                    <div class="text-[9px] text-[#3b82f6] font-bold uppercase tracking-widest mt-1">${h.xp} Base XP | 🔥 +${h.streakBonus} XP/Tag</div>
+                                                </div>
+                                                <button type="button" onclick="window.deleteHabit('${h.id}')" class="text-gray-600 hover:text-red-500 transition ml-4"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                    <div class="border-t border-[#1f1f1f] pt-6">
+                                        <h4 class="text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-4">Neues Habit hinzufügen</h4>
+                                        <form onsubmit="event.preventDefault(); window.addManualHabit(event);" class="space-y-3">
+                                            <input id="new_hab_name" required placeholder="Titel (z.B. Eisbaden)" class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#3b82f6]">
+                                            <input id="new_hab_desc" required placeholder="Beschreibung" class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#3b82f6]">
+                                            <div class="flex gap-3">
+                                                <input id="new_hab_xp" type="number" required placeholder="Base XP" class="w-1/2 p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#3b82f6]">
+                                                <input id="new_hab_streak" type="number" required placeholder="Streak Bonus/Tag" class="w-1/2 p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#3b82f6]">
+                                            </div>
+                                            <div>
+                                                <label class="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1 block">Gültig bis (Enddatum)</label>
+                                                <input id="new_hab_end" type="date" required style="color-scheme: dark;" class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#3b82f6] cursor-pointer">
+                                            </div>
+                                            <select id="new_hab_type" onchange="document.getElementById('new_hab_qr').style.display = this.value === 'qr' ? 'block' : 'none'" class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white appearance-none outline-none focus:border-[#3b82f6]">
+                                                <option value="upload">Photo Upload</option>
+                                                <option value="qr">QR Scan</option>
+                                            </select>
+                                            <input id="new_hab_qr" placeholder="QR Code Text" class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#3b82f6]" style="display: none;">
+                                            <button type="submit" class="w-full bg-white text-black font-black uppercase text-[10px] tracking-widest py-3 rounded-sm hover:bg-[#3b82f6] hover:text-white transition">Habit Hinzufügen</button>
+                                        </form>
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="space-y-8">
@@ -533,6 +645,8 @@
                                                 <option value="qr">Lokal einlösen (QR Scan)</option>
                                                 <option value="shipping">Physischer Versand</option>
                                                 <option value="link">Digital (Link / Code)</option>
+                                                <option value="xp">XP Boost (+ XP)</option>
+                                                <option value="lvl">Level Boost (+ Level)</option>
                                             </select>
                                             <input id="rew_info" placeholder="Einlöse-Anweisung" required class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00]">
                                             <button type="submit" class="w-full bg-[#1f1f1f] hover:bg-[#ff4d00] text-white font-bold py-3 rounded-sm text-xs uppercase tracking-widest transition">Speichern</button>
@@ -557,5 +671,3 @@
     </script>
 </body>
 </html>
-
-```
