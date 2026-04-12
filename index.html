@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -134,7 +133,7 @@
             currentWeekTab: 1,
             authStep: 'phone', tempPhone: '', tempUploadData: null,
             weeklyData: { 1: { title: "Loading...", startOffset: 0, missions: [] } },
-            rewardData: [], pendingMissions: [],
+            rewardData: [], habitData: [], pendingMissions: [],
             seasonConfig: null
         };
 
@@ -208,6 +207,7 @@
                     const data = docSnap.data();
                     state.weeklyData = data.weeklyData || state.weeklyData;
                     state.rewardData = data.rewardData || [];
+                    state.habitData = data.habitData || [];
                     state.seasonConfig = data.seasonConfig || { number: 1, active: true, start: '', end: '' };
                     state.currentWeekTab = getActiveWeek();
                 }
@@ -271,11 +271,40 @@
             const btn = document.getElementById(`btn-${mid}`); if(btn) { btn.innerText = "Claiming..."; btn.disabled = true; }
             try {
                 const currentCompleted = state.profile.completed || []; const isRepeatable = String(mid).startsWith('rep_');
-                if(isRepeatable || !currentCompleted.includes(mid)) {
-                    const newXp = (state.profile.xp || 0) + xp; const newCompleted = [...currentCompleted]; if(!isRepeatable) newCompleted.push(mid);
-                    await setDoc(doc(db, 'plot_users', state.user.uid), { xp: newXp, lvl: Math.floor(newXp / 1000) + 1, completed: newCompleted }, { merge: true });
+                let updatePayload = {};
+                let claimSuccess = false;
+
+                if (isRepeatable) {
+                    const habit = state.habitData.find(h => h.id === mid);
+                    const streakBonus = habit ? (parseInt(habit.streakBonus) || 0) : 0;
+                    const streaks = state.profile.streaks || {};
+                    const habitStreak = streaks[mid] || { streak: 0, lastDate: '' };
+                    const todayStr = new Date().toISOString().split('T')[0];
+                    
+                    if (habitStreak.lastDate !== todayStr) {
+                        let activeStreak = habitStreak.streak;
+                        if (habitStreak.lastDate) {
+                            const diffDays = Math.round(Math.abs((new Date(todayStr) - new Date(habitStreak.lastDate)) / (1000 * 60 * 60 * 24)));
+                            if (diffDays > 1) activeStreak = 0;
+                        }
+                        const newStreak = activeStreak + 1;
+                        const finalXp = xp + (newStreak > 1 ? (newStreak - 1) * streakBonus : 0);
+                        const newTotalXp = (state.profile.xp || 0) + finalXp;
+                        streaks[mid] = { streak: newStreak, lastDate: todayStr };
+                        
+                        updatePayload = { xp: newTotalXp, lvl: Math.floor(newTotalXp / 1000) + 1, streaks: streaks };
+                        claimSuccess = true;
+                        window.showToast(`+${finalXp} XP für ${name}! (Streak: ${newStreak}🔥)`, "success");
+                    } else { window.showToast("Heute bereits erledigt!", "error"); }
+                } else if (!currentCompleted.includes(mid)) {
+                    const newXp = (state.profile.xp || 0) + xp; const newCompleted = [...currentCompleted, mid];
+                    updatePayload = { xp: newXp, lvl: Math.floor(newXp / 1000) + 1, completed: newCompleted };
+                    claimSuccess = true;
                     window.showToast(`+${xp} XP für ${name}!`, "success");
                 }
+
+                if (claimSuccess) { await setDoc(doc(db, 'plot_users', state.user.uid), updatePayload, { merge: true }); }
+                else if (btn) { btn.innerText = "Claim XP"; btn.disabled = false; }
             } catch(e) { window.showToast("Fehler beim Claimen.", "error"); if(btn) { btn.innerText = "Claim XP"; btn.disabled = false; } }
         };
 
@@ -323,11 +352,39 @@
                 const btn = document.querySelector('#modal-container button.btn-grind'); if(btn) { btn.innerText = "Verifying..."; btn.disabled = true; }
                 try {
                     const currentCompleted = state.profile.completed || []; const isRepeatable = String(mid).startsWith('rep_');
-                    if(isRepeatable || !currentCompleted.includes(mid)) {
-                        const newXp = (state.profile.xp || 0) + xp; const newCompleted = [...currentCompleted]; if(!isRepeatable) newCompleted.push(mid);
-                        await setDoc(doc(db, 'plot_users', state.user.uid), { xp: newXp, lvl: Math.floor(newXp / 1000) + 1, completed: newCompleted }, { merge: true });
+                    let updatePayload = {};
+                    let claimSuccess = false;
+
+                    if (isRepeatable) {
+                        const habit = state.habitData.find(h => h.id === mid);
+                        const streakBonus = habit ? (parseInt(habit.streakBonus) || 0) : 0;
+                        const streaks = state.profile.streaks || {};
+                        const habitStreak = streaks[mid] || { streak: 0, lastDate: '' };
+                        const todayStr = new Date().toISOString().split('T')[0];
+                        
+                        if (habitStreak.lastDate !== todayStr) {
+                            let activeStreak = habitStreak.streak;
+                            if (habitStreak.lastDate) {
+                                const diffDays = Math.round(Math.abs((new Date(todayStr) - new Date(habitStreak.lastDate)) / (1000 * 60 * 60 * 24)));
+                                if (diffDays > 1) activeStreak = 0;
+                            }
+                            const newStreak = activeStreak + 1;
+                            const finalXp = xp + (newStreak > 1 ? (newStreak - 1) * streakBonus : 0);
+                            const newTotalXp = (state.profile.xp || 0) + finalXp;
+                            streaks[mid] = { streak: newStreak, lastDate: todayStr };
+                            
+                            updatePayload = { xp: newTotalXp, lvl: Math.floor(newTotalXp / 1000) + 1, streaks: streaks };
+                            claimSuccess = true;
+                            window.showToast(`+${finalXp} XP für ${name}! (Streak: ${newStreak}🔥)`, "success");
+                        } else { window.showToast("Heute bereits erledigt!", "error"); }
+                    } else if (!currentCompleted.includes(mid)) {
+                        const newXp = (state.profile.xp || 0) + xp; const newCompleted = [...currentCompleted, mid];
+                        updatePayload = { xp: newXp, lvl: Math.floor(newXp / 1000) + 1, completed: newCompleted };
+                        claimSuccess = true;
                         window.showToast(`+${xp} XP für ${name}! Code verifiziert.`, "success");
                     }
+
+                    if (claimSuccess) { await setDoc(doc(db, 'plot_users', state.user.uid), updatePayload, { merge: true }); }
                     window.closeModal();
                 } catch(e) { window.showToast("Systemfehler.", "error"); if(btn) { btn.innerText = "Code Prüfen"; btn.disabled = false; } }
             } else { window.showToast("Falscher Code.", "error"); }
@@ -340,7 +397,11 @@
             const btn = document.querySelector('#modal-container button.btn-grind'); if(btn) { btn.innerText = "Transmitting..."; btn.disabled = true; }
             const timeout = setTimeout(() => { if(btn && btn.innerText === "Transmitting...") { btn.disabled = false; btn.innerText = "Erneut Senden"; window.showToast("Zeitüberschreitung.", "error"); } }, 10000);
             try {
-                await addDoc(collection(db, 'plot_pending_proofs'), { uid: state.user.uid, alias: state.profile.alias || 'Grinder', mid, missionName: name, xp, type, data, timestamp: new Date() });
+                await addDoc(collection(db, 'plot_pending_proofs'), { 
+                    uid: state.user.uid, alias: state.profile.alias || 'Grinder', mid, 
+                    missionName: name, xp, type, data, timestamp: new Date(),
+                    submissionDate: new Date().toISOString().split('T')[0]
+                });
                 clearTimeout(timeout); window.showToast("Gesendet. Warte auf Überprüfung.", "info"); window.closeModal();
             } catch(e) { clearTimeout(timeout); window.showToast("Systemfehler beim Senden.", "error"); if(btn) { btn.innerText = "Erneut Senden"; btn.disabled = false; } }
         };
@@ -376,6 +437,35 @@
             } catch (e) { window.showToast("Fehler beim Einlösen.", "error"); window.stopRedeemHold(); } finally { isRedeeming = false; }
         };
 
+        window.claimBoost = async (rewardLvl, tier, type, amountStr) => {
+            const amount = parseInt(amountStr) || 0;
+            const btn = document.getElementById('boost-claim-btn');
+            if(btn) { btn.innerText = "Claiming..."; btn.disabled = true; }
+            const rewardId = `lvl${rewardLvl}_${tier}`;
+            
+            try {
+                const p = state.profile;
+                if((p.redeemed || []).includes(rewardId)) return;
+                
+                let newXp = p.xp || 0;
+                let newLvl = p.lvl || 1;
+                
+                if (type === 'xp') {
+                    newXp += amount;
+                    newLvl = Math.floor(newXp / 1000) + 1;
+                } else if (type === 'lvl') {
+                    newLvl += amount;
+                    newXp = (newLvl - 1) * 1000 + (newXp % 1000);
+                }
+                
+                const currentRedeemed = [...(p.redeemed || []), rewardId];
+                await setDoc(doc(db, 'plot_users', state.user.uid), { xp: newXp, lvl: newLvl, redeemed: currentRedeemed }, { merge: true });
+                
+                window.showToast(`BOOST AKTIVIERT!`, "success");
+                window.closeModal();
+            } catch(e) { window.showToast("Fehler beim Einlösen.", "error"); if(btn) { btn.innerText = "BOOST AKTIVIEREN"; btn.disabled = false; } }
+        };
+
         window.openClaimModal = (lvl, tier) => {
             isRedeeming = false; holdProgress = 0;
             const reward = state.rewardData.find(r => r.lvl === lvl); if(!reward) return;
@@ -384,11 +474,14 @@
             const rewardId = `lvl${lvl}_${tier}`; const isAlreadyRedeemed = (state.profile.redeemed || []).includes(rewardId);
             let contentHtml = '';
 
-            if (isAlreadyRedeemed && (type === 'qr' || type === 'shipping')) {
+            if (isAlreadyRedeemed && (type === 'qr' || type === 'shipping' || type === 'xp' || type === 'lvl')) {
                 contentHtml = `<div class="bg-[#111] p-8 rounded-sm flex flex-col items-center justify-center mb-6 border border-white/5 shadow-inner"><div class="w-12 h-12 rounded-full border-2 border-gray-600 flex items-center justify-center mb-4 opacity-50"><svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div><p class="text-xs text-gray-500 uppercase tracking-widest font-bold text-center">Bereits eingelöst<br><span class="font-normal text-[10px] mt-1 block">Dieser Loot ist nicht mehr verfügbar.</span></p></div>`;
             } else if (type === 'link') {
                 const isUrl = info.startsWith('http');
                 contentHtml = `<div class="bg-[#1f1f1f] p-6 rounded-sm flex flex-col items-center justify-center mb-6 border ${borderClass}"><p class="text-xs text-gray-400 mb-4 uppercase tracking-widest font-bold">Access Code / Link</p>${isUrl ? `<a href="${info}" target="_blank" class="w-full ${bgClass} text-white font-black py-3 px-4 rounded-sm text-center uppercase tracking-widest hover:opacity-80 transition">Link öffnen</a>` : `<div class="w-full bg-black text-white font-mono text-xl py-3 px-4 rounded-sm text-center select-all border border-white/10">${info}</div>`}</div>`;
+            } else if (type === 'xp' || type === 'lvl') {
+                const isXp = type === 'xp'; const unit = isXp ? 'XP' : 'Level';
+                contentHtml = `<div class="bg-[#1f1f1f] p-6 rounded-sm flex flex-col mb-6 border ${borderClass} shadow-2xl relative overflow-hidden"><div class="absolute top-0 right-0 bg-[#000] px-2 py-1 text-[8px] font-bold text-gray-500 uppercase tracking-widest rounded-bl-sm">Instant Boost</div><p class="text-[11px] text-gray-300 mb-8 leading-relaxed text-center font-medium">Dies fügt deinem Account direkt XP/Level hinzu.<br><span class="text-white font-black uppercase tracking-widest block mt-3 text-2xl ${textClass}">+${info} ${unit}</span></p><button type="button" id="boost-claim-btn" onclick="window.claimBoost(${lvl}, '${tier}', '${type}', '${info}')" class="w-full ${bgClass} text-white font-black py-4 px-4 rounded-sm text-sm uppercase tracking-widest shadow-[0_0_20px_rgba(255,77,0,0.4)] hover:scale-[1.02] transition">BOOST AKTIVIEREN</button></div>`;
             } else if (type === 'qr') {
                 contentHtml = `<div id="redeem-container" class="bg-[#1f1f1f] p-6 rounded-sm flex flex-col mb-6 border ${borderClass} shadow-2xl relative overflow-hidden"><div class="absolute top-0 right-0 bg-[#000] px-2 py-1 text-[8px] font-bold text-gray-500 uppercase tracking-widest rounded-bl-sm">One-Time Use</div><p class="text-[11px] text-gray-300 mb-8 leading-relaxed text-center font-medium">${info}<br><span class="text-white font-black uppercase tracking-widest block mt-3 border-t border-white/10 pt-3">Das Personal muss das Einlösen bestätigen!</span></p><div onmousedown="window.startRedeemHold(${lvl}, '${tier}', event)" onmouseup="window.stopRedeemHold()" onmouseleave="window.stopRedeemHold()" ontouchstart="window.startRedeemHold(${lvl}, '${tier}', event)" ontouchend="window.stopRedeemHold()" class="relative w-full h-16 bg-black border border-white/20 rounded-sm overflow-hidden cursor-pointer flex items-center justify-center group"><div id="redeem-btn-fill" class="absolute left-0 top-0 bottom-0 w-0 ${bgClass} z-0" style="transition: none;"></div><span id="redeem-btn-text" class="relative z-10 text-white font-black italic uppercase tracking-widest text-sm pointer-events-none drop-shadow-md">Hold to Redeem</span></div></div>`;
             } else if (type === 'shipping') {
@@ -455,7 +548,7 @@
             if(!nameInput) return window.showToast("Bitte gib einen Namen ein.", "error"); if(!cityInput || cityInput === "locked") return window.showToast("Bitte wähle deine Base.", "error");
             const btn = e.target.querySelector('button'); btn.disabled = true; btn.innerText = "Registering...";
             try {
-                state.profile = { xp: 0, lvl: 1, completed: [], redeemed: [], alias: nameInput, city: cityInput, hasPremium: false };
+                state.profile = { xp: 0, lvl: 1, completed: [], redeemed: [], streaks: {}, alias: nameInput, city: cityInput, hasPremium: false };
                 await setDoc(doc(db, 'plot_users', state.user.uid), state.profile);
                 window.playGrindIntro(); window.showToast(`Willkommen, ${nameInput}.`, "success"); state.view = 'dashboard'; render();
             } catch (err) { window.showToast("Fehler bei der Registrierung.", "error"); btn.disabled = false; btn.innerText = "Confirm Identity"; }
@@ -589,38 +682,18 @@
                         <p>Max Mustermann<br>Musterstraße 1<br>12345 Musterstadt</p>
                         <h2>Kontakt</h2>
                         <p>Telefon: +49 (0) 123 44 55 66<br>E-Mail: info@grind-app.com</p>
-                        <h2>Verbraucherstreitbeilegung/Universalschlichtungsstelle</h2>
-                        <p>Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.</p>
-                        <h2>Haftung für Inhalte</h2>
-                        <p>Als Diensteanbieter sind wir gemäß § 7 Abs.1 TMG für eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich. Nach §§ 8 bis 10 TMG sind wir als Diensteanbieter jedoch nicht verpflichtet, übermittelte oder gespeicherte fremde Informationen zu überwachen.</p>
                     `;
                 } else if (state.view === 'datenschutz') {
                     title = 'Datenschutzerklärung';
                     content = `
                         <h2>1. Datenschutz auf einen Blick</h2>
                         <p>Wir nehmen den Schutz Ihrer persönlichen Daten sehr ernst. Wir behandeln Ihre personenbezogenen Daten vertraulich und entsprechend der gesetzlichen Datenschutzvorschriften sowie dieser Datenschutzerklärung.</p>
-                        <h2>2. Datenerfassung in unserer App</h2>
-                        <p><strong>Account-Daten:</strong> Zur Nutzung der App ist eine Registrierung via Telefonnummer erforderlich (betrieben durch Google Firebase Auth). Zudem speichern wir deinen gewählten Alias und deine Stadt.</p>
-                        <p><strong>Kamera-Nutzung:</strong> Die App greift auf deine Kamera zu, um QR-Codes zu scannen. Bilder werden dabei nur lokal im Browser verarbeitet, es sei denn, du lädst aktiv ein Foto als Beweis hoch.</p>
-                        <p><strong>Uploads:</strong> Wenn du Beweisfotos für Missionen hochlädst, werden diese auf unseren Servern (Firebase Storage) zwischengespeichert, bis ein Admin sie verifiziert oder ablehnt.</p>
-                        <h2>3. Zahlungsanbieter</h2>
-                        <p>Wenn du den "PRO Pass" kaufst, erfolgt die Abwicklung über PayPal. Wir speichern keine Kreditkarten- oder Bankdaten in unserem System. Es gelten die Datenschutzbestimmungen von PayPal (Europe) S.à r.l. et Cie, S.C.A.</p>
-                        <h2>4. Hosting (Google Firebase)</h2>
-                        <p>Diese App wird über Google Firebase gehostet. Firebase erhebt und verarbeitet IP-Adressen und Nutzungsdaten in unserem Auftrag zur Bereitstellung der Infrastruktur.</p>
                     `;
                 } else if (state.view === 'agb') {
                     title = 'AGB';
                     content = `
                         <h2>1. Geltungsbereich</h2>
                         <p>Diese Allgemeinen Geschäftsbedingungen gelten für alle Verträge und Nutzungen der GRIND Web-App, insbesondere für den Erwerb des digitalen "PRO Passes".</p>
-                        <h2>2. Leistungen des "PRO Pass"</h2>
-                        <p>Durch den Erwerb des PRO Passes erhält der Nutzer für die Dauer der aktuellen Season Zugang zu Premium-Belohnungen (Loot), sofern das entsprechende Level durch XP erreicht wird. Ein Anspruch auf physische Produkte besteht nur, solange der Vorrat bei unseren Partnern reicht.</p>
-                        <h2>3. Preise und Zahlung</h2>
-                        <p>Die angegebenen Preise sind Endpreise inklusive der gesetzlichen Mehrwertsteuer. Die Zahlung erfolgt über den eingebundenen Dienstleister (PayPal).</p>
-                        <h2>4. Widerrufsrecht für digitale Inhalte</h2>
-                        <p><strong>Ausdrücklicher Hinweis:</strong> Beim Kauf des PRO Passes handelt es sich um einen Vertrag über die Lieferung von nicht auf einem körperlichen Datenträger befindlichen digitalen Inhalten. Das Widerrufsrecht erlischt vorzeitig, wenn wir mit der Ausführung des Vertrags (Freischaltung des PRO-Status in der App) begonnen haben, nachdem Sie ausdrücklich zugestimmt haben, dass wir mit der Ausführung vor Ablauf der Widerrufsfrist beginnen, und Sie Ihre Kenntnis davon bestätigt haben, dass Sie durch Ihre Zustimmung mit Beginn der Ausführung des Vertrags Ihr Widerrufsrecht verlieren.</p>
-                        <h2>5. Fair Play & Account-Sperrung</h2>
-                        <p>Das Manipulieren von XP, das Fälschen von Beweisfotos oder das Weitergeben von einmaligen QR-Codes führt zum sofortigen Ausschluss und zur Löschung des Accounts ohne Anspruch auf Rückerstattung.</p>
                     `;
                 }
 
@@ -690,7 +763,7 @@
             }
 
             if (state.view === 'dashboard') {
-                const p = state.profile || { xp: 0, lvl: 1, completed: [], redeemed: [], alias: 'Stranger', city: 'Köln', hasPremium: false };
+                const p = state.profile || { xp: 0, lvl: 1, completed: [], redeemed: [], streaks: {}, alias: 'Stranger', city: 'Köln', hasPremium: false };
                 const safeXp = p.xp || 0; 
                 const safeLvl = p.lvl || 1; 
                 const safeCompleted = p.completed || []; 
@@ -888,9 +961,6 @@
                     `;
                 });
 
-                const isUscPending = state.pendingMissions.includes('rep_usc');
-                const uscBtnText = isUscPending ? 'Wird überprüft ⏳' : 'Verify Habit';
-
                 html += `
                             </div>
                         </section>
@@ -903,16 +973,84 @@
                                 </div>
                             </div>
                             <div class="space-y-4">
-                                <div class="card p-6 rounded-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4 group relative overflow-hidden ${isUscPending ? 'is-pending border-yellow-500/30' : ''}">
-                                    <div class="absolute left-0 top-0 bottom-0 w-1 ${isUscPending ? 'bg-yellow-500' : 'bg-gray-600 group-hover:bg-[#ff4d00]'} transition"></div>
-                                    <div class="pending-overlay"><span class="text-yellow-500 font-black italic uppercase tracking-widest flex items-center gap-2"><svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> Wird überprüft</span></div>
-                                    <div class="pr-6 relative z-0 flex-1">
-                                        <h4 class="font-black italic uppercase text-lg group-hover:text-[#ff4d00] transition tracking-tighter">Urban Sports Club</h4><p class="text-gray-400 text-xs mt-1 font-medium leading-relaxed">Lade einen Screenshot deines erfolgreichen USC Check-Ins hoch.</p><span class="inline-block mt-3 border border-gray-700 bg-black px-2 py-0.5 text-[8px] font-bold uppercase tracking-widest text-gray-400">📷 Photo Upload</span>
-                                    </div>
-                                    <div class="text-left md:text-right flex-shrink-0 relative z-0 flex flex-col items-start md:items-end w-full md:w-auto mt-4 md:mt-0">
-                                        <span class="block text-[#ff4d00] font-black text-2xl italic tracking-tighter mb-2">+25</span><button type="button" onclick="window.openVerifyModal('rep_usc', 25, 'upload', 'Urban Sports Check-in', '')" class="btn-grind w-full md:w-auto py-3 text-[10px] bg-white text-black hover:bg-[#ff4d00] hover:text-white transition" ${isUscPending ? 'disabled' : ''}>${uscBtnText}</button>
-                                    </div>
+                `;
+
+                if ((state.habitData || []).length === 0) {
+                    html += `<div class="text-center p-8 text-gray-600 italic text-sm">Derzeit keine Daily Habits aktiv.</div>`;
+                }
+
+                (state.habitData || []).forEach(m => {
+                    const isPending = state.pendingMissions.includes(m.id);
+                    const todayStr = new Date().toISOString().split('T')[0];
+                    const habitStreak = p.streaks?.[m.id] || { streak: 0, lastDate: '' };
+                    const isDoneToday = habitStreak.lastDate === todayStr;
+                    
+                    let activeStreak = habitStreak.streak;
+                    if (habitStreak.lastDate) {
+                        const diffDays = Math.round(Math.abs((new Date(todayStr) - new Date(habitStreak.lastDate)) / (1000 * 60 * 60 * 24)));
+                        if (diffDays > 1) activeStreak = 0;
+                    }
+
+                    const nextStreak = isDoneToday ? activeStreak : activeStreak + 1;
+                    const currentBonus = (nextStreak > 1 ? (nextStreak - 1) * (parseInt(m.streakBonus) || 0) : 0);
+                    const totalXpDisplay = isDoneToday ? m.xp : m.xp + currentBonus;
+
+                    let habDaysLeftText = "LIVE";
+                    if (m.endDate) {
+                        const end = new Date(m.endDate);
+                        end.setHours(23, 59, 59, 999);
+                        const diff = end.getTime() - new Date().getTime();
+                        if (diff > 0) {
+                            const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+                            habDaysLeftText = d > 0 ? `NOCH ${d} TAG${d === 1 ? '' : 'E'}` : "LETZTER TAG";
+                        } else {
+                            habDaysLeftText = "ABGELAUFEN";
+                        }
+                    }
+                    
+                    const isExpired = habDaysLeftText === "ABGELAUFEN";
+                    let cardClasses = 'card p-6 rounded-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4 group relative overflow-hidden ';
+                    if (isDoneToday) cardClasses += 'is-completed border-[#ff4d00]/30 opacity-75';
+                    else if (isPending) cardClasses += 'is-pending border-yellow-500/30';
+                    else if (isExpired) cardClasses += 'opacity-50 cursor-not-allowed';
+
+                    let badgeText = m.type === 'qr' ? '📍 QR Scan' : (m.type === 'upload' ? '📷 Photo Upload' : '⚡ Action');
+                    const safeName = m.name.replace(/'/g, "\\'");
+                    const safeQrSolution = m.qr_solution ? m.qr_solution.replace(/'/g, "\\'") : '';
+                    
+                    let btnAction = '';
+                    if (!isExpired) {
+                        btnAction = m.type === 'instant' ? `window.claimInstantMission('${m.id}', ${m.xp}, '${safeName}')` : `window.openVerifyModal('${m.id}', ${m.xp}, '${m.type}', '${safeName}', '${safeQrSolution}')`;
+                    }
+                    
+                    let btnText = isDoneToday ? 'DONE FOR TODAY' : (isPending ? 'Wird überprüft ⏳' : 'Verify Habit');
+                    if (isExpired) btnText = 'LOCKED';
+
+                    html += `
+                        <div class="${cardClasses}">
+                            <div class="absolute left-0 top-0 bottom-0 w-1 ${isPending ? 'bg-yellow-500' : (isDoneToday ? 'bg-[#ff4d00]' : 'bg-gray-600 group-hover:bg-[#ff4d00]')} transition"></div>
+                            ${isDoneToday ? `<div class="completed-overlay"><span class="text-[#ff4d00] font-black italic uppercase tracking-widest flex items-center gap-2"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> DONE TODAY</span></div>` : ''}
+                            ${isPending ? `<div class="pending-overlay"><span class="text-yellow-500 font-black italic uppercase tracking-widest flex items-center gap-2"><svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> Wird überprüft</span></div>` : ''}
+                            <div class="pr-6 relative z-0 flex-1 w-full">
+                                <div class="flex justify-between items-start mb-1">
+                                    <h4 class="font-black italic uppercase text-lg group-hover:text-[#ff4d00] transition tracking-tighter break-words max-w-[70%]">${m.name}</h4>
+                                    <span class="text-[9px] font-bold text-gray-500 tracking-widest uppercase bg-black px-2 py-1 rounded-sm border border-gray-800">${habDaysLeftText}</span>
                                 </div>
+                                <p class="text-gray-400 text-xs mt-1 font-medium leading-relaxed">${m.desc}</p>
+                                <div class="flex flex-wrap items-center gap-2 mt-3">
+                                    <span class="border border-gray-700 bg-black px-2 py-0.5 text-[8px] font-bold uppercase tracking-widest text-gray-400">${badgeText}</span>
+                                    ${m.streakBonus > 0 ? `<span class="border border-[#ff4d00]/30 bg-[#ff4d00]/10 text-[#ff4d00] px-2 py-0.5 text-[8px] font-bold uppercase tracking-widest shadow-[0_0_10px_rgba(255,77,0,0.2)]">🔥 Streak: ${activeStreak} (+${m.streakBonus} XP/Tag)</span>` : `<span class="border border-gray-700 bg-gray-900 text-gray-300 px-2 py-0.5 text-[8px] font-bold uppercase tracking-widest">🔥 Streak: ${activeStreak}</span>`}
+                                </div>
+                            </div>
+                            <div class="text-left md:text-right flex-shrink-0 relative z-0 flex flex-col items-start md:items-end w-full md:w-auto mt-4 md:mt-0">
+                                <span class="block text-[#ff4d00] font-black text-2xl italic tracking-tighter mb-2">+${totalXpDisplay}</span>
+                                <button type="button" onclick="${btnAction}" class="btn-grind w-full md:w-auto py-3 text-[10px] bg-white text-black hover:bg-[#ff4d00] hover:text-white transition" ${(isDoneToday || isPending || isExpired) ? 'disabled' : ''}>${btnText}</button>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += `
                             </div>
                         </section>
                     </main>
@@ -960,7 +1098,3 @@
     </script>
 </body>
 </html>
-
-
-
-```
