@@ -1,0 +1,257 @@
+```html
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GRIND. | Join the Health Tribe</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&display=swap" rel="stylesheet">
+    
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #050505; 
+            color: #ffffff; 
+            overflow-x: hidden; 
+            scroll-behavior: smooth;
+        }
+
+        .bg-grid {
+            background-size: 50px 50px;
+            background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        }
+
+        .grind-gradient { background: linear-gradient(90deg, #ff4d00, #ff8800); }
+        .text-gradient { background: linear-gradient(90deg, #ffffff, #888888); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        .btn-grind { 
+            background: white; color: black; font-weight: 900; font-style: italic; text-transform: uppercase; 
+            padding: 16px 32px; font-size: 14px; transition: all 0.3s; box-shadow: 0 4px 15px rgba(255,255,255,0.1); 
+            cursor: pointer; border-radius: 4px; border: none; letter-spacing: 0.1em; display: inline-block;
+        }
+        .btn-grind:hover { background: #ff4d00; color: white; box-shadow: 0 0 30px rgba(255, 77, 0, 0.5); transform: translateY(-2px); }
+
+        /* Endless Trailer Animation */
+        .trailer-container { position: relative; height: 120px; display: flex; align-items: center; justify-content: center; }
+        .trailer-word {
+            position: absolute;
+            font-size: 12vw; font-weight: 900; font-style: italic; text-transform: uppercase;
+            white-space: nowrap; opacity: 0; letter-spacing: -0.05em; text-align: center;
+            animation: endlessTrailer 8s infinite;
+        }
+        @media (min-width: 768px) { .trailer-word { font-size: 8vw; } }
+
+        .trailer-word:nth-child(1) { animation-delay: 0s; color: #666; }
+        .trailer-word:nth-child(2) { animation-delay: 2s; color: #aaa; }
+        .trailer-word:nth-child(3) { animation-delay: 4s; color: #fff; }
+        .trailer-word:nth-child(4) { animation-delay: 6s; color: #ff4d00; text-shadow: 0 0 40px rgba(255,77,0,0.5); }
+
+        @keyframes endlessTrailer {
+            0% { opacity: 0; transform: scale(0.9); filter: blur(10px); }
+            10% { opacity: 1; transform: scale(1); filter: blur(0px); }
+            15% { opacity: 1; transform: scale(1.02); filter: blur(0px); }
+            25% { opacity: 0; transform: scale(1.1); filter: blur(10px); }
+            100% { opacity: 0; }
+        }
+
+        /* Floating UI Elements */
+        @keyframes float-slow { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+        .float-el { animation: float-slow 6s ease-in-out infinite; }
+        .float-el-delayed { animation: float-slow 6s ease-in-out infinite; animation-delay: 3s; }
+
+        /* Scroll Reveal */
+        .reveal { opacity: 0; transform: translateY(50px); transition: all 1s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+
+        /* Glowing aura */
+        .aura { position: absolute; border-radius: 50%; filter: blur(100px); z-index: 0; pointer-events: none; }
+        .aura-orange { background: rgba(255, 77, 0, 0.15); width: 600px; height: 600px; }
+        
+        .mock-card { background: #0f0f0f; border: 1px solid #1f1f1f; border-radius: 4px; box-shadow: 0 20px 40px rgba(0,0,0,0.8); }
+    </style>
+</head>
+<body class="bg-grid">
+
+    <!-- Navbar -->
+    <nav class="fixed top-0 left-0 right-0 z-50 p-6 flex justify-between items-center bg-black/50 backdrop-blur-md border-b border-white/5">
+        <div class="text-2xl font-black italic tracking-tighter">GRIND<span class="text-[#ff4d00]">.</span></div>
+        <a href="index.html" class="text-[10px] uppercase font-bold text-white border border-[#ff4d00] bg-[#ff4d00]/10 px-4 py-2 rounded-sm hover:bg-[#ff4d00] transition tracking-widest">Enter Drop</a>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative min-h-screen flex flex-col items-center justify-center pt-20 overflow-hidden">
+        <div class="aura aura-orange top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></div>
+        
+        <p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-[0.4em] mb-8 relative z-10">The Network is live</p>
+        
+        <div class="trailer-container w-full relative z-10 mb-8">
+            <div class="trailer-word">ELEVATE HEALTH.</div>
+            <div class="trailer-word">FORGE BONDS.</div>
+            <div class="trailer-word">CLEAR MISSIONS.</div>
+            <div class="trailer-word">GRIND.</div>
+        </div>
+
+        <p class="text-gray-400 font-medium text-sm md:text-base max-w-lg text-center leading-relaxed mt-4 mb-12 relative z-10 reveal">
+            Tritt dem exklusiven Health Tribe bei. Sammle XP durch Workouts, Eisbaden und Deep Talks. Schalte echten Loot frei.
+        </p>
+
+        <a href="index.html" class="btn-grind reveal relative z-10">Join The Base</a>
+
+        <!-- Scroll Indicator -->
+        <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 flex flex-col items-center opacity-50 reveal">
+            <span class="text-[8px] uppercase tracking-[0.3em] font-bold mb-2">Scroll</span>
+            <div class="w-[1px] h-12 bg-gradient-to-b from-[#ff4d00] to-transparent"></div>
+        </div>
+    </section>
+
+    <!-- Feature 1: Health & Missions -->
+    <section class="relative py-32 px-6 max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-16">
+        <div class="md:w-1/2 reveal relative z-10">
+            <p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-[0.4em] mb-4">Phase 01</p>
+            <h2 class="text-4xl md:text-6xl font-black italic tracking-tighter mb-6 leading-none text-gradient">PUSH YOUR<br>LIMITS.</h2>
+            <p class="text-gray-400 text-sm leading-relaxed mb-8">
+                Kein Stillstand. Deine Gesundheit ist dein größtes Asset. Absolviere wöchentliche Operations – vom 10k Run über Nutrition-Challenges bis zum USC Check-in. Lade dein Beweisfoto hoch und sichere dir die XP.
+            </p>
+            <div class="flex gap-4">
+                <div class="bg-[#111] border border-[#1f1f1f] p-4 rounded-sm flex-1">
+                    <span class="text-2xl block mb-2">🏃</span>
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-white">Physical</span>
+                </div>
+                <div class="bg-[#111] border border-[#1f1f1f] p-4 rounded-sm flex-1">
+                    <span class="text-2xl block mb-2">🧠</span>
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-white">Mental</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="md:w-1/2 relative h-[400px] w-full reveal">
+            <div class="aura aura-orange absolute right-0 top-0 opacity-50"></div>
+            <!-- Mock Mission Card -->
+            <div class="mock-card float-el absolute right-0 md:right-10 top-10 w-full md:w-[400px] p-6 z-20 border-l-4 border-l-[#ff4d00]">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h4 class="font-black italic uppercase text-xl text-white tracking-tighter">Ice Bath Challenge</h4>
+                        <span class="inline-block mt-2 border border-gray-700 bg-black px-2 py-0.5 text-[8px] font-bold uppercase tracking-widest text-gray-400">📷 Photo Upload</span>
+                    </div>
+                    <span class="text-[#ff4d00] font-black text-2xl italic tracking-tighter">+500</span>
+                </div>
+                <p class="text-gray-500 text-xs mb-4">Mindestens 3 Minuten in unter 10 Grad kaltem Wasser. Zeig uns den Timer.</p>
+                <div class="w-full bg-[#1f1f1f] text-center py-3 text-[10px] font-black uppercase tracking-widest text-gray-400 rounded-sm">Verify Operation</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Feature 2: Relationships & Tribe -->
+    <section class="relative py-32 px-6 max-w-6xl mx-auto flex flex-col-reverse md:flex-row items-center gap-16 border-t border-white/5">
+        <div class="md:w-1/2 relative h-[400px] w-full reveal">
+            <div class="aura aura-orange absolute left-0 bottom-0 opacity-30"></div>
+            <!-- Mock User Stats -->
+            <div class="mock-card float-el-delayed absolute left-0 md:left-10 top-20 w-full md:w-[350px] p-8 z-20 flex flex-col items-center text-center">
+                <div class="w-20 h-20 rounded-full border-4 border-[#1f1f1f] bg-black flex items-center justify-center font-black italic text-2xl grind-gradient text-black mb-4">LVL 4</div>
+                <h4 class="font-black italic uppercase text-2xl text-white tracking-tighter">STRANGER</h4>
+                <p class="text-gray-500 font-mono mt-1 text-[10px] tracking-widest uppercase mb-6">ATHLETE | BASE: KÖLN</p>
+                <div class="w-full flex justify-between text-[10px] font-bold uppercase text-gray-500 mb-2 tracking-widest italic">
+                    <span>XP: <span class="text-white">3450</span></span>
+                </div>
+                <div class="w-full bg-gray-900 h-2 rounded-full overflow-hidden border border-white/5 relative mb-4">
+                    <div class="grind-gradient h-full w-[45%]"></div>
+                </div>
+                <span class="text-xs text-green-500 font-bold uppercase tracking-widest">✓ 12 Operations Cleared</span>
+            </div>
+        </div>
+
+        <div class="md:w-1/2 reveal relative z-10 text-right">
+            <p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-[0.4em] mb-4">Phase 02</p>
+            <h2 class="text-4xl md:text-6xl font-black italic tracking-tighter mb-6 leading-none text-gradient">FORGE REAL<br>BONDS.</h2>
+            <p class="text-gray-400 text-sm leading-relaxed mb-8 ml-auto">
+                Dein Umfeld formt dich. Finde Gleichgesinnte in deiner Base. Tausche dich über Deep Talks aus, absolviert Partner-Workouts und pusht euch gegenseitig aufs nächste Level. The Tribe is watching.
+            </p>
+            <div class="inline-block bg-[#111] border border-white/10 px-6 py-3 rounded-full text-xs font-bold uppercase tracking-widest text-gray-300">
+                📍 Active Base: Köln
+            </div>
+        </div>
+    </section>
+
+    <!-- Feature 3: Loot -->
+    <section class="relative py-32 px-6 max-w-6xl mx-auto text-center border-t border-white/5">
+        <div class="reveal">
+            <p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-[0.4em] mb-4">Phase 03</p>
+            <h2 class="text-4xl md:text-6xl font-black italic tracking-tighter mb-6 leading-none text-gradient">CLAIM YOUR<br>REWARDS.</h2>
+            <p class="text-gray-400 text-sm leading-relaxed mb-12 max-w-xl mx-auto">
+                Level aufsteigen heißt abkassieren. Schalte jeden Rang neues Loot frei. Von kostenlosen Riegeln bei unseren lokalen Partnern bis hin zu exklusivem Merch. Upgrade auf den PRO Pass für den maximalen Drop.
+            </p>
+        </div>
+
+        <!-- Horizontal Track Preview -->
+        <div class="flex justify-center items-center gap-6 md:gap-12 reveal overflow-hidden py-10 relative">
+            <div class="absolute left-0 right-0 top-1/2 h-[1px] bg-[#1f1f1f] -translate-y-1/2 z-0"></div>
+            <div class="absolute left-[20%] right-[40%] top-1/2 h-[2px] bg-[#ff4d00] -translate-y-1/2 z-0 shadow-[0_0_15px_rgba(255,77,0,0.5)]"></div>
+            
+            <!-- Nodes -->
+            <div class="relative z-10 flex flex-col items-center opacity-50 scale-90">
+                <div class="w-16 h-12 bg-black border border-[#1f1f1f] mb-3 rounded-sm flex items-center justify-center text-[8px] font-bold text-gray-500 uppercase">Free Coffee</div>
+                <div class="w-8 h-8 rounded-full bg-gray-800 text-gray-400 border border-white/20 flex items-center justify-center font-black italic text-xs">4</div>
+            </div>
+            
+            <div class="relative z-10 flex flex-col items-center">
+                <div class="w-24 h-20 bg-[#140a00] border border-[#ff4d00] mb-3 rounded-sm flex flex-col items-center justify-center shadow-[0_0_15px_rgba(255,77,0,0.15)]">
+                    <span class="bg-[#333] text-white text-[6px] font-black px-1.5 py-0.5 rounded-sm mb-2 uppercase">Free</span>
+                    <span class="text-[9px] font-bold text-gray-200 uppercase text-center px-1">ESN Protein Bar</span>
+                </div>
+                <div class="w-12 h-12 rounded-full grind-gradient text-black flex items-center justify-center font-black italic text-sm shadow-[0_0_20px_rgba(255,77,0,0.4)] scale-110 z-20">5</div>
+                <div class="w-28 h-24 mt-4 bg-[#1a0a2e] border border-[#a855f7] rounded-sm flex flex-col items-center justify-center shadow-[0_0_20px_rgba(168,85,247,0.25)]">
+                    <span class="text-[10px] font-bold text-[#d8b4fe] uppercase text-center px-1">Grind Shirt</span>
+                    <span class="bg-gradient-to-r from-[#7c3aed] to-[#9333ea] text-white text-[7px] font-black px-2 py-0.5 mt-2 rounded-sm uppercase shadow-[0_2px_8px_rgba(124,58,237,0.4)]">PRO</span>
+                </div>
+            </div>
+
+            <div class="relative z-10 flex flex-col items-center opacity-50 scale-90">
+                <div class="w-16 h-12 bg-black border border-[#1f1f1f] mb-3 rounded-sm flex items-center justify-center text-[8px] font-bold text-gray-500 uppercase">-</div>
+                <div class="w-8 h-8 rounded-full bg-gray-800 text-gray-400 border border-white/20 flex items-center justify-center font-black italic text-xs">6</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section class="relative py-32 flex flex-col items-center justify-center text-center overflow-hidden">
+        <div class="aura aura-orange bottom-0 opacity-60"></div>
+        <h2 class="text-6xl md:text-8xl font-black italic tracking-tighter mb-8 relative z-10 drop-shadow-2xl">ARE YOU<br>READY?</h2>
+        <a href="index.html" class="btn-grind reveal relative z-10 text-lg px-12 py-5 border border-white/20 hover:border-transparent">Enter The Drop</a>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-white/5 py-8 text-center flex flex-col items-center justify-center gap-6 w-full relative z-10">
+        <div class="flex flex-wrap justify-center gap-x-6 gap-y-3 text-[10px] uppercase font-bold tracking-[0.2em] text-gray-600">
+            <a href="index.html" class="hover:text-white transition">App</a>
+            <span class="hidden md:inline">•</span>
+            <a href="index.html" class="hover:text-white transition">Impressum</a>
+            <span class="hidden md:inline">•</span>
+            <a href="index.html" class="hover:text-white transition">Datenschutz</a>
+        </div>
+        <p class="text-[#1f1f1f] text-[9px] uppercase tracking-widest font-black">© 2026 GRIND NETWORK. ALL RIGHTS RESERVED.</p>
+    </footer>
+
+    <!-- Scroll Script for Reveal animations -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const reveals = document.querySelectorAll('.reveal');
+            const revealOnScroll = () => {
+                const windowHeight = window.innerHeight;
+                const elementVisible = 100;
+                reveals.forEach(reveal => {
+                    const elementTop = reveal.getBoundingClientRect().top;
+                    if (elementTop < windowHeight - elementVisible) {
+                        reveal.classList.add('active');
+                    }
+                });
+            };
+            window.addEventListener('scroll', revealOnScroll);
+            revealOnScroll(); // Trigger on load
+        });
+    </script>
+</body>
+</html>
+
+```
