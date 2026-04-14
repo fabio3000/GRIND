@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -160,11 +161,21 @@
             if(!state.seasonConfig || !state.seasonConfig.start) return 1;
             const now = new Date();
             const start = new Date(state.seasonConfig.start);
+
             if(now < start) return 1;
+
+            let firstSunday = new Date(start.getFullYear(), start.getMonth(), 1);
+            while (firstSunday.getDay() !== 0) {
+                firstSunday.setDate(firstSunday.getDate() + 1);
+            }
+            firstSunday.setHours(23, 59, 59, 999);
+
+            if (now.getTime() <= firstSunday.getTime()) return 1;
+
+            const diffTime = now.getTime() - firstSunday.getTime();
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)); 
             
-            const diffTime = Math.abs(now - start);
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
-            let week = Math.floor((diffDays - 1) / 7) + 1;
+            let week = 2 + Math.floor(diffDays / 7);
             
             return Math.max(1, Math.min(week, 4));
         };
@@ -1102,3 +1113,6 @@
     </script>
 </body>
 </html>
+
+
+```
