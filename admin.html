@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -91,6 +92,29 @@
             }
         }
 
+        const getActiveWeek = () => {
+            if(!state.seasonConfig || !state.seasonConfig.start) return 1;
+            const now = new Date();
+            const start = new Date(state.seasonConfig.start);
+
+            if(now < start) return 1;
+
+            let firstSunday = new Date(start.getFullYear(), start.getMonth(), 1);
+            while (firstSunday.getDay() !== 0) {
+                firstSunday.setDate(firstSunday.getDate() + 1);
+            }
+            firstSunday.setHours(23, 59, 59, 999);
+
+            if (now.getTime() <= firstSunday.getTime()) return 1;
+
+            const diffTime = now.getTime() - firstSunday.getTime();
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)); 
+            
+            let week = 2 + Math.floor(diffDays / 7);
+            
+            return Math.max(1, Math.min(week, 4));
+        };
+
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 state.user = user;
@@ -111,6 +135,11 @@
                                         state.rewardData = data.rewardData || [];
                                         state.habitData = data.habitData || [];
                                         state.seasonConfig = data.seasonConfig || { number: 1, active: true, start: '', end: '' };
+                                        
+                                        // Update admin view to current week dynamically
+                                        const curW = getActiveWeek();
+                                        if (state.adminEditWeek < 1 || state.adminEditWeek > 4) state.adminEditWeek = curW;
+
                                         if(state.view === 'admin') safeRender();
                                     } else {
                                         setDoc(doc(db, 'system', 'grind_season'), { weeklyData: {}, rewardData: [], habitData: [], seasonConfig: state.seasonConfig }, { merge: true });
@@ -656,18 +685,11 @@
 
                                 <div class="card p-6 rounded-sm">
                                     <h3 class="text-lg font-black uppercase tracking-widest text-[#ff4d00] mb-4">AI Mission Architect</h3>
-                                    <input type="password" id="ai_key" value="${savedKey}" oninput="window.saveApiKey(event)" placeholder="Gemini API Key..." class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-xs mb-4 text-gray-400 outline-none focus:border-[#ff4d00]">
-                                    <button type="button" id="ai-gen-btn" onclick="window.generateAIQuests()" class="w-full btn-grind mb-4 text-xs py-3">KI: Generiere neue Ops</button>
-                                    <div id="ai-result" class="min-h-[100px] border border-white/5 bg-[#050505] p-4 rounded-sm"><p class="text-[10px] text-gray-600 uppercase font-bold text-center italic mt-6">Warte auf Input...</p></div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }
-
-                html += `</main>`; appDiv.innerHTML = html;
-            }
+                                    <input type=\"password\" id=\"ai_key\" value=\"${savedKey}\" oninput=\"window.saveApiKey(event)\" placeholder=\"Gemini API Key...\" class=\"w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-xs mb-4 text-gray-400 outline-none focus:border-[#ff4d00]\">\n                                    <button type=\"button\" id=\"ai-gen-btn\" onclick=\"window.generateAIQuests()\" class=\"w-full btn-grind mb-4 text-xs py-3\">KI: Generiere neue Ops</button>\n                                    <div id=\"ai-result\" class=\"min-h-[100px] border border-white/5 bg-[#050505] p-4 rounded-sm\"><p class=\"text-[10px] text-gray-600 uppercase font-bold text-center italic mt-6\">Warte auf Input...</p></div>\n                                </div>\n                            </div>\n                        </div>\n                    `;\n                }\n\n                html += `</main>`; appDiv.innerHTML = html;\n            }
         }
     </script>
 </body>
 </html>
+
+
+```
