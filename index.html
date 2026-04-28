@@ -1,4 +1,4 @@
-```html
+
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -8,12 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&display=swap" rel="stylesheet">
     
-    
-
-
-
-
-<link rel="icon" type="image/png" sizes="32x32" href="https://grind-app.de/favicon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://grind-app.de/favicon.png">
   <link rel="icon" type="image/png" sizes="16x16" href="https://grind-app.de/favicon.png">
   <link rel="manifest" href="./manifest.json">
   <link rel="apple-touch-icon" href="https://grind-app.de/logo.jpg">
@@ -29,10 +24,6 @@
     
     <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-
-
-
-
 
     <!-- Stabilste Version des HTML5 QR Scanners -->
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
@@ -62,8 +53,9 @@
         .reward-box.pro { border-color: #6d28d9; height: 95px; width: 110px; box-shadow: 0 0 10px rgba(109, 40, 217, 0.05); }
         .reward-box.pro.unlocked { background: #1a0a2e; border-color: #a855f7; box-shadow: 0 0 20px rgba(168, 85, 247, 0.25); }
 
-        .tag-free { background: #333; color: white; font-size: 7px; font-weight: 900; padding: 2px 6px; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); text-transform: uppercase; border-radius: 2px; }
-        .tag-pro { background: linear-gradient(90deg, #7c3aed, #9333ea); color: white; font-size: 8px; font-weight: 900; padding: 2px 8px; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); text-transform: uppercase; border-radius: 3px; box-shadow: 0 2px 8px rgba(124,58,237,0.4); z-index: 20; }
+        /* Z-Index erhöht, damit Tags immer sichtbar über dem Overlay bleiben */
+        .tag-free { background: #333; color: white; font-size: 7px; font-weight: 900; padding: 2px 6px; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); text-transform: uppercase; border-radius: 2px; z-index: 30; }
+        .tag-pro { background: linear-gradient(90deg, #7c3aed, #9333ea); color: white; font-size: 8px; font-weight: 900; padding: 2px 8px; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); text-transform: uppercase; border-radius: 3px; box-shadow: 0 2px 8px rgba(124,58,237,0.4); z-index: 30; }
         
         .week-btn { border: 1px solid #1f1f1f; background: #0a0a0a; transition: all 0.2s; }
         .week-btn.active { background: #ff4d00; color: white; border-color: #ff4d00; font-weight: 900; box-shadow: 0 0 15px rgba(255, 77, 0, 0.2); }
@@ -165,7 +157,8 @@
             authStep: 'phone', tempPhone: '', tempUploadData: null,
             weeklyData: { 1: { title: "Loading...", startOffset: 0, missions: [] } },
             rewardData: [], habitData: [], pendingMissions: [],
-            seasonConfig: null
+            seasonConfig: null,
+            dashboardNeedsScroll: true
         };
 
         const RANKS = ["Rookie", "Grinder", "Hustler", "Athlete", "Machine", "Legend"];
@@ -262,7 +255,10 @@
                 onSnapshot(doc(db, 'plot_users', user.uid), (docSnap) => {
                     if (docSnap.exists()) {
                         state.profile = docSnap.data();
-                        if (['loading', 'auth', 'onboarding'].includes(state.view)) state.view = 'dashboard';
+                        if (['loading', 'auth', 'onboarding'].includes(state.view)) {
+                            state.view = 'dashboard';
+                            state.dashboardNeedsScroll = true;
+                        }
                         render();
                     } else { state.view = 'onboarding'; render(); }
                 });
@@ -500,10 +496,13 @@
                 }
                 
                 const currentRedeemed = [...(p.redeemed || []), rewardId];
-                await setDoc(doc(db, 'plot_users', state.user.uid), { xp: newXp, lvl: newLvl, redeemed: currentRedeemed }, { merge: true });
                 
-                window.showToast(`BOOST AKTIVIERT!`, "success");
+                // Menü schließen und sofort nach oben scrollen, um die Animation zu sehen
                 window.closeModal();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+
+                await setDoc(doc(db, 'plot_users', state.user.uid), { xp: newXp, lvl: newLvl, redeemed: currentRedeemed }, { merge: true });
+                window.showToast(`BOOST AKTIVIERT!`, "success");
             } catch(e) { window.showToast("Fehler beim Einlösen.", "error"); if(btn) { btn.innerText = "BOOST AKTIVIEREN"; btn.disabled = false; } }
         };
 
@@ -547,7 +546,12 @@
             } catch(e) { window.showToast("Fehler bei der Anfrage.", "error"); if(btn) { btn.innerText = "Versand anfordern"; btn.disabled = false; } }
         };
 
-        window.setView = (view) => { state.prevView = state.view; state.view = view; render(); };
+        window.setView = (view) => { 
+            if (view === 'dashboard' && state.view !== 'dashboard') state.dashboardNeedsScroll = true;
+            state.prevView = state.view; 
+            state.view = view; 
+            render(); 
+        };
         window.goBack = () => { state.view = state.prevView || 'dashboard'; render(); };
         window.handleLogout = () => { state.view = 'loading'; render(); signOut(auth); };
         
@@ -591,7 +595,7 @@
             try {
                 state.profile = { xp: 0, lvl: 1, completed: [], redeemed: [], streaks: {}, alias: nameInput, city: cityInput, hasPremium: false };
                 await setDoc(doc(db, 'plot_users', state.user.uid), state.profile);
-                window.playGrindIntro(); window.showToast(`Willkommen, ${nameInput}.`, "success"); state.view = 'dashboard'; render();
+                window.playGrindIntro(); window.showToast(`Willkommen, ${nameInput}.`, "success"); state.view = 'dashboard'; state.dashboardNeedsScroll = true; render();
             } catch (err) { window.showToast("Fehler bei der Registrierung.", "error"); btn.disabled = false; btn.innerText = "Confirm Identity"; }
         };
 
@@ -646,7 +650,6 @@
                 if (navigator.canShare && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: 'GRIND.', text: `Join the Hustle. My standing in Season ${seasonNum}: Level ${safeLvl}.` }); } catch (err) { if (err.name !== 'AbortError') fallback(); } } else fallback();
             }, 'image/png');
         };
-
 
         function animateValue(id, start, end, duration) {
             const obj = document.getElementById(id); if (!obj) return; let startTimestamp = null;
@@ -910,20 +913,21 @@
                     const freeClaimed = safeRedeemed.includes(`lvl${i}_free`);
                     const proClaimed = safeRedeemed.includes(`lvl${i}_pro`);
 
+                    // Angepasstes Design für den "Claimed" Layer, damit es die Ränder nicht zerschneidet
                     html += `
                         <div id="level-node-${i}" class="level-node flex flex-col items-center relative z-10">
                             <div ${isUnlocked && r?.free && !freeClaimed ? `onclick="window.openClaimModal(${i}, 'free')" class="reward-box mb-4 unlocked cursor-pointer hover:scale-105"` : (freeClaimed ? `onclick="window.openClaimModal(${i}, 'free')" class="reward-box mb-4 unlocked opacity-50 cursor-pointer"` : `class="reward-box mb-4 opacity-60 scale-95"`)}>
                                 <span class="tag-free">FREE</span>
-                                ${freeClaimed && r?.free ? `<span class="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-[1px] text-green-500 z-20 font-black text-xs uppercase italic transform -rotate-12"><svg class="w-6 h-6 drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></span>` : ''}
-                                <span class="text-[10px] font-bold uppercase text-center px-2 text-gray-200 mt-3">${r?.free || '-'}</span>
+                                ${freeClaimed && r?.free ? `<div class="absolute inset-0 bg-black/80 backdrop-blur-[2px] z-20 flex items-center justify-center rounded-[4px]"><span class="text-green-500 font-black text-xs uppercase italic transform -rotate-12"><svg class="w-6 h-6 drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></span></div>` : ''}
+                                <span class="text-[10px] font-bold uppercase text-center px-2 text-gray-200 mt-3 relative z-10">${r?.free || '-'}</span>
                             </div>
                             
                             <div id="circle-node-${i}" class="relative w-10 h-10 rounded-full flex items-center justify-center font-black italic text-xs ${isUnlocked ? 'grind-gradient text-black scale-110 shadow-[0_0_15px_rgba(255,77,0,0.5)]' : 'bg-gray-800 text-gray-400 border border-white/20'}">${i}</div>
                             
                             <div ${isProUnlocked && r?.pro && !proClaimed ? `onclick="window.openClaimModal(${i}, 'pro')" class="reward-box pro mt-5 unlocked scale-105 cursor-pointer"` : (proClaimed ? `onclick="window.openClaimModal(${i}, 'pro')" class="reward-box pro mt-5 unlocked opacity-50 cursor-pointer"` : `class="reward-box pro mt-5 opacity-70 scale-[0.98] hover:opacity-100"`)}>
                                 <span class="tag-pro italic">PRO</span>
-                                ${proClaimed && r?.pro ? `<span class="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-[1px] text-[#a855f7] z-20 font-black text-xs uppercase italic transform -rotate-12"><svg class="w-6 h-6 drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></span>` : ''}
-                                <span class="text-[10px] font-bold uppercase text-center px-2 mt-4 ${isProUnlocked ? 'text-[#d8b4fe]' : 'text-purple-300'}">${r?.pro || '-'}</span>
+                                ${proClaimed && r?.pro ? `<div class="absolute inset-0 bg-black/80 backdrop-blur-[2px] z-20 flex items-center justify-center rounded-[4px]"><span class="text-[#a855f7] font-black text-xs uppercase italic transform -rotate-12"><svg class="w-6 h-6 drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></span></div>` : ''}
+                                <span class="text-[10px] font-bold uppercase text-center px-2 mt-4 relative z-10 ${isProUnlocked ? 'text-[#d8b4fe]' : 'text-purple-300'}">${r?.pro || '-'}</span>
                             </div>
                         </div>
                     `;
@@ -1102,14 +1106,28 @@
 
                 setTimeout(() => {
                     const currentNode = document.getElementById(`level-node-${safeLvl}`);
-                    if (currentNode && state.prevLvl === null) currentNode.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-                    const topBar = document.getElementById('top-xp-bar'); const trackLine = document.getElementById('track-line');
+                    const passViewport = document.getElementById('pass-viewport');
+                    
+                    // Zentriere die aktuelle Position im Pass wenn man frisch auf das Dashboard kommt
+                    if (passViewport && currentNode && (state.prevLvl === null || state.dashboardNeedsScroll)) {
+                        const scrollLeft = currentNode.offsetLeft - (passViewport.offsetWidth / 2) + (currentNode.offsetWidth / 2);
+                        passViewport.scrollTo({ left: scrollLeft, behavior: 'smooth' });
+                        state.dashboardNeedsScroll = false;
+                    }
+
+                    const topBar = document.getElementById('top-xp-bar'); 
+                    const trackLine = document.getElementById('track-line');
                     if (trackLine) trackLine.style.width = `calc(140px * ${targetTrackProgress})`;
 
                     if (state.prevLvl !== null && safeLvl > state.prevLvl) {
                         if (topBar) {
                             topBar.style.transition = 'width 1000ms ease-out'; topBar.style.width = '100%';
                             setTimeout(() => { topBar.style.transition = 'none'; topBar.style.width = '0%'; void topBar.offsetWidth; topBar.style.transition = 'width 1000ms ease-out'; topBar.style.width = `${targetXpProgress}%`; }, 1000); 
+                        }
+                        // Bei Level Up ebenfalls zentrieren
+                        if (passViewport && currentNode) {
+                            const scrollLeft = currentNode.offsetLeft - (passViewport.offsetWidth / 2) + (currentNode.offsetWidth / 2);
+                            passViewport.scrollTo({ left: scrollLeft, behavior: 'smooth' });
                         }
                     } else if (topBar) { topBar.style.transition = 'width 1000ms ease-out'; topBar.style.width = `${targetXpProgress}%`; }
 
@@ -1118,7 +1136,6 @@
                         if (state.prevLvl !== null && safeLvl > state.prevLvl) {
                             const lvlText = document.getElementById('main-lvl-text'); if (lvlText) lvlText.classList.add('animate-pop');
                             const newCircle = document.getElementById(`circle-node-${safeLvl}`); if (newCircle) newCircle.classList.add('animate-pop');
-                            if (currentNode) currentNode.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
                         }
                     }
                     state.prevXp = safeXp; state.prevLvl = safeLvl;
@@ -1139,6 +1156,3 @@
     </script>
 </body>
 </html>
-
-
-```
