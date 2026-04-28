@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GRIND. QR Forge</title>
     
-    <!-- Tailwind & Google Fonts (exakt wie auf deiner Website) -->
+    <!-- Tailwind & Google Fonts -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&display=swap" rel="stylesheet">
     <script type="text/javascript" src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
@@ -42,7 +42,6 @@
             box-shadow: 0 0 10px rgba(255, 77, 0, 0.1);
         }
 
-        /* Farbwähler anpassen */
         input[type="color"] {
             -webkit-appearance: none;
             border: 1px solid #1f1f1f;
@@ -56,7 +55,6 @@
         input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
         input[type="color"]::-webkit-color-swatch { border: none; border-radius: 3px; }
 
-        /* Der Button exakt wie auf deiner Website */
         .btn-grind { 
             background: white; 
             color: black; 
@@ -104,21 +102,22 @@
             justify-content: center;
             align-items: center;
             border: 4px solid #1f1f1f;
-            /* NEU: Absolute Sperren, damit der 4K-Code nicht ausbricht */
             width: 100%;
             max-width: 348px;
             aspect-ratio: 1 / 1;
             box-sizing: border-box;
-            overflow: hidden; 
+            transition: opacity 0.2s ease; /* Weicher Übergang beim Download */
         }
 
-        #canvas-container > * {
+        /* SVG ordentlich in den Container einpassen */
+        #canvas-container svg, 
+        #canvas-container canvas {
             width: 100% !important;
-            height: 100% !important;
-            object-fit: contain;
+            height: auto !important;
+            max-width: 100%;
+            max-height: 100%;
         }
 
-        /* Checkbox Styling */
         .checkbox-container {
             display: flex;
             align-items: center;
@@ -163,7 +162,6 @@
                         </div>
                     </div>
 
-                    <!-- Spezifischer Fix für weiße Logos -->
                     <label class="checkbox-container">
                         <input type="checkbox" id="darkBgToggle" checked>
                         <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">Dunkle Base für weißes Logo generieren</span>
@@ -200,44 +198,43 @@
 
     <script>
         let uploadedLogoDataUrl = "";
-        let originalLogoImage = null; // Speichert das Bild für die spätere Verarbeitung
+        let originalLogoImage = null;
 
-        // 1. Initialisierung mit GRIND-Design in 4K Qualität
+        // 1. Initialisierung mit UI-freundlicher Größe (300x300)
         const qrCode = new QRCodeStyling({
-            width: 2048,  // Von 300 auf 2048 erhöht für Ultra-High-Res Export
-            height: 2048, // Von 300 auf 2048 erhöht
+            width: 300, 
+            height: 300, 
             type: "svg",
             data: "https://grind-app.de",
             image: "",
             qrOptions: {
-                errorCorrectionLevel: 'H' // Hohe Fehlerkorrektur für Logos
+                errorCorrectionLevel: 'H'
             },
             dotsOptions: {
                 color: "#050505",
-                type: "rounded" // Leicht abgerundet, wirkt moderner
+                type: "rounded"
             },
             backgroundOptions: {
                 color: "#ffffff",
             },
             cornersSquareOptions: {
-                color: "#ff4d00", // Grind Orange
-                type: "extra-rounded" // Äußerer Ring weich
+                color: "#ff4d00",
+                type: "extra-rounded"
             },
             cornersDotOptions: {
                 color: "#ff4d00",
-                type: "dot" // Der innere Punkt (Spiegelt das Logo wider!)
+                type: "dot"
             },
             imageOptions: {
                 crossOrigin: "anonymous",
                 margin: 0,
                 imageSize: 0.4,
-                hideBackgroundDots: true // Macht Platz für das Logo
+                hideBackgroundDots: true
             }
         });
 
         qrCode.append(document.getElementById("canvas-container"));
 
-        // 2. Datei-Upload verarbeiten
         document.getElementById('logoUpload').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
@@ -255,10 +252,8 @@
             }
         });
 
-        // Event-Listener für die Checkbox
         document.getElementById('darkBgToggle').addEventListener('change', processLogoAndUpdateQR);
 
-        // 3. Funktion: Legt (falls gewünscht) einen dunklen Hintergrund hinter das weiße Logo
         function processLogoAndUpdateQR() {
             if (!originalLogoImage) {
                 updateQR();
@@ -268,34 +263,26 @@
             const useDarkBg = document.getElementById('darkBgToggle').checked;
             
             if (useDarkBg) {
-                // Erstelle ein Canvas, um das Logo auf einen dunklen Hintergrund zu zeichnen
                 const canvas = document.createElement('canvas');
-                const padding = 60; // Rand um das Logo
+                const padding = 60;
                 canvas.width = originalLogoImage.width + padding * 2;
                 canvas.height = originalLogoImage.height + padding * 2;
                 const ctx = canvas.getContext('2d');
 
-                // Zeichne die dunkle Base (Kreis oder abgerundetes Rechteck)
                 ctx.fillStyle = '#050505';
-                
-                // Wir zeichnen einen leicht abgerundeten Hintergrund (Squircle)
                 ctx.beginPath();
                 ctx.roundRect(0, 0, canvas.width, canvas.height, canvas.width * 0.2); 
                 ctx.fill();
 
-                // Zeichne das Logo zentriert darüber
                 ctx.drawImage(originalLogoImage, padding, padding);
-                
                 uploadedLogoDataUrl = canvas.toDataURL('image/png');
             } else {
-                // Logo unverändert lassen
                 uploadedLogoDataUrl = originalLogoImage.src;
             }
 
             updateQR();
         }
 
-        // 4. Funktion zum Aktualisieren des Codes
         function updateQR() {
             const dataInput = document.getElementById('data').value;
             const colorDarkInput = document.getElementById('colorDark').value;
@@ -304,23 +291,32 @@
             qrCode.update({
                 data: dataInput || " ",
                 image: uploadedLogoDataUrl,
-                dotsOptions: {
-                    color: colorDarkInput
-                },
-                cornersSquareOptions: {
-                    color: colorAccentInput
-                },
-                cornersDotOptions: {
-                    color: colorAccentInput
-                }
+                dotsOptions: { color: colorDarkInput },
+                cornersSquareOptions: { color: colorAccentInput },
+                cornersDotOptions: { color: colorAccentInput }
             });
         }
 
-        // 5. Download Funktion
+        // 5. Clevere Download-Funktion: Hochskalieren -> Downloaden -> Zurücksetzen
         function downloadQR(extension) {
-            qrCode.download({ name: "GRIND-QR-Code", extension: extension });
+            const container = document.getElementById('canvas-container');
+            
+            // Verstecke die UI kurzzeitig fließend, damit das UI beim Skalieren nicht springt
+            container.style.opacity = '0';
+
+            // Skaliere den Code intern auf 4K-Qualität für den Download
+            qrCode.update({ width: 2048, height: 2048 });
+
+            // Gib dem Browser 100ms Zeit, das Update zu rendern, bevor der Download startet
+            setTimeout(() => {
+                qrCode.download({ name: "GRIND-QR-Code", extension: extension }).then(() => {
+                    // Setze die Größe sofort wieder auf UI-freundliche 300px zurück
+                    qrCode.update({ width: 300, height: 300 });
+                    // Blende das UI wieder ein
+                    container.style.opacity = '1';
+                });
+            }, 100);
         }
     </script>
 </body>
 </html>
-
