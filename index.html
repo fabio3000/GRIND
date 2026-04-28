@@ -4,26 +4,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <!-- PRIVATSPHÄRE-SCHUTZ: Verhindert, dass Google die Seite indexiert und deinen Namen/Adresse findet -->
+    <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+    <meta name="googlebot" content="noindex, nofollow">
+    
     <title>GRIND. | System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&display=swap" rel="stylesheet">
     
     <link rel="icon" type="image/png" sizes="32x32" href="https://grind-app.de/favicon.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="https://grind-app.de/favicon.png">
-  <link rel="manifest" href="./manifest.json">
-  <link rel="apple-touch-icon" href="https://grind-app.de/logo.jpg">
-  <meta name="apple-mobile-web-app-title" content="GRIND.">
-  <link rel="icon" type="image/png" sizes="192x192" href="https://grind-app.de/logo.jpg">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://grind-app.de/favicon.png">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="apple-touch-icon" href="https://grind-app.de/logo.jpg">
+    <meta name="apple-mobile-web-app-title" content="GRIND.">
+    <link rel="icon" type="image/png" sizes="192x192" href="https://grind-app.de/logo.jpg">
 
-  <meta property="og:title" content="GRIND.">
-  <meta property="og:url" content="https://grind-app.de">
-  <meta property="og:type" content="website">
-  <meta property="og:description" content="Level up your life. Join the GRIND.">
-  
-  <meta property="og:image" content="https://grind-app.de/logo.jpg">
-    
+    <!-- Meta Tags (Auch hier wird noindex respektiert) -->
+    <meta property="og:title" content="GRIND.">
+    <meta property="og:url" content="https://grind-app.de">
+    <meta property="og:type" content="website">
+    <meta property="og:description" content="Level up your life. Join the GRIND.">
+    <meta property="og:image" content="https://grind-app.de/logo.jpg">
     <meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
+    <meta property="og:image:height" content="630">
 
     <!-- Stabilste Version des HTML5 QR Scanners -->
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
@@ -53,7 +57,6 @@
         .reward-box.pro { border-color: #6d28d9; height: 95px; width: 110px; box-shadow: 0 0 10px rgba(109, 40, 217, 0.05); }
         .reward-box.pro.unlocked { background: #1a0a2e; border-color: #a855f7; box-shadow: 0 0 20px rgba(168, 85, 247, 0.25); }
 
-        /* Z-Index erhöht, damit Tags immer sichtbar über dem Overlay bleiben */
         .tag-free { background: #333; color: white; font-size: 7px; font-weight: 900; padding: 2px 6px; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); text-transform: uppercase; border-radius: 2px; z-index: 30; }
         .tag-pro { background: linear-gradient(90deg, #7c3aed, #9333ea); color: white; font-size: 8px; font-weight: 900; padding: 2px 8px; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); text-transform: uppercase; border-radius: 3px; box-shadow: 0 2px 8px rgba(124,58,237,0.4); z-index: 30; }
         
@@ -71,7 +74,6 @@
         .btn-grind:hover { background: #ff4d00; color: white; box-shadow: 0 4px 20px rgba(255, 77, 0, 0.4); }
         .btn-grind:disabled { background: #1f1f1f; color: #555; cursor: not-allowed; box-shadow: none; border-color: #1f1f1f; }
 
-        /* PRO Button in Lila */
         .btn-pro { background: #1a0a2e; color: #a855f7; font-weight: 900; font-style: italic; text-transform: uppercase; padding: 12px 24px; font-size: 12px; transition: all 0.2s; box-shadow: 0 4px 15px rgba(168,85,247,0.1); cursor: pointer; border-radius: 4px; border: 1px solid rgba(168,85,247,0.3); }
         .btn-pro:hover { background: #a855f7; color: white; box-shadow: 0 4px 20px rgba(168,85,247,0.4); border-color: #a855f7; }
         
@@ -90,7 +92,6 @@
         .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Lockscreen Animations */
         @keyframes pulse-slow { 0%, 100% { opacity: 0.3; transform: scale(0.95); } 50% { opacity: 1; transform: scale(1.05); } }
         .animate-pulse-slow { animation: pulse-slow 4s ease-in-out infinite; }
         .glitch-bg { background-image: radial-gradient(circle at 50% 50%, #1a0a00 0%, #050505 80%); }
@@ -117,10 +118,14 @@
             100% { opacity: 0; transform: translate(-50%, -50%) scale(1.1); filter: blur(4px); }
         }
         
-        .legal-content h2 { color: white; font-weight: 900; font-style: italic; text-transform: uppercase; margin-top: 2rem; margin-bottom: 0.5rem; letter-spacing: 0.05em; }
+        .legal-content h2 { color: white; font-weight: 900; font-style: italic; text-transform: uppercase; margin-top: 2.5rem; margin-bottom: 0.75rem; letter-spacing: 0.05em; font-size: 1.25rem; }
+        .legal-content h3 { color: #d4d4d4; font-weight: 700; margin-top: 1.5rem; margin-bottom: 0.5rem; }
         .legal-content p { margin-bottom: 1rem; color: #a3a3a3; font-size: 0.875rem; line-height: 1.6; }
         .legal-content ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 1rem; color: #a3a3a3; font-size: 0.875rem; }
-        .legal-content strong { color: #d4d4d4; }
+        .legal-content li { margin-bottom: 0.25rem; }
+        .legal-content strong { color: #ffffff; font-weight: bold; }
+        .legal-content a { color: #ff4d00; text-decoration: none; transition: color 0.2s; }
+        .legal-content a:hover { color: #ffffff; text-decoration: underline; }
     </style>
 </head>
 <body class="flex flex-col relative select-none">
@@ -497,7 +502,6 @@
                 
                 const currentRedeemed = [...(p.redeemed || []), rewardId];
                 
-                // Menü schließen und sofort nach oben scrollen, um die Animation zu sehen
                 window.closeModal();
                 window.scrollTo({ top: 0, behavior: 'smooth' });
 
@@ -723,21 +727,106 @@
                     title = 'Impressum';
                     content = `
                         <h2>Angaben gemäß § 5 TMG</h2>
-                        <p>Max Mustermann<br>Musterstraße 1<br>12345 Musterstadt</p>
+                        <p>Fabio Maines<br>Thieboldsgasse 117<br>50676 Köln</p>
+                        
                         <h2>Kontakt</h2>
-                        <p>Telefon: +49 (0) 123 44 55 66<br>E-Mail: info@grind-app.com</p>
+                        <p>E-Mail: <a href="mailto:Fabio.maines@grind-app.de">Fabio.maines@grind-app.de</a></p>
+                        
+                        <h2>Umsatzsteuer</h2>
+                        <p>Gemäß § 19 UStG wird keine Umsatzsteuer berechnet (Kleinunternehmerregelung).</p>
+                        
+                        <h2>Redaktionell verantwortlich</h2>
+                        <p>Fabio Maines<br>Thieboldsgasse 117<br>50676 Köln</p>
+
+                        <h2>EU-Streitschlichtung</h2>
+                        <p>Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit: <a href="https://ec.europa.eu/consumers/odr/" target="_blank">https://ec.europa.eu/consumers/odr/</a>.<br>Unsere E-Mail-Adresse finden Sie oben im Impressum.</p>
+                        
+                        <h2>Verbraucher&shy;streit&shy;beilegung/Universal&shy;schlichtungs&shy;stelle</h2>
+                        <p>Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.</p>
                     `;
                 } else if (state.view === 'datenschutz') {
                     title = 'Datenschutzerklärung';
                     content = `
                         <h2>1. Datenschutz auf einen Blick</h2>
-                        <p>Wir nehmen den Schutz Ihrer persönlichen Daten sehr ernst. Wir behandeln Ihre personenbezogenen Daten vertraulich und entsprechend der gesetzlichen Datenschutzvorschriften sowie dieser Datenschutzerklärung.</p>
+                        <h3>Allgemeine Hinweise</h3>
+                        <p>Die folgenden Hinweise geben einen einfachen Überblick darüber, was mit Ihren personenbezogenen Daten passiert, wenn Sie diese App ("GRIND") nutzen. Personenbezogene Daten sind alle Daten, mit denen Sie persönlich identifiziert werden können.</p>
+                        
+                        <h3>Datenerfassung in der App</h3>
+                        <p><strong>Wer ist verantwortlich für die Datenerfassung?</strong><br>
+                        Die Datenverarbeitung erfolgt durch den App-Betreiber (siehe Impressum).</p>
+                        
+                        <p><strong>Wie erfassen wir Ihre Daten?</strong><br>
+                        Ihre Daten werden zum einen dadurch erhoben, dass Sie uns diese mitteilen. Hierbei handelt es sich z. B. um Daten, die Sie bei der Erstellung des Profils eingeben (Alias, Base/Stadt, Telefonnummer) oder wenn Sie uns Adressdaten für den Versand von physischen Loots mitteilen.</p>
+                        
+                        <p><strong>Wofür nutzen wir Ihre Daten?</strong><br>
+                        Ein Teil der Daten wird erhoben, um eine fehlerfreie Bereitstellung der App zu gewährleisten. Andere Daten können zur Analyse Ihres Nutzerverhaltens verwendet werden. Eingegebene Daten (wie Fotos zur Verifizierung oder Scans) dienen der Sicherstellung des "Grind Tracks" (Anti-Cheat-Mechaniken).</p>
+
+                        <h2>2. Hosting, Backend & Analysetools</h2>
+                        <h3>Hosting (GitHub Pages)</h3>
+                        <p>Wir hosten unsere Web-App bei GitHub Inc., 88 Colin P Kelly Jr St, San Francisco, CA 94107, USA. Wenn Sie die App aufrufen, erfasst GitHub Ihre IP-Adresse und weitere technische Daten (z.B. User-Agent). Weitere Informationen finden Sie in der Datenschutzerklärung von GitHub: <a href="https://docs.github.com/en/site-policy/privacy-policies/github-privacy-statement" target="_blank">GitHub Privacy Statement</a>.</p>
+
+                        <h3>Google Firebase</h3>
+                        <p>Wir nutzen Firebase von Google (Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland), um Benutzeranmeldungen (Authentication via SMS) und die Datenbank (Firestore) zu verwalten.<br>
+                        Ihre Telefonnummer, Ihr gewählter Alias, Ihr Fortschritt (XP) sowie hochgeladene Beweisfotos und ggf. Lieferadressen werden sicher in den Firebase-Datenbanken gespeichert. Die Datenübertragung in die USA stützt sich auf die Standardvertragsklauseln der EU-Kommission. Mehr Informationen finden Sie in der Datenschutzerklärung von Google.</p>
+                        
+                        <h3>Google Analytics & Search Console</h3>
+                        <p>Diese Website nutzt Funktionen des Webanalysedienstes Google Analytics und die Google Search Console. Anbieter ist die Google Ireland Limited. Wir haben die IP-Anonymisierung aktiviert. Google Analytics verwendet "Cookies", um eine Analyse der Benutzung der Website durch Sie zu ermöglichen.</p>
+
+                        <h2>3. Berechtigungen & Zugriffe</h2>
+                        <h3>Kamera-Zugriff</h3>
+                        <p>Für das Scannen von QR-Codes fragt die App nach der Berechtigung für die Kamera. Der Scanvorgang erfolgt lokal auf Ihrem Endgerät über die Bibliothek "html5-qrcode". Es werden keine Videostreams an unsere Server gesendet. Nur der im QR-Code ausgelesene Text wird zur Validierung an das System übertragen.</p>
+                        
+                        <h3>Foto-Upload</h3>
+                        <p>Wenn Sie ein Foto als "Beweis" für eine Mission hochladen, wird dieses Bild auf unseren Firebase-Servern gespeichert, um manuell oder maschinell validiert zu werden. Mit dem Upload erteilen Sie uns die Erlaubnis, dieses Bild zu diesem Zweck zu speichern und zu verarbeiten.</p>
+
+                        <h2>4. Zahlungsanbieter (PayPal)</h2>
+                        <p>Wir bieten in der App Zahlungen per PayPal an. Wenn Sie den "PRO Pass" erwerben, werden Ihre Zahlungsdaten zur Zahlungsabwicklung an die PayPal (Europe) S.à r.l. et Cie, S.C.A., 22-24 Boulevard Royal, L-2449 Luxembourg übermittelt. Wir speichern keine Bank- oder Kreditkartendaten in unserer eigenen Datenbank.</p>
+
+                        <h2>5. Ihre Rechte</h2>
+                        <p>Sie haben jederzeit das Recht, unentgeltlich Auskunft über Herkunft, Empfänger und Zweck Ihrer gespeicherten personenbezogenen Daten zu erhalten. Sie haben außerdem ein Recht, die Berichtigung oder Löschung dieser Daten zu verlangen. Hierzu können Sie sich jederzeit an die im Impressum angegebene Adresse wenden.</p>
                     `;
                 } else if (state.view === 'agb') {
                     title = 'AGB';
                     content = `
-                        <h2>1. Geltungsbereich</h2>
-                        <p>Diese Allgemeinen Geschäftsbedingungen gelten für alle Verträge und Nutzungen der GRIND Web-App, insbesondere für den Erwerb des digitalen "PRO Passes".</p>
+                        <h2>§ 1 Geltungsbereich und Vertragsgegenstand</h2>
+                        <p>Diese Allgemeinen Geschäftsbedingungen (AGB) gelten für die Nutzung der "GRIND" Web-App (im Folgenden "App"). Die App bietet Nutzern die Möglichkeit, durch das Abschließen von Aufgaben ("Missions" / "Operations") Erfahrungspunkte (XP) zu sammeln und sich digitale oder physische Belohnungen ("Loots") freizuschalten.</p>
+                        
+                        <h2>§ 2 Nutzerkonto & Voraussetzungen</h2>
+                        <ul>
+                            <li>Die Nutzung der App und insbesondere Käufe oder die Teilnahme an Gewinnspielen ist nur volljährigen Personen (ab 18 Jahren) gestattet.</li>
+                            <li>Die Registrierung erfolgt über eine gültige Handynummer. Der Nutzer ist verpflichtet, wahrheitsgemäße Angaben (z.B. bei Versandadressen) zu machen.</li>
+                            <li>Jeder Nutzer darf nur einen Account besitzen ("No Smurfing").</li>
+                        </ul>
+
+                        <h2>§ 3 Der GRIND PRO Pass (Kauf & Widerrufsverzicht)</h2>
+                        <p>Die App bietet einen kostenlosen Track ("Free") und einen Premium-Track ("PRO Pass").<br>
+                        <strong>(1) Art des Kaufs:</strong> Der "PRO Pass" ist ein Einmalkauf, der ausschließlich für die Dauer der aktuell laufenden "Season" gilt. Es handelt sich um <u>kein</u> Abonnement.<br>
+                        <strong>(2) Widerrufsverzicht:</strong> Der PRO Pass ist ein digitaler Inhalt. <strong>Mit dem Kauf stimmen Sie ausdrücklich zu, dass wir vor Ablauf der Widerrufsfrist mit der Ausführung des Vertrags (Freischaltung des PRO Passes) beginnen. Ihnen ist bekannt, dass Sie durch diese Zustimmung mit Beginn der Ausführung Ihr Widerrufsrecht verlieren.</strong> Eine Rückerstattung des Kaufpreises ist nach erfolgreicher Freischaltung ausgeschlossen.</p>
+
+                        <h2>§ 4 Fair Play, Anti-Cheat & Sanktionen</h2>
+                        <p>Der GRIND Track basiert auf Ehrlichkeit. Jeglicher Versuch, das System oder andere Nutzer zu betrügen, wird strengstens geahndet.<br>
+                        <strong>Als Betrugsversuche ("Cheating") gelten insbesondere, aber nicht ausschließlich:</strong></p>
+                        <ul>
+                            <li>Das Hochladen von falschen, aus dem Internet kopierten, KI-generierten oder manipulierten Beweisfotos ("Faking").</li>
+                            <li>Das Weitergeben oder Einlösen von geleakten QR-Codes oder Access-Links an Dritte.</li>
+                            <li>Das Ausnutzen von technischen Fehlern ("Bugs") oder das Hacken der App.</li>
+                            <li>Die Erstellung von mehreren Accounts, um sich unfaire Vorteile zu verschaffen.</li>
+                        </ul>
+                        <p><strong>Sanktionen:</strong> Bei einem festgestellten Verstoß behalten wir uns das Recht vor, den Nutzer-Account <u>sofort und ohne Vorwarnung permanent zu sperren</u>. Ein Anspruch auf Reaktivierung, Auszahlung von noch nicht eingelösten Loots oder die Erstattung des gekauften "PRO Passes" besteht in diesem Fall ausdrücklich nicht. Wir behalten uns weitere rechtliche Schritte vor.</p>
+
+                        <h2>§ 5 Loots, Gutscheine & Gewinnspiele</h2>
+                        <p>In der App können "Loots" (z. B. T-Shirts, Vor-Ort-Gutscheine, Rabattcodes oder Auslosungen) freigeschaltet werden.</p>
+                        <ul>
+                            <li><strong>Physische Güter (z. B. Kleidung):</strong> Die Ausgabe von physischen Artikeln erfolgt nur "solange der Vorrat reicht". Es besteht kein Rechtsanspruch auf ein spezifisches Item oder eine spezifische Größe.</li>
+                            <li><strong>Gutscheine:</strong> Gutscheine von Partnern unterliegen den Bedingungen des jeweiligen Partners.</li>
+                            <li><strong>Auslosungen / Giveaways:</strong> Sofern eine Mission oder ein Loot die Teilnahme an einer Auslosung beinhaltet, gilt: Die Teilnahme ist unverbindlich, eine Gewinnausschüttung wird nicht garantiert. <strong>Der Rechtsweg ist ausgeschlossen.</strong> Eine Barauszahlung von Gewinnen oder Loots ist niemals möglich.</li>
+                        </ul>
+
+                        <h2>§ 6 Verfügbarkeit & Haftungsbeschränkung</h2>
+                        <p>Wir bemühen uns, die App ununterbrochen zur Verfügung zu stellen. Es besteht jedoch kein Anspruch auf ständige Erreichbarkeit. Wir haften nur für Vorsatz und grobe Fahrlässigkeit. Bei leichter Fahrlässigkeit haften wir nur bei Verletzung einer wesentlichen Vertragspflicht (Kardinalpflicht). Für Datenverlust oder Ausfälle aufgrund von Drittanbietern (z.B. Server-Ausfälle bei Google/Firebase) übernehmen wir keine Haftung.</p>
+
+                        <h2>§ 7 Änderungen der AGB</h2>
+                        <p>Wir behalten uns vor, diese AGB (z.B. für kommende Seasons) anzupassen. Änderungen werden innerhalb der App kommuniziert.</p>
                     `;
                 }
 
@@ -745,8 +834,9 @@
                     <div class="max-w-3xl mx-auto px-6 py-12 w-full relative z-20">
                         <button onclick="window.goBack()" class="text-[#ff4d00] text-[10px] font-bold uppercase tracking-widest mb-10 flex items-center gap-2 hover:text-white transition"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg> Zurück</button>
                         <h1 class="text-3xl md:text-5xl font-black italic uppercase tracking-tighter mb-8">${title}</h1>
-                        <div class="legal-content">${content}</div>
+                        <div class="legal-content bg-[#0a0a0a] border border-[#1f1f1f] p-6 md:p-10 rounded-sm shadow-xl">${content}</div>
                     </div>
+                    ${getFooterHTML()}
                 `;
                 return;
             }
@@ -913,7 +1003,6 @@
                     const freeClaimed = safeRedeemed.includes(`lvl${i}_free`);
                     const proClaimed = safeRedeemed.includes(`lvl${i}_pro`);
 
-                    // Angepasstes Design für den "Claimed" Layer, damit es die Ränder nicht zerschneidet
                     html += `
                         <div id="level-node-${i}" class="level-node flex flex-col items-center relative z-10">
                             <div ${isUnlocked && r?.free && !freeClaimed ? `onclick="window.openClaimModal(${i}, 'free')" class="reward-box mb-4 unlocked cursor-pointer hover:scale-105"` : (freeClaimed ? `onclick="window.openClaimModal(${i}, 'free')" class="reward-box mb-4 unlocked opacity-50 cursor-pointer"` : `class="reward-box mb-4 opacity-60 scale-95"`)}>
@@ -1108,7 +1197,6 @@
                     const currentNode = document.getElementById(`level-node-${safeLvl}`);
                     const passViewport = document.getElementById('pass-viewport');
                     
-                    // Zentriere die aktuelle Position im Pass wenn man frisch auf das Dashboard kommt
                     if (passViewport && currentNode && (state.prevLvl === null || state.dashboardNeedsScroll)) {
                         const scrollLeft = currentNode.offsetLeft - (passViewport.offsetWidth / 2) + (currentNode.offsetWidth / 2);
                         passViewport.scrollTo({ left: scrollLeft, behavior: 'smooth' });
@@ -1124,7 +1212,6 @@
                             topBar.style.transition = 'width 1000ms ease-out'; topBar.style.width = '100%';
                             setTimeout(() => { topBar.style.transition = 'none'; topBar.style.width = '0%'; void topBar.offsetWidth; topBar.style.transition = 'width 1000ms ease-out'; topBar.style.width = `${targetXpProgress}%`; }, 1000); 
                         }
-                        // Bei Level Up ebenfalls zentrieren
                         if (passViewport && currentNode) {
                             const scrollLeft = currentNode.offsetLeft - (passViewport.offsetWidth / 2) + (currentNode.offsetWidth / 2);
                             passViewport.scrollTo({ left: scrollLeft, behavior: 'smooth' });
