@@ -1,225 +1,313 @@
-```html
+
 <!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GRIND. QR-Code Generator</title>
-    <!-- Einbinden der QR-Code Styling Bibliothek -->
+    <title>GRIND. QR Forge</title>
+    
+    <!-- Tailwind & Google Fonts (exakt wie auf deiner Website) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&display=swap" rel="stylesheet">
     <script type="text/javascript" src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
+
     <style>
-        :root {
-            --brand-orange: #FF4500; /* Angepasst an den orangenen Punkt im Logo */
-            --bg-dark: #0a0a0a;
-            --card-dark: #1a1a1a;
-            --text-light: #ffffff;
-            --text-muted: #aaaaaa;
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #050505; 
+            color: #ffffff; 
+            background-image: radial-gradient(circle at 50% 0%, #1a0a00 0%, #050505 60%);
+            min-height: 100vh;
         }
 
-        body {
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-            background-color: var(--bg-dark);
-            color: var(--text-light);
-            max-width: 500px;
-            margin: 2rem auto;
-            padding: 20px;
+        .card { 
+            background: #0a0a0a; 
+            border: 1px solid #1f1f1f; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
         }
 
-        .container {
-            background-color: var(--card-dark);
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-            border: 1px solid #333;
-        }
-
-        h2 { 
-            text-align: center; 
-            font-weight: 900;
-            letter-spacing: 2px;
-            font-style: italic;
-            font-size: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        h2 span {
-            color: var(--brand-orange);
-        }
-
-        .control-group { margin-bottom: 1.5rem; }
-        
-        label { 
-            display: block; 
-            margin-bottom: 0.5rem; 
-            font-weight: bold; 
-            font-size: 0.9rem;
-            color: var(--text-muted);
-        }
-
-        textarea, input[type="color"], input[type="file"] {
+        .input-grind {
             width: 100%;
-            padding: 12px;
-            background-color: #2a2a2a;
-            color: white;
-            border: 1px solid #444;
-            border-radius: 6px;
-            box-sizing: border-box;
-            font-family: inherit;
-        }
-
-        textarea:focus {
-            outline: none;
-            border-color: var(--brand-orange);
-        }
-
-        input[type="color"] {
-            height: 50px;
-            padding: 5px;
-            cursor: pointer;
-        }
-
-        input[type="file"] {
-            padding: 10px;
-            background-color: transparent;
-            border: 1px dashed #555;
-            cursor: pointer;
-        }
-
-        button {
-            width: 100%;
-            background: var(--brand-orange);
-            color: white;
-            border: none;
             padding: 16px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            border-radius: 6px;
+            background-color: #0f0f0f;
+            border: 1px solid #1f1f1f;
+            border-radius: 4px;
+            color: white;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .input-grind:focus {
+            border-color: #ff4d00;
+            box-shadow: 0 0 10px rgba(255, 77, 0, 0.1);
+        }
+
+        /* Farbwähler anpassen */
+        input[type="color"] {
+            -webkit-appearance: none;
+            border: 1px solid #1f1f1f;
+            width: 100%;
+            height: 50px;
+            border-radius: 4px;
             cursor: pointer;
-            transition: background 0.3s ease;
-            margin-top: 10px;
+            padding: 0;
+            background: #0f0f0f;
+        }
+        input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+        input[type="color"]::-webkit-color-swatch { border: none; border-radius: 3px; }
+
+        /* Der Button exakt wie auf deiner Website */
+        .btn-grind { 
+            background: white; 
+            color: black; 
+            font-weight: 900; 
+            font-style: italic; 
+            text-transform: uppercase; 
+            padding: 16px 24px; 
+            font-size: 14px; 
+            transition: all 0.2s; 
+            box-shadow: 0 4px 15px rgba(255,255,255,0.1); 
+            cursor: pointer; 
+            border-radius: 4px; 
+            border: none;
+            width: 100%;
+            letter-spacing: 1px;
+        }
+        .btn-grind:hover { 
+            background: #ff4d00; 
+            color: white; 
+            box-shadow: 0 4px 20px rgba(255, 77, 0, 0.4); 
         }
 
-        button:hover { 
-            background: #e03e00; 
+        .btn-outline {
+            background: transparent;
+            color: #ff4d00;
+            border: 1px solid #ff4d00;
+            font-weight: 900; 
+            font-style: italic; 
+            text-transform: uppercase; 
+            padding: 12px 24px; 
+            transition: all 0.2s;
+            cursor: pointer;
+            border-radius: 4px;
+            width: 100%;
+        }
+        .btn-outline:hover {
+            background: rgba(255, 77, 0, 0.1);
         }
 
-        #canvas {
-            margin-top: 2rem;
+        #canvas-container {
+            background: white;
+            padding: 24px;
+            border-radius: 8px;
             display: flex;
             justify-content: center;
-            background: white; /* QR Code braucht hohen Kontrast zum Scannen */
-            padding: 20px;
-            border-radius: 12px;
+            border: 4px solid #1f1f1f;
+        }
+
+        /* Checkbox Styling */
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .checkbox-container input {
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+            accent-color: #ff4d00;
         }
     </style>
 </head>
-<body>
+<body class="p-4 md:p-8 flex justify-center items-center">
 
-    <div class="container">
-        <h2>GRIND<span>.</span></h2>
+    <div class="max-w-4xl w-full grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
+        
+        <!-- Linke Spalte: Einstellungen -->
+        <div class="card p-8 rounded-lg flex flex-col gap-6 relative overflow-hidden group">
+            <div class="absolute inset-0 bg-gradient-to-r from-[#ff4d00] to-transparent opacity-5 transition duration-1000"></div>
+            
+            <div class="relative z-10">
+                <p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-[0.4em] mb-1">Creation Tool</p>
+                <h1 class="text-4xl font-black italic uppercase tracking-tighter mb-6">QR Forge<span class="text-[#ff4d00]">.</span></h1>
+                
+                <div class="space-y-5">
+                    <div>
+                        <label class="block text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-2">Ziel (Text oder URL)</label>
+                        <textarea id="data" rows="3" class="input-grind font-mono text-sm" placeholder="https://grind-app.de/mission-1">https://grind-app.de</textarea>
+                    </div>
 
-        <div class="control-group">
-            <label for="data">Dein Text (wird im QR-Code gespeichert):</label>
-            <textarea id="data" rows="4" placeholder="Schreibe hier deinen Text rein...">Willkommen bei GRIND.</textarea>
-        </div>
+                    <div>
+                        <label class="block text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-2">Logo Upload</label>
+                        <div class="relative">
+                            <input type="file" id="logoUpload" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                            <div class="input-grind flex items-center justify-center border-dashed border-2 text-gray-400 hover:text-[#ff4d00] hover:border-[#ff4d00]">
+                                <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                                <span id="fileName" class="font-bold text-xs tracking-widest uppercase">Klicke für GRIND Logo</span>
+                            </div>
+                        </div>
+                    </div>
 
-        <div class="control-group">
-            <label for="logoUpload">Dein Logo hochladen (.png, .jpg):</label>
-            <input type="file" id="logoUpload" accept="image/*">
-        </div>
+                    <!-- Spezifischer Fix für weiße Logos -->
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="darkBgToggle" checked>
+                        <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">Dunkle Base für weißes Logo generieren</span>
+                    </label>
 
-        <div style="display: flex; gap: 10px;">
-            <div class="control-group" style="flex: 1;">
-                <label for="colorDark">Punkte-Farbe:</label>
-                <input type="color" id="colorDark" value="#000000">
+                    <div class="grid grid-cols-2 gap-4 pt-2">
+                        <div>
+                            <label class="block text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-2">Punkte</label>
+                            <input type="color" id="colorDark" value="#050505">
+                        </div>
+                        <div>
+                            <label class="block text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-2">Akzent (Punkt)</label>
+                            <input type="color" id="colorAccent" value="#ff4d00">
+                        </div>
+                    </div>
+
+                    <button onclick="updateQR()" class="btn-grind mt-4">Code Generieren</button>
+                </div>
             </div>
-
-            <div class="control-group" style="flex: 1;">
-                <label for="colorLight">Hintergrund:</label>
-                <input type="color" id="colorLight" value="#ffffff">
-            </div>
         </div>
 
-        <button onclick="generateQR()">QR-Code erstellen</button>
+        <!-- Rechte Spalte: Vorschau -->
+        <div class="flex flex-col items-center justify-center gap-6">
+            <div id="canvas-container" class="shadow-[0_0_40px_rgba(255,77,0,0.15)]"></div>
+            
+            <div class="w-full max-w-[348px] flex gap-4">
+                <button onclick="downloadQR('png')" class="btn-outline">PNG Download</button>
+                <button onclick="downloadQR('svg')" class="btn-outline">SVG Download</button>
+            </div>
+            <p class="text-gray-500 text-[10px] font-bold uppercase tracking-widest text-center mt-2 max-w-[348px]">SVG ist ideal für den Druck von Postern oder Kleidung (ohne Qualitätsverlust).</p>
+        </div>
 
-        <div id="canvas"></div>
     </div>
 
     <script>
         let uploadedLogoDataUrl = "";
+        let originalLogoImage = null; // Speichert das Bild für die spätere Verarbeitung
 
-        // Datei-Upload verarbeiten und in Base64 umwandeln
-        document.getElementById('logoUpload').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    uploadedLogoDataUrl = event.target.result;
-                    generateQR(); // Direkt aktualisieren nach Upload
-                };
-                reader.readAsDataURL(file);
-            } else {
-                uploadedLogoDataUrl = "";
-            }
-        });
-
-        // Initialisierung des QR-Codes im GRIND-Design
+        // 1. Initialisierung mit GRIND-Design
         const qrCode = new QRCodeStyling({
             width: 300,
             height: 300,
             type: "svg",
-            data: "Willkommen bei GRIND.",
+            data: "https://grind-app.de",
             image: "",
             qrOptions: {
-                errorCorrectionLevel: 'H' // WICHTIG: Höchste Fehlerkorrektur für Logos
+                errorCorrectionLevel: 'H' // Hohe Fehlerkorrektur für Logos
             },
             dotsOptions: {
-                color: "#000000",
-                type: "rounded" // Etwas besser lesbar für Scanner als "extra-rounded"
+                color: "#050505",
+                type: "rounded" // Leicht abgerundet, wirkt moderner
             },
             backgroundOptions: {
                 color: "#ffffff",
             },
             cornersSquareOptions: {
-                color: "#FF4500", // Das GRIND-Orange für die Ecken
-                type: "extra-rounded"
+                color: "#ff4d00", // Grind Orange
+                type: "extra-rounded" // Äußerer Ring weich
             },
             cornersDotOptions: {
-                color: "#FF4500",
-                type: "dot"
+                color: "#ff4d00",
+                type: "dot" // Der innere Punkt (Spiegelt das Logo wider!)
             },
             imageOptions: {
                 crossOrigin: "anonymous",
-                margin: 5, // Rand um das Logo etwas verkleinert
-                imageSize: 0.35 // Logo nimmt jetzt max 35% ein, damit genug Code übrig bleibt
+                margin: 0,
+                imageSize: 0.4,
+                hideBackgroundDots: true // Macht Platz für das Logo
             }
         });
 
-        qrCode.append(document.getElementById("canvas"));
+        qrCode.append(document.getElementById("canvas-container"));
 
-        // Funktion zum Aktualisieren
-        function generateQR() {
+        // 2. Datei-Upload verarbeiten
+        document.getElementById('logoUpload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                document.getElementById('fileName').innerText = file.name;
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const img = new Image();
+                    img.onload = function() {
+                        originalLogoImage = img;
+                        processLogoAndUpdateQR();
+                    };
+                    img.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Event-Listener für die Checkbox
+        document.getElementById('darkBgToggle').addEventListener('change', processLogoAndUpdateQR);
+
+        // 3. Funktion: Legt (falls gewünscht) einen dunklen Hintergrund hinter das weiße Logo
+        function processLogoAndUpdateQR() {
+            if (!originalLogoImage) {
+                updateQR();
+                return;
+            }
+
+            const useDarkBg = document.getElementById('darkBgToggle').checked;
+            
+            if (useDarkBg) {
+                // Erstelle ein Canvas, um das Logo auf einen dunklen Hintergrund zu zeichnen
+                const canvas = document.createElement('canvas');
+                const padding = 60; // Rand um das Logo
+                canvas.width = originalLogoImage.width + padding * 2;
+                canvas.height = originalLogoImage.height + padding * 2;
+                const ctx = canvas.getContext('2d');
+
+                // Zeichne die dunkle Base (Kreis oder abgerundetes Rechteck)
+                ctx.fillStyle = '#050505';
+                
+                // Wir zeichnen einen leicht abgerundeten Hintergrund (Squircle)
+                ctx.beginPath();
+                ctx.roundRect(0, 0, canvas.width, canvas.height, canvas.width * 0.2); 
+                ctx.fill();
+
+                // Zeichne das Logo zentriert darüber
+                ctx.drawImage(originalLogoImage, padding, padding);
+                
+                uploadedLogoDataUrl = canvas.toDataURL('image/png');
+            } else {
+                // Logo unverändert lassen
+                uploadedLogoDataUrl = originalLogoImage.src;
+            }
+
+            updateQR();
+        }
+
+        // 4. Funktion zum Aktualisieren des Codes
+        function updateQR() {
             const dataInput = document.getElementById('data').value;
             const colorDarkInput = document.getElementById('colorDark').value;
-            const colorLightInput = document.getElementById('colorLight').value;
+            const colorAccentInput = document.getElementById('colorAccent').value;
 
             qrCode.update({
-                data: dataInput || " ", // Verhindert Fehler bei leerem Text
+                data: dataInput || " ",
                 image: uploadedLogoDataUrl,
                 dotsOptions: {
                     color: colorDarkInput
                 },
-                backgroundOptions: {
-                    color: colorLightInput
+                cornersSquareOptions: {
+                    color: colorAccentInput
+                },
+                cornersDotOptions: {
+                    color: colorAccentInput
                 }
             });
         }
-    </script>
 
+        // 5. Download Funktion
+        function downloadQR(extension) {
+            qrCode.download({ name: "GRIND-QR-Code", extension: extension });
+        }
+    </script>
 </body>
 </html>
 
-
-```
