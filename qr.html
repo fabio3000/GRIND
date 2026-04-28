@@ -102,7 +102,20 @@
             border-radius: 8px;
             display: flex;
             justify-content: center;
+            align-items: center;
             border: 4px solid #1f1f1f;
+            /* NEU: Absolute Sperren, damit der 4K-Code nicht ausbricht */
+            width: 100%;
+            max-width: 348px;
+            aspect-ratio: 1 / 1;
+            box-sizing: border-box;
+            overflow: hidden; 
+        }
+
+        #canvas-container > * {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: contain;
         }
 
         /* Checkbox Styling */
@@ -189,10 +202,10 @@
         let uploadedLogoDataUrl = "";
         let originalLogoImage = null; // Speichert das Bild für die spätere Verarbeitung
 
-        // 1. Initialisierung mit GRIND-Design
+        // 1. Initialisierung mit GRIND-Design in 4K Qualität
         const qrCode = new QRCodeStyling({
-            width: 300,
-            height: 300,
+            width: 2048,  // Von 300 auf 2048 erhöht für Ultra-High-Res Export
+            height: 2048, // Von 300 auf 2048 erhöht
             type: "svg",
             data: "https://grind-app.de",
             image: "",
