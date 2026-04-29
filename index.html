@@ -1,4 +1,4 @@
-
+```html
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -316,13 +316,13 @@
             const rewardId = `lvl${lvl}_${tier}`;
 
             try {
-                // 1. In Firebase abspeichern
-                await addDoc(collection(db, 'plot_shipping_requests'), { uid: state.user.uid, alias: state.profile.alias, lvl: lvl, tier: tier, address: address, timestamp: new Date(), status: 'pending' });
+                // 1. In Firebase abspeichern (Sichere Werte-Übergabe)
+                await addDoc(collection(db, 'plot_shipping_requests'), { uid: state.user.uid, alias: state.profile?.alias || 'Grinder', lvl: lvl, tier: tier, address: address, timestamp: new Date(), status: 'pending' });
                 
-                const currentRedeemed = state.profile.redeemed || [];
+                const currentRedeemed = state.profile?.redeemed || [];
                 if(!currentRedeemed.includes(rewardId)) { currentRedeemed.push(rewardId); await setDoc(doc(db, 'plot_users', state.user.uid), { redeemed: currentRedeemed }, { merge: true }); }
                 
-                // 2. Email direkt via FormSubmit versenden (Isoliert, damit Abstürze hier nicht die DB blockieren)
+                // 2. Email direkt via FormSubmit versenden (Isoliert im eigenen Block)
                 try {
                     fetch("https://formsubmit.co/ajax/Fabio.maines@grind-app.de", {
                         method: "POST",
@@ -330,23 +330,281 @@
                         body: JSON.stringify({
                             _subject: "Neue Loot-Bestellung (GRIND.)",
                             _template: "table",
-                            Alias: state.profile.alias,
+                            Alias: state.profile?.alias || 'Grinder',
                             Level: lvl,
                             Tier: tier,
                             Adresse_oder_Info: address,
-                            User_ID: state.user.uid
+                            User_ID: state.user?.uid || 'Unknown'
                         })
                     }).catch(e => console.log("Email error:", e));
                 } catch(mailErr) {
-                    console.log("Email blockiert:", mailErr);
+                    console.log("Konnte E-Mail nicht absenden:", mailErr);
                 }
 
                 window.showToast("Anfrage für physical Loot gesendet!", "success"); window.closeModal();
             } catch(e) { 
-                console.error("Datenbank Fehler:", e);
-                window.showToast("Systemfehler. (Firestore Rules prüfen!)", "error"); 
+                console.error(e);
+                window.showToast("Fehler: " + (e.message || "Netzwerkfehler"), "error"); 
                 if(btn) { btn.innerText = "Versand anfordern"; btn.disabled = false; } 
             }
+        };
+
+        window.claimInstantMission = async (mid, xp, name) => {
+            const btn = document.getElementById(`btn-${mid}`); if(btn) { btn.innerText = "Claiming..."; btn.disabled = true; }
+            try {
+                const currentCompleted = state.profile.completed || []; const isRepeatable = String(mid).startsWith('rep_');
+                let updatePayload = {};
+                let claimSuccess = false;
+
+                if (isRepeatable) {
+                    const habit = state.habitData.find(h => h.id === mid);
+                    const streakBonus = habit ? (parseInt(habit.streakBonus) || 0) : 0;
+                    const streaks = state.profile.streaks || {};
+                    const habitStreak = streaks[mid] || { streak: 0, lastDate: '' };
+                    const todayStr = new Date().toISOString().split('T')[0];
+                    
+                    if (habitStreak.lastDate !== todayStr) {
+                        let activeStreak = habitStreak.streak;
+                        if (habitStreak.lastDate) {
+                            const diffDays = Math.round(Math.abs((new Date(todayStr) - new Date(habitStreak.lastDate)) / (1000 * 60 * 60 * 24)));
+                            if (diffDays > 1) activeStreak = 0;
+                        }
+                        const newStreak = activeStreak + 1;
+                        const finalXp = xp + (newStreak > 1 ? (newStreak - 1) * streakBonus : 0);
+                        const newTotalXp = (state.profile.xp || 0) + finalXp;
+                        streaks[mid] = { streak: newStreak, lastDate: todayStr };
+                        
+                        updatePayload = { xp: newTotalXp, lvl: Math.floor(newTotalXp / 1000) + 1, streaks: streaks };
+                        claimSuccess = true;
+                        window.showToast(`+${finalXp} XP für ${name}! (Streak: ${newStreak}🔥)`, "success");
+                    } else { window.showToast("Heute bereits erledigt!", "error"); }
+                } else if (!currentCompleted.includes(mid)) {
+                    const newXp = (state.profile.xp || 0) + xp; const newCompleted = [...currentCompleted, mid];
+                    updatePayload = { xp: newXp, lvl: Math.floor(newXp / 1000) + 1, completed: newCompleted };
+                    claimSuccess = true;
+                    window.showToast(`+${xp} XP für ${name}!`, "success");
+                }
+
+                if (claimSuccess) { await setDoc(doc(db, 'plot_users', state.user.uid), updatePayload, { merge: true }); }
+                else if (btn) { btn.innerText = "Claim XP"; btn.disabled = false; }
+            } catch(e) { window.showToast("Fehler beim Claimen.", "error"); if(btn) { btn.innerText = "Claim XP"; btn.disabled = false; } }
+        };
+
+        window.startQRScanner = () => {
+            document.getElementById('qr-placeholder').classList.add('hidden'); document.getElementById('qr-reader').classList.remove('hidden');
+            try {
+                window.html5QrCode = new Html5Qrcode("qr-reader");
+                window.html5QrCode.start(
+                    { facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 } },
+                    (decodedText) => {
+                        document.getElementById('verify_code_input').value = decodedText;
+                        if (window.currentVerify && window.currentVerify.qrSolution) { window.checkCode(decodedText); } else { window.showToast("Code erfasst!", "success"); }
+                        try { if(window.html5QrCode) { const stopAndHide = () => { document.getElementById('qr-reader').classList.add('hidden'); document.getElementById('qr-placeholder').classList.remove('hidden'); window.html5QrCode = null; }; window.html5QrCode.stop().then(() => { try { window.html5QrCode.clear(); } catch(e){} stopAndHide(); }).catch(stopAndHide); } } catch(e) {}
+                    }, (err) => {}
+                ).catch(err => { window.showToast("Kamera Zugriff verweigert.", "error"); document.getElementById('qr-reader').classList.add('hidden'); document.getElementById('qr-placeholder').classList.remove('hidden'); });
+            } catch (e) { window.showToast("Scanner Error.", "error"); }
+        };
+
+        window.triggerFileInput = () => document.getElementById('proof_file_input').click();
+        
+        window.handleFileSelect = (e) => {
+            const file = e.target.files[0]; if(!file) return; const reader = new FileReader();
+            reader.onload = (ev) => { const img = new Image(); img.onload = () => { const canvas = document.createElement('canvas'); let width = img.width; let height = img.height; const MAX_SIZE = 800; if (width > height && width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } else if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } canvas.width = width; canvas.height = height; canvas.getContext('2d').drawImage(img, 0, 0, width, height); const compressedData = canvas.toDataURL('image/jpeg', 0.7); document.getElementById('upload-preview').src = compressedData; document.getElementById('upload-preview').classList.remove('hidden'); document.getElementById('upload-placeholder').classList.add('hidden'); state.tempUploadData = compressedData; }; img.src = ev.target.result; }; reader.readAsDataURL(file);
+        };
+
+        window.openVerifyModal = (mid, xp, type, name, qrSolution = '') => {
+            state.tempUploadData = null; window.currentVerify = { mid, xp, name, type, qrSolution };
+            let innerHtml = `<p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">Verify Operation</p><h3 class="text-2xl font-black italic uppercase tracking-tighter mb-6">${name}</h3>`;
+            if(type === 'qr') {
+                innerHtml += `<div id="qr-placeholder" onclick="window.startQRScanner()" class="border-2 border-dashed border-[#1f1f1f] p-8 mb-4 flex flex-col items-center justify-center bg-black/50 rounded-sm hover:border-[#ff4d00] cursor-pointer transition"><svg class="w-12 h-12 text-[#ff4d00] mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg><p class="text-xs text-white font-bold uppercase tracking-widest text-center">Kamera aktivieren</p></div><div id="qr-reader" class="hidden w-full mb-4 rounded-sm overflow-hidden border border-[#1f1f1f]"></div><input id="verify_code_input" type="text" placeholder="Oder Code manuell eingeben" class="w-full p-4 bg-[#0f0f0f] border border-[#1f1f1f] rounded-sm outline-none focus:border-[#ff4d00] text-white text-center text-sm tracking-widest uppercase mb-6">`;
+            } else {
+                innerHtml += `<input type="file" id="proof_file_input" accept="image/*" class="hidden" onchange="window.handleFileSelect(event)"><div onclick="window.triggerFileInput()" class="border-2 border-dashed border-[#1f1f1f] min-h-[150px] p-2 mb-6 flex flex-col items-center justify-center bg-black/50 rounded-sm hover:border-[#ff4d00] transition cursor-pointer overflow-hidden relative"><div id="upload-placeholder" class="text-center"><svg class="w-12 h-12 text-[#ff4d00] mb-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg><p class="text-xs text-white font-bold uppercase tracking-widest">Beweisfoto hochladen</p></div><img id="upload-preview" class="hidden absolute inset-0 w-full h-full object-cover"></div>`;
+            }
+            if (type === 'qr' && qrSolution) { innerHtml += `<button type="button" onclick="window.checkCode()" class="w-full btn-grind py-4">Code Prüfen</button>`; } 
+            else { innerHtml += `<button type="button" onclick="window.submitVerification('${mid}', ${xp}, '${type}', '${name.replace(/'/g, "\\'")}')" class="w-full btn-grind py-4">Senden zur Prüfung</button>`; }
+            window.openModal(innerHtml);
+        };
+
+        window.checkCode = async (scannedValue = null) => {
+            const val = scannedValue || document.getElementById('verify_code_input').value.trim();
+            if(!window.currentVerify) return; const { mid, xp, name, qrSolution } = window.currentVerify;
+            if(!val) return window.showToast("Bitte Code eingeben.", "error");
+
+            if (val.toLowerCase() === qrSolution.toLowerCase()) {
+                const btn = document.querySelector('#modal-container button.btn-grind'); if(btn) { btn.innerText = "Verifying..."; btn.disabled = true; }
+                try {
+                    const currentCompleted = state.profile.completed || []; const isRepeatable = String(mid).startsWith('rep_');
+                    let updatePayload = {};
+                    let claimSuccess = false;
+
+                    if (isRepeatable) {
+                        const habit = state.habitData.find(h => h.id === mid);
+                        const streakBonus = habit ? (parseInt(habit.streakBonus) || 0) : 0;
+                        const streaks = state.profile.streaks || {};
+                        const habitStreak = streaks[mid] || { streak: 0, lastDate: '' };
+                        const todayStr = new Date().toISOString().split('T')[0];
+                        
+                        if (habitStreak.lastDate !== todayStr) {
+                            let activeStreak = habitStreak.streak;
+                            if (habitStreak.lastDate) {
+                                const diffDays = Math.round(Math.abs((new Date(todayStr) - new Date(habitStreak.lastDate)) / (1000 * 60 * 60 * 24)));
+                                if (diffDays > 1) activeStreak = 0;
+                            }
+                            const newStreak = activeStreak + 1;
+                            const finalXp = xp + (newStreak > 1 ? (newStreak - 1) * streakBonus : 0);
+                            const newTotalXp = (state.profile.xp || 0) + finalXp;
+                            streaks[mid] = { streak: newStreak, lastDate: todayStr };
+                            
+                            updatePayload = { xp: newTotalXp, lvl: Math.floor(newTotalXp / 1000) + 1, streaks: streaks };
+                            claimSuccess = true;
+                            window.showToast(`+${finalXp} XP für ${name}! (Streak: ${newStreak}🔥)`, "success");
+                        } else { window.showToast("Heute bereits erledigt!", "error"); }
+                    } else if (!currentCompleted.includes(mid)) {
+                        const newXp = (state.profile.xp || 0) + xp; const newCompleted = [...currentCompleted, mid];
+                        updatePayload = { xp: newXp, lvl: Math.floor(newXp / 1000) + 1, completed: newCompleted };
+                        claimSuccess = true;
+                        window.showToast(`+${xp} XP für ${name}! Code verifiziert.`, "success");
+                    }
+
+                    if (claimSuccess) { await setDoc(doc(db, 'plot_users', state.user.uid), updatePayload, { merge: true }); }
+                    window.closeModal();
+                } catch(e) { window.showToast("Systemfehler.", "error"); if(btn) { btn.innerText = "Code Prüfen"; btn.disabled = false; } }
+            } else { window.showToast("Falscher Code.", "error"); }
+        };
+
+        window.submitVerification = async (mid, xp, type, name) => {
+            let data = null;
+            if (type === 'qr') { data = document.getElementById('verify_code_input').value.trim(); if(!data) return window.showToast("Bitte Code eingeben.", "error"); } 
+            else { data = state.tempUploadData; if(!data) return window.showToast("Bitte lade ein Foto hoch.", "error"); }
+            const btn = document.querySelector('#modal-container button.btn-grind'); if(btn) { btn.innerText = "Transmitting..."; btn.disabled = true; }
+            const timeout = setTimeout(() => { if(btn && btn.innerText === "Transmitting...") { btn.disabled = false; btn.innerText = "Erneut Senden"; window.showToast("Zeitüberschreitung.", "error"); } }, 10000);
+            try {
+                await addDoc(collection(db, 'plot_pending_proofs'), { 
+                    uid: state.user.uid, alias: state.profile.alias || 'Grinder', mid, 
+                    missionName: name, xp, type, data, timestamp: new Date(),
+                    submissionDate: new Date().toISOString().split('T')[0]
+                });
+                clearTimeout(timeout); window.showToast("Gesendet. Warte auf Überprüfung.", "info"); window.closeModal();
+            } catch(e) { clearTimeout(timeout); window.showToast("Systemfehler beim Senden.", "error"); if(btn) { btn.innerText = "Erneut Senden"; btn.disabled = false; } }
+        };
+
+        window.startRedeemHold = (lvl, tier, event) => {
+            if(isRedeeming) return; if(event && event.type === 'touchstart') event.preventDefault(); 
+            const btn = document.getElementById('redeem-btn-fill'); const text = document.getElementById('redeem-btn-text'); if(!btn || !text) return;
+            text.innerText = "HOLDING..."; let lastTime = performance.now();
+            const updateFill = (currentTime) => {
+                const deltaTime = currentTime - lastTime; lastTime = currentTime; holdProgress += (deltaTime / 1500) * 100; 
+                if(holdProgress >= 100) { holdProgress = 100; btn.style.width = "100%"; window.executeRedeem(lvl, tier); return; }
+                btn.style.width = `${holdProgress}%`; holdTimer = requestAnimationFrame(updateFill);
+            };
+            holdTimer = requestAnimationFrame(updateFill);
+        };
+
+        window.stopRedeemHold = () => {
+            if(isRedeeming) return; cancelAnimationFrame(holdTimer); holdProgress = 0;
+            const btn = document.getElementById('redeem-btn-fill'); const text = document.getElementById('redeem-btn-text');
+            if(btn) btn.style.width = "0%"; if(text) text.innerText = "HOLD TO REDEEM";
+        };
+
+        window.executeRedeem = async (lvl, tier) => {
+            isRedeeming = true;
+            const text = document.getElementById('redeem-btn-text'); if(text) text.innerText = "VERIFYING...";
+            const rewardId = `lvl${lvl}_${tier}`;
+            try {
+                const currentRedeemed = state.profile.redeemed || [];
+                if(!currentRedeemed.includes(rewardId)) { currentRedeemed.push(rewardId); await setDoc(doc(db, 'plot_users', state.user.uid), { redeemed: currentRedeemed }, { merge: true }); }
+                const container = document.getElementById('redeem-container');
+                if(container) { container.innerHTML = `<div class="flex flex-col items-center justify-center py-6 animate-pop"><div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mb-4 shadow-[0_0_30px_rgba(34,197,94,0.5)]"><svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></div><h4 class="text-white font-black italic text-xl uppercase tracking-widest text-center">Ticket<br>eingelöst</h4><p class="text-gray-400 text-xs mt-3 text-center">Dieser Loot wurde erfolgreich<br>von deinem Konto abgebucht.</p></div>`; }
+                window.showToast("Erfolgreich eingelöst!", "success");
+            } catch (e) { window.showToast("Fehler beim Einlösen.", "error"); window.stopRedeemHold(); } finally { isRedeeming = false; }
+        };
+
+        window.claimBoost = async (rewardLvl, tier, type, amountStr) => {
+            const amount = parseInt(amountStr) || 0;
+            const btn = document.getElementById('boost-claim-btn');
+            if(btn) { btn.innerText = "Claiming..."; btn.disabled = true; }
+            const rewardId = `lvl${rewardLvl}_${tier}`;
+            
+            try {
+                const p = state.profile;
+                if((p.redeemed || []).includes(rewardId)) return;
+                
+                let newXp = p.xp || 0;
+                let newLvl = p.lvl || 1;
+                
+                if (type === 'xp') {
+                    newXp += amount;
+                    newLvl = Math.floor(newXp / 1000) + 1;
+                } else if (type === 'lvl') {
+                    newLvl += amount;
+                    newXp = (newLvl - 1) * 1000 + (newXp % 1000);
+                }
+                
+                const currentRedeemed = [...(p.redeemed || []), rewardId];
+                
+                window.closeModal();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+
+                await setDoc(doc(db, 'plot_users', state.user.uid), { xp: newXp, lvl: newLvl, redeemed: currentRedeemed }, { merge: true });
+                window.showToast(`BOOST AKTIVIERT!`, "success");
+            } catch(e) { window.showToast("Fehler beim Einlösen.", "error"); if(btn) { btn.innerText = "BOOST AKTIVIEREN"; btn.disabled = false; } }
+        };
+
+        window.openClaimModal = (lvl, tier) => {
+            isRedeeming = false; holdProgress = 0;
+            const reward = state.rewardData.find(r => r.lvl === lvl); if(!reward) return;
+            const title = reward[tier]; const type = reward[`${tier}_type`] || 'qr'; const info = reward[`${tier}_info`] || 'Zeige diesen Screen beim Partner vor Ort vor.';
+            const isPro = tier === 'pro'; const textClass = isPro ? 'text-[#a855f7]' : 'text-[#ff4d00]'; const bgClass = isPro ? 'bg-[#a855f7]' : 'bg-[#ff4d00]'; const borderClass = isPro ? 'border-[#a855f7]/30' : 'border-[#ff4d00]/30';
+            const rewardId = `lvl${lvl}_${tier}`; const isAlreadyRedeemed = (state.profile.redeemed || []).includes(rewardId);
+            let contentHtml = '';
+
+            if (isAlreadyRedeemed && (type === 'qr' || type === 'shipping' || type === 'xp' || type === 'lvl')) {
+                contentHtml = `<div class="bg-[#111] p-8 rounded-sm flex flex-col items-center justify-center mb-6 border border-white/5 shadow-inner"><div class="w-12 h-12 rounded-full border-2 border-gray-600 flex items-center justify-center mb-4 opacity-50"><svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div><p class="text-xs text-gray-500 uppercase tracking-widest font-bold text-center">Bereits eingelöst<br><span class="font-normal text-[10px] mt-1 block">Dieser Loot ist nicht mehr verfügbar.</span></p></div>`;
+            } else if (type === 'link') {
+                const isUrl = info.startsWith('http');
+                contentHtml = `<div class="bg-[#1f1f1f] p-6 rounded-sm flex flex-col items-center justify-center mb-6 border ${borderClass}"><p class="text-xs text-gray-400 mb-4 uppercase tracking-widest font-bold">Access Code / Link</p>${isUrl ? `<a href="${info}" target="_blank" class="w-full ${bgClass} text-white font-black py-3 px-4 rounded-sm text-center uppercase tracking-widest hover:opacity-80 transition">Link öffnen</a>` : `<div class="w-full bg-black text-white font-mono text-xl py-3 px-4 rounded-sm text-center select-all border border-white/10">${info}</div>`}</div>`;
+            } else if (type === 'xp' || type === 'lvl') {
+                const isXp = type === 'xp'; const unit = isXp ? 'XP' : 'Level';
+                contentHtml = `<div class="bg-[#1f1f1f] p-6 rounded-sm flex flex-col mb-6 border ${borderClass} shadow-2xl relative overflow-hidden"><div class="absolute top-0 right-0 bg-[#000] px-2 py-1 text-[8px] font-bold text-gray-500 uppercase tracking-widest rounded-bl-sm">Instant Boost</div><p class="text-[11px] text-gray-300 mb-8 leading-relaxed text-center font-medium">Dies fügt deinem Account direkt XP/Level hinzu.<br><span class="text-white font-black uppercase tracking-widest block mt-3 text-2xl ${textClass}">+${info} ${unit}</span></p><button type="button" id="boost-claim-btn" onclick="window.claimBoost(${lvl}, '${tier}', '${type}', '${info}')" class="w-full ${bgClass} text-white font-black py-4 px-4 rounded-sm text-sm uppercase tracking-widest shadow-[0_0_20px_rgba(255,77,0,0.4)] hover:scale-[1.02] transition">BOOST AKTIVIEREN</button></div>`;
+            } else if (type === 'qr') {
+                contentHtml = `<div id="redeem-container" class="bg-[#1f1f1f] p-6 rounded-sm flex flex-col mb-6 border ${borderClass} shadow-2xl relative overflow-hidden"><div class="absolute top-0 right-0 bg-[#000] px-2 py-1 text-[8px] font-bold text-gray-500 uppercase tracking-widest rounded-bl-sm">One-Time Use</div><p class="text-[11px] text-gray-300 mb-8 leading-relaxed text-center font-medium">${info}<br><span class="text-white font-black uppercase tracking-widest block mt-3 border-t border-white/10 pt-3">Das Personal muss das Einlösen bestätigen!</span></p><div onmousedown="window.startRedeemHold(${lvl}, '${tier}', event)" onmouseup="window.stopRedeemHold()" onmouseleave="window.stopRedeemHold()" ontouchstart="window.startRedeemHold(${lvl}, '${tier}', event)" ontouchend="window.stopRedeemHold()" class="relative w-full h-16 bg-black border border-white/20 rounded-sm overflow-hidden cursor-pointer flex items-center justify-center group"><div id="redeem-btn-fill" class="absolute left-0 top-0 bottom-0 w-0 ${bgClass} z-0" style="transition: none;"></div><span id="redeem-btn-text" class="relative z-10 text-white font-black italic uppercase tracking-widest text-sm pointer-events-none drop-shadow-md">Hold to Redeem</span></div></div>`;
+            } else if (type === 'shipping') {
+                contentHtml = `<div class="bg-[#1f1f1f] p-6 rounded-sm flex flex-col mb-6 border border-white/10 relative"><div class="absolute top-0 right-0 bg-[#000] px-2 py-1 text-[8px] font-bold text-gray-500 uppercase tracking-widest rounded-bl-sm">One-Time Request</div><p class="text-xs text-gray-400 mb-4 leading-relaxed">${info}</p><input id="shipping_address" type="text" placeholder="Adresse oder Shirt-Größe..." class="w-full p-3 bg-black border border-white/20 rounded-sm text-sm text-white outline-none focus:border-white mb-4"><button type="button" onclick="window.submitShipping(${lvl}, '${tier}')" class="w-full ${bgClass} text-white font-black py-3 px-4 rounded-sm text-xs uppercase tracking-widest hover:opacity-80 transition">Versand anfordern</button></div>`;
+            }
+
+            let innerHtml = `<p class="${textClass} text-[10px] font-black uppercase tracking-widest mb-1">Loot Stash</p><h3 class="text-2xl font-black italic uppercase tracking-tighter mb-6">${title}</h3>${contentHtml}<button type="button" onclick="window.closeModal()" class="w-full bg-[#111] text-gray-400 hover:bg-white hover:text-black font-black italic uppercase py-3 transition text-xs border border-white/5 rounded-sm">Schließen</button>`;
+            window.openModal(innerHtml);
+        };
+
+        window.submitShipping = async (lvl, tier) => {
+            const address = document.getElementById('shipping_address').value.trim();
+            if(!address) return window.showToast("Bitte Daten eingeben.", "error");
+            const btn = document.querySelector('#modal-container button.bg-\\[\\#ff4d00\\], #modal-container button.bg-\\[\\#a855f7\\]'); if(btn) { btn.innerText = "Senden..."; btn.disabled = true; }
+            const rewardId = `lvl${lvl}_${tier}`;
+
+            try {
+                // 1. In Firebase abspeichern (bleibt exakt so)
+                await addDoc(collection(db, 'plot_shipping_requests'), { uid: state.user.uid, alias: state.profile.alias, lvl: lvl, tier: tier, address: address, timestamp: new Date(), status: 'pending' });
+                
+                // 2. Email direkt via FormSubmit versenden
+                fetch("https://formsubmit.co/ajax/Fabio.maines@grind-app.de", {
+                    method: "POST",
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify({
+                        _subject: "Neue Loot-Bestellung (GRIND.)",
+                        _template: "table",
+                        Alias: state.profile.alias,
+                        Level: lvl,
+                        Tier: tier,
+                        Adresse_oder_Info: address,
+                        User_ID: state.user.uid
+                    })
+                }).catch(e => console.log("Email error:", e));
+
+                const currentRedeemed = state.profile.redeemed || [];
+                if(!currentRedeemed.includes(rewardId)) { currentRedeemed.push(rewardId); await setDoc(doc(db, 'plot_users', state.user.uid), { redeemed: currentRedeemed }, { merge: true }); }
+                window.showToast("Anfrage für physical Loot gesendet!", "success"); window.closeModal();
+            } catch(e) { window.showToast("Fehler bei der Anfrage.", "error"); if(btn) { btn.innerText = "Versand anfordern"; btn.disabled = false; } }
         };
 
         window.setView = (view) => { 
