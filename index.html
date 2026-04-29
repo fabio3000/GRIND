@@ -9,7 +9,7 @@
     <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
     <meta name="googlebot" content="noindex, nofollow">
     
-    <title>GRIND. | System</title>
+    <title>GRIND.</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&display=swap" rel="stylesheet">
     
@@ -543,7 +543,24 @@
             const rewardId = `lvl${lvl}_${tier}`;
 
             try {
+                // 1. In Firebase abspeichern (bleibt exakt so)
                 await addDoc(collection(db, 'plot_shipping_requests'), { uid: state.user.uid, alias: state.profile.alias, lvl: lvl, tier: tier, address: address, timestamp: new Date(), status: 'pending' });
+                
+                // 2. Email direkt via FormSubmit versenden
+                fetch("https://formsubmit.co/ajax/Fabio.maines@grind-app.de", {
+                    method: "POST",
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify({
+                        _subject: "Neue Loot-Bestellung (GRIND.)",
+                        _template: "table",
+                        Alias: state.profile.alias,
+                        Level: lvl,
+                        Tier: tier,
+                        Adresse_oder_Info: address,
+                        User_ID: state.user.uid
+                    })
+                }).catch(e => console.log("Email error:", e));
+
                 const currentRedeemed = state.profile.redeemed || [];
                 if(!currentRedeemed.includes(rewardId)) { currentRedeemed.push(rewardId); await setDoc(doc(db, 'plot_users', state.user.uid), { redeemed: currentRedeemed }, { merge: true }); }
                 window.showToast("Anfrage für physical Loot gesendet!", "success"); window.closeModal();
@@ -674,7 +691,7 @@
                     <span class="hidden md:inline">•</span>
                     <span class="hover:text-white cursor-pointer transition" onclick="window.setView('agb')">AGB</span>
                 </div>
-                <p class="text-[#1f1f1f] text-[9px] uppercase tracking-widest font-black">© 2026 GRIND NETWORK. ALL RIGHTS RESERVED.</p>
+                <p class="text-[#1f1f1f] text-[9px] uppercase tracking-widest font-black">© 2026 GRIND. NETWORK. ALL RIGHTS RESERVED.</p>
             </footer>
         `;
 
@@ -749,7 +766,7 @@
                     content = `
                         <h2>1. Datenschutz auf einen Blick</h2>
                         <h3>Allgemeine Hinweise</h3>
-                        <p>Die folgenden Hinweise geben einen einfachen Überblick darüber, was mit Ihren personenbezogenen Daten passiert, wenn Sie diese App ("GRIND") nutzen. Personenbezogene Daten sind alle Daten, mit denen Sie persönlich identifiziert werden können.</p>
+                        <p>Die folgenden Hinweise geben einen einfachen Überblick darüber, was mit Ihren personenbezogenen Daten passiert, wenn Sie diese App ("GRIND.") nutzen. Personenbezogene Daten sind alle Daten, mit denen Sie persönlich identifiziert werden können.</p>
                         
                         <h3>Datenerfassung in der App</h3>
                         <p><strong>Wer ist verantwortlich für die Datenerfassung?</strong><br>
@@ -789,7 +806,7 @@
                     title = 'AGB';
                     content = `
                         <h2>§ 1 Geltungsbereich und Vertragsgegenstand</h2>
-                        <p>Diese Allgemeinen Geschäftsbedingungen (AGB) gelten für die Nutzung der "GRIND" Web-App (im Folgenden "App"). Die App bietet Nutzern die Möglichkeit, durch das Abschließen von Aufgaben ("Missions" / "Operations") Erfahrungspunkte (XP) zu sammeln und sich digitale oder physische Belohnungen ("Loots") freizuschalten.</p>
+                        <p>Diese Allgemeinen Geschäftsbedingungen (AGB) gelten für die Nutzung der "GRIND." Web-App (im Folgenden "App"). Die App bietet Nutzern die Möglichkeit, durch das Abschließen von Aufgaben ("Missions" / "Operations") Erfahrungspunkte (XP) zu sammeln und sich digitale oder physische Belohnungen ("Loots") freizuschalten.</p>
                         
                         <h2>§ 2 Nutzerkonto & Voraussetzungen</h2>
                         <ul>
@@ -798,13 +815,13 @@
                             <li>Jeder Nutzer darf nur einen Account besitzen ("No Smurfing").</li>
                         </ul>
 
-                        <h2>§ 3 Der GRIND PRO Pass (Kauf & Widerrufsverzicht)</h2>
+                        <h2>§ 3 Der GRIND. PRO Pass (Kauf & Widerrufsverzicht)</h2>
                         <p>Die App bietet einen kostenlosen Track ("Free") und einen Premium-Track ("PRO Pass").<br>
                         <strong>(1) Art des Kaufs:</strong> Der "PRO Pass" ist ein Einmalkauf, der ausschließlich für die Dauer der aktuell laufenden "Season" gilt. Es handelt sich um <u>kein</u> Abonnement.<br>
                         <strong>(2) Widerrufsverzicht:</strong> Der PRO Pass ist ein digitaler Inhalt. <strong>Mit dem Kauf stimmen Sie ausdrücklich zu, dass wir vor Ablauf der Widerrufsfrist mit der Ausführung des Vertrags (Freischaltung des PRO Passes) beginnen. Ihnen ist bekannt, dass Sie durch diese Zustimmung mit Beginn der Ausführung Ihr Widerrufsrecht verlieren.</strong> Eine Rückerstattung des Kaufpreises ist nach erfolgreicher Freischaltung ausgeschlossen.</p>
 
                         <h2>§ 4 Fair Play, Anti-Cheat & Sanktionen</h2>
-                        <p>Der GRIND Track basiert auf Ehrlichkeit. Jeglicher Versuch, das System oder andere Nutzer zu betrügen, wird strengstens geahndet.<br>
+                        <p>Der GRIND. Track basiert auf Ehrlichkeit. Jeglicher Versuch, das System oder andere Nutzer zu betrügen, wird strengstens geahndet.<br>
                         <strong>Als Betrugsversuche ("Cheating") gelten insbesondere, aber nicht ausschließlich:</strong></p>
                         <ul>
                             <li>Das Hochladen von falschen, aus dem Internet kopierten, KI-generierten oder manipulierten Beweisfotos ("Faking").</li>
@@ -851,10 +868,10 @@
                 appDiv.innerHTML = `
                     <div class="flex-1 flex flex-col items-center justify-center p-6 min-h-[80vh] text-center animate-fade-in relative z-20">
                         <div class="w-16 h-16 border-2 border-[#a855f7] rounded-full flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(168,85,247,0.3)] bg-[#0a0a0a]"><svg class="w-8 h-8 text-[#a855f7]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg></div>
-                        <h2 class="text-4xl font-black italic tracking-tighter mb-2">GRIND <span class="text-[#a855f7]">PRO</span></h2><p class="text-gray-400 font-bold uppercase tracking-widest text-[10px] mb-8 max-w-xs leading-relaxed">Schalte alle Premium-Rewards der Season 0${seasonNum} frei und maximiere deinen Progress.</p>
+                        <h2 class="text-4xl font-black italic tracking-tighter mb-2">GRIND. <span class="text-[#a855f7]">PRO</span></h2><p class="text-gray-400 font-bold uppercase tracking-widest text-[10px] mb-8 max-w-xs leading-relaxed">Schalte alle Premium-Rewards der Season 0${seasonNum} frei und maximiere deinen Progress.</p>
                         <div class="bg-[#0a0a0a] border border-[#1f1f1f] p-8 rounded-sm mb-6 w-full max-w-sm shadow-2xl relative overflow-hidden group"><div class="absolute inset-0 bg-gradient-to-t from-[#a855f7]/10 to-transparent opacity-50"></div><div class="relative z-10"><div class="text-[10px] uppercase tracking-[0.2em] text-gray-500 font-bold mb-2">Season Pass</div><div id="dynamic-price-display" class="text-5xl font-black text-white italic tracking-tighter mb-8">${displayPrice} €</div><div id="paypal-button-container" class="w-full min-h-[150px] relative z-50 flex items-center justify-center"></div></div></div>
                         <p class="text-[9px] text-gray-600 uppercase tracking-widest mt-2 mb-6 max-w-xs mx-auto leading-relaxed">Mit dem Kauf stimmst du unseren <span class="text-white underline cursor-pointer hover:text-[#a855f7]" onclick="window.setView('agb')">AGB</span> zu und verzichtest auf das Widerrufsrecht für diesen digitalen Inhalt.</p>
-                        <button type="button" onclick="window.setView('dashboard')" class="text-gray-600 hover:text-white text-[10px] uppercase tracking-[0.2em] font-bold transition">Zurück zum Grind</button>
+                        <button type="button" onclick="window.setView('dashboard')" class="text-gray-600 hover:text-white text-[10px] uppercase tracking-[0.2em] font-bold transition">Zurück zum Grind.</button>
                     </div>
                     ${getFooterHTML()}
                 `;
