@@ -1,4 +1,4 @@
-
+```html
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -307,6 +307,46 @@
             if(!container) { container = document.createElement('div'); container.id = 'modal-container'; container.className = 'fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300 overflow-y-auto'; document.body.appendChild(container); }
             container.innerHTML = `<div class="bg-[#0a0a0a] border border-[#1f1f1f] p-8 rounded-sm max-w-md w-full shadow-[0_0_40px_rgba(255,77,0,0.1)] transform scale-95 transition-transform duration-300 relative my-auto"><button type="button" onclick="window.closeModal()" class="absolute top-4 right-4 text-gray-500 hover:text-white z-50"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>${contentHtml}</div>`;
             setTimeout(() => { container.classList.remove('opacity-0', 'pointer-events-none'); container.classList.add('opacity-100'); container.firstElementChild.classList.remove('scale-95'); container.firstElementChild.classList.add('scale-100'); }, 10);
+        };
+
+        window.submitShipping = async (lvl, tier) => {
+            const address = document.getElementById('shipping_address').value.trim();
+            if(!address) return window.showToast("Bitte Daten eingeben.", "error");
+            const btn = document.querySelector('#modal-container button.bg-\\[\\#ff4d00\\], #modal-container button.bg-\\[\\#a855f7\\]'); if(btn) { btn.innerText = "Senden..."; btn.disabled = true; }
+            const rewardId = `lvl${lvl}_${tier}`;
+
+            try {
+                // 1. In Firebase abspeichern (Sichere Werte-Übergabe)
+                await addDoc(collection(db, 'plot_shipping_requests'), { uid: state.user.uid, alias: state.profile?.alias || 'Grinder', lvl: lvl, tier: tier, address: address, timestamp: new Date(), status: 'pending' });
+                
+                const currentRedeemed = state.profile?.redeemed || [];
+                if(!currentRedeemed.includes(rewardId)) { currentRedeemed.push(rewardId); await setDoc(doc(db, 'plot_users', state.user.uid), { redeemed: currentRedeemed }, { merge: true }); }
+                
+                // 2. Email direkt via FormSubmit versenden (Isoliert im eigenen Block)
+                try {
+                    fetch("https://formsubmit.co/ajax/Fabio.maines@grind-app.de", {
+                        method: "POST",
+                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                        body: JSON.stringify({
+                            _subject: "Neue Loot-Bestellung (GRIND.)",
+                            _template: "table",
+                            Alias: state.profile?.alias || 'Grinder',
+                            Level: lvl,
+                            Tier: tier,
+                            Adresse_oder_Info: address,
+                            User_ID: state.user?.uid || 'Unknown'
+                        })
+                    }).catch(e => console.log("Email error:", e));
+                } catch(mailErr) {
+                    console.log("Konnte E-Mail nicht absenden:", mailErr);
+                }
+
+                window.showToast("Anfrage für physical Loot gesendet!", "success"); window.closeModal();
+            } catch(e) { 
+                console.error(e);
+                window.showToast("Fehler: " + (e.message || "Netzwerkfehler"), "error"); 
+                if(btn) { btn.innerText = "Versand anfordern"; btn.disabled = false; } 
+            }
         };
 
         window.claimInstantMission = async (mid, xp, name) => {
@@ -1260,3 +1300,7 @@
     </script>
 </body>
 </html>
+
+
+
+```
