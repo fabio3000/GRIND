@@ -1,4 +1,4 @@
-```html
+
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -416,18 +416,29 @@
             const title = document.getElementById('rew_title').value;
             const type = document.getElementById('rew_type').value;
             const info = document.getElementById('rew_info').value;
+            const fieldsInput = document.getElementById('rew_fields');
+            const fields = fieldsInput ? fieldsInput.value : '';
 
             let updatedRewards = JSON.parse(JSON.stringify(state.rewardData));
             let existing = updatedRewards.find(r => r.lvl === lvl);
 
             if (!existing) { existing = { lvl: lvl }; updatedRewards.push(existing); }
             existing[tier] = title; existing[`${tier}_type`] = type; existing[`${tier}_info`] = info;
+            
+            // Wenn es ein Formular/Bestellung ist, die benötigten Felder speichern
+            if (type === 'shipping') {
+                existing[`${tier}_fields`] = fields;
+            } else {
+                delete existing[`${tier}_fields`];
+            }
+            
             updatedRewards.sort((a, b) => a.lvl - b.lvl);
 
             try {
                 await setDoc(doc(db, 'system', 'grind_season'), { rewardData: updatedRewards }, { merge: true });
                 window.showToast(`Level ${lvl} Reward gespeichert.`, "success");
                 e.target.reset();
+                if(fieldsInput) fieldsInput.style.display = 'none';
             } catch (err) { window.showToast("Fehler beim Speichern.", "error"); }
         };
 
@@ -436,7 +447,7 @@
             let updatedRewards = JSON.parse(JSON.stringify(state.rewardData));
             let existing = updatedRewards.find(r => r.lvl === lvl);
             if(existing) {
-                delete existing[tier]; delete existing[`${tier}_type`]; delete existing[`${tier}_info`];
+                delete existing[tier]; delete existing[`${tier}_type`]; delete existing[`${tier}_info`]; delete existing[`${tier}_fields`];
                 if(!existing.free && !existing.pro) updatedRewards = updatedRewards.filter(r => r.lvl !== lvl);
                 await setDoc(doc(db, 'system', 'grind_season'), { rewardData: updatedRewards }, { merge: true });
                 window.showToast("Reward entfernt.", "success");
@@ -445,8 +456,12 @@
 
         window.updateRewardInfoPlaceholder = (val) => {
             const input = document.getElementById('rew_info');
+            const fieldsInput = document.getElementById('rew_fields');
+            
+            if(fieldsInput) fieldsInput.style.display = (val === 'shipping') ? 'block' : 'none';
+            
             if(val === 'link') input.placeholder = "URL eintragen (z.B. https://hyrox.com/discount)";
-            else if(val === 'shipping') input.placeholder = "Versand-Anweisung (z.B. Schick uns deine Größe)";
+            else if(val === 'shipping') input.placeholder = "Versand-Anweisung (z.B. Bitte fülle das Formular aus)";
             else if(val === 'xp') input.placeholder = "XP Menge (z.B. 500)";
             else if(val === 'lvl') input.placeholder = "Level Menge (z.B. 1)";
             else input.placeholder = "Einlöse-Anweisung (z.B. Zeige dies an der Kasse)";
@@ -668,12 +683,16 @@
                                             <input id="rew_title" placeholder="Titel (z.B. Free ESN Bar)" required class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00]">
                                             <select id="rew_type" onchange="window.updateRewardInfoPlaceholder(this.value)" class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00] appearance-none">
                                                 <option value="qr">Lokal einlösen (QR Scan)</option>
-                                                <option value="shipping">Physischer Versand</option>
+                                                <option value="shipping">Formular / Physischer Versand</option>
                                                 <option value="link">Digital (Link / Code)</option>
                                                 <option value="xp">XP Boost (+ XP)</option>
                                                 <option value="lvl">Level Boost (+ Level)</option>
                                             </select>
                                             <input id="rew_info" placeholder="Einlöse-Anweisung" required class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00]">
+                                            
+                                            <!-- NEU: Wird eingeblendet, wenn "Formular / Physischer Versand" ausgewählt ist -->
+                                            <input id="rew_fields" placeholder="Formular-Felder (kommasepariert, z.B. Vorname, Adresse, T-Shirt Größe)" class="w-full p-3 bg-[#111] border border-[#333] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00]" style="display: none;">
+                                            
                                             <button type="submit" class="w-full bg-[#1f1f1f] hover:bg-[#ff4d00] text-white font-bold py-3 rounded-sm text-xs uppercase tracking-widest transition">Speichern</button>
                                         </form>
                                     </div>
@@ -696,6 +715,3 @@
     </script>
 </body>
 </html>
-
-
-```
