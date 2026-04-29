@@ -329,9 +329,13 @@
             if(btn) { btn.innerText = "Senden..."; btn.disabled = true; }
             const rewardId = `lvl${lvl}_${tier}`;
 
+            // Artikel-Namen aus dem State holen
+            const reward = state.rewardData.find(r => r.lvl === lvl);
+            const itemName = reward ? reward[tier] : 'Unbekanntes Item';
+
             try {
-                // 1. In Firebase abspeichern
-                await addDoc(collection(db, 'plot_shipping_requests'), { uid: state.user.uid, alias: state.profile?.alias || 'Grinder', lvl: lvl, tier: tier, address: addressString, timestamp: new Date(), status: 'pending' });
+                // 1. In Firebase abspeichern (mit itemName)
+                await addDoc(collection(db, 'plot_shipping_requests'), { uid: state.user.uid, alias: state.profile?.alias || 'Grinder', lvl: lvl, tier: tier, itemName: itemName, address: addressString, timestamp: new Date(), status: 'pending' });
                 
                 const currentRedeemed = state.profile?.redeemed || [];
                 if(!currentRedeemed.includes(rewardId)) { currentRedeemed.push(rewardId); await setDoc(doc(db, 'plot_users', state.user.uid), { redeemed: currentRedeemed }, { merge: true }); }
@@ -339,8 +343,9 @@
                 // 2. Email direkt via FormSubmit versenden (als schöne Tabelle)
                 try {
                     let emailPayload = {
-                        _subject: "Neue Loot-Bestellung (Level " + lvl + " " + tier.toUpperCase() + ") von " + (state.profile?.alias || 'Grinder'),
+                        _subject: "Neue Loot-Bestellung: " + itemName + " von " + (state.profile?.alias || 'Grinder'),
                         _template: "table",
+                        Artikel: itemName,
                         Alias: state.profile?.alias || 'Grinder',
                         Level: String(lvl),
                         Tier: tier.toUpperCase(),
