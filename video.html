@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GRIND. | Promo Video</title>
+    <title>GRIND. | Premium Promo</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&display=swap" rel="stylesheet">
     
@@ -18,304 +17,340 @@
             padding: 0;
         }
 
-        /* --- Global Effects --- */
-        .crt-overlay {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-            background-size: 100% 2px, 3px 100%;
-            z-index: 999; pointer-events: none; opacity: 0.4;
-        }
-        
+        /* --- Global Premium Effects --- */
         .vignette {
             position: fixed; inset: 0;
-            background: radial-gradient(circle at center, transparent 30%, #000 110%);
+            background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.8) 100%);
             z-index: 998; pointer-events: none;
         }
 
-        .grind-gradient { background: linear-gradient(90deg, #ff4d00, #ff8800); }
-        .text-grind { color: #ff4d00; text-shadow: 0 0 20px rgba(255, 77, 0, 0.5); }
+        .grind-gradient { background: linear-gradient(135deg, #ff4d00, #ff8800); }
+        .text-grind { color: #ff4d00; text-shadow: 0 0 40px rgba(255, 77, 0, 0.4); }
 
-        /* --- Scene Management --- */
+        /* --- Cinematic Scene Transitions --- */
         .scene {
             position: absolute; inset: 0;
             opacity: 0; visibility: hidden;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            transition: opacity 0.3s ease-out, transform 0.5s ease-out;
+            transition: opacity 0.5s ease, transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
             transform: scale(1.05);
         }
         .scene.active {
             opacity: 1; visibility: visible;
             transform: scale(1);
         }
-        .scene.cut { transition: none !important; } /* Hard cut effect */
 
-        /* --- Animations --- */
-        @keyframes glitch {
-            0% { transform: translate(0) }
-            20% { transform: translate(-5px, 5px) }
-            40% { transform: translate(-5px, -5px) }
-            60% { transform: translate(5px, 5px) }
-            80% { transform: translate(5px, -5px) }
-            100% { transform: translate(0) }
+        /* --- Smooth Animations --- */
+        @keyframes blur-reveal {
+            0% { opacity: 0; transform: translateY(20px); filter: blur(10px); }
+            100% { opacity: 1; transform: translateY(0); filter: blur(0); }
         }
-        .animate-glitch { animation: glitch 0.2s cubic-bezier(.25, .46, .45, .94) both infinite; }
+        .animate-reveal { animation: blur-reveal 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; opacity: 0; }
 
-        @keyframes pulse-fast {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.1); opacity: 0.8; }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
         }
-        .pulse-fast { animation: pulse-fast 0.5s infinite; }
+        .animate-float { animation: float 5s ease-in-out infinite; }
 
-        @keyframes ken-burns {
-            0% { transform: scale(1); }
-            100% { transform: scale(1.2); }
+        @keyframes pulse-soft {
+            0%, 100% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 rgba(255,77,0,0); }
+            50% { transform: scale(1.05); opacity: 0.9; box-shadow: 0 0 25px rgba(255,77,0,0.4); }
         }
-        .bg-zoom { animation: ken-burns 15s linear infinite alternate; }
+        .pulse-soft { animation: pulse-soft 2s infinite cubic-bezier(0.4, 0, 0.2, 1); }
 
-        @keyframes slide-up {
-            0% { transform: translateY(100px); opacity: 0; }
-            100% { transform: translateY(0); opacity: 1; }
-        }
-        .slide-up { animation: slide-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-
-        @keyframes stamp {
-            0% { transform: scale(3) rotate(-20deg); opacity: 0; }
-            50% { transform: scale(0.8) rotate(-10deg); opacity: 1; }
-            100% { transform: scale(1) rotate(-12deg); opacity: 1; }
-        }
-        .stamp-effect { animation: stamp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; opacity: 0; }
-
-        @keyframes fill-bar {
-            0% { width: 0%; }
-            100% { width: 100%; }
+        @keyframes stamp-smooth {
+            0% { transform: scale(2) rotate(-15deg); opacity: 0; filter: blur(4px); }
+            70% { transform: scale(0.95) rotate(-5deg); opacity: 1; filter: blur(0); }
+            100% { transform: scale(1) rotate(-5deg); opacity: 1; }
         }
 
-        /* --- Simulated UI --- */
-        .mock-card { background: #0a0a0a; border: 1px solid #1f1f1f; box-shadow: 0 20px 40px rgba(0,0,0,0.8); }
-        .mock-reward { background: #140a00; border: 1px solid #ff4d00; box-shadow: 0 0 30px rgba(255,77,0,0.2); }
+        /* --- Premium Glass UI --- */
+        .glass-card { 
+            background: rgba(15, 15, 15, 0.6); 
+            backdrop-filter: blur(16px); 
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.08); 
+            box-shadow: 0 30px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1); 
+        }
         
-        #progress-bar { position: fixed; bottom: 0; left: 0; height: 4px; background: #ff4d00; z-index: 1000; width: 0%; box-shadow: 0 0 10px #ff4d00; }
+        #progress-bar { position: fixed; bottom: 0; left: 0; height: 6px; background: #ff4d00; z-index: 1000; width: 0%; box-shadow: 0 -2px 20px rgba(255,77,0,0.5); }
+
+        /* Adjusted text sizes for better fit */
+        .huge-text { font-size: 11vw; line-height: 1; letter-spacing: -0.02em; }
+        @media (min-width: 768px) { .huge-text { font-size: 8vw; } }
+
+        /* Video Background */
+        .video-bg {
+            position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+            opacity: 0; transition: opacity 0.8s ease-in-out;
+        }
     </style>
 </head>
 <body>
 
-    <div class="crt-overlay"></div>
     <div class="vignette"></div>
     <div id="progress-bar"></div>
 
-    <!-- Hintergrund Elemente -->
-    <div class="fixed inset-0 z-0 bg-zoom opacity-30" style="background-image: radial-gradient(circle at 50% 50%, #1a0a00 0%, #050505 80%);"></div>
+    <!-- ================= REAL VIDEO BACKGROUNDS ================= -->
+    <div id="video-layer" class="fixed inset-0 z-0 bg-black">
+        <!-- Video 1: Urban / Night Hustle (Hook) -->
+        <video id="vid-urban" class="video-bg" src="https://cdn.coverr.co/videos/coverr-night-traffic-in-the-city-2715/1080p.mp4" loop muted playsinline crossorigin="anonymous"></video>
+        <!-- Video 2: Gym / Workout (Operations) -->
+        <video id="vid-gym" class="video-bg" src="https://cdn.coverr.co/videos/coverr-man-lifting-weights-4187/1080p.mp4" loop muted playsinline crossorigin="anonymous"></video>
+        <!-- Video 3: Running / Nature (Habits & Outro) -->
+        <video id="vid-run" class="video-bg" src="https://cdn.coverr.co/videos/coverr-man-running-in-the-forest-4375/1080p.mp4" loop muted playsinline crossorigin="anonymous"></video>
+        
+        <!-- Premium Darkening Gradient -->
+        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/80"></div>
+    </div>
 
-    <!-- ================= SCENES ================= -->
+    <!-- ================= SCENES (Premium Cinematic Pacing) ================= -->
 
-    <!-- SCENE 0: Click to Start (Browsers require interaction for audio/video feeling) -->
     <div id="scene-start" class="scene active z-50 bg-black">
-        <h1 class="text-5xl md:text-7xl font-black italic tracking-tighter text-white animate-pulse">TAP TO START</h1>
+        <h1 class="text-3xl md:text-5xl font-black italic tracking-tighter text-white animate-pulse">TAP TO START</h1>
+        <p class="text-gray-500 mt-6 text-xs font-bold uppercase tracking-[0.2em]">Erlebe den Grind</p>
     </div>
 
-    <!-- SCENE 1: The Hook -->
-    <div id="scene-1" class="scene z-10">
-        <h1 id="s1-t1" class="text-6xl md:text-9xl font-black italic uppercase tracking-tighter hidden">Stop</h1>
-        <h1 id="s1-t2" class="text-6xl md:text-9xl font-black italic uppercase tracking-tighter hidden mt-4 text-grind">Scrolling.</h1>
+    <!-- SCENE 1: The Hook (0 - 2.5s) -->
+    <div id="scene-1" class="scene z-10 text-center">
+        <h1 id="s1-t1" class="huge-text font-black italic text-white animate-reveal" style="animation-delay: 0.1s;">Stop</h1>
+        <h1 id="s1-t2" class="huge-text font-black italic text-grind animate-reveal" style="animation-delay: 0.6s;">Scrolling.</h1>
     </div>
 
-    <!-- SCENE 2: The Question -->
-    <div id="scene-2" class="scene z-10">
-        <h2 class="text-4xl md:text-7xl font-black italic uppercase text-center leading-tight">
+    <!-- SCENE 2: The Question (2.5 - 6s) -->
+    <div id="scene-2" class="scene z-10 px-6 text-center">
+        <h2 id="s2-t1" class="text-3xl md:text-6xl font-black italic uppercase leading-tight animate-reveal" style="animation-delay: 0.2s;">
             Was wäre, wenn dein Leben <br>
             ein <span class="text-grind">Spiel</span> wäre?
         </h2>
     </div>
 
-    <!-- SCENE 3: Dashboard Demo -->
-    <div id="scene-3" class="scene z-10 p-8">
-        <h3 class="absolute top-10 md:top-20 text-3xl md:text-5xl font-black italic uppercase tracking-widest text-gray-500">Level Up in Real Life.</h3>
+    <!-- SCENE 3: Dashboard Demo (6 - 11.5s) -->
+    <div id="scene-3" class="scene z-10 p-4 md:p-12 w-full max-w-4xl mx-auto">
+        <h3 class="text-2xl md:text-4xl font-black italic uppercase tracking-widest text-white mb-6 md:mb-10 text-center drop-shadow-lg">Sammle XP im <span class="text-grind">echten Leben.</span></h3>
         
-        <div class="mock-card w-full max-w-2xl p-8 md:p-12 rounded-lg relative overflow-hidden transform scale-110 shadow-[0_0_50px_rgba(255,77,0,0.15)]">
-            <div class="absolute inset-0 bg-gradient-to-r from-[#ff4d00] to-transparent opacity-10"></div>
-            <p class="text-[#ff4d00] text-xs font-black uppercase tracking-[0.4em] mb-4">Dein Standing</p>
-            <div class="flex items-end gap-6 mb-8">
-                <h2 id="mock-lvl" class="text-7xl md:text-9xl font-black italic tracking-tighter leading-none">LVL 1</h2>
-                <span class="text-xl md:text-3xl text-gray-500 font-black italic uppercase mb-2">Rookie</span>
+        <div class="glass-card w-full p-8 md:p-12 rounded-2xl relative overflow-hidden animate-float">
+            <div class="absolute -top-40 -right-40 w-80 h-80 bg-[#ff4d00] rounded-full blur-[100px] opacity-20"></div>
+            
+            <p class="text-gray-400 text-[10px] md:text-xs font-bold uppercase tracking-[0.3em] mb-4">Dein Standing</p>
+            <div class="flex items-end gap-6 mb-8 md:mb-10">
+                <h2 id="mock-lvl" class="text-7xl md:text-9xl font-black italic tracking-tighter leading-none text-white transition-colors duration-500">LVL 1</h2>
             </div>
-            <div class="w-full bg-gray-900 h-6 rounded-full overflow-hidden border border-white/10 relative">
-                <div id="mock-xp-bar" class="grind-gradient h-full w-0 transition-all duration-[2000ms] ease-out"></div>
+            
+            <div class="w-full bg-black/50 h-5 md:h-6 rounded-full overflow-hidden border border-white/10 relative shadow-inner">
+                <div id="mock-xp-bar" class="grind-gradient h-full w-0 transition-all shadow-[0_0_20px_rgba(255,77,0,0.8)]"></div>
             </div>
-            <div class="flex justify-between mt-4 text-sm font-bold text-gray-400 uppercase tracking-widest">
-                <span>XP: <span id="mock-xp-num" class="text-white">0</span> / 1000</span>
+            <div class="flex justify-between mt-4 text-sm md:text-base font-black text-gray-400 uppercase tracking-widest">
+                <span>XP: <span id="mock-xp-num" class="text-white transition-all duration-300">0</span> / 1000</span>
             </div>
         </div>
     </div>
 
-    <!-- SCENE 4: Operations -->
-    <div id="scene-4" class="scene z-10 p-8">
-        <h3 class="absolute top-10 md:top-20 text-3xl md:text-5xl font-black italic uppercase tracking-widest text-white">Drop In. <span class="text-grind">Clear Missions.</span></h3>
+    <!-- SCENE 4: Operations (11.5 - 18.5s) -->
+    <div id="scene-4" class="scene z-10 p-4 md:p-8 w-full max-w-4xl mx-auto">
+        <h3 class="text-2xl md:text-4xl font-black italic uppercase tracking-widest text-white mb-8 text-center drop-shadow-lg">Erledige echte <span class="text-grind">Missionen.</span></h3>
         
-        <div class="w-full max-w-3xl space-y-6 mt-20">
-            <!-- Mission 1 -->
-            <div class="mock-card p-6 md:p-8 rounded-lg flex justify-between items-center slide-up" style="animation-delay: 0.2s; opacity: 0;">
+        <div class="space-y-4 md:space-y-6">
+            <div id="mock-m1" class="glass-card p-5 md:p-8 rounded-xl flex justify-between items-center opacity-0 transform translate-y-8 transition-all duration-500 ease-out">
                 <div>
-                    <h4 class="font-black italic uppercase text-2xl md:text-4xl">Morning Run (5km)</h4>
-                    <span class="inline-block mt-2 border border-gray-700 bg-black px-3 py-1 text-[10px] md:text-xs font-bold uppercase tracking-widest text-gray-400">📍 GPS / Upload</span>
+                    <h4 class="font-black italic uppercase text-xl md:text-3xl text-white">Morning Run Club (5km)</h4>
+                    <span class="inline-block mt-2 bg-white/10 border border-white/20 px-3 py-1.5 text-[10px] md:text-xs font-black uppercase tracking-widest text-white rounded-md backdrop-blur-sm">📍 QR Scan</span>
                 </div>
                 <div class="text-right relative">
-                    <span class="block text-gray-500 font-black text-3xl md:text-5xl italic tracking-tighter mb-2 line-through opacity-50">+500 XP</span>
-                    <div class="absolute -inset-10 flex items-center justify-center pointer-events-none">
-                        <div class="stamp-effect text-[#ff4d00] font-black italic uppercase text-3xl md:text-5xl border-4 border-[#ff4d00] px-4 py-2 bg-black/80 backdrop-blur-sm rounded-lg shadow-[0_0_30px_rgba(255,77,0,0.5)]" style="animation-delay: 1.5s;">VERIFIED</div>
+                    <span class="block text-gray-500 font-black text-2xl md:text-4xl italic tracking-tighter line-through opacity-60">+500 XP</span>
+                    <div class="absolute inset-0 flex items-center justify-center pointer-events-none scale-110 z-20">
+                        <div id="mock-stamp" class="text-white font-black italic uppercase text-2xl md:text-4xl border-2 md:border-4 border-white px-4 py-1 md:py-2 bg-white/20 backdrop-blur-md rounded-lg shadow-[0_10px_30px_rgba(0,0,0,0.5)] opacity-0">CLEARED</div>
                     </div>
                 </div>
             </div>
             
-            <!-- Mission 2 -->
-            <div class="mock-card p-6 md:p-8 rounded-lg flex justify-between items-center slide-up" style="animation-delay: 0.6s; opacity: 0;">
+            <div id="mock-m2" class="glass-card p-5 md:p-8 rounded-xl flex justify-between items-center opacity-0 transform translate-y-8 transition-all duration-500 ease-out">
                 <div>
-                    <h4 class="font-black italic uppercase text-2xl md:text-4xl">Deep Talk</h4>
-                    <span class="inline-block mt-2 border border-gray-700 bg-black px-3 py-1 text-[10px] md:text-xs font-bold uppercase tracking-widest text-gray-400">🗣️ Offline Connection</span>
+                    <h4 class="font-black italic uppercase text-xl md:text-3xl text-white">Recovery</h4>
+                    <span class="inline-block mt-2 bg-white/10 border border-white/20 px-3 py-1.5 text-[10px] md:text-xs font-black uppercase tracking-widest text-white rounded-md backdrop-blur-sm">📷 Photo Upload</span>
                 </div>
-                <div class="text-right">
-                    <span class="block text-grind font-black text-3xl md:text-5xl italic tracking-tighter mb-2">+300 XP</span>
-                    <button class="bg-white text-black font-black uppercase text-xs md:text-sm px-6 py-3">Verify Action</button>
+                <div class="text-right relative">
+                    <span class="block text-grind font-black text-2xl md:text-4xl italic tracking-tighter mb-1">+400 XP</span>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- SCENE 5: Streaks -->
-    <div id="scene-5" class="scene z-10 bg-grind-gradient relative overflow-hidden">
-        <div class="absolute inset-0 bg-black/60 backdrop-blur-md z-0"></div>
-        <div class="relative z-10 text-center">
-            <h1 class="text-7xl md:text-9xl font-black italic uppercase tracking-tighter mb-6 text-white drop-shadow-2xl">Endless Grind.</h1>
-            <div class="flex justify-center items-center gap-4 text-4xl md:text-6xl font-black italic">
-                <span class="text-grind animate-pulse">🔥 STREAK: </span>
-                <span id="mock-streak" class="text-white">1</span>
+    <!-- SCENE 5: Streaks (18.5 - 24s) -->
+    <div id="scene-5" class="scene z-10 relative overflow-hidden">
+        <div class="relative z-10 text-center px-6">
+            <h1 class="text-3xl md:text-5xl font-black italic uppercase tracking-tighter mb-6 md:mb-8 text-white drop-shadow-2xl">Baue eiserne <span class="text-grind">Routinen</span> auf.</h1>
+            <p class="text-gray-400 font-bold uppercase tracking-widest text-xs md:text-sm mb-4 md:mb-6">Daily Habits</p>
+            <div class="flex justify-center items-center gap-4 md:gap-6 text-6xl md:text-8xl font-black italic">
+                <span class="text-grind drop-shadow-[0_0_30px_rgba(255,77,0,0.5)]">🔥</span>
+                <span id="mock-streak" class="text-white tabular-nums">1</span>
+                <span class="text-xl md:text-3xl text-gray-500 uppercase tracking-widest mt-4 md:mt-6">Days</span>
             </div>
         </div>
     </div>
 
-    <!-- SCENE 6: The Loot -->
-    <div id="scene-6" class="scene z-10 p-8 w-full">
-        <h3 class="absolute top-10 md:top-20 text-3xl md:text-5xl font-black italic uppercase tracking-widest text-center w-full">Claim <span class="text-grind">Real Loot.</span></h3>
+    <!-- SCENE 6: The Loot Level Up (24 - 31s) -->
+    <div id="scene-6" class="scene z-10 p-4 md:p-6 w-full max-w-5xl mx-auto overflow-hidden">
+        <h3 class="text-3xl md:text-5xl font-black italic uppercase tracking-widest text-center w-full text-white mb-12 md:mb-16 drop-shadow-lg">Schalte echten <span class="text-grind">Loot</span> frei.</h3>
         
-        <div class="flex items-center justify-center gap-8 mt-20 scale-125 md:scale-150 transform transition-transform duration-[5000ms] ease-linear" id="loot-track">
+        <div class="flex items-center justify-center gap-6 md:gap-12 w-full transition-transform duration-[1200ms] cubic-bezier(0.25, 1, 0.5, 1)" id="loot-track">
             
-            <div class="flex flex-col items-center opacity-50">
-                <div class="mock-card w-24 h-24 flex items-center justify-center border-gray-700 rounded-lg mb-4">
-                    <span class="text-xs font-bold uppercase text-gray-500">Sticker</span>
+            <!-- LEVEL 10 (Startet fokussiert, gleitet nach links) -->
+            <div id="loot-10" class="flex flex-col items-center relative z-20 transition-all duration-800 transform scale-105 md:scale-110">
+                <div class="glass-card w-28 h-28 md:w-40 md:h-40 flex flex-col items-center justify-center rounded-2xl mb-4 md:mb-6 relative border-[#ff4d00]/50 shadow-[0_0_40px_rgba(255,77,0,0.2)]">
+                    <span class="absolute -top-3 bg-[#ff4d00] text-black text-[9px] md:text-[10px] font-black px-2 py-1 uppercase rounded-sm">CLAIMED</span>
+                    <span class="text-4xl md:text-6xl mb-2">🥤</span>
+                    <span class="text-[10px] md:text-xs font-black uppercase text-white text-center">Protein</span>
                 </div>
-                <div class="w-12 h-12 rounded-full bg-gray-800 flex items-center justify-center font-black">9</div>
+                <div class="w-14 h-14 md:w-16 md:h-16 rounded-full bg-[#111] text-gray-500 border border-gray-700 flex items-center justify-center font-black text-xl md:text-2xl">10</div>
             </div>
 
-            <div class="flex flex-col items-center relative z-20">
-                <div class="absolute -top-6 text-grind font-black text-xs uppercase tracking-widest animate-pulse">UNLOCKED</div>
-                <div class="mock-reward w-32 h-32 flex flex-col items-center justify-center rounded-lg mb-4 transform scale-110">
-                    <span class="bg-gradient-to-r from-[#7c3aed] to-[#9333ea] text-white text-[8px] font-black px-2 py-1 uppercase rounded-sm absolute -bottom-3 shadow-[0_0_10px_rgba(147,51,234,0.5)]">PRO</span>
-                    <span class="text-2xl mb-2">🥤</span>
-                    <span class="text-xs font-black uppercase text-white text-center px-2">ESN Protein</span>
+            <!-- LEVEL 11 (Startet klein rechts, rückt in die Mitte und leuchtet auf) -->
+            <div id="loot-11" class="flex flex-col items-center relative transition-all duration-800 opacity-40 transform scale-75">
+                <div id="badge-11" class="absolute -top-5 md:-top-6 text-white font-black text-xs md:text-sm uppercase tracking-widest opacity-0 bg-grind-gradient px-3 py-1 rounded-sm shadow-[0_10px_20px_rgba(255,77,0,0.5)] z-50 transition-opacity duration-400">NEW LOOT!</div>
+                
+                <div id="box-11" class="glass-card w-28 h-28 md:w-40 md:h-40 flex items-center justify-center rounded-2xl mb-4 md:mb-6 relative overflow-hidden transition-all duration-400">
+                    <span class="text-4xl md:text-6xl transition-transform duration-400" id="box-11-icon">👕</span>
                 </div>
-                <div class="w-16 h-16 rounded-full grind-gradient text-black flex items-center justify-center font-black text-xl shadow-[0_0_20px_rgba(255,77,0,0.6)]">10</div>
+                <div id="circle-11" class="w-14 h-14 md:w-16 md:h-16 rounded-full bg-[#111] text-gray-500 border border-gray-700 flex items-center justify-center font-black text-xl md:text-2xl transition-all duration-400">11</div>
             </div>
 
-            <div class="flex flex-col items-center opacity-50">
-                <div class="mock-card w-24 h-24 flex items-center justify-center border-gray-700 rounded-lg mb-4 relative overflow-hidden">
-                     <span class="bg-[#333] text-white text-[8px] font-black px-2 py-1 uppercase rounded-sm absolute -top-3">FREE</span>
-                    <span class="text-xs font-bold uppercase text-gray-500">T-Shirt</span>
+            <!-- LEVEL 12 (Vorschau rechts) -->
+            <div id="loot-12" class="flex flex-col items-center relative opacity-20 transform scale-50 transition-all duration-800 hidden md:flex">
+                <div class="glass-card w-28 h-28 md:w-40 md:h-40 flex items-center justify-center rounded-2xl mb-4 md:mb-6">
+                    <span class="text-4xl md:text-6xl opacity-50">🎟️</span>
                 </div>
-                <div class="w-12 h-12 rounded-full bg-gray-800 flex items-center justify-center font-black">11</div>
+                <div class="w-14 h-14 md:w-16 md:h-16 rounded-full bg-[#111] text-gray-600 border border-gray-800 flex items-center justify-center font-black text-xl md:text-2xl">12</div>
             </div>
 
         </div>
     </div>
 
-    <!-- SCENE 7: Outro CTA -->
-    <div id="scene-7" class="scene z-10 bg-black">
-        <h1 class="text-6xl md:text-9xl font-black italic tracking-tighter text-white mb-2">GRIND<span class="text-grind">.</span></h1>
-        <p class="text-xl md:text-3xl text-gray-400 font-bold uppercase tracking-[0.3em] mb-12">Level Up Your Life.</p>
-        
-        <div class="border border-white/20 p-6 rounded-lg bg-white/5 backdrop-blur-md text-center max-w-sm">
-            <p class="text-xs text-grind font-black uppercase tracking-widest mb-2">Season 1 is LIVE</p>
-            <h4 class="text-2xl font-black italic uppercase mb-6">Hol dir den PRO Pass</h4>
-            <div class="bg-white text-black font-black uppercase tracking-widest py-4 px-8 rounded-sm pulse-fast">Join The Network</div>
+    <!-- SCENE 7: Outro CTA (31 - 38s) -->
+    <div id="scene-7" class="scene z-10 px-4">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-md z-0"></div>
+        <div class="relative z-10 flex flex-col items-center w-full max-w-md mx-auto">
+            <h1 class="text-6xl md:text-8xl font-black italic tracking-tighter text-white mb-2 md:mb-4 drop-shadow-[0_0_30px_rgba(0,0,0,1)] animate-reveal" style="animation-delay: 0.1s;">GRIND<span class="text-grind">.</span></h1>
+            <p class="text-xl md:text-2xl text-gray-300 font-bold uppercase tracking-[0.3em] mb-10 md:mb-12 animate-reveal drop-shadow-lg text-center" style="animation-delay: 0.4s;">Level Up Your Life.</p>
+            
+            <div class="glass-card p-8 md:p-10 rounded-2xl text-center shadow-[0_20px_50px_rgba(0,0,0,0.8)] border border-[#ff4d00]/30 w-full animate-reveal" style="animation-delay: 0.8s;">
+                <p class="text-xs md:text-sm text-grind font-black uppercase tracking-[0.3em] mb-5">Season 1</p>
+                <div class="bg-white text-black text-base md:text-lg font-black uppercase tracking-widest py-4 px-8 rounded-xl pulse-soft cursor-pointer hover:bg-gray-200 transition-colors shadow-2xl">
+                    Jetzt schon anmelden
+                </div>
+            </div>
         </div>
     </div>
 
     <!-- ================= SCRIPT CONTROLLER ================= -->
     <script>
-        // Total Video Duration in ms (60 Seconds)
-        const TOTAL_DURATION = 60000;
+        // Cinematic Duration: 38 Seconds (slightly faster)
+        const TOTAL_DURATION = 38000;
         let isPlaying = false;
         let startTime = 0;
         let animationFrameId;
 
-        // Scene Definitions (Start Time in MS, End Time in MS)
+        // Video Background Elements
+        const vidUrban = document.getElementById('vid-urban');
+        const vidGym = document.getElementById('vid-gym');
+        const vidRun = document.getElementById('vid-run');
+
+        function switchVideo(activeVid) {
+            [vidUrban, vidGym, vidRun].forEach(v => v.style.opacity = '0');
+            if(activeVid) activeVid.style.opacity = '0.6'; // Soft opacity for readability
+        }
+
+        // Tighter Pacing Scene Timings
         const scenes = [
-            { id: 'scene-1', start: 0, end: 5000, onEnter: initScene1 },
-            { id: 'scene-2', start: 5000, end: 9000 },
-            { id: 'scene-3', start: 9000, end: 20000, onEnter: initScene3 },
-            { id: 'scene-4', start: 20000, end: 32000 },
-            { id: 'scene-5', start: 32000, end: 42000, onEnter: initScene5 },
-            { id: 'scene-6', start: 42000, end: 52000, onEnter: initScene6 },
-            { id: 'scene-7', start: 52000, end: 60000, onEnter: initScene7 }
+            { id: 'scene-1', start: 0, end: 2500, onEnter: initScene1 },
+            { id: 'scene-2', start: 2500, end: 6000 },
+            { id: 'scene-3', start: 6000, end: 11500, onEnter: initScene3 },
+            { id: 'scene-4', start: 11500, end: 18500, onEnter: initScene4 },
+            { id: 'scene-5', start: 18500, end: 24000, onEnter: initScene5 },
+            { id: 'scene-6', start: 24000, end: 31000, onEnter: initScene6 },
+            { id: 'scene-7', start: 31000, end: 38000, onEnter: initScene7 }
         ];
 
         const progressBar = document.getElementById('progress-bar');
 
-        // --- Custom Animations Triggered via JS ---
+        // --- Animations ---
 
         function initScene1() {
-            const t1 = document.getElementById('s1-t1');
-            const t2 = document.getElementById('s1-t2');
-            t1.classList.remove('hidden'); t2.classList.remove('hidden');
-            t1.style.opacity = '0'; t2.style.opacity = '0';
-            
-            setTimeout(() => { t1.style.opacity = '1'; t1.classList.add('animate-glitch'); }, 500);
-            setTimeout(() => { t1.classList.remove('animate-glitch'); }, 1000);
-            
-            setTimeout(() => { t2.style.opacity = '1'; t2.classList.add('animate-glitch'); }, 1500);
-            setTimeout(() => { t2.classList.remove('animate-glitch'); }, 2200);
+            switchVideo(vidUrban); 
         }
 
         function initScene3() {
+            switchVideo(vidRun); 
             const bar = document.getElementById('mock-xp-bar');
             const num = document.getElementById('mock-xp-num');
             const lvl = document.getElementById('mock-lvl');
             
-            bar.style.width = '0%';
-            num.innerText = '0';
-            lvl.innerText = 'LVL 1';
-            lvl.classList.remove('text-grind', 'animate-glitch');
+            bar.style.transition = 'none'; bar.style.width = '0%';
+            num.innerText = '0'; 
+            lvl.innerText = 'LVL 1'; 
+            lvl.style.color = 'white';
+            lvl.style.textShadow = 'none';
 
             setTimeout(() => {
+                // Faster satisfying fill over 1.5 seconds
+                bar.style.transition = 'width 1.5s cubic-bezier(0.25, 1, 0.5, 1)';
                 bar.style.width = '100%';
-                let currentObj = { val: 0 };
-                let target = 1000;
-                let duration = 2000;
                 let start = null;
                 
                 function step(timestamp) {
                     if (!start) start = timestamp;
-                    let progress = Math.min((timestamp - start) / duration, 1);
-                    num.innerText = Math.floor(progress * target);
+                    let progress = Math.min((timestamp - start) / 1500, 1);
+                    let easeProgress = 1 - Math.pow(1 - progress, 3); 
+                    num.innerText = Math.floor(easeProgress * 1000);
+                    
                     if (progress < 1) {
                         window.requestAnimationFrame(step);
                     } else {
-                        // Level UP Effect
+                        // Smooth Level Up Reveal
                         lvl.innerText = 'LVL 2';
-                        lvl.classList.add('text-grind', 'animate-glitch');
-                        bar.style.transition = 'none';
-                        bar.style.width = '0%';
+                        lvl.style.color = '#ff4d00';
+                        lvl.style.textShadow = '0 0 40px rgba(255, 77, 0, 0.6)';
+                        
+                        bar.style.transition = 'none'; bar.style.width = '0%';
+                        
                         setTimeout(() => {
-                            bar.style.transition = 'width 1s ease-out';
-                            bar.style.width = '30%';
-                            num.innerText = '300';
-                            lvl.classList.remove('animate-glitch');
-                        }, 500);
+                            bar.style.transition = 'width 0.8s cubic-bezier(0.25, 1, 0.5, 1)';
+                            bar.style.width = '25%';
+                            num.innerText = '250';
+                        }, 300);
                     }
                 }
                 window.requestAnimationFrame(step);
-            }, 1000);
+            }, 500); // Trigger slightly faster
+        }
+
+        function initScene4() {
+            switchVideo(vidGym); 
+            const m1 = document.getElementById('mock-m1');
+            const m2 = document.getElementById('mock-m2');
+            const stamp1 = document.getElementById('mock-stamp');
+            
+            // Reset
+            m1.style.opacity = '0'; m1.style.transform = 'translateY(30px)';
+            m2.style.opacity = '0'; m2.style.transform = 'translateY(30px)';
+            stamp1.style.opacity = '0'; stamp1.style.animation = 'none';
+            
+            setTimeout(() => { 
+                m1.style.opacity = '1'; m1.style.transform = 'translateY(0)'; 
+            }, 300);
+            
+            setTimeout(() => { 
+                stamp1.style.animation = 'stamp-smooth 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards'; 
+            }, 1200);
+            
+            setTimeout(() => { 
+                m2.style.opacity = '1'; m2.style.transform = 'translateY(0)'; 
+            }, 2000);
         }
 
         function initScene5() {
+            switchVideo(vidUrban);
             const streakNum = document.getElementById('mock-streak');
             streakNum.innerText = '1';
             
@@ -323,53 +358,87 @@
             let interval = setInterval(() => {
                 current += 1;
                 streakNum.innerText = current;
-                streakNum.style.transform = 'scale(1.5)';
-                setTimeout(() => streakNum.style.transform = 'scale(1)', 100);
+                streakNum.style.transform = 'scale(1.1)';
+                setTimeout(() => streakNum.style.transform = 'scale(1)', 80); 
                 
-                if(current >= 14) clearInterval(interval);
-            }, 300); // Fast counting
+                if(current >= 21) clearInterval(interval); 
+            }, 120); // Count slightly faster
         }
 
         function initScene6() {
+            switchVideo(vidRun);
             const track = document.getElementById('loot-track');
-            track.style.transform = 'translateX(200px) scale(1.2)';
+            const l10 = document.getElementById('loot-10');
+            const l11 = document.getElementById('loot-11');
+            const l12 = document.getElementById('loot-12');
+            const box11 = document.getElementById('box-11');
+            const circle11 = document.getElementById('circle-11');
+            const b11 = document.getElementById('badge-11');
+            const icon11 = document.getElementById('box-11-icon');
+            
+            // Define how far to slide based on screen width
+            const slideAmount = window.innerWidth < 768 ? '-35%' : '-25%';
+            
+            track.style.transform = 'translateX(25%)';
+            
             setTimeout(() => {
-                track.style.transform = 'translateX(-100px) scale(1.5)';
-            }, 100);
+                track.style.transform = `translateX(${slideAmount})`;
+                
+                l10.style.opacity = '0.4';
+                l10.style.transform = 'scale(0.85)';
+                l10.querySelector('.glass-card').style.borderColor = 'rgba(255,255,255,0.08)';
+                l10.querySelector('.glass-card').style.boxShadow = 'none';
+                
+                l11.style.opacity = '1';
+                l11.style.transform = 'scale(1.1)';
+                
+                if(l12) {
+                    l12.style.opacity = '0.4';
+                    l12.style.transform = 'scale(0.85)';
+                }
+
+                setTimeout(() => {
+                    box11.style.borderColor = '#ff4d00';
+                    box11.style.boxShadow = '0 0 50px rgba(255,77,0,0.3)';
+                    box11.style.background = 'rgba(255, 77, 0, 0.1)';
+                    
+                    circle11.style.background = 'linear-gradient(135deg, #ff4d00, #ff8800)';
+                    circle11.style.color = 'black';
+                    circle11.style.borderColor = 'transparent';
+                    
+                    b11.style.opacity = '1';
+                    
+                    icon11.style.transform = 'scale(1.25)';
+                    setTimeout(() => icon11.style.transform = 'scale(1)', 300);
+
+                }, 600); // Trigger slightly faster mid-slide
+
+            }, 800);
         }
 
         function initScene7() {
-            // Add a small shake to the whole scene
-            const s7 = document.getElementById('scene-7');
-            s7.classList.add('animate-glitch');
-            setTimeout(() => s7.classList.remove('animate-glitch'), 400);
+            switchVideo(vidUrban); 
         }
 
-        // --- Core Video Loop ---
-
+        // --- Core Loop ---
         function updateTimeline(timestamp) {
             if (!startTime) startTime = timestamp;
             let elapsed = timestamp - startTime;
 
-            // Loop logic
             if (elapsed >= TOTAL_DURATION) {
                 startTime = timestamp; 
                 elapsed = 0;
             }
 
-            // Update Progress Bar
-            const progressPercent = (elapsed / TOTAL_DURATION) * 100;
-            progressBar.style.width = `${progressPercent}%`;
+            progressBar.style.width = `${(elapsed / TOTAL_DURATION) * 100}%`;
 
-            // Scene Switching
             scenes.forEach(scene => {
                 const el = document.getElementById(scene.id);
                 if (elapsed >= scene.start && elapsed < scene.end) {
                     if (!el.classList.contains('active')) {
-                        // Hide all others
-                        document.querySelectorAll('.scene').forEach(s => s.classList.remove('active', 'cut'));
-                        
-                        // Activate new scene
+                        document.querySelectorAll('.scene').forEach(s => {
+                            if (s.id !== scene.id) s.classList.remove('active');
+                        });
                         el.classList.add('active');
                         if (scene.onEnter) scene.onEnter();
                     }
@@ -378,13 +447,14 @@
                 }
             });
 
-            if(isPlaying) {
-                animationFrameId = requestAnimationFrame(updateTimeline);
-            }
+            if(isPlaying) animationFrameId = requestAnimationFrame(updateTimeline);
         }
 
-        // Start mechanism
         document.getElementById('scene-start').addEventListener('click', () => {
+            [vidUrban, vidGym, vidRun].forEach(v => { 
+                v.play().catch(e => console.log("Video Play Error:", e)); 
+            });
+            
             document.getElementById('scene-start').classList.remove('active');
             isPlaying = true;
             startTime = performance.now();
