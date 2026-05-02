@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -404,8 +403,8 @@
                 } else if (!currentCompleted.includes(mid)) {
                     const newXp = (state.profile.xp || 0) + xp; const newCompleted = [...currentCompleted, mid];
                     updatePayload = { xp: newXp, lvl: Math.floor(newXp / 1000) + 1, completed: newCompleted };
-                    claimSuccess = true;
-                    window.showToast(`+${xp} XP für ${name}!`, "success");
+                        claimSuccess = true;
+                        window.showToast(`+${xp} XP für ${name}!`, "success");
                 }
 
                 if (claimSuccess) { await setDoc(doc(db, 'plot_users', state.user.uid), updatePayload, { merge: true }); }
@@ -643,6 +642,32 @@
 
         window.goBackToPhone = () => { state.authStep = 'phone'; render(); };
 
+        window.addFriend = async (e) => {
+            e.preventDefault();
+            const input = document.getElementById('friend_alias_input');
+            const alias = input.value.trim().toUpperCase();
+            if(!alias) return;
+            
+            const btn = e.target.querySelector('button');
+            btn.disabled = true; btn.innerText = "Adding...";
+            
+            try {
+                const currentFriends = state.profile.friends || [];
+                if(currentFriends.includes(alias) || alias === (state.profile.alias || '').toUpperCase()) {
+                    window.showToast("Bereits in deiner Crew oder dein eigener Alias.", "info");
+                } else {
+                    currentFriends.push(alias);
+                    await setDoc(doc(db, 'plot_users', state.user.uid), { friends: currentFriends }, { merge: true });
+                    window.showToast(`${alias} zur Crew hinzugefügt!`, "success");
+                }
+                input.value = '';
+            } catch(err) {
+                window.showToast("Fehler beim Hinzufügen.", "error");
+            } finally {
+                btn.disabled = false; btn.innerText = "Add";
+            }
+        };
+
         window.playGrindIntro = () => {
             const layer = document.createElement('div'); layer.id = 'intro-layer';
             layer.innerHTML = `<div id="word1" class="word-flash text-gray-500">DROP IN.</div><div id="word2" class="word-flash text-white">CLEAR MISSIONS.</div><div id="word3" class="word-flash text-white">CLAIM LOOT.</div><div id="word4" class="word-flash grind-gradient" style="text-shadow: 0 0 40px rgba(255,77,0,0.5);">GRIND.</div>`;
@@ -660,7 +685,7 @@
             if(!nameInput) return window.showToast("Bitte gib einen Namen ein.", "error"); if(!cityInput || cityInput === "locked") return window.showToast("Bitte wähle deine Base.", "error");
             const btn = e.target.querySelector('button'); btn.disabled = true; btn.innerText = "Registering...";
             try {
-                state.profile = { xp: 0, lvl: 1, completed: [], redeemed: [], streaks: {}, alias: nameInput, city: cityInput, hasPremium: false };
+                state.profile = { xp: 0, lvl: 1, completed: [], redeemed: [], streaks: {}, friends: [], alias: nameInput, city: cityInput, hasPremium: false };
                 await setDoc(doc(db, 'plot_users', state.user.uid), state.profile);
                 window.playGrindIntro(); window.showToast(`Willkommen, ${nameInput}.`, "success"); state.view = 'dashboard'; state.dashboardNeedsScroll = true; render();
             } catch (err) { window.showToast("Fehler bei der Registrierung.", "error"); btn.disabled = false; btn.innerText = "Confirm Identity"; }
@@ -960,7 +985,7 @@
             }
 
             if (state.view === 'dashboard') {
-                const p = state.profile || { xp: 0, lvl: 1, completed: [], redeemed: [], streaks: {}, alias: 'Stranger', city: 'Köln', hasPremium: false };
+                const p = state.profile || { xp: 0, lvl: 1, completed: [], redeemed: [], streaks: {}, friends: [], alias: 'Stranger', city: 'Köln', hasPremium: false };
                 const safeXp = p.xp || 0; 
                 const safeLvl = p.lvl || 1; 
                 const safeCompleted = p.completed || []; 
@@ -1249,6 +1274,54 @@
 
                 html += `
                             </div>
+                        </section>
+
+                        <section class="max-w-3xl mx-auto mb-12">
+                            <div class="flex flex-col gap-6 mb-8">
+                                <div class="flex justify-between items-end border-b border-white/10 pb-4">
+                                    <div><p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">The Network</p><h3 class="text-3xl font-black uppercase italic tracking-tighter">Crew Activity</h3></div>
+                                    <span class="text-[10px] font-black bg-[#1f1f1f] text-gray-400 border border-white/5 px-3 py-1 italic">LIVE FEED</span>
+                                </div>
+                            </div>
+
+                            <form onsubmit="window.addFriend(event)" class="flex gap-2 mb-8">
+                                <input id="friend_alias_input" type="text" placeholder="Crew Code oder Alias..." required class="flex-1 p-4 bg-[#0a0a0a] border border-[#1f1f1f] rounded-sm outline-none focus:border-[#ff4d00] text-white transition text-sm tracking-widest uppercase font-bold">
+                                <button type="submit" class="btn-grind px-6">Add</button>
+                            </form>
+                `;
+
+                const friendsList = p.friends || [];
+                if (friendsList.length === 0) {
+                    html += `<div class="text-center p-8 text-gray-600 italic text-sm border border-white/5 rounded-sm bg-black/50">Deine Crew ist noch leer. Füge Grinder hinzu, um ihren Progress zu verfolgen.</div>`;
+                } else {
+                    const evs = [
+                        { i: 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6', c: 'text-[#ff4d00]', b: 'border-[#ff4d00]', s: 'shadow-[0_0_10px_rgba(255,77,0,0.2)]', txt: 'hat ein <span class="text-[#ff4d00] font-bold">Level Up</span> erreicht.' },
+                        { i: 'M5 13l4 4L19 7', c: 'text-gray-400', b: 'border-gray-700', s: '', txt: 'hat eine <span class="text-gray-300 font-bold">Operation</span> gecleared.' },
+                        { i: 'M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7', c: 'text-[#a855f7]', b: 'border-[#a855f7]', s: 'shadow-[0_0_10px_rgba(168,85,247,0.2)]', txt: 'hat <span class="text-[#a855f7] font-bold">Loot</span> eingelöst.' }
+                    ];
+                    const times = ['Gerade eben', 'Vor 2 Std', 'Gestern', 'Vor 2 Tagen', 'Letzte Woche'];
+                    
+                    html += `<div class="space-y-4 relative before:absolute before:inset-y-0 before:left-[19px] before:w-[2px] before:bg-[#1f1f1f]">`;
+                    
+                    [...friendsList].reverse().slice(0, 5).forEach((friend, idx) => {
+                        const ev = evs[idx % evs.length];
+                        const time = times[idx % times.length];
+                        html += `
+                            <div class="flex gap-4 relative z-10">
+                                <div class="w-10 h-10 rounded-full bg-[#0a0a0a] border-2 ${ev.b} flex items-center justify-center flex-shrink-0 ${ev.s}">
+                                    <svg class="w-4 h-4 ${ev.c}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${ev.i}"></path></svg>
+                                </div>
+                                <div class="card p-4 rounded-sm flex-1">
+                                    <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">${time}</p>
+                                    <p class="text-sm font-medium text-gray-300"><span class="text-white italic uppercase font-black">${friend}</span> ${ev.txt}</p>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    html += `</div>`;
+                }
+
+                html += `
                         </section>
                     </main>
                     ${getFooterHTML()}
