@@ -139,7 +139,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, updateDoc, arrayUnion, onSnapshot, collection, addDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, updateDoc, arrayUnion, onSnapshot, collection, addDoc, query, where, getDocs, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDtwsvmYSONjFufhbJ5I8G_RAMffnh7re0",
@@ -180,20 +180,21 @@
             return `vor ${Math.floor(diff/86400)} Tagen`;
         };
 
-        // ROBUSSTE ACTIVITY LOGGING
+        // ROBUSSTE ACTIVITY LOGGING inkl. PRO Status
         window.logActivity = async (type, text) => {
             try {
                 if(!state.profile || !state.profile.alias) return;
                 const newAct = {
                     alias: state.profile.alias,
-                    type: type, // 'LEVEL_UP', 'MISSION', 'REDEEM'
+                    isPro: !!state.profile.hasPremium, // PRO Flag mitgeben
+                    type: type, // 'LEVEL_UP', 'MISSION', 'REDEEM', 'PRO'
                     text: text,
                     timestamp: Date.now()
                 };
                 
-                // Optimistic UI Update (Direktes Anzeigen)
+                // Optimistic UI Update
                 if(!state.activities) state.activities = [];
-                state.activities.push(newAct);
+                state.activities.unshift(newAct);
                 if(state.view === 'dashboard') render();
 
                 await addDoc(collection(db, 'plot_activities'), newAct);
@@ -291,7 +292,7 @@
                     if (docSnap.exists()) {
                         state.profile = docSnap.data();
                         
-                        // Auto-Generate Crew Code falls nicht vorhanden
+                        // Auto-Generate Crew Code
                         if (!state.profile.crewCode) {
                             const generatedCode = Math.random().toString(36).substring(2, 8).toUpperCase();
                             state.profile.crewCode = generatedCode;
@@ -321,14 +322,15 @@
                     }
                 });
 
-                // ACTIVITIES FEED LISTENER MIT ERROR CATCH
-                onSnapshot(collection(db, 'plot_activities'), (snap) => {
+                // ACTIVITIES FEED: Ordentlich sortiert und limitiert, um alle Updates zu fangen
+                const activitiesQuery = query(collection(db, 'plot_activities'), orderBy('timestamp', 'desc'), limit(50));
+                onSnapshot(activitiesQuery, (snap) => {
                     if(snap && snap.docs) {
                         state.activities = snap.docs.map(d => d.data());
                         if(state.view === 'dashboard') render();
                     }
                 }, (error) => {
-                    console.warn("Activities konnten nicht geladen werden. Evtl fehlen die Firestore Rules für 'plot_activities'.", error);
+                    console.warn("Activities Fetch Error (Regeln prüfen)", error);
                 });
 
                 setupSeasonData();
@@ -441,7 +443,6 @@
                 const theirAlias = theirData.alias || 'Grinder';
 
                 const myFriends = state.profile.friends || [];
-                // Case insensitive check
                 const isAlreadyFriend = myFriends.some(f => f.toLowerCase() === theirAlias.toLowerCase());
                 if (isAlreadyFriend) {
                     return window.showToast(`${theirAlias} ist bereits in deiner Crew.`, "info");
@@ -472,7 +473,7 @@
             try {
                 await updateDoc(doc(db, 'plot_users', theirUid), {
                     friends: arrayUnion(state.profile.alias)
-                }).catch(e => console.warn("Mutual update gescheitert (evtl. Rules), fahre fort.", e));
+                }).catch(e => console.warn("Mutual update gescheitert.", e));
 
                 await updateDoc(doc(db, 'plot_users', state.user.uid), {
                     friends: arrayUnion(theirAlias)
@@ -485,7 +486,6 @@
                 window.showToast("Fehler beim Verbinden.", "error");
             }
         };
-        // -----------------------------
 
         window.submitShipping = async (lvl, tier) => {
             const inputs = document.querySelectorAll('.shipping-input-field');
@@ -527,15 +527,12 @@
                         User_ID: state.user?.uid || 'Unknown'
                     };
                     Object.assign(emailPayload, addressData);
-
                     fetch("https://formsubmit.co/ajax/Fabio.maines@grind-app.de", {
-                        method: "POST",
-                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                        body: JSON.stringify(emailPayload)
+                        method: "POST", headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify(emailPayload)
                     }).catch(e => console.log("Email error:", e));
                 } catch(mailErr) { console.log(mailErr); }
 
-                window.logActivity('REDEEM', `hat '<span class="text-[#a855f7] font-bold">${itemName}</span>' angefordert.`);
+                window.logActivity('REDEEM', `hat physischen Loot ('<span class="text-[#a855f7] font-bold">${itemName}</span>') angefordert.`);
                 window.showToast("Anfrage für physical Loot gesendet!", "success"); window.closeModal();
             } catch(e) { 
                 console.error(e); window.showToast("Fehler: " + (e.message || "Netzwerkfehler"), "error"); 
@@ -588,7 +585,7 @@
                     await setDoc(doc(db, 'plot_users', state.user.uid), updatePayload, { merge: true }); 
                     window.logActivity('MISSION', `hat die Operation '<span class="text-white">${name}</span>' absolviert.`);
                     if(newLvl > oldLvl) {
-                        window.logActivity('LEVEL_UP', `hat <span class="text-[#ff4d00] font-bold">Level ${newLvl}</span> erreicht!`);
+                        window.logActivity('LEVEL_UP', `hat <span class="${state.profile.hasPremium ? 'text-[#a855f7]' : 'text-[#ff4d00]'} font-bold">Level ${newLvl}</span> erreicht!`);
                     }
                 }
                 else if (btn) { btn.innerText = "Claim XP"; btn.disabled = false; }
@@ -680,7 +677,7 @@
                         await setDoc(doc(db, 'plot_users', state.user.uid), updatePayload, { merge: true }); 
                         window.logActivity('MISSION', `hat die Operation '<span class="text-white">${name}</span>' absolviert.`);
                         if(newLvl > oldLvl) {
-                            window.logActivity('LEVEL_UP', `hat <span class="text-[#ff4d00] font-bold">Level ${newLvl}</span> erreicht!`);
+                            window.logActivity('LEVEL_UP', `hat <span class="${state.profile.hasPremium ? 'text-[#a855f7]' : 'text-[#ff4d00]'} font-bold">Level ${newLvl}</span> erreicht!`);
                         }
                     }
                     window.closeModal();
@@ -769,9 +766,9 @@
 
                 await setDoc(doc(db, 'plot_users', state.user.uid), { xp: newXp, lvl: newLvl, redeemed: currentRedeemed }, { merge: true });
                 
-                window.logActivity('REDEEM', `hat einen Boost aktiviert.`);
+                window.logActivity('REDEEM', `hat einen XP/Level Boost aktiviert.`);
                 if(newLvl > oldLvl) {
-                    window.logActivity('LEVEL_UP', `hat <span class="text-[#ff4d00] font-bold">Level ${newLvl}</span> erreicht!`);
+                    window.logActivity('LEVEL_UP', `hat <span class="${state.profile.hasPremium ? 'text-[#a855f7]' : 'text-[#ff4d00]'} font-bold">Level ${newLvl}</span> erreicht!`);
                 }
 
                 window.showToast(`BOOST AKTIVIERT!`, "success");
@@ -1127,7 +1124,15 @@
                 `;
                 setTimeout(() => {
                     if (window.paypal && document.getElementById('paypal-button-container') && !document.getElementById('paypal-button-container').innerHTML) {
-                        paypal.Buttons({ createOrder: function(data, actions) { return actions.order.create({ purchase_units: [{ amount: { value: checkoutPrice, currency_code: 'EUR' }, custom_id: state.user.uid }] }); }, onApprove: function(data, actions) { return actions.order.capture().then(async function(details) { window.showToast("Zahlung autorisiert! PRO Pass aktiviert.", "success"); try { await setDoc(doc(db, 'plot_users', state.user.uid), { hasPremium: true }, { merge: true }); } catch(e) { console.error(e); } window.setView('dashboard'); }); } }).render('#paypal-button-container');
+                        paypal.Buttons({ createOrder: function(data, actions) { return actions.order.create({ purchase_units: [{ amount: { value: checkoutPrice, currency_code: 'EUR' }, custom_id: state.user.uid }] }); }, onApprove: function(data, actions) { return actions.order.capture().then(async function(details) { 
+                            window.showToast("Zahlung autorisiert! PRO Pass aktiviert.", "success"); 
+                            try { 
+                                await setDoc(doc(db, 'plot_users', state.user.uid), { hasPremium: true }, { merge: true }); 
+                                if(state.profile) state.profile.hasPremium = true;
+                                window.logActivity('PRO', `hat den <span class="text-[#a855f7] font-bold">PRO Pass</span> freigeschaltet!`);
+                            } catch(e) { console.error(e); } 
+                            window.setView('dashboard'); 
+                        }); } }).render('#paypal-button-container');
                     } else if (!window.paypal) { document.getElementById('paypal-button-container').innerHTML = '<div class="text-red-500 text-xs italic font-bold">Zahlungssystem blockiert. Bitte Seite neu laden.</div>'; }
                 }, 100); return;
             }
@@ -1474,19 +1479,13 @@
                 const friendsList = p.friends || [];
                 const feedUsers = [...friendsList, p.alias];
                 
-                // Case-Insensitive Check, damit Aliases richtig matchen (WICHTIG!)
+                // Case-Insensitive Filterung 
                 const feedUsersLower = feedUsers.map(u => (u || '').toLowerCase());
-
-                const evIcons = {
-                    'LEVEL_UP': { i: 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6', c: 'text-[#ff4d00]', b: 'border-[#ff4d00]', s: 'shadow-[0_0_10px_rgba(255,77,0,0.2)]' },
-                    'MISSION': { i: 'M5 13l4 4L19 7', c: 'text-gray-400', b: 'border-gray-700', s: '' },
-                    'REDEEM': { i: 'M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7', c: 'text-[#a855f7]', b: 'border-[#a855f7]', s: 'shadow-[0_0_10px_rgba(168,85,247,0.2)]' }
-                };
 
                 const feedActivities = (state.activities || [])
                     .filter(act => act.alias && feedUsersLower.includes(act.alias.toLowerCase()))
                     .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
-                    .slice(0, 8); // Top 8 anzeigen
+                    .slice(0, 10); // Top 10 anzeigen
 
                 if (feedActivities.length === 0) {
                     if (friendsList.length === 0) {
@@ -1498,21 +1497,47 @@
                     html += `<div class="space-y-4 relative before:absolute before:inset-y-0 before:left-[19px] before:w-[2px] before:bg-[#1f1f1f]">`;
                     
                     feedActivities.forEach(act => {
-                        const ev = evIcons[act.type] || evIcons['MISSION'];
-                        const time = getRelativeTime(act.timestamp);
+                        const isProUser = act.isPro === true;
                         
-                        // Prüfen ob ich es selbst war
+                        // Dynamisches Color- & Icon-Mapping für PRO User im Feed
+                        let iconSvg = 'M5 13l4 4L19 7'; // Default Mission
+                        let colorClass = 'text-gray-400';
+                        let borderClass = 'border-gray-700';
+                        let shadowClass = '';
+
+                        if (act.type === 'LEVEL_UP') {
+                            iconSvg = 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6';
+                            colorClass = isProUser ? 'text-[#a855f7]' : 'text-[#ff4d00]';
+                            borderClass = isProUser ? 'border-[#a855f7]' : 'border-[#ff4d00]';
+                            shadowClass = isProUser ? 'shadow-[0_0_10px_rgba(168,85,247,0.2)]' : 'shadow-[0_0_10px_rgba(255,77,0,0.2)]';
+                        } else if (act.type === 'REDEEM') {
+                            iconSvg = 'M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7';
+                            colorClass = 'text-[#a855f7]';
+                            borderClass = 'border-[#a855f7]';
+                            shadowClass = 'shadow-[0_0_10px_rgba(168,85,247,0.2)]';
+                        } else if (act.type === 'PRO') {
+                            iconSvg = 'M13 10V3L4 14h7v7l9-11h-7z';
+                            colorClass = 'text-[#a855f7]';
+                            borderClass = 'border-[#a855f7]';
+                            shadowClass = 'shadow-[0_0_15px_rgba(168,85,247,0.4)]';
+                        }
+
+                        const time = getRelativeTime(act.timestamp);
                         const isMe = (act.alias || '').toLowerCase() === (p.alias || '').toLowerCase();
                         const displayName = isMe ? 'Du' : act.alias;
                         
+                        // Wenn der User Pro ist, wird der Name im Feed Lila
+                        const nameColorClass = isProUser ? 'text-[#d8b4fe]' : 'text-white';
+                        const proBadge = isProUser ? `<span class="ml-2 align-middle bg-[#a855f7]/20 text-[#a855f7] border border-[#a855f7]/30 text-[8px] px-1.5 py-0.5 rounded-sm font-black shadow-[0_0_10px_rgba(168,85,247,0.2)]">PRO</span>` : '';
+                        
                         html += `
                             <div class="flex gap-4 relative z-10">
-                                <div class="w-10 h-10 rounded-full bg-[#0a0a0a] border-2 ${ev.b} flex items-center justify-center flex-shrink-0 ${ev.s}">
-                                    <svg class="w-4 h-4 ${ev.c}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${ev.i}"></path></svg>
+                                <div class="w-10 h-10 rounded-full bg-[#0a0a0a] border-2 ${borderClass} flex items-center justify-center flex-shrink-0 ${shadowClass}">
+                                    <svg class="w-4 h-4 ${colorClass}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${iconSvg}"></path></svg>
                                 </div>
                                 <div class="card p-4 rounded-sm flex-1">
                                     <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">${time}</p>
-                                    <p class="text-sm font-medium text-gray-300"><span class="text-white italic uppercase font-black">${displayName}</span> ${act.text}</p>
+                                    <p class="text-sm font-medium text-gray-300"><span class="${nameColorClass} italic uppercase font-black">${displayName}</span>${proBadge} ${act.text}</p>
                                 </div>
                             </div>
                         `;
