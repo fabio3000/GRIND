@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -19,7 +20,7 @@
     <meta name="apple-mobile-web-app-title" content="GRIND.">
     <link rel="icon" type="image/png" sizes="192x192" href="https://grind-app.de/logo.jpg">
 
-    <!-- Meta Tags (Auch hier wird noindex respektiert) -->
+    <!-- Meta Tags -->
     <meta property="og:title" content="GRIND.">
     <meta property="og:url" content="https://grind-app.de">
     <meta property="og:type" content="website">
@@ -28,7 +29,6 @@
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
 
-    <!-- Stabilste Version des HTML5 QR Scanners -->
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script src="https://www.paypal.com/sdk/js?client-id=AboxAT2qskA0lY5-23Kj2tu_qY3bOK57rq_LbhtE_cdVOBT37fSHGacBKjgl-zx1XcJM9AZql96OCwc8&currency=EUR"></script>
     <style>
@@ -139,7 +139,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, updateDoc, arrayUnion, onSnapshot, collection, addDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDtwsvmYSONjFufhbJ5I8G_RAMffnh7re0",
@@ -259,9 +259,26 @@
                 onSnapshot(doc(db, 'plot_users', user.uid), (docSnap) => {
                     if (docSnap.exists()) {
                         state.profile = docSnap.data();
+                        
+                        // Auto-Generate Crew Code falls nicht vorhanden
+                        if (!state.profile.crewCode) {
+                            const generatedCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+                            state.profile.crewCode = generatedCode;
+                            setDoc(doc(db, 'plot_users', user.uid), { crewCode: generatedCode }, { merge: true });
+                        }
+
                         if (['loading', 'auth', 'onboarding'].includes(state.view)) {
                             state.view = 'dashboard';
                             state.dashboardNeedsScroll = true;
+                            
+                            // Check URL for invite code
+                            const urlParams = new URLSearchParams(window.location.search);
+                            const crewCode = urlParams.get('crew');
+                            if (crewCode) {
+                                // Clear URL
+                                window.history.replaceState({}, document.title, window.location.pathname);
+                                setTimeout(() => window.resolveInvite(crewCode), 1000);
+                            }
                         }
                         render();
                     } else { state.view = 'onboarding'; render(); }
@@ -308,6 +325,129 @@
             setTimeout(() => { container.classList.remove('opacity-0', 'pointer-events-none'); container.classList.add('opacity-100'); container.firstElementChild.classList.remove('scale-95'); container.firstElementChild.classList.add('scale-100'); }, 10);
         };
 
+        // --- CREW INVITE SYSTEM ---
+        window.openInviteModal = () => {
+            if(!state.profile) return;
+            const link = `${window.location.origin}/?crew=${state.profile.crewCode || ''}`;
+            let innerHtml = `
+                <p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">Network</p>
+                <h3 class="text-2xl font-black italic uppercase tracking-tighter mb-6">Crew Erweitern</h3>
+                
+                <div class="bg-[#1f1f1f] p-5 rounded-sm mb-6 border border-white/10">
+                    <p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-3">Option 1: Invite Link teilen</p>
+                    <div class="flex gap-2">
+                        <input type="text" readonly value="${link}" class="flex-1 p-3 bg-black border border-[#333] rounded-sm text-xs text-gray-400 outline-none truncate selection:bg-[#ff4d00] selection:text-white">
+                        <button type="button" onclick="window.copyToClipboard('${link}')" class="bg-[#ff4d00] text-white px-4 rounded-sm hover:opacity-80 transition flex-shrink-0" title="Kopieren">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-[#1f1f1f] p-5 rounded-sm mb-6 border border-white/10">
+                    <p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-3">Option 2: Crew Code eingeben</p>
+                    <form onsubmit="window.submitManualCode(event)" class="flex gap-2">
+                        <input id="manual_crew_code" type="text" placeholder="CODE..." required class="flex-1 p-3 bg-black border border-[#333] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00] uppercase font-bold tracking-widest">
+                        <button type="submit" class="bg-white text-black font-black uppercase tracking-widest px-4 rounded-sm hover:bg-[#ff4d00] hover:text-white transition text-xs">Add</button>
+                    </form>
+                </div>
+
+                <button type="button" onclick="window.closeModal()" class="w-full bg-[#111] text-gray-400 hover:bg-white hover:text-black font-black italic uppercase py-3 transition text-xs border border-white/5 rounded-sm">Schließen</button>
+            `;
+            window.openModal(innerHtml);
+        };
+
+        window.copyToClipboard = (text) => {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed"; // Damit Safari nicht nach unten scrollt
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                window.showToast("Link in Zwischenablage kopiert!", "success");
+            } catch (err) {
+                window.showToast("Kopieren fehlgeschlagen.", "error");
+            }
+            document.body.removeChild(textArea);
+        };
+
+        window.submitManualCode = (e) => {
+            e.preventDefault();
+            const code = document.getElementById('manual_crew_code').value.trim().toUpperCase();
+            if(!code) return;
+            const btn = e.target.querySelector('button');
+            if(btn) { btn.disabled = true; btn.innerText = "..."; }
+            window.resolveInvite(code).finally(() => {
+                if(btn) { btn.disabled = false; btn.innerText = "Add"; }
+            });
+        };
+
+        window.resolveInvite = async (code) => {
+            try {
+                code = code.toUpperCase();
+                if (code === state.profile.crewCode) {
+                    return window.showToast("Das ist dein eigener Code.", "error");
+                }
+                
+                const q = query(collection(db, 'plot_users'), where('crewCode', '==', code));
+                const snap = await getDocs(q);
+                if (snap.empty) {
+                    return window.showToast("Crew Code ist ungültig oder abgelaufen.", "error");
+                }
+                
+                const theirData = snap.docs[0].data();
+                const theirUid = snap.docs[0].id;
+                const theirAlias = theirData.alias || 'Grinder';
+
+                const myFriends = state.profile.friends || [];
+                if (myFriends.includes(theirAlias)) {
+                    return window.showToast(`${theirAlias} ist bereits in deiner Crew.`, "info");
+                }
+
+                // Show Accept Modal
+                let innerHtml = `
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-[#1f1f1f] rounded-full mx-auto mb-4 border-2 border-[#ff4d00] flex items-center justify-center animate-pulse-slow">
+                            <svg class="w-8 h-8 text-[#ff4d00]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                        </div>
+                        <h3 class="text-3xl font-black italic uppercase tracking-tighter mb-2">${theirAlias}</h3>
+                        <p class="text-gray-400 text-[11px] mb-8 leading-relaxed max-w-[200px] mx-auto">Möchtest du dich mit diesem Grinder verbinden? Beide erhalten Updates im Live-Feed voneinander.</p>
+                        
+                        <button type="button" onclick="window.confirmFriend('${theirUid}', '${theirAlias}')" class="w-full btn-grind py-4 mb-3">Akzeptieren & Verbinden</button>
+                        <button type="button" onclick="window.closeModal()" class="text-xs text-gray-500 uppercase tracking-widest font-bold hover:text-white transition py-2">Abbrechen</button>
+                    </div>
+                `;
+                window.openModal(innerHtml);
+            } catch(e) {
+                console.error(e);
+                window.showToast("Netzwerkfehler bei der Code-Prüfung.", "error");
+            }
+        };
+
+        window.confirmFriend = async (theirUid, theirAlias) => {
+            const btn = document.querySelector('#modal-container button.btn-grind');
+            if(btn) { btn.innerText = "Connecting..."; btn.disabled = true; }
+            try {
+                // 1. Sich selbst beim anderen hinzufügen (Mutual Update)
+                await updateDoc(doc(db, 'plot_users', theirUid), {
+                    friends: arrayUnion(state.profile.alias)
+                }).catch(e => console.warn("Mutual update gescheitert (evtl. Rules), fahre fort.", e));
+
+                // 2. Den anderen bei sich selbst hinzufügen
+                await updateDoc(doc(db, 'plot_users', state.user.uid), {
+                    friends: arrayUnion(theirAlias)
+                });
+
+                window.closeModal();
+                window.showToast(`Du bist jetzt mit ${theirAlias} in einer Crew!`, "success");
+            } catch(e) {
+                console.error(e);
+                window.showToast("Fehler beim Verbinden.", "error");
+            }
+        };
+        // -----------------------------
+
         window.submitShipping = async (lvl, tier) => {
             const inputs = document.querySelectorAll('.shipping-input-field');
             let addressString = "";
@@ -328,18 +468,15 @@
             if(btn) { btn.innerText = "Senden..."; btn.disabled = true; }
             const rewardId = `lvl${lvl}_${tier}`;
 
-            // Artikel-Namen aus dem State holen
             const reward = state.rewardData.find(r => r.lvl === lvl);
             const itemName = reward ? reward[tier] : 'Unbekanntes Item';
 
             try {
-                // 1. In Firebase abspeichern (mit itemName)
                 await addDoc(collection(db, 'plot_shipping_requests'), { uid: state.user.uid, alias: state.profile?.alias || 'Grinder', lvl: lvl, tier: tier, itemName: itemName, address: addressString, timestamp: new Date(), status: 'pending' });
                 
                 const currentRedeemed = state.profile?.redeemed || [];
                 if(!currentRedeemed.includes(rewardId)) { currentRedeemed.push(rewardId); await setDoc(doc(db, 'plot_users', state.user.uid), { redeemed: currentRedeemed }, { merge: true }); }
                 
-                // 2. Email direkt via FormSubmit versenden (als schöne Tabelle)
                 try {
                     let emailPayload = {
                         _subject: "Neue Loot-Bestellung: " + itemName + " von " + (state.profile?.alias || 'Grinder'),
@@ -350,8 +487,6 @@
                         Tier: tier.toUpperCase(),
                         User_ID: state.user?.uid || 'Unknown'
                     };
-                    
-                    // Alle Formularfelder als eigene Zeilen in der E-Mail hinzufügen
                     Object.assign(emailPayload, addressData);
 
                     fetch("https://formsubmit.co/ajax/Fabio.maines@grind-app.de", {
@@ -359,14 +494,11 @@
                         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                         body: JSON.stringify(emailPayload)
                     }).catch(e => console.log("Email error:", e));
-                } catch(mailErr) {
-                    console.log("Konnte E-Mail nicht absenden:", mailErr);
-                }
+                } catch(mailErr) { console.log(mailErr); }
 
                 window.showToast("Anfrage für physical Loot gesendet!", "success"); window.closeModal();
             } catch(e) { 
-                console.error(e);
-                window.showToast("Fehler: " + (e.message || "Netzwerkfehler"), "error"); 
+                console.error(e); window.showToast("Fehler: " + (e.message || "Netzwerkfehler"), "error"); 
                 if(btn) { btn.innerText = "Versand anfordern"; btn.disabled = false; } 
             }
         };
@@ -591,7 +723,6 @@
             } else if (type === 'qr') {
                 contentHtml = `<div id="redeem-container" class="bg-[#1f1f1f] p-6 rounded-sm flex flex-col mb-6 border ${borderClass} shadow-2xl relative overflow-hidden"><div class="absolute top-0 right-0 bg-[#000] px-2 py-1 text-[8px] font-bold text-gray-500 uppercase tracking-widest rounded-bl-sm">One-Time Use</div><p class="text-[11px] text-gray-300 mb-8 leading-relaxed text-center font-medium">${info}<br><span class="text-white font-black uppercase tracking-widest block mt-3 border-t border-white/10 pt-3">Das Personal muss das Einlösen bestätigen!</span></p><div onmousedown="window.startRedeemHold(${lvl}, '${tier}', event)" onmouseup="window.stopRedeemHold()" onmouseleave="window.stopRedeemHold()" ontouchstart="window.startRedeemHold(${lvl}, '${tier}', event)" ontouchend="window.stopRedeemHold()" class="relative w-full h-16 bg-black border border-white/20 rounded-sm overflow-hidden cursor-pointer flex items-center justify-center group"><div id="redeem-btn-fill" class="absolute left-0 top-0 bottom-0 w-0 ${bgClass} z-0" style="transition: none;"></div><span id="redeem-btn-text" class="relative z-10 text-white font-black italic uppercase tracking-widest text-sm pointer-events-none drop-shadow-md">Hold to Redeem</span></div></div>`;
             } else if (type === 'shipping') {
-                // Dynamische Felder bauen anhand dessen, was der Admin eingegeben hat
                 const fieldsStr = reward[`${tier}_fields`] || 'Adresse oder Info...';
                 const fieldsArr = fieldsStr.split(',').map(s => s.trim()).filter(s => s);
                 let fieldsHtml = '';
@@ -601,7 +732,6 @@
                         fieldsHtml += `<input id="shipping_field_${idx}" type="text" placeholder="${f}" class="w-full p-3 bg-black border border-white/20 rounded-sm text-sm text-white outline-none focus:border-white mb-3 shipping-input-field" data-label="${f}">`;
                     });
                 } else {
-                    // Fallback, falls der Admin das Formular-Feld leergelassen hat
                     fieldsHtml = `<input id="shipping_field_0" type="text" placeholder="Adresse oder Info..." class="w-full p-3 bg-black border border-white/20 rounded-sm text-sm text-white outline-none focus:border-white mb-3 shipping-input-field" data-label="Eingabe">`;
                 }
 
@@ -642,32 +772,6 @@
 
         window.goBackToPhone = () => { state.authStep = 'phone'; render(); };
 
-        window.addFriend = async (e) => {
-            e.preventDefault();
-            const input = document.getElementById('friend_alias_input');
-            const alias = input.value.trim().toUpperCase();
-            if(!alias) return;
-            
-            const btn = e.target.querySelector('button');
-            btn.disabled = true; btn.innerText = "Adding...";
-            
-            try {
-                const currentFriends = state.profile.friends || [];
-                if(currentFriends.includes(alias) || alias === (state.profile.alias || '').toUpperCase()) {
-                    window.showToast("Bereits in deiner Crew oder dein eigener Alias.", "info");
-                } else {
-                    currentFriends.push(alias);
-                    await setDoc(doc(db, 'plot_users', state.user.uid), { friends: currentFriends }, { merge: true });
-                    window.showToast(`${alias} zur Crew hinzugefügt!`, "success");
-                }
-                input.value = '';
-            } catch(err) {
-                window.showToast("Fehler beim Hinzufügen.", "error");
-            } finally {
-                btn.disabled = false; btn.innerText = "Add";
-            }
-        };
-
         window.playGrindIntro = () => {
             const layer = document.createElement('div'); layer.id = 'intro-layer';
             layer.innerHTML = `<div id="word1" class="word-flash text-gray-500">DROP IN.</div><div id="word2" class="word-flash text-white">CLEAR MISSIONS.</div><div id="word3" class="word-flash text-white">CLAIM LOOT.</div><div id="word4" class="word-flash grind-gradient" style="text-shadow: 0 0 40px rgba(255,77,0,0.5);">GRIND.</div>`;
@@ -685,7 +789,8 @@
             if(!nameInput) return window.showToast("Bitte gib einen Namen ein.", "error"); if(!cityInput || cityInput === "locked") return window.showToast("Bitte wähle deine Base.", "error");
             const btn = e.target.querySelector('button'); btn.disabled = true; btn.innerText = "Registering...";
             try {
-                state.profile = { xp: 0, lvl: 1, completed: [], redeemed: [], streaks: {}, friends: [], alias: nameInput, city: cityInput, hasPremium: false };
+                const generatedCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+                state.profile = { xp: 0, lvl: 1, completed: [], redeemed: [], streaks: {}, friends: [], crewCode: generatedCode, alias: nameInput, city: cityInput, hasPremium: false };
                 await setDoc(doc(db, 'plot_users', state.user.uid), state.profile);
                 window.playGrindIntro(); window.showToast(`Willkommen, ${nameInput}.`, "success"); state.view = 'dashboard'; state.dashboardNeedsScroll = true; render();
             } catch (err) { window.showToast("Fehler bei der Registrierung.", "error"); btn.disabled = false; btn.innerText = "Confirm Identity"; }
@@ -985,7 +1090,7 @@
             }
 
             if (state.view === 'dashboard') {
-                const p = state.profile || { xp: 0, lvl: 1, completed: [], redeemed: [], streaks: {}, friends: [], alias: 'Stranger', city: 'Köln', hasPremium: false };
+                const p = state.profile || { xp: 0, lvl: 1, completed: [], redeemed: [], streaks: {}, friends: [], crewCode: '', alias: 'Stranger', city: 'Köln', hasPremium: false };
                 const safeXp = p.xp || 0; 
                 const safeLvl = p.lvl || 1; 
                 const safeCompleted = p.completed || []; 
@@ -1284,15 +1389,17 @@
                                 </div>
                             </div>
 
-                            <form onsubmit="window.addFriend(event)" class="flex gap-2 mb-8">
-                                <input id="friend_alias_input" type="text" placeholder="Crew Code oder Alias..." required class="flex-1 p-4 bg-[#0a0a0a] border border-[#1f1f1f] rounded-sm outline-none focus:border-[#ff4d00] text-white transition text-sm tracking-widest uppercase font-bold">
-                                <button type="submit" class="btn-grind px-6">Add</button>
-                            </form>
+                            <div class="flex gap-2 mb-8">
+                                <button type="button" onclick="window.openInviteModal()" class="w-full btn-grind py-4 flex items-center justify-center gap-3">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                    Crew Erweitern (Link & Code)
+                                </button>
+                            </div>
                 `;
 
                 const friendsList = p.friends || [];
                 if (friendsList.length === 0) {
-                    html += `<div class="text-center p-8 text-gray-600 italic text-sm border border-white/5 rounded-sm bg-black/50">Deine Crew ist noch leer. Füge Grinder hinzu, um ihren Progress zu verfolgen.</div>`;
+                    html += `<div class="text-center p-8 text-gray-600 italic text-sm border border-white/5 rounded-sm bg-black/50">Deine Crew ist noch leer. Erweitere dein Network, um den Progress deiner Freunde zu verfolgen.</div>`;
                 } else {
                     const evs = [
                         { i: 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6', c: 'text-[#ff4d00]', b: 'border-[#ff4d00]', s: 'shadow-[0_0_10px_rgba(255,77,0,0.2)]', txt: 'hat ein <span class="text-[#ff4d00] font-bold">Level Up</span> erreicht.' },
