@@ -180,29 +180,6 @@
             return `vor ${Math.floor(diff/86400)} Tagen`;
         };
 
-        // ROBUSSTE ACTIVITY LOGGING inkl. PRO Status
-        window.logActivity = async (type, text) => {
-            try {
-                if(!state.profile || !state.profile.alias) return;
-                const newAct = {
-                    alias: state.profile.alias,
-                    isPro: !!state.profile.hasPremium, // PRO Flag mitgeben
-                    type: type, // 'LEVEL_UP', 'MISSION', 'REDEEM', 'PRO'
-                    text: text,
-                    timestamp: Date.now()
-                };
-                
-                // Optimistic UI Update
-                if(!state.activities) state.activities = [];
-                state.activities.unshift(newAct);
-                if(state.view === 'dashboard') render();
-
-                await addDoc(collection(db, 'plot_activities'), newAct);
-            } catch(e) { 
-                console.warn("Activity log failed. Evtl Firebase Rules blockiert?", e); 
-            }
-        };
-
         window.showToast = (msg, type = 'success') => {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div'); toast.className = `toast ${type}`;
@@ -210,6 +187,29 @@
             toast.innerHTML = `${icon} <div><div class="font-black text-[10px] uppercase tracking-widest text-gray-400 mb-0.5">System</div><div>${msg}</div></div>`;
             container.appendChild(toast); setTimeout(() => toast.classList.add('show'), 10);
             setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 4000);
+        };
+
+        // ROBUSSTE ACTIVITY LOGGING inkl. Error Toasts
+        window.logActivity = async (type, text) => {
+            try {
+                if(!state.profile || !state.profile.alias) return;
+                const newAct = {
+                    alias: state.profile.alias,
+                    isPro: !!state.profile.hasPremium, 
+                    type: type, 
+                    text: text,
+                    timestamp: Date.now()
+                };
+                
+                // Optimistic UI Update - Wird nicht im eigenen Feed gezeigt, da eigener Feed sich filtert, 
+                // aber wird sofort an die DB gesendet.
+                await addDoc(collection(db, 'plot_activities'), newAct).catch(err => {
+                    console.error("Firebase Rules Error beim Feed:", err);
+                    window.showToast("Feed-Update fehlgeschlagen: Prüfe Firebase Rules!", "error");
+                });
+            } catch(e) { 
+                console.error("Critical Activity Log Error:", e);
+            }
         };
 
         const getActiveWeek = () => {
@@ -322,7 +322,7 @@
                     }
                 });
 
-                // ACTIVITIES FEED: Ordentlich sortiert und limitiert, um alle Updates zu fangen
+                // ACTIVITIES FEED LISTENERS: Laden fehlgeschlagen = Rules blocken!
                 const activitiesQuery = query(collection(db, 'plot_activities'), orderBy('timestamp', 'desc'), limit(50));
                 onSnapshot(activitiesQuery, (snap) => {
                     if(snap && snap.docs) {
@@ -330,7 +330,8 @@
                         if(state.view === 'dashboard') render();
                     }
                 }, (error) => {
-                    console.warn("Activities Fetch Error (Regeln prüfen)", error);
+                    console.error("Activities Lade-Fehler! (Firebase Rules checken)", error);
+                    window.showToast("Der Live-Feed wird durch Firebase Rules blockiert!", "error");
                 });
 
                 setupSeasonData();
@@ -371,9 +372,22 @@
         window.openInviteModal = () => {
             if(!state.profile) return;
             const link = `${window.location.origin}/?crew=${state.profile.crewCode || ''}`;
+            
+            // Berechne aktuellen XP Bonus für nächsten Freund
+            const currentFriendsCount = (state.profile.friends || []).length;
+            const nextXpBounty = (currentFriendsCount + 1) * 100;
+            
             let innerHtml = `
                 <p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">Network</p>
                 <h3 class="text-2xl font-black italic uppercase tracking-tighter mb-6">Crew Erweitern</h3>
+                
+                <div class="bg-gradient-to-r from-[#ff4d00]/20 to-transparent border border-[#ff4d00]/30 p-4 rounded-sm mb-6 flex items-center gap-4">
+                    <div class="text-3xl drop-shadow-[0_0_10px_rgba(255,77,0,0.8)]">🔥</div>
+                    <div>
+                        <p class="text-[#ff4d00] font-black italic uppercase tracking-widest text-sm">Bounty Active</p>
+                        <p class="text-gray-300 text-[10px] uppercase font-bold tracking-widest mt-1">Sichere dir steigende XP-Boni für jeden Grinder, der deiner Crew joint! <br><span class="text-white">Dein nächster Freund bringt fette +${nextXpBounty} XP!</span></p>
+                    </div>
+                </div>
                 
                 <div class="bg-[#1f1f1f] p-5 rounded-sm mb-6 border border-white/10">
                     <p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-3">Option 1: Invite Link teilen</p>
@@ -448,13 +462,20 @@
                     return window.showToast(`${theirAlias} ist bereits in deiner Crew.`, "info");
                 }
 
+                // XP Bounty dynamisch für Bestätigungsfenster
+                const nextXpBounty = (myFriends.length + 1) * 100;
+
                 let innerHtml = `
                     <div class="text-center">
                         <div class="w-16 h-16 bg-[#1f1f1f] rounded-full mx-auto mb-4 border-2 border-[#ff4d00] flex items-center justify-center animate-pulse-slow">
                             <svg class="w-8 h-8 text-[#ff4d00]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                         </div>
                         <h3 class="text-3xl font-black italic uppercase tracking-tighter mb-2">${theirAlias}</h3>
-                        <p class="text-gray-400 text-[11px] mb-8 leading-relaxed max-w-[200px] mx-auto">Möchtest du dich mit diesem Grinder verbinden? Beide erhalten Updates im Live-Feed voneinander.</p>
+                        <p class="text-gray-400 text-[11px] mb-6 leading-relaxed max-w-[200px] mx-auto">Möchtest du dich mit diesem Grinder verbinden? Beide erhalten Updates im Live-Feed voneinander.</p>
+                        
+                        <div class="bg-[#ff4d00]/10 border border-[#ff4d00]/30 py-2 px-4 rounded-sm inline-block mb-6 shadow-[0_0_10px_rgba(255,77,0,0.2)]">
+                            <p class="text-[#ff4d00] font-black italic uppercase tracking-widest text-sm">+${nextXpBounty} XP BOUNTY</p>
+                        </div>
                         
                         <button type="button" onclick="window.confirmFriend('${theirUid}', '${theirAlias}')" class="w-full btn-grind py-4 mb-3">Akzeptieren & Verbinden</button>
                         <button type="button" onclick="window.closeModal()" class="text-xs text-gray-500 uppercase tracking-widest font-bold hover:text-white transition py-2">Abbrechen</button>
@@ -471,16 +492,33 @@
             const btn = document.querySelector('#modal-container button.btn-grind');
             if(btn) { btn.innerText = "Connecting..."; btn.disabled = true; }
             try {
+                // Dynamische Bounty Berechnen
+                const myFriends = state.profile.friends || [];
+                const nextXpBounty = (myFriends.length + 1) * 100;
+                
+                const oldLvl = state.profile.lvl || 1;
+                const newXp = (state.profile.xp || 0) + nextXpBounty;
+                const newLvl = Math.floor(newXp / 1000) + 1;
+
+                // Mutual Update beim Freund
                 await updateDoc(doc(db, 'plot_users', theirUid), {
                     friends: arrayUnion(state.profile.alias)
                 }).catch(e => console.warn("Mutual update gescheitert.", e));
 
+                // Eigenes Profil Update inkl. XP Belohnung
                 await updateDoc(doc(db, 'plot_users', state.user.uid), {
-                    friends: arrayUnion(theirAlias)
+                    friends: arrayUnion(theirAlias),
+                    xp: newXp,
+                    lvl: newLvl
                 });
+                
+                window.logActivity('MISSION', `hat die Crew erweitert (+${nextXpBounty} XP).`);
+                if(newLvl > oldLvl) {
+                    window.logActivity('LEVEL_UP', `hat <span class="${state.profile.hasPremium ? 'text-[#a855f7]' : 'text-[#ff4d00]'} font-bold">Level ${newLvl}</span> erreicht!`);
+                }
 
                 window.closeModal();
-                window.showToast(`Du bist jetzt mit ${theirAlias} in einer Crew!`, "success");
+                window.showToast(`+${nextXpBounty} XP! Du bist jetzt mit ${theirAlias} in einer Crew!`, "success");
             } catch(e) {
                 console.error(e);
                 window.showToast("Fehler beim Verbinden.", "error");
@@ -532,7 +570,7 @@
                     }).catch(e => console.log("Email error:", e));
                 } catch(mailErr) { console.log(mailErr); }
 
-                window.logActivity('REDEEM', `hat physischen Loot ('<span class="text-[#a855f7] font-bold">${itemName}</span>') angefordert.`);
+                window.logActivity('REDEEM', `hat physischen Loot ('<span class="${state.profile.hasPremium ? 'text-[#a855f7]' : 'text-[#ff4d00]'} font-bold">${itemName}</span>') angefordert.`);
                 window.showToast("Anfrage für physical Loot gesendet!", "success"); window.closeModal();
             } catch(e) { 
                 console.error(e); window.showToast("Fehler: " + (e.message || "Netzwerkfehler"), "error"); 
@@ -732,7 +770,7 @@
                 const container = document.getElementById('redeem-container');
                 if(container) { container.innerHTML = `<div class="flex flex-col items-center justify-center py-6 animate-pop"><div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mb-4 shadow-[0_0_30px_rgba(34,197,94,0.5)]"><svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></div><h4 class="text-white font-black italic text-xl uppercase tracking-widest text-center">Ticket<br>eingelöst</h4><p class="text-gray-400 text-xs mt-3 text-center">Dieser Loot wurde erfolgreich<br>von deinem Konto abgebucht.</p></div>`; }
                 
-                window.logActivity('REDEEM', `hat '<span class="text-[#a855f7] font-bold">${itemName}</span>' eingelöst.`);
+                window.logActivity('REDEEM', `hat '<span class="${state.profile.hasPremium ? 'text-[#a855f7]' : 'text-[#ff4d00]'} font-bold">${itemName}</span>' eingelöst.`);
                 window.showToast("Erfolgreich eingelöst!", "success");
             } catch (e) { window.showToast("Fehler beim Einlösen.", "error"); window.stopRedeemHold(); } finally { isRedeeming = false; }
         };
@@ -868,7 +906,8 @@
         };
 
         window.generateShareCard = async () => {
-            if (!state.profile) return; window.showToast("Generiere Stats Card...", "info");
+            if (!state.profile) return window.showToast("Profil nicht geladen.", "error"); 
+            window.showToast("Generiere Stats Card...", "info");
             const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
             canvas.width = 1080; canvas.height = 1920; const centerY = canvas.height / 2;
             
@@ -876,7 +915,7 @@
             const glow = ctx.createRadialGradient(540, centerY, 0, 540, centerY, 900); glow.addColorStop(0, 'rgba(255, 77, 0, 0.15)'); glow.addColorStop(1, 'transparent'); ctx.fillStyle = glow; ctx.fillRect(0, 0, canvas.width, canvas.height);
             ctx.globalAlpha = 0.03; for (let i = 0; i < 70000; i++) { ctx.fillStyle = Math.random() > 0.5 ? '#ffffff' : '#000000'; ctx.fillRect(Math.random() * canvas.width, Math.random() * canvas.height, 2, 2); } ctx.globalAlpha = 1.0; 
 
-                     ctx.font = 'italic 900 130px "Inter", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.font = 'italic 900 130px "Inter", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
             const textGrind = 'GRIND'; const textDot = '.'; const wGrind = ctx.measureText(textGrind).width; const wDot = ctx.measureText(textDot).width;
             ctx.fillStyle = '#ffffff'; ctx.fillText(textGrind, 540 - (wDot / 2), 280); ctx.fillStyle = '#ff4d00'; ctx.fillText(textDot, 540 + (wGrind / 2), 280);
 
@@ -1476,8 +1515,9 @@
                             </div>
                 `;
 
+                // Feed-Logik: EIGENE AKTIVITÄTEN AUSBLENDEN!
                 const friendsList = p.friends || [];
-                const feedUsers = [...friendsList, p.alias];
+                const feedUsers = [...friendsList]; // Enthält NICHT p.alias!
                 
                 // Case-Insensitive Filterung 
                 const feedUsersLower = feedUsers.map(u => (u || '').toLowerCase());
@@ -1489,7 +1529,7 @@
 
                 if (feedActivities.length === 0) {
                     if (friendsList.length === 0) {
-                        html += `<div class="text-center p-8 text-gray-600 italic text-sm border border-white/5 rounded-sm bg-black/50">Deine Crew ist noch leer. Erweitere dein Network, um den Progress deiner Freunde zu verfolgen.</div>`;
+                        html += `<div class="text-center p-8 text-gray-600 italic text-sm border border-white/5 rounded-sm bg-black/50">Deine Crew ist noch leer. <br><span class="text-[#ff4d00] font-bold">Lade Freunde ein und kassiere massiv XP Boosts!</span></div>`;
                     } else {
                         html += `<div class="text-center p-8 text-gray-600 italic text-sm border border-white/5 rounded-sm bg-black/50">Noch keine Aktivität in deiner Crew. Time to grind!</div>`;
                     }
@@ -1499,22 +1539,20 @@
                     feedActivities.forEach(act => {
                         const isProUser = act.isPro === true;
                         
-                        // Dynamisches Color- & Icon-Mapping für PRO User im Feed
+                        // Dynamisches Color- & Icon-Mapping (Lila für Pro, Orange für Free)
                         let iconSvg = 'M5 13l4 4L19 7'; // Default Mission
-                        let colorClass = 'text-gray-400';
-                        let borderClass = 'border-gray-700';
+                        let colorClass = isProUser ? 'text-[#a855f7]' : 'text-[#ff4d00]';
+                        let borderClass = isProUser ? 'border-[#a855f7]/30' : 'border-[#ff4d00]/30';
                         let shadowClass = '';
 
                         if (act.type === 'LEVEL_UP') {
                             iconSvg = 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6';
-                            colorClass = isProUser ? 'text-[#a855f7]' : 'text-[#ff4d00]';
                             borderClass = isProUser ? 'border-[#a855f7]' : 'border-[#ff4d00]';
-                            shadowClass = isProUser ? 'shadow-[0_0_10px_rgba(168,85,247,0.2)]' : 'shadow-[0_0_10px_rgba(255,77,0,0.2)]';
+                            shadowClass = isProUser ? 'shadow-[0_0_10px_rgba(168,85,247,0.3)]' : 'shadow-[0_0_10px_rgba(255,77,0,0.3)]';
                         } else if (act.type === 'REDEEM') {
                             iconSvg = 'M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7';
-                            colorClass = 'text-[#a855f7]';
-                            borderClass = 'border-[#a855f7]';
-                            shadowClass = 'shadow-[0_0_10px_rgba(168,85,247,0.2)]';
+                            borderClass = isProUser ? 'border-[#a855f7]' : 'border-[#ff4d00]';
+                            shadowClass = isProUser ? 'shadow-[0_0_10px_rgba(168,85,247,0.3)]' : 'shadow-[0_0_10px_rgba(255,77,0,0.3)]';
                         } else if (act.type === 'PRO') {
                             iconSvg = 'M13 10V3L4 14h7v7l9-11h-7z';
                             colorClass = 'text-[#a855f7]';
@@ -1523,11 +1561,10 @@
                         }
 
                         const time = getRelativeTime(act.timestamp);
-                        const isMe = (act.alias || '').toLowerCase() === (p.alias || '').toLowerCase();
-                        const displayName = isMe ? 'Du' : act.alias;
+                        const displayName = act.alias;
                         
-                        // Wenn der User Pro ist, wird der Name im Feed Lila
-                        const nameColorClass = isProUser ? 'text-[#d8b4fe]' : 'text-white';
+                        // Wenn der User Pro ist, wird der Name im Feed Lila (sonst Orange)
+                        const nameColorClass = isProUser ? 'text-[#d8b4fe]' : 'text-[#ff4d00]';
                         const proBadge = isProUser ? `<span class="ml-2 align-middle bg-[#a855f7]/20 text-[#a855f7] border border-[#a855f7]/30 text-[8px] px-1.5 py-0.5 rounded-sm font-black shadow-[0_0_10px_rgba(168,85,247,0.2)]">PRO</span>` : '';
                         
                         html += `
@@ -1537,7 +1574,7 @@
                                 </div>
                                 <div class="card p-4 rounded-sm flex-1">
                                     <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">${time}</p>
-                                    <p class="text-sm font-medium text-gray-300"><span class="${nameColorClass} italic uppercase font-black">${displayName}</span>${proBadge} ${act.text}</p>
+                                    <p class="text-sm font-medium text-gray-300"><span class="${nameColorClass} italic uppercase font-black">${displayName}</span>${proBadge} <span class="text-gray-400 text-xs">${act.text}</span></p>
                                 </div>
                             </div>
                         `;
@@ -1603,4 +1640,3 @@
     </script>
 </body>
 </html>
-
