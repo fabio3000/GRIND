@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -160,7 +159,7 @@
             currentWeekTab: 1,
             authStep: 'phone', tempPhone: '', tempUploadData: null,
             weeklyData: { 1: { title: "Loading...", startOffset: 0, missions: [] } },
-            rewardData: [], habitData: [], pendingMissions: [],
+            rewardData: [], habitData: [], pendingMissions: [], activities: [],
             seasonConfig: null,
             dashboardNeedsScroll: true
         };
@@ -170,6 +169,27 @@
         let holdTimer = null; let holdProgress = 0; let isRedeeming = false;
         window.currentVerify = null;
         window.countdownInterval = null;
+
+        const getRelativeTime = (timestamp) => {
+            if(!timestamp) return "Gerade eben";
+            const diff = Math.floor((Date.now() - timestamp) / 1000);
+            if (diff < 60) return "Gerade eben";
+            if (diff < 3600) return `vor ${Math.floor(diff/60)} Min`;
+            if (diff < 86400) return `vor ${Math.floor(diff/3600)} Std`;
+            return `vor ${Math.floor(diff/86400)} Tagen`;
+        };
+
+        window.logActivity = async (type, text) => {
+            try {
+                if(!state.profile || !state.profile.alias) return;
+                await addDoc(collection(db, 'plot_activities'), {
+                    alias: state.profile.alias,
+                    type: type, // 'LEVEL_UP', 'MISSION', 'REDEEM'
+                    text: text,
+                    timestamp: Date.now()
+                });
+            } catch(e) { console.warn("Activity log failed", e); }
+        };
 
         window.showToast = (msg, type = 'success') => {
             const container = document.getElementById('toast-container');
@@ -275,7 +295,6 @@
                             const urlParams = new URLSearchParams(window.location.search);
                             const crewCode = urlParams.get('crew');
                             if (crewCode) {
-                                // Clear URL
                                 window.history.replaceState({}, document.title, window.location.pathname);
                                 setTimeout(() => window.resolveInvite(crewCode), 1000);
                             }
@@ -287,6 +306,13 @@
                 onSnapshot(collection(db, 'plot_pending_proofs'), (snap) => {
                     if (snap && snap.docs) {
                         state.pendingMissions = snap.docs.map(d => d.data()).filter(data => data.uid === state.user.uid).map(data => data.mid);
+                        if(state.view === 'dashboard') render();
+                    }
+                });
+
+                onSnapshot(collection(db, 'plot_activities'), (snap) => {
+                    if(snap && snap.docs) {
+                        state.activities = snap.docs.map(d => d.data());
                         if(state.view === 'dashboard') render();
                     }
                 });
@@ -359,7 +385,7 @@
         window.copyToClipboard = (text) => {
             const textArea = document.createElement("textarea");
             textArea.value = text;
-            textArea.style.position = "fixed"; // Damit Safari nicht nach unten scrollt
+            textArea.style.position = "fixed";
             document.body.appendChild(textArea);
             textArea.focus();
             textArea.select();
@@ -405,7 +431,6 @@
                     return window.showToast(`${theirAlias} ist bereits in deiner Crew.`, "info");
                 }
 
-                // Show Accept Modal
                 let innerHtml = `
                     <div class="text-center">
                         <div class="w-16 h-16 bg-[#1f1f1f] rounded-full mx-auto mb-4 border-2 border-[#ff4d00] flex items-center justify-center animate-pulse-slow">
@@ -429,12 +454,10 @@
             const btn = document.querySelector('#modal-container button.btn-grind');
             if(btn) { btn.innerText = "Connecting..."; btn.disabled = true; }
             try {
-                // 1. Sich selbst beim anderen hinzufügen (Mutual Update)
                 await updateDoc(doc(db, 'plot_users', theirUid), {
                     friends: arrayUnion(state.profile.alias)
                 }).catch(e => console.warn("Mutual update gescheitert (evtl. Rules), fahre fort.", e));
 
-                // 2. Den anderen bei sich selbst hinzufügen
                 await updateDoc(doc(db, 'plot_users', state.user.uid), {
                     friends: arrayUnion(theirAlias)
                 });
@@ -496,6 +519,7 @@
                     }).catch(e => console.log("Email error:", e));
                 } catch(mailErr) { console.log(mailErr); }
 
+                window.logActivity('REDEEM', `hat '<span class="text-[#a855f7] font-bold">${itemName}</span>' angefordert.`);
                 window.showToast("Anfrage für physical Loot gesendet!", "success"); window.closeModal();
             } catch(e) { 
                 console.error(e); window.showToast("Fehler: " + (e.message || "Netzwerkfehler"), "error"); 
@@ -509,6 +533,9 @@
                 const currentCompleted = state.profile.completed || []; const isRepeatable = String(mid).startsWith('rep_');
                 let updatePayload = {};
                 let claimSuccess = false;
+                
+                const oldLvl = state.profile.lvl || 1;
+                let newLvl = oldLvl;
 
                 if (isRepeatable) {
                     const habit = state.habitData.find(h => h.id === mid);
@@ -528,18 +555,26 @@
                         const newTotalXp = (state.profile.xp || 0) + finalXp;
                         streaks[mid] = { streak: newStreak, lastDate: todayStr };
                         
-                        updatePayload = { xp: newTotalXp, lvl: Math.floor(newTotalXp / 1000) + 1, streaks: streaks };
+                        newLvl = Math.floor(newTotalXp / 1000) + 1;
+                        updatePayload = { xp: newTotalXp, lvl: newLvl, streaks: streaks };
                         claimSuccess = true;
                         window.showToast(`+${finalXp} XP für ${name}! (Streak: ${newStreak}🔥)`, "success");
                     } else { window.showToast("Heute bereits erledigt!", "error"); }
                 } else if (!currentCompleted.includes(mid)) {
                     const newXp = (state.profile.xp || 0) + xp; const newCompleted = [...currentCompleted, mid];
-                    updatePayload = { xp: newXp, lvl: Math.floor(newXp / 1000) + 1, completed: newCompleted };
-                        claimSuccess = true;
-                        window.showToast(`+${xp} XP für ${name}!`, "success");
+                    newLvl = Math.floor(newXp / 1000) + 1;
+                    updatePayload = { xp: newXp, lvl: newLvl, completed: newCompleted };
+                    claimSuccess = true;
+                    window.showToast(`+${xp} XP für ${name}!`, "success");
                 }
 
-                if (claimSuccess) { await setDoc(doc(db, 'plot_users', state.user.uid), updatePayload, { merge: true }); }
+                if (claimSuccess) { 
+                    await setDoc(doc(db, 'plot_users', state.user.uid), updatePayload, { merge: true }); 
+                    window.logActivity('MISSION', `hat die Operation '<span class="text-white">${name}</span>' absolviert.`);
+                    if(newLvl > oldLvl) {
+                        window.logActivity('LEVEL_UP', `hat <span class="text-[#ff4d00] font-bold">Level ${newLvl}</span> erreicht!`);
+                    }
+                }
                 else if (btn) { btn.innerText = "Claim XP"; btn.disabled = false; }
             } catch(e) { window.showToast("Fehler beim Claimen.", "error"); if(btn) { btn.innerText = "Claim XP"; btn.disabled = false; } }
         };
@@ -590,6 +625,9 @@
                     const currentCompleted = state.profile.completed || []; const isRepeatable = String(mid).startsWith('rep_');
                     let updatePayload = {};
                     let claimSuccess = false;
+                    
+                    const oldLvl = state.profile.lvl || 1;
+                    let newLvl = oldLvl;
 
                     if (isRepeatable) {
                         const habit = state.habitData.find(h => h.id === mid);
@@ -609,18 +647,26 @@
                             const newTotalXp = (state.profile.xp || 0) + finalXp;
                             streaks[mid] = { streak: newStreak, lastDate: todayStr };
                             
-                            updatePayload = { xp: newTotalXp, lvl: Math.floor(newTotalXp / 1000) + 1, streaks: streaks };
+                            newLvl = Math.floor(newTotalXp / 1000) + 1;
+                            updatePayload = { xp: newTotalXp, lvl: newLvl, streaks: streaks };
                             claimSuccess = true;
                             window.showToast(`+${finalXp} XP für ${name}! (Streak: ${newStreak}🔥)`, "success");
                         } else { window.showToast("Heute bereits erledigt!", "error"); }
                     } else if (!currentCompleted.includes(mid)) {
                         const newXp = (state.profile.xp || 0) + xp; const newCompleted = [...currentCompleted, mid];
-                        updatePayload = { xp: newXp, lvl: Math.floor(newXp / 1000) + 1, completed: newCompleted };
+                        newLvl = Math.floor(newXp / 1000) + 1;
+                        updatePayload = { xp: newXp, lvl: newLvl, completed: newCompleted };
                         claimSuccess = true;
                         window.showToast(`+${xp} XP für ${name}! Code verifiziert.`, "success");
                     }
 
-                    if (claimSuccess) { await setDoc(doc(db, 'plot_users', state.user.uid), updatePayload, { merge: true }); }
+                    if (claimSuccess) { 
+                        await setDoc(doc(db, 'plot_users', state.user.uid), updatePayload, { merge: true }); 
+                        window.logActivity('MISSION', `hat die Operation '<span class="text-white">${name}</span>' absolviert.`);
+                        if(newLvl > oldLvl) {
+                            window.logActivity('LEVEL_UP', `hat <span class="text-[#ff4d00] font-bold">Level ${newLvl}</span> erreicht!`);
+                        }
+                    }
                     window.closeModal();
                 } catch(e) { window.showToast("Systemfehler.", "error"); if(btn) { btn.innerText = "Code Prüfen"; btn.disabled = false; } }
             } else { window.showToast("Falscher Code.", "error"); }
@@ -665,10 +711,15 @@
             const text = document.getElementById('redeem-btn-text'); if(text) text.innerText = "VERIFYING...";
             const rewardId = `lvl${lvl}_${tier}`;
             try {
+                const reward = state.rewardData.find(r => r.lvl === lvl);
+                const itemName = reward ? reward[tier] : 'Loot';
+
                 const currentRedeemed = state.profile.redeemed || [];
                 if(!currentRedeemed.includes(rewardId)) { currentRedeemed.push(rewardId); await setDoc(doc(db, 'plot_users', state.user.uid), { redeemed: currentRedeemed }, { merge: true }); }
                 const container = document.getElementById('redeem-container');
                 if(container) { container.innerHTML = `<div class="flex flex-col items-center justify-center py-6 animate-pop"><div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mb-4 shadow-[0_0_30px_rgba(34,197,94,0.5)]"><svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></div><h4 class="text-white font-black italic text-xl uppercase tracking-widest text-center">Ticket<br>eingelöst</h4><p class="text-gray-400 text-xs mt-3 text-center">Dieser Loot wurde erfolgreich<br>von deinem Konto abgebucht.</p></div>`; }
+                
+                window.logActivity('REDEEM', `hat '<span class="text-[#a855f7] font-bold">${itemName}</span>' eingelöst.`);
                 window.showToast("Erfolgreich eingelöst!", "success");
             } catch (e) { window.showToast("Fehler beim Einlösen.", "error"); window.stopRedeemHold(); } finally { isRedeeming = false; }
         };
@@ -683,8 +734,9 @@
                 const p = state.profile;
                 if((p.redeemed || []).includes(rewardId)) return;
                 
+                const oldLvl = p.lvl || 1;
                 let newXp = p.xp || 0;
-                let newLvl = p.lvl || 1;
+                let newLvl = oldLvl;
                 
                 if (type === 'xp') {
                     newXp += amount;
@@ -700,6 +752,12 @@
                 window.scrollTo({ top: 0, behavior: 'smooth' });
 
                 await setDoc(doc(db, 'plot_users', state.user.uid), { xp: newXp, lvl: newLvl, redeemed: currentRedeemed }, { merge: true });
+                
+                window.logActivity('REDEEM', `hat einen Boost aktiviert.`);
+                if(newLvl > oldLvl) {
+                    window.logActivity('LEVEL_UP', `hat <span class="text-[#ff4d00] font-bold">Level ${newLvl}</span> erreicht!`);
+                }
+
                 window.showToast(`BOOST AKTIVIERT!`, "success");
             } catch(e) { window.showToast("Fehler beim Einlösen.", "error"); if(btn) { btn.innerText = "BOOST AKTIVIEREN"; btn.disabled = false; } }
         };
@@ -1398,21 +1456,34 @@
                 `;
 
                 const friendsList = p.friends || [];
-                if (friendsList.length === 0) {
-                    html += `<div class="text-center p-8 text-gray-600 italic text-sm border border-white/5 rounded-sm bg-black/50">Deine Crew ist noch leer. Erweitere dein Network, um den Progress deiner Freunde zu verfolgen.</div>`;
+                const feedUsers = [...friendsList, p.alias]; // Include user themselves so it's not empty immediately
+
+                const evIcons = {
+                    'LEVEL_UP': { i: 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6', c: 'text-[#ff4d00]', b: 'border-[#ff4d00]', s: 'shadow-[0_0_10px_rgba(255,77,0,0.2)]' },
+                    'MISSION': { i: 'M5 13l4 4L19 7', c: 'text-gray-400', b: 'border-gray-700', s: '' },
+                    'REDEEM': { i: 'M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7', c: 'text-[#a855f7]', b: 'border-[#a855f7]', s: 'shadow-[0_0_10px_rgba(168,85,247,0.2)]' }
+                };
+
+                const feedActivities = (state.activities || [])
+                    .filter(act => feedUsers.includes(act.alias))
+                    .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
+                    .slice(0, 8); // Top 8 anzeigen
+
+                if (feedActivities.length === 0) {
+                    if (friendsList.length === 0) {
+                        html += `<div class="text-center p-8 text-gray-600 italic text-sm border border-white/5 rounded-sm bg-black/50">Deine Crew ist noch leer. Erweitere dein Network, um den Progress deiner Freunde zu verfolgen.</div>`;
+                    } else {
+                        html += `<div class="text-center p-8 text-gray-600 italic text-sm border border-white/5 rounded-sm bg-black/50">Noch keine Aktivität in deiner Crew. Time to grind!</div>`;
+                    }
                 } else {
-                    const evs = [
-                        { i: 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6', c: 'text-[#ff4d00]', b: 'border-[#ff4d00]', s: 'shadow-[0_0_10px_rgba(255,77,0,0.2)]', txt: 'hat ein <span class="text-[#ff4d00] font-bold">Level Up</span> erreicht.' },
-                        { i: 'M5 13l4 4L19 7', c: 'text-gray-400', b: 'border-gray-700', s: '', txt: 'hat eine <span class="text-gray-300 font-bold">Operation</span> gecleared.' },
-                        { i: 'M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7', c: 'text-[#a855f7]', b: 'border-[#a855f7]', s: 'shadow-[0_0_10px_rgba(168,85,247,0.2)]', txt: 'hat <span class="text-[#a855f7] font-bold">Loot</span> eingelöst.' }
-                    ];
-                    const times = ['Gerade eben', 'Vor 2 Std', 'Gestern', 'Vor 2 Tagen', 'Letzte Woche'];
-                    
                     html += `<div class="space-y-4 relative before:absolute before:inset-y-0 before:left-[19px] before:w-[2px] before:bg-[#1f1f1f]">`;
                     
-                    [...friendsList].reverse().slice(0, 5).forEach((friend, idx) => {
-                        const ev = evs[idx % evs.length];
-                        const time = times[idx % times.length];
+                    feedActivities.forEach(act => {
+                        const ev = evIcons[act.type] || evIcons['MISSION'];
+                        const time = getRelativeTime(act.timestamp);
+                        const isMe = act.alias === p.alias;
+                        const displayName = isMe ? 'Du' : act.alias;
+                        
                         html += `
                             <div class="flex gap-4 relative z-10">
                                 <div class="w-10 h-10 rounded-full bg-[#0a0a0a] border-2 ${ev.b} flex items-center justify-center flex-shrink-0 ${ev.s}">
@@ -1420,7 +1491,7 @@
                                 </div>
                                 <div class="card p-4 rounded-sm flex-1">
                                     <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">${time}</p>
-                                    <p class="text-sm font-medium text-gray-300"><span class="text-white italic uppercase font-black">${friend}</span> ${ev.txt}</p>
+                                    <p class="text-sm font-medium text-gray-300"><span class="text-white italic uppercase font-black">${displayName}</span> ${act.text}</p>
                                 </div>
                             </div>
                         `;
@@ -1486,3 +1557,4 @@
     </script>
 </body>
 </html>
+
