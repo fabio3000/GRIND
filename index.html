@@ -5,11 +5,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
-    <!-- PRIVATSPHÄRE-SCHUTZ: Verhindert, dass Google die Seite indexiert und deinen Namen/Adresse findet -->
-    <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
-    <meta name="googlebot" content="noindex, nofollow">
+    <!-- SEO & GOOGLE DISCOVERABILITY -->
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+    <meta name="description" content="Verwandle deinen Alltag in ein Spiel. Sammle XP durch Fitness, Habits und Hustle. Schalte echte Rewards frei und miss dich mit deiner Crew. Join the GRIND Network.">
+    <meta name="keywords" content="Habit Tracker, Fitness App, Gamification, Motivation, Health, Eisbaden, Run Club, XP sammeln">
     
-    <title>GRIND.</title>
+    <title>GRIND. | Level up your life</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&display=swap" rel="stylesheet">
     
@@ -20,11 +22,11 @@
     <meta name="apple-mobile-web-app-title" content="GRIND.">
     <link rel="icon" type="image/png" sizes="192x192" href="https://grind-app.de/logo.jpg">
 
-    <!-- Meta Tags -->
-    <meta property="og:title" content="GRIND.">
+    <!-- Open Graph (Fürs Teilen auf WhatsApp, Insta, etc.) -->
+    <meta property="og:title" content="GRIND. | Level up your life">
     <meta property="og:url" content="https://grind-app.de">
     <meta property="og:type" content="website">
-    <meta property="og:description" content="Level up your life. Join the GRIND.">
+    <meta property="og:description" content="Verwandle deinen Alltag in ein Spiel. Sammle XP durch Fitness, Habits und Hustle. Schalte echte Rewards frei und miss dich mit deiner Crew.">
     <meta property="og:image" content="https://grind-app.de/logo.jpg">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
@@ -76,18 +78,24 @@
         .btn-pro { background: #1a0a2e; color: #a855f7; font-weight: 900; font-style: italic; text-transform: uppercase; padding: 12px 24px; font-size: 12px; transition: all 0.2s; box-shadow: 0 4px 15px rgba(168,85,247,0.1); cursor: pointer; border-radius: 4px; border: 1px solid rgba(168,85,247,0.3); }
         .btn-pro:hover { background: #a855f7; color: white; box-shadow: 0 4px 20px rgba(168,85,247,0.4); border-color: #a855f7; }
         
-        /* BOUNTY BUTTON ANIMATION */
-        @keyframes bounty-glow {
-            0% { box-shadow: 0 0 15px rgba(255, 77, 0, 0.4); transform: scale(1); }
-            50% { box-shadow: 0 0 35px rgba(255, 77, 0, 0.9), inset 0 0 15px rgba(255,255,255,0.4); transform: scale(1.02); }
-            100% { box-shadow: 0 0 15px rgba(255, 77, 0, 0.4); transform: scale(1); }
+        /* PREMIUM BOUNTY BUTTON ANIMATION */
+        @keyframes subtle-pulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 10px rgba(255, 77, 0, 0.1); border-color: rgba(255, 77, 0, 0.3); }
+            50% { opacity: 0.95; box-shadow: 0 0 20px rgba(255, 77, 0, 0.4); border-color: rgba(255, 77, 0, 0.6); }
         }
         .btn-bounty {
-            animation: bounty-glow 2s infinite ease-in-out;
-            background: linear-gradient(90deg, #ff4d00, #ff8800);
+            animation: subtle-pulse 3s infinite ease-in-out;
+            background: #0a0a0a;
             color: white;
-            border: 1px solid rgba(255,255,255,0.3);
+            border: 1px solid rgba(255, 77, 0, 0.3);
             cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-bounty:hover {
+            background: #111;
+            border-color: #ff4d00;
+            box-shadow: 0 0 25px rgba(255, 77, 0, 0.5);
+            transform: translateY(-2px);
         }
 
         .completed-overlay { position: absolute; inset: 0; background: rgba(5,5,5,0.8); z-index: 10; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px); opacity: 0; transition: opacity 0.3s; pointer-events: none; }
@@ -215,8 +223,6 @@
                     timestamp: Date.now()
                 };
                 
-                // Wir speichern das nur in der Datenbank.
-                // Es taucht durch die Subscription nur dann im Feed auf, wenn es gematcht wird.
                 await addDoc(collection(db, 'plot_activities'), newAct).catch(err => {
                     console.error("Firebase Rules Error beim Feed:", err);
                 });
@@ -393,26 +399,31 @@
                 <p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">Network</p>
                 <h3 class="text-2xl font-black italic uppercase tracking-tighter mb-6">Crew Erweitern</h3>
                 
-                <div class="bg-gradient-to-r from-[#ff4d00]/20 to-transparent border border-[#ff4d00]/30 p-4 rounded-sm mb-6 flex items-center gap-4">
-                    <div class="text-3xl drop-shadow-[0_0_10px_rgba(255,77,0,0.8)]">🔥</div>
-                    <div>
-                        <p class="text-[#ff4d00] font-black italic uppercase tracking-widest text-sm">Bounty Active</p>
-                        <p class="text-gray-300 text-[10px] uppercase font-bold tracking-widest mt-1">Sichere dir steigende XP-Boni für jeden Grinder, der deiner Crew joint! <br><span class="text-white">Dein nächster Invite bringt fette +${nextXpBounty} XP!</span></p>
+                <div class="bg-[#1f1f1f] p-5 rounded-sm mb-6 border border-white/10 relative overflow-hidden group">
+                    <div class="absolute inset-0 bg-gradient-to-r from-[#ff4d00]/10 to-transparent"></div>
+                    <div class="relative z-10 flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-full border border-[#ff4d00]/30 flex items-center justify-center bg-[#0a0a0a]">
+                            <svg class="w-5 h-5 text-[#ff4d00]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        </div>
+                        <div>
+                            <p class="text-[#ff4d00] font-black italic uppercase tracking-widest text-sm">Bounty Active</p>
+                            <p class="text-gray-400 text-[10px] font-medium mt-1 leading-relaxed">Jeder Grinder, der joint, steigert dein Level. Nächster Invite bringt dir <span class="text-white font-bold">+${nextXpBounty} XP</span>.</p>
+                        </div>
                     </div>
                 </div>
                 
-                <div class="bg-[#1f1f1f] p-5 rounded-sm mb-6 border border-white/10">
-                    <p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-3">Option 1: Invite Link teilen</p>
+                <div class="bg-[#111] p-5 rounded-sm mb-6 border border-white/5">
+                    <p class="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-3">Option 1: Link teilen</p>
                     <div class="flex gap-2">
                         <input type="text" readonly value="${link}" class="flex-1 p-3 bg-black border border-[#333] rounded-sm text-xs text-gray-400 outline-none truncate selection:bg-[#ff4d00] selection:text-white">
-                        <button type="button" onclick="window.copyToClipboard('${link}')" class="bg-[#ff4d00] text-white px-4 rounded-sm hover:opacity-80 transition flex-shrink-0" title="Kopieren">
+                        <button type="button" onclick="window.copyToClipboard('${link}')" class="bg-[#1f1f1f] border border-gray-700 text-white px-4 rounded-sm hover:bg-[#ff4d00] hover:border-[#ff4d00] transition flex-shrink-0" title="Kopieren">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
                         </button>
                     </div>
                 </div>
 
-                <div class="bg-[#1f1f1f] p-5 rounded-sm mb-6 border border-white/10">
-                    <p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-3">Option 2: Crew Code eingeben</p>
+                <div class="bg-[#111] p-5 rounded-sm mb-6 border border-white/5">
+                    <p class="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-3">Option 2: Code eingeben</p>
                     <form onsubmit="window.submitManualCode(event)" class="flex gap-2">
                         <input id="manual_crew_code" type="text" placeholder="CODE..." required class="flex-1 p-3 bg-black border border-[#333] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00] uppercase font-bold tracking-widest">
                         <button type="submit" class="bg-white text-black font-black uppercase tracking-widest px-4 rounded-sm hover:bg-[#ff4d00] hover:text-white transition text-xs">Add</button>
@@ -524,8 +535,6 @@
                     lvl: newLvl
                 });
                 
-                // Hier nicht die Activity pushen, da der Feed ja eigene Activities herausfiltert
-                // Aber man könnte es für den Admin oder falls es wichtig ist speichern
                 window.logActivity('MISSION', `hat die Crew erweitert (+${nextXpBounty} XP).`);
                 
                 if(newLvl > oldLvl) {
@@ -1522,7 +1531,7 @@
                                 </div>
                             </div>
 
-                            <!-- ANIMATED BOUNTY BUTTON -->
+                            <!-- SLEEK PREMIUM BOUNTY CTA -->
                 `;
 
                 // Berechne XP für den Button Text VOR dem Rendern
@@ -1530,19 +1539,21 @@
                 const nextBounty = (myFriendsCount + 1) * 100;
 
                 html += `
-                            <div class="flex gap-2 mb-8 relative">
-                                <div class="absolute -top-3 -right-2 bg-red-600 text-white text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-sm shadow-[0_0_10px_rgba(220,38,38,0.8)] z-20 animate-bounce">
-                                    🔥 HIGH REWARD
-                                </div>
-                                <button type="button" onclick="window.openInviteModal()" class="w-full btn-bounty py-4 rounded-sm flex flex-col items-center justify-center gap-1.5 transition-all relative z-10">
-                                    <div class="flex items-center gap-2 font-black italic uppercase tracking-widest text-sm drop-shadow-md">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
-                                        Crew Erweitern & XP Sichern
+                            <div class="card p-6 rounded-sm mb-8 border border-[#ff4d00]/20 relative overflow-hidden group">
+                                <div class="absolute inset-0 bg-gradient-to-r from-[#ff4d00]/5 to-transparent"></div>
+                                <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+                                    <div class="text-center md:text-left flex-1">
+                                        <p class="text-[#ff4d00] font-black italic uppercase tracking-widest text-sm mb-2 flex items-center justify-center md:justify-start gap-2">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                            Bounty Active
+                                        </p>
+                                        <p class="text-gray-400 text-[11px] leading-relaxed">Erweitere dein Network. Jeder neue Grinder bringt dir massive XP Boosts. Nächster Invite: <span class="text-white font-bold bg-white/10 px-2 py-0.5 rounded-sm">+${nextBounty} XP</span>.</p>
                                     </div>
-                                    <span class="text-[10px] font-bold text-white/90 uppercase tracking-widest bg-black/30 px-3 py-0.5 rounded-full border border-white/20">
-                                        +${nextBounty} XP für den nächsten Freund
-                                    </span>
-                                </button>
+                                    <button type="button" onclick="window.openInviteModal()" class="w-full md:w-auto btn-bounty px-8 py-4 rounded-sm flex items-center justify-center gap-3 whitespace-nowrap flex-shrink-0">
+                                        <svg class="w-5 h-5 text-[#ff4d00]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                        <span class="font-black italic uppercase text-xs tracking-widest">Crew Erweitern</span>
+                                    </button>
+                                </div>
                             </div>
                 `;
 
@@ -1560,7 +1571,7 @@
 
                 if (feedActivities.length === 0) {
                     if (friendsList.length === 0) {
-                        html += `<div class="text-center p-8 text-gray-600 italic text-sm border border-white/5 rounded-sm bg-black/50">Deine Crew ist noch leer. <br><span class="text-[#ff4d00] font-bold">Lade Freunde ein und kassiere massiv XP Boosts!</span></div>`;
+                        html += `<div class="text-center p-8 text-gray-600 italic text-sm border border-white/5 rounded-sm bg-black/50">Deine Crew ist noch leer. <br><span class="text-[#ff4d00] font-bold">Lade Freunde ein und kassiere deinen XP Boost!</span></div>`;
                     } else {
                         html += `<div class="text-center p-8 text-gray-600 italic text-sm border border-white/5 rounded-sm bg-black/50">Noch keine Aktivität in deiner Crew. Time to grind!</div>`;
                     }
@@ -1598,8 +1609,8 @@
                         const nameColorClass = isProUser ? 'text-[#d8b4fe]' : 'text-[#ff4d00]';
                         const proBadge = isProUser ? `<span class="ml-2 align-middle bg-[#a855f7]/20 text-[#a855f7] border border-[#a855f7]/30 text-[8px] px-1.5 py-0.5 rounded-sm font-black shadow-[0_0_10px_rgba(168,85,247,0.2)]">PRO</span>` : '';
                         
-                        // NEU: Umschreiben von eventuell hardcodierten tailwind-Klassen in der Datenbank! 
-                        // Egal was früher als Farbe reingespeichert wurde, es überschreibt sie dynamisch anhand des aktuellen PRO-Status.
+                        // NEU: Überschreibt alte hardcodierte Farben direkt zur Laufzeit! 
+                        // Egal ob PRO oder nicht, wir machen den Text (z.B. den Missions-Namen) farblich passend.
                         const dynamicText = act.text.replace(/text-\[#[a-fA-F0-9]+\]/g, isProUser ? 'text-[#a855f7]' : 'text-[#ff4d00]');
 
                         html += `
@@ -1675,3 +1686,4 @@
     </script>
 </body>
 </html>
+
