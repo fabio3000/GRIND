@@ -76,6 +76,20 @@
         .btn-pro { background: #1a0a2e; color: #a855f7; font-weight: 900; font-style: italic; text-transform: uppercase; padding: 12px 24px; font-size: 12px; transition: all 0.2s; box-shadow: 0 4px 15px rgba(168,85,247,0.1); cursor: pointer; border-radius: 4px; border: 1px solid rgba(168,85,247,0.3); }
         .btn-pro:hover { background: #a855f7; color: white; box-shadow: 0 4px 20px rgba(168,85,247,0.4); border-color: #a855f7; }
         
+        /* BOUNTY BUTTON ANIMATION */
+        @keyframes bounty-glow {
+            0% { box-shadow: 0 0 15px rgba(255, 77, 0, 0.4); transform: scale(1); }
+            50% { box-shadow: 0 0 35px rgba(255, 77, 0, 0.9), inset 0 0 15px rgba(255,255,255,0.4); transform: scale(1.02); }
+            100% { box-shadow: 0 0 15px rgba(255, 77, 0, 0.4); transform: scale(1); }
+        }
+        .btn-bounty {
+            animation: bounty-glow 2s infinite ease-in-out;
+            background: linear-gradient(90deg, #ff4d00, #ff8800);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            cursor: pointer;
+        }
+
         .completed-overlay { position: absolute; inset: 0; background: rgba(5,5,5,0.8); z-index: 10; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px); opacity: 0; transition: opacity 0.3s; pointer-events: none; }
         .card.is-completed .completed-overlay { opacity: 1; pointer-events: auto; }
         
@@ -201,11 +215,10 @@
                     timestamp: Date.now()
                 };
                 
-                // Optimistic UI Update - Wird nicht im eigenen Feed gezeigt, da eigener Feed sich filtert, 
-                // aber wird sofort an die DB gesendet.
+                // Wir speichern das nur in der Datenbank.
+                // Es taucht durch die Subscription nur dann im Feed auf, wenn es gematcht wird.
                 await addDoc(collection(db, 'plot_activities'), newAct).catch(err => {
                     console.error("Firebase Rules Error beim Feed:", err);
-                    window.showToast("Feed-Update fehlgeschlagen: Prüfe Firebase Rules!", "error");
                 });
             } catch(e) { 
                 console.error("Critical Activity Log Error:", e);
@@ -322,7 +335,7 @@
                     }
                 });
 
-                // ACTIVITIES FEED LISTENERS: Laden fehlgeschlagen = Rules blocken!
+                // ACTIVITIES FEED LISTENERS
                 const activitiesQuery = query(collection(db, 'plot_activities'), orderBy('timestamp', 'desc'), limit(50));
                 onSnapshot(activitiesQuery, (snap) => {
                     if(snap && snap.docs) {
@@ -331,7 +344,6 @@
                     }
                 }, (error) => {
                     console.error("Activities Lade-Fehler! (Firebase Rules checken)", error);
-                    window.showToast("Der Live-Feed wird durch Firebase Rules blockiert!", "error");
                 });
 
                 setupSeasonData();
@@ -385,7 +397,7 @@
                     <div class="text-3xl drop-shadow-[0_0_10px_rgba(255,77,0,0.8)]">🔥</div>
                     <div>
                         <p class="text-[#ff4d00] font-black italic uppercase tracking-widest text-sm">Bounty Active</p>
-                        <p class="text-gray-300 text-[10px] uppercase font-bold tracking-widest mt-1">Sichere dir steigende XP-Boni für jeden Grinder, der deiner Crew joint! <br><span class="text-white">Dein nächster Freund bringt fette +${nextXpBounty} XP!</span></p>
+                        <p class="text-gray-300 text-[10px] uppercase font-bold tracking-widest mt-1">Sichere dir steigende XP-Boni für jeden Grinder, der deiner Crew joint! <br><span class="text-white">Dein nächster Invite bringt fette +${nextXpBounty} XP!</span></p>
                     </div>
                 </div>
                 
@@ -512,9 +524,12 @@
                     lvl: newLvl
                 });
                 
+                // Hier nicht die Activity pushen, da der Feed ja eigene Activities herausfiltert
+                // Aber man könnte es für den Admin oder falls es wichtig ist speichern
                 window.logActivity('MISSION', `hat die Crew erweitert (+${nextXpBounty} XP).`);
+                
                 if(newLvl > oldLvl) {
-                    window.logActivity('LEVEL_UP', `hat <span class="${state.profile.hasPremium ? 'text-[#a855f7]' : 'text-[#ff4d00]'} font-bold">Level ${newLvl}</span> erreicht!`);
+                    window.logActivity('LEVEL_UP', `hat <span class="font-bold">Level ${newLvl}</span> erreicht!`);
                 }
 
                 window.closeModal();
@@ -570,7 +585,7 @@
                     }).catch(e => console.log("Email error:", e));
                 } catch(mailErr) { console.log(mailErr); }
 
-                window.logActivity('REDEEM', `hat physischen Loot ('<span class="${state.profile.hasPremium ? 'text-[#a855f7]' : 'text-[#ff4d00]'} font-bold">${itemName}</span>') angefordert.`);
+                window.logActivity('REDEEM', `hat physischen Loot ('<span class="font-bold">${itemName}</span>') angefordert.`);
                 window.showToast("Anfrage für physical Loot gesendet!", "success"); window.closeModal();
             } catch(e) { 
                 console.error(e); window.showToast("Fehler: " + (e.message || "Netzwerkfehler"), "error"); 
@@ -621,9 +636,9 @@
 
                 if (claimSuccess) { 
                     await setDoc(doc(db, 'plot_users', state.user.uid), updatePayload, { merge: true }); 
-                    window.logActivity('MISSION', `hat die Operation '<span class="text-white">${name}</span>' absolviert.`);
+                    window.logActivity('MISSION', `hat die Operation '<span class="font-bold text-white">${name}</span>' absolviert.`);
                     if(newLvl > oldLvl) {
-                        window.logActivity('LEVEL_UP', `hat <span class="${state.profile.hasPremium ? 'text-[#a855f7]' : 'text-[#ff4d00]'} font-bold">Level ${newLvl}</span> erreicht!`);
+                        window.logActivity('LEVEL_UP', `hat <span class="font-bold">Level ${newLvl}</span> erreicht!`);
                     }
                 }
                 else if (btn) { btn.innerText = "Claim XP"; btn.disabled = false; }
@@ -713,9 +728,9 @@
 
                     if (claimSuccess) { 
                         await setDoc(doc(db, 'plot_users', state.user.uid), updatePayload, { merge: true }); 
-                        window.logActivity('MISSION', `hat die Operation '<span class="text-white">${name}</span>' absolviert.`);
+                        window.logActivity('MISSION', `hat die Operation '<span class="font-bold text-white">${name}</span>' absolviert.`);
                         if(newLvl > oldLvl) {
-                            window.logActivity('LEVEL_UP', `hat <span class="${state.profile.hasPremium ? 'text-[#a855f7]' : 'text-[#ff4d00]'} font-bold">Level ${newLvl}</span> erreicht!`);
+                            window.logActivity('LEVEL_UP', `hat <span class="font-bold">Level ${newLvl}</span> erreicht!`);
                         }
                     }
                     window.closeModal();
@@ -770,7 +785,7 @@
                 const container = document.getElementById('redeem-container');
                 if(container) { container.innerHTML = `<div class="flex flex-col items-center justify-center py-6 animate-pop"><div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mb-4 shadow-[0_0_30px_rgba(34,197,94,0.5)]"><svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></div><h4 class="text-white font-black italic text-xl uppercase tracking-widest text-center">Ticket<br>eingelöst</h4><p class="text-gray-400 text-xs mt-3 text-center">Dieser Loot wurde erfolgreich<br>von deinem Konto abgebucht.</p></div>`; }
                 
-                window.logActivity('REDEEM', `hat '<span class="${state.profile.hasPremium ? 'text-[#a855f7]' : 'text-[#ff4d00]'} font-bold">${itemName}</span>' eingelöst.`);
+                window.logActivity('REDEEM', `hat '<span class="font-bold">${itemName}</span>' eingelöst.`);
                 window.showToast("Erfolgreich eingelöst!", "success");
             } catch (e) { window.showToast("Fehler beim Einlösen.", "error"); window.stopRedeemHold(); } finally { isRedeeming = false; }
         };
@@ -806,7 +821,7 @@
                 
                 window.logActivity('REDEEM', `hat einen XP/Level Boost aktiviert.`);
                 if(newLvl > oldLvl) {
-                    window.logActivity('LEVEL_UP', `hat <span class="${state.profile.hasPremium ? 'text-[#a855f7]' : 'text-[#ff4d00]'} font-bold">Level ${newLvl}</span> erreicht!`);
+                    window.logActivity('LEVEL_UP', `hat <span class="font-bold">Level ${newLvl}</span> erreicht!`);
                 }
 
                 window.showToast(`BOOST AKTIVIERT!`, "success");
@@ -1168,7 +1183,7 @@
                             try { 
                                 await setDoc(doc(db, 'plot_users', state.user.uid), { hasPremium: true }, { merge: true }); 
                                 if(state.profile) state.profile.hasPremium = true;
-                                window.logActivity('PRO', `hat den <span class="text-[#a855f7] font-bold">PRO Pass</span> freigeschaltet!`);
+                                window.logActivity('PRO', `hat den <span class="font-bold">PRO Pass</span> freigeschaltet!`);
                             } catch(e) { console.error(e); } 
                             window.setView('dashboard'); 
                         }); } }).render('#paypal-button-container');
@@ -1507,10 +1522,26 @@
                                 </div>
                             </div>
 
-                            <div class="flex gap-2 mb-8">
-                                <button type="button" onclick="window.openInviteModal()" class="w-full btn-grind py-4 flex items-center justify-center gap-3">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                                    Crew Erweitern (Link & Code)
+                            <!-- ANIMATED BOUNTY BUTTON -->
+                `;
+
+                // Berechne XP für den Button Text VOR dem Rendern
+                const myFriendsCount = (p.friends || []).length;
+                const nextBounty = (myFriendsCount + 1) * 100;
+
+                html += `
+                            <div class="flex gap-2 mb-8 relative">
+                                <div class="absolute -top-3 -right-2 bg-red-600 text-white text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-sm shadow-[0_0_10px_rgba(220,38,38,0.8)] z-20 animate-bounce">
+                                    🔥 HIGH REWARD
+                                </div>
+                                <button type="button" onclick="window.openInviteModal()" class="w-full btn-bounty py-4 rounded-sm flex flex-col items-center justify-center gap-1.5 transition-all relative z-10">
+                                    <div class="flex items-center gap-2 font-black italic uppercase tracking-widest text-sm drop-shadow-md">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
+                                        Crew Erweitern & XP Sichern
+                                    </div>
+                                    <span class="text-[10px] font-bold text-white/90 uppercase tracking-widest bg-black/30 px-3 py-0.5 rounded-full border border-white/20">
+                                        +${nextBounty} XP für den nächsten Freund
+                                    </span>
                                 </button>
                             </div>
                 `;
@@ -1567,6 +1598,10 @@
                         const nameColorClass = isProUser ? 'text-[#d8b4fe]' : 'text-[#ff4d00]';
                         const proBadge = isProUser ? `<span class="ml-2 align-middle bg-[#a855f7]/20 text-[#a855f7] border border-[#a855f7]/30 text-[8px] px-1.5 py-0.5 rounded-sm font-black shadow-[0_0_10px_rgba(168,85,247,0.2)]">PRO</span>` : '';
                         
+                        // NEU: Umschreiben von eventuell hardcodierten tailwind-Klassen in der Datenbank! 
+                        // Egal was früher als Farbe reingespeichert wurde, es überschreibt sie dynamisch anhand des aktuellen PRO-Status.
+                        const dynamicText = act.text.replace(/text-\[#[a-fA-F0-9]+\]/g, isProUser ? 'text-[#a855f7]' : 'text-[#ff4d00]');
+
                         html += `
                             <div class="flex gap-4 relative z-10">
                                 <div class="w-10 h-10 rounded-full bg-[#0a0a0a] border-2 ${borderClass} flex items-center justify-center flex-shrink-0 ${shadowClass}">
@@ -1574,7 +1609,7 @@
                                 </div>
                                 <div class="card p-4 rounded-sm flex-1">
                                     <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">${time}</p>
-                                    <p class="text-sm font-medium text-gray-300"><span class="${nameColorClass} italic uppercase font-black">${displayName}</span>${proBadge} <span class="text-gray-400 text-xs">${act.text}</span></p>
+                                    <p class="text-sm font-medium text-gray-300"><span class="${nameColorClass} italic uppercase font-black">${displayName}</span>${proBadge} <span class="text-gray-400 text-xs">${dynamicText}</span></p>
                                 </div>
                             </div>
                         `;
