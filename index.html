@@ -22,7 +22,7 @@
     <meta name="apple-mobile-web-app-title" content="GRIND.">
     <link rel="icon" type="image/png" sizes="192x192" href="https://grind-app.de/logo.jpg">
 
-    <!-- Open Graph (Fürs Teilen auf WhatsApp, Insta, etc.) -->
+    <!-- Open Graph -->
     <meta property="og:title" content="GRIND. | Level up your life">
     <meta property="og:url" content="https://grind-app.de">
     <meta property="og:type" content="website">
@@ -36,93 +36,162 @@
     <style>
         body { 
             font-family: 'Inter', sans-serif; 
-            background-color: #050505; 
+            background-color: #000; 
             color: #ffffff; 
             overflow-x: hidden; 
-            background-image: radial-gradient(circle at 50% 0%, #1a0a00 0%, #050505 60%);
             min-height: 100vh;
             overscroll-behavior-y: none;
+            position: relative;
         }
+
+        /* --- PREMIUM GLASS BACKGROUND ORBS --- */
+        body::before { content:''; position:fixed; top:-10%; left:-20%; width:70vw; height:70vw; background:#ff4d00; filter:blur(150px); opacity:0.15; z-index:0; pointer-events:none; }
+        body::after { content:''; position:fixed; bottom:-10%; right:-20%; width:80vw; height:80vw; background:#a855f7; filter:blur(150px); opacity:0.15; z-index:0; pointer-events:none; }
         
-        .grind-gradient { background: linear-gradient(90deg, #ff4d00, #ff8800); }
-        .card { background: #0f0f0f; border: 1px solid #1f1f1f; transition: all 0.3s ease; }
-        .card:hover { border-color: #ff4d00; box-shadow: 0 0 20px rgba(255, 77, 0, 0.1); }
+        #app { position: relative; z-index: 10; }
         
+        /* --- PREMIUM GLASS CARDS --- */
+        .card { 
+            background: rgba(20, 20, 20, 0.5); 
+            backdrop-filter: blur(24px); 
+            -webkit-backdrop-filter: blur(24px); 
+            border: 1px solid rgba(255, 255, 255, 0.05); 
+            border-radius: 24px; 
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4); 
+            transition: all 0.3s ease; 
+        }
+        .card:hover { 
+            border-color: rgba(255, 77, 0, 0.2); 
+            box-shadow: 0 20px 40px rgba(255, 77, 0, 0.1); 
+        }
+
+        /* --- INPUTS & SELECTS --- */
+        input, select, textarea {
+            background: rgba(255, 255, 255, 0.05) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            color: white !important;
+            backdrop-filter: blur(10px) !important;
+            border-radius: 16px !important;
+        }
+        input:focus, select:focus, textarea:focus { 
+            border-color: #ff4d00 !important; 
+            outline: none !important; 
+        }
+
+        /* --- BUTTONS --- */
+        .btn-grind { 
+            background: rgba(255, 255, 255, 0.1); 
+            color: white; 
+            font-weight: 700; 
+            text-transform: uppercase; 
+            padding: 14px 24px; 
+            font-size: 12px; 
+            border-radius: 16px; 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            backdrop-filter: blur(10px); 
+            transition: all 0.3s; 
+            cursor: pointer; 
+        }
+        .btn-grind:hover:not(:disabled) { 
+            background: rgba(255, 77, 0, 0.8); 
+            border-color: #ff4d00; 
+            box-shadow: 0 0 20px rgba(255, 77, 0, 0.4); 
+        }
+        .btn-grind:disabled { 
+            background: rgba(0,0,0,0.3); 
+            color: #666; 
+            border-color: transparent; 
+            cursor: not-allowed; 
+            box-shadow: none; 
+        }
+
+        .btn-pro { 
+            background: rgba(168, 85, 247, 0.1); 
+            color: #d8b4fe; 
+            font-weight: 700; 
+            text-transform: uppercase; 
+            padding: 12px 20px; 
+            font-size: 11px; 
+            border-radius: 16px; 
+            border: 1px solid rgba(168, 85, 247, 0.3); 
+            backdrop-filter: blur(10px); 
+            transition: all 0.3s; 
+            cursor: pointer; 
+        }
+        .btn-pro:hover { 
+            background: rgba(168, 85, 247, 0.8); 
+            color: white; 
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.4); 
+            border-color: #a855f7; 
+        }
+
+        /* --- LOOT NODES --- */
+        .reward-box { 
+            width: 100px; height: 85px; 
+            background: rgba(255, 255, 255, 0.03); 
+            border: 1px solid rgba(255, 255, 255, 0.05); 
+            backdrop-filter: blur(10px); 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            position: relative; z-index: 10; border-radius: 16px; transition: all 0.3s ease; 
+        }
+        .reward-box.unlocked { border-color: rgba(255, 77, 0, 0.4); background: rgba(255, 77, 0, 0.1); box-shadow: 0 0 20px rgba(255, 77, 0, 0.2); }
+        .reward-box.pro { border-color: rgba(168, 85, 247, 0.3); height: 95px; width: 110px; box-shadow: 0 0 15px rgba(168, 85, 247, 0.1); }
+        .reward-box.pro.unlocked { background: rgba(168, 85, 247, 0.15); border-color: rgba(168, 85, 247, 0.6); box-shadow: 0 0 30px rgba(168, 85, 247, 0.3); }
+
+        .tag-free { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.1); color: white; font-size: 7px; font-weight: 900; padding: 3px 8px; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); text-transform: uppercase; border-radius: 8px; z-index: 30; backdrop-filter: blur(5px); }
+        .tag-pro { background: linear-gradient(135deg, #7c3aed, #9333ea); color: white; font-size: 8px; font-weight: 900; padding: 3px 10px; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); text-transform: uppercase; border-radius: 8px; box-shadow: 0 4px 15px rgba(124,58,237,0.4); z-index: 30; }
+        
+        .week-btn { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; transition: all 0.2s; backdrop-filter: blur(10px); }
+        .week-btn.active { background: rgba(255, 77, 0, 0.2); color: #ff4d00; border-color: #ff4d00; font-weight: 900; box-shadow: 0 0 15px rgba(255, 77, 0, 0.2); }
+        
+        /* --- UTILITIES --- */
+        .grind-gradient { background: linear-gradient(135deg, #ff4d00, #ff8800); }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; scroll-behavior: smooth; }
-        
         .level-node { min-width: 140px; position: relative; }
         
-        .reward-box { width: 100px; height: 85px; border: 1px solid #1f1f1f; background: #0a0a0a; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; z-index: 10; border-radius: 4px; transition: all 0.3s ease; }
-        .reward-box.unlocked { border-color: #ff4d00; background: #140a00; box-shadow: 0 0 15px rgba(255, 77, 0, 0.15); }
-        .reward-box.pro { border-color: #6d28d9; height: 95px; width: 110px; box-shadow: 0 0 10px rgba(109, 40, 217, 0.05); }
-        .reward-box.pro.unlocked { background: #1a0a2e; border-color: #a855f7; box-shadow: 0 0 20px rgba(168, 85, 247, 0.25); }
-
-        .tag-free { background: #333; color: white; font-size: 7px; font-weight: 900; padding: 2px 6px; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); text-transform: uppercase; border-radius: 2px; z-index: 30; }
-        .tag-pro { background: linear-gradient(90deg, #7c3aed, #9333ea); color: white; font-size: 8px; font-weight: 900; padding: 2px 8px; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); text-transform: uppercase; border-radius: 3px; box-shadow: 0 2px 8px rgba(124,58,237,0.4); z-index: 30; }
-        
-        .week-btn { border: 1px solid #1f1f1f; background: #0a0a0a; transition: all 0.2s; }
-        .week-btn.active { background: #ff4d00; color: white; border-color: #ff4d00; font-weight: 900; box-shadow: 0 0 15px rgba(255, 77, 0, 0.2); }
-        
+        /* --- TOASTS --- */
         #toast-container { position: fixed; top: 20px; right: 20px; z-index: 99999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
-        .toast { pointer-events: auto; background: #0a0a0a; border: 1px solid #1f1f1f; color: white; padding: 16px 24px; border-radius: 4px; font-size: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.8); transform: translateX(120%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: flex; align-items: center; gap: 12px; }
+        .toast { pointer-events: auto; background: rgba(20,20,20,0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 16px 24px; border-radius: 16px; font-size: 14px; box-shadow: 0 20px 40px rgba(0,0,0,0.6); transform: translateX(120%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: flex; align-items: center; gap: 12px; }
         .toast.show { transform: translateX(0); }
-        .toast.success { border-left: 4px solid #ff4d00; }
-        .toast.error { border-left: 4px solid #dc2626; }
-        .toast.info { border-left: 4px solid #3b82f6; }
-        
-        .btn-grind { background: white; color: black; font-weight: 900; font-style: italic; text-transform: uppercase; padding: 12px 24px; font-size: 12px; transition: all 0.2s; box-shadow: 0 4px 15px rgba(255,255,255,0.1); cursor: pointer; border-radius: 4px; border: none; }
-        .btn-grind:hover { background: #ff4d00; color: white; box-shadow: 0 4px 20px rgba(255, 77, 0, 0.4); }
-        .btn-grind:disabled { background: #1f1f1f; color: #555; cursor: not-allowed; box-shadow: none; border-color: #1f1f1f; }
-
-        .btn-pro { background: #1a0a2e; color: #a855f7; font-weight: 900; font-style: italic; text-transform: uppercase; padding: 12px 24px; font-size: 12px; transition: all 0.2s; box-shadow: 0 4px 15px rgba(168,85,247,0.1); cursor: pointer; border-radius: 4px; border: 1px solid rgba(168,85,247,0.3); }
-        .btn-pro:hover { background: #a855f7; color: white; box-shadow: 0 4px 20px rgba(168,85,247,0.4); border-color: #a855f7; }
         
         /* PREMIUM BOUNTY BUTTON ANIMATION */
         @keyframes subtle-pulse {
-            0%, 100% { opacity: 1; box-shadow: 0 0 10px rgba(255, 77, 0, 0.1); border-color: rgba(255, 77, 0, 0.3); }
-            50% { opacity: 0.95; box-shadow: 0 0 20px rgba(255, 77, 0, 0.4); border-color: rgba(255, 77, 0, 0.6); }
+            0%, 100% { opacity: 1; box-shadow: 0 0 20px rgba(255, 77, 0, 0.1); border-color: rgba(255, 77, 0, 0.3); }
+            50% { opacity: 0.95; box-shadow: 0 0 30px rgba(255, 77, 0, 0.4); border-color: rgba(255, 77, 0, 0.6); }
         }
         .btn-bounty {
             animation: subtle-pulse 3s infinite ease-in-out;
-            background: #0a0a0a;
+            background: rgba(255, 77, 0, 0.05);
             color: white;
             border: 1px solid rgba(255, 77, 0, 0.3);
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
             cursor: pointer;
             transition: all 0.3s ease;
         }
-        .btn-bounty:hover {
-            background: #111;
-            border-color: #ff4d00;
-            box-shadow: 0 0 25px rgba(255, 77, 0, 0.5);
-            transform: translateY(-2px);
-        }
+        .btn-bounty:hover { background: rgba(255, 77, 0, 0.2); border-color: #ff4d00; transform: translateY(-2px); }
 
-        .completed-overlay { position: absolute; inset: 0; background: rgba(5,5,5,0.8); z-index: 10; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px); opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+        .completed-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.6); z-index: 10; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px); opacity: 0; transition: opacity 0.3s; pointer-events: none; border-radius: inherit; }
         .card.is-completed .completed-overlay { opacity: 1; pointer-events: auto; }
         
-        .pending-overlay { position: absolute; inset: 0; background: rgba(5,5,5,0.8); z-index: 10; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px); opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+        .pending-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.6); z-index: 10; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px); opacity: 0; transition: opacity 0.3s; pointer-events: none; border-radius: inherit; }
         .card.is-pending .pending-overlay { opacity: 1; pointer-events: auto; }
 
         @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.3) translateY(-10px); text-shadow: 0 0 30px #ff4d00; color: #ff4d00; } 100% { transform: scale(1) translateY(0); text-shadow: 0 0 10px rgba(255,77,0,0.5); } }
         .animate-pop { animation: pop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
-        
-        @keyframes shine { 100% { left: 200%; } }
-        .xp-bar-glow { position: relative; overflow: hidden; }
-        .xp-bar-glow::after { content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent); animation: shine 2.5s infinite; }
         .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
         @keyframes pulse-slow { 0%, 100% { opacity: 0.3; transform: scale(0.95); } 50% { opacity: 1; transform: scale(1.05); } }
         .animate-pulse-slow { animation: pulse-slow 4s ease-in-out infinite; }
-        .glitch-bg { background-image: radial-gradient(circle at 50% 50%, #1a0a00 0%, #050505 80%); }
+        .glitch-bg { background: transparent; }
 
         .grecaptcha-badge { filter: invert(1) grayscale(0.2) opacity(0.3); transition: all 0.5s ease !important; bottom: 20px !important; }
         .grecaptcha-badge:hover { filter: invert(1) grayscale(0) opacity(0.8); }
 		
         #intro-layer {
             position: fixed; inset: 0; z-index: 999999;
-            background-color: #050505; display: flex; align-items: center; justify-content: center;
+            background-color: #000; display: flex; align-items: center; justify-content: center;
             transition: opacity 0.8s ease;
         }
         .word-flash {
@@ -211,7 +280,6 @@
             setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 4000);
         };
 
-        // ROBUSSTE ACTIVITY LOGGING inkl. Error Toasts
         window.logActivity = async (type, text) => {
             try {
                 if(!state.profile || !state.profile.alias) return;
@@ -311,7 +379,6 @@
                     if (docSnap.exists()) {
                         state.profile = docSnap.data();
                         
-                        // Auto-Generate Crew Code
                         if (!state.profile.crewCode) {
                             const generatedCode = Math.random().toString(36).substring(2, 8).toUpperCase();
                             state.profile.crewCode = generatedCode;
@@ -322,7 +389,6 @@
                             state.view = 'dashboard';
                             state.dashboardNeedsScroll = true;
                             
-                            // Check URL for invite code
                             const urlParams = new URLSearchParams(window.location.search);
                             const crewCode = urlParams.get('crew');
                             if (crewCode) {
@@ -341,7 +407,6 @@
                     }
                 });
 
-                // ACTIVITIES FEED LISTENERS
                 const activitiesQuery = query(collection(db, 'plot_activities'), orderBy('timestamp', 'desc'), limit(50));
                 onSnapshot(activitiesQuery, (snap) => {
                     if(snap && snap.docs) {
@@ -381,17 +446,14 @@
 
         window.openModal = (contentHtml) => {
             let container = document.getElementById('modal-container');
-            if(!container) { container = document.createElement('div'); container.id = 'modal-container'; container.className = 'fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300 overflow-y-auto'; document.body.appendChild(container); }
-            container.innerHTML = `<div class="bg-[#0a0a0a] border border-[#1f1f1f] p-8 rounded-sm max-w-md w-full shadow-[0_0_40px_rgba(255,77,0,0.1)] transform scale-95 transition-transform duration-300 relative my-auto"><button type="button" onclick="window.closeModal()" class="absolute top-4 right-4 text-gray-500 hover:text-white z-50"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>${contentHtml}</div>`;
+            if(!container) { container = document.createElement('div'); container.id = 'modal-container'; container.className = 'fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300 overflow-y-auto'; document.body.appendChild(container); }
+            container.innerHTML = `<div class="card p-8 w-full max-w-md shadow-[0_0_40px_rgba(255,77,0,0.1)] transform scale-95 transition-transform duration-300 relative my-auto"><button type="button" onclick="window.closeModal()" class="absolute top-4 right-4 text-gray-500 hover:text-white z-50"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>${contentHtml}</div>`;
             setTimeout(() => { container.classList.remove('opacity-0', 'pointer-events-none'); container.classList.add('opacity-100'); container.firstElementChild.classList.remove('scale-95'); container.firstElementChild.classList.add('scale-100'); }, 10);
         };
 
-        // --- CREW INVITE SYSTEM ---
         window.openInviteModal = () => {
             if(!state.profile) return;
             const link = `${window.location.origin}/?crew=${state.profile.crewCode || ''}`;
-            
-            // Berechne aktuellen XP Bonus für nächsten Freund
             const currentFriendsCount = (state.profile.friends || []).length;
             const nextXpBounty = (currentFriendsCount + 1) * 100;
             
@@ -399,10 +461,10 @@
                 <p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">Network</p>
                 <h3 class="text-2xl font-black italic uppercase tracking-tighter mb-6">Crew Erweitern</h3>
                 
-                <div class="bg-[#1f1f1f] p-5 rounded-sm mb-6 border border-white/10 relative overflow-hidden group">
+                <div class="bg-white/5 p-5 rounded-2xl mb-6 border border-white/10 relative overflow-hidden group">
                     <div class="absolute inset-0 bg-gradient-to-r from-[#ff4d00]/10 to-transparent"></div>
                     <div class="relative z-10 flex items-center gap-4">
-                        <div class="w-10 h-10 rounded-full border border-[#ff4d00]/30 flex items-center justify-center bg-[#0a0a0a]">
+                        <div class="w-10 h-10 rounded-full border border-[#ff4d00]/30 flex items-center justify-center bg-black/50 backdrop-blur-md">
                             <svg class="w-5 h-5 text-[#ff4d00]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                         </div>
                         <div>
@@ -412,25 +474,23 @@
                     </div>
                 </div>
                 
-                <div class="bg-[#111] p-5 rounded-sm mb-6 border border-white/5">
-                    <p class="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-3">Option 1: Link teilen</p>
+                <div class="bg-white/5 p-5 rounded-2xl mb-6 border border-white/10 backdrop-blur-md">
+                    <p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-3">Option 1: Link teilen</p>
                     <div class="flex gap-2">
-                        <input type="text" readonly value="${link}" class="flex-1 p-3 bg-black border border-[#333] rounded-sm text-xs text-gray-400 outline-none truncate selection:bg-[#ff4d00] selection:text-white">
-                        <button type="button" onclick="window.copyToClipboard('${link}')" class="bg-[#1f1f1f] border border-gray-700 text-white px-4 rounded-sm hover:bg-[#ff4d00] hover:border-[#ff4d00] transition flex-shrink-0" title="Kopieren">
+                        <input type="text" readonly value="${link}" class="flex-1 text-xs outline-none truncate">
+                        <button type="button" onclick="window.copyToClipboard('${link}')" class="btn-grind px-4 flex-shrink-0" title="Kopieren">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
                         </button>
                     </div>
                 </div>
 
-                <div class="bg-[#111] p-5 rounded-sm mb-6 border border-white/5">
-                    <p class="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-3">Option 2: Code eingeben</p>
+                <div class="bg-white/5 p-5 rounded-2xl mb-6 border border-white/10 backdrop-blur-md">
+                    <p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-3">Option 2: Code eingeben</p>
                     <form onsubmit="window.submitManualCode(event)" class="flex gap-2">
-                        <input id="manual_crew_code" type="text" placeholder="CODE..." required class="flex-1 p-3 bg-black border border-[#333] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00] uppercase font-bold tracking-widest">
-                        <button type="submit" class="bg-white text-black font-black uppercase tracking-widest px-4 rounded-sm hover:bg-[#ff4d00] hover:text-white transition text-xs">Add</button>
+                        <input id="manual_crew_code" type="text" placeholder="CODE..." required class="flex-1 uppercase font-bold tracking-widest">
+                        <button type="submit" class="btn-grind px-4">Add</button>
                     </form>
                 </div>
-
-                <button type="button" onclick="window.closeModal()" class="w-full bg-[#111] text-gray-400 hover:bg-white hover:text-black font-black italic uppercase py-3 transition text-xs border border-white/5 rounded-sm">Schließen</button>
             `;
             window.openModal(innerHtml);
         };
@@ -485,18 +545,17 @@
                     return window.showToast(`${theirAlias} ist bereits in deiner Crew.`, "info");
                 }
 
-                // XP Bounty dynamisch für Bestätigungsfenster
                 const nextXpBounty = (myFriends.length + 1) * 100;
 
                 let innerHtml = `
                     <div class="text-center">
-                        <div class="w-16 h-16 bg-[#1f1f1f] rounded-full mx-auto mb-4 border-2 border-[#ff4d00] flex items-center justify-center animate-pulse-slow">
+                        <div class="w-16 h-16 bg-black/50 backdrop-blur-md rounded-full mx-auto mb-4 border border-[#ff4d00] flex items-center justify-center animate-pulse-slow shadow-[0_0_20px_rgba(255,77,0,0.3)]">
                             <svg class="w-8 h-8 text-[#ff4d00]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                         </div>
                         <h3 class="text-3xl font-black italic uppercase tracking-tighter mb-2">${theirAlias}</h3>
                         <p class="text-gray-400 text-[11px] mb-6 leading-relaxed max-w-[200px] mx-auto">Möchtest du dich mit diesem Grinder verbinden? Beide erhalten Updates im Live-Feed voneinander.</p>
                         
-                        <div class="bg-[#ff4d00]/10 border border-[#ff4d00]/30 py-2 px-4 rounded-sm inline-block mb-6 shadow-[0_0_10px_rgba(255,77,0,0.2)]">
+                        <div class="bg-[#ff4d00]/10 border border-[#ff4d00]/30 py-2 px-4 rounded-xl inline-block mb-6 shadow-[0_0_10px_rgba(255,77,0,0.2)]">
                             <p class="text-[#ff4d00] font-black italic uppercase tracking-widest text-sm">+${nextXpBounty} XP BOUNTY</p>
                         </div>
                         
@@ -515,7 +574,6 @@
             const btn = document.querySelector('#modal-container button.btn-grind');
             if(btn) { btn.innerText = "Connecting..."; btn.disabled = true; }
             try {
-                // Dynamische Bounty Berechnen
                 const myFriends = state.profile.friends || [];
                 const nextXpBounty = (myFriends.length + 1) * 100;
                 
@@ -523,12 +581,10 @@
                 const newXp = (state.profile.xp || 0) + nextXpBounty;
                 const newLvl = Math.floor(newXp / 1000) + 1;
 
-                // Mutual Update beim Freund
                 await updateDoc(doc(db, 'plot_users', theirUid), {
                     friends: arrayUnion(state.profile.alias)
                 }).catch(e => console.warn("Mutual update gescheitert.", e));
 
-                // Eigenes Profil Update inkl. XP Belohnung
                 await updateDoc(doc(db, 'plot_users', state.user.uid), {
                     friends: arrayUnion(theirAlias),
                     xp: newXp,
@@ -565,7 +621,7 @@
 
             if(!allValid) return window.showToast("Bitte alle Felder ausfüllen.", "error");
 
-            const btn = document.querySelector('#modal-container button.bg-\\[\\#ff4d00\\], #modal-container button.bg-\\[\\#a855f7\\]'); 
+            const btn = document.querySelector('#modal-container button.btn-grind'); 
             if(btn) { btn.innerText = "Senden..."; btn.disabled = true; }
             const rewardId = `lvl${lvl}_${tier}`;
 
@@ -680,9 +736,9 @@
             state.tempUploadData = null; window.currentVerify = { mid, xp, name, type, qrSolution };
             let innerHtml = `<p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">Verify Operation</p><h3 class="text-2xl font-black italic uppercase tracking-tighter mb-6">${name}</h3>`;
             if(type === 'qr') {
-                innerHtml += `<div id="qr-placeholder" onclick="window.startQRScanner()" class="border-2 border-dashed border-[#1f1f1f] p-8 mb-4 flex flex-col items-center justify-center bg-black/50 rounded-sm hover:border-[#ff4d00] cursor-pointer transition"><svg class="w-12 h-12 text-[#ff4d00] mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg><p class="text-xs text-white font-bold uppercase tracking-widest text-center">Kamera aktivieren</p></div><div id="qr-reader" class="hidden w-full mb-4 rounded-sm overflow-hidden border border-[#1f1f1f]"></div><input id="verify_code_input" type="text" placeholder="Oder Code manuell eingeben" class="w-full p-4 bg-[#0f0f0f] border border-[#1f1f1f] rounded-sm outline-none focus:border-[#ff4d00] text-white text-center text-sm tracking-widest uppercase mb-6">`;
+                innerHtml += `<div id="qr-placeholder" onclick="window.startQRScanner()" class="border border-white/10 p-8 mb-4 flex flex-col items-center justify-center bg-white/5 backdrop-blur-sm rounded-2xl hover:border-[#ff4d00]/50 cursor-pointer transition"><svg class="w-12 h-12 text-[#ff4d00] mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg><p class="text-xs text-white font-bold uppercase tracking-widest text-center">Kamera aktivieren</p></div><div id="qr-reader" class="hidden w-full mb-4 rounded-2xl overflow-hidden border border-white/10"></div><input id="verify_code_input" type="text" placeholder="Oder Code manuell eingeben" class="w-full text-center text-sm tracking-widest uppercase mb-6">`;
             } else {
-                innerHtml += `<input type="file" id="proof_file_input" accept="image/*" class="hidden" onchange="window.handleFileSelect(event)"><div onclick="window.triggerFileInput()" class="border-2 border-dashed border-[#1f1f1f] min-h-[150px] p-2 mb-6 flex flex-col items-center justify-center bg-black/50 rounded-sm hover:border-[#ff4d00] transition cursor-pointer overflow-hidden relative"><div id="upload-placeholder" class="text-center"><svg class="w-12 h-12 text-[#ff4d00] mb-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg><p class="text-xs text-white font-bold uppercase tracking-widest">Beweisfoto hochladen</p></div><img id="upload-preview" class="hidden absolute inset-0 w-full h-full object-cover"></div>`;
+                innerHtml += `<input type="file" id="proof_file_input" accept="image/*" class="hidden" onchange="window.handleFileSelect(event)"><div onclick="window.triggerFileInput()" class="border border-white/10 min-h-[150px] p-2 mb-6 flex flex-col items-center justify-center bg-white/5 backdrop-blur-sm rounded-2xl hover:border-[#ff4d00]/50 transition cursor-pointer overflow-hidden relative"><div id="upload-placeholder" class="text-center"><svg class="w-12 h-12 text-[#ff4d00] mb-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg><p class="text-xs text-white font-bold uppercase tracking-widest">Beweisfoto hochladen</p></div><img id="upload-preview" class="hidden absolute inset-0 w-full h-full object-cover"></div>`;
             }
             if (type === 'qr' && qrSolution) { innerHtml += `<button type="button" onclick="window.checkCode()" class="w-full btn-grind py-4">Code Prüfen</button>`; } 
             else { innerHtml += `<button type="button" onclick="window.submitVerification('${mid}', ${xp}, '${type}', '${name.replace(/'/g, "\\'")}')" class="w-full btn-grind py-4">Senden zur Prüfung</button>`; }
@@ -846,15 +902,15 @@
             let contentHtml = '';
 
             if (isAlreadyRedeemed && (type === 'qr' || type === 'shipping' || type === 'xp' || type === 'lvl')) {
-                contentHtml = `<div class="bg-[#111] p-8 rounded-sm flex flex-col items-center justify-center mb-6 border border-white/5 shadow-inner"><div class="w-12 h-12 rounded-full border-2 border-gray-600 flex items-center justify-center mb-4 opacity-50"><svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div><p class="text-xs text-gray-500 uppercase tracking-widest font-bold text-center">Bereits eingelöst<br><span class="font-normal text-[10px] mt-1 block">Dieser Loot ist nicht mehr verfügbar.</span></p></div>`;
+                contentHtml = `<div class="bg-white/5 p-8 rounded-2xl flex flex-col items-center justify-center mb-6 border border-white/10 shadow-inner backdrop-blur-md"><div class="w-12 h-12 rounded-full border-2 border-gray-600 flex items-center justify-center mb-4 opacity-50"><svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div><p class="text-xs text-gray-400 uppercase tracking-widest font-bold text-center">Bereits eingelöst<br><span class="font-normal text-[10px] mt-1 block text-gray-500">Dieser Loot ist nicht mehr verfügbar.</span></p></div>`;
             } else if (type === 'link') {
                 const isUrl = info.startsWith('http');
-                contentHtml = `<div class="bg-[#1f1f1f] p-6 rounded-sm flex flex-col items-center justify-center mb-6 border ${borderClass}"><p class="text-xs text-gray-400 mb-4 uppercase tracking-widest font-bold">Access Code / Link</p>${isUrl ? `<a href="${info}" target="_blank" class="w-full ${bgClass} text-white font-black py-3 px-4 rounded-sm text-center uppercase tracking-widest hover:opacity-80 transition">Link öffnen</a>` : `<div class="w-full bg-black text-white font-mono text-xl py-3 px-4 rounded-sm text-center select-all border border-white/10">${info}</div>`}</div>`;
+                contentHtml = `<div class="bg-white/5 p-6 rounded-2xl flex flex-col items-center justify-center mb-6 border ${borderClass} backdrop-blur-md"><p class="text-xs text-gray-400 mb-4 uppercase tracking-widest font-bold">Access Code / Link</p>${isUrl ? `<a href="${info}" target="_blank" class="w-full ${bgClass} text-white font-black py-3 px-4 rounded-xl text-center uppercase tracking-widest hover:opacity-80 transition">Link öffnen</a>` : `<div class="w-full bg-black/50 text-white font-mono text-xl py-3 px-4 rounded-xl text-center select-all border border-white/10">${info}</div>`}</div>`;
             } else if (type === 'xp' || type === 'lvl') {
                 const isXp = type === 'xp'; const unit = isXp ? 'XP' : 'Level';
-                contentHtml = `<div class="bg-[#1f1f1f] p-6 rounded-sm flex flex-col mb-6 border ${borderClass} shadow-2xl relative overflow-hidden"><div class="absolute top-0 right-0 bg-[#000] px-2 py-1 text-[8px] font-bold text-gray-500 uppercase tracking-widest rounded-bl-sm">Instant Boost</div><p class="text-[11px] text-gray-300 mb-8 leading-relaxed text-center font-medium">Dies fügt deinem Account direkt XP/Level hinzu.<br><span class="text-white font-black uppercase tracking-widest block mt-3 text-2xl ${textClass}">+${info} ${unit}</span></p><button type="button" id="boost-claim-btn" onclick="window.claimBoost(${lvl}, '${tier}', '${type}', '${info}')" class="w-full ${bgClass} text-white font-black py-4 px-4 rounded-sm text-sm uppercase tracking-widest shadow-[0_0_20px_rgba(255,77,0,0.4)] hover:scale-[1.02] transition">BOOST AKTIVIEREN</button></div>`;
+                contentHtml = `<div class="bg-white/5 p-6 rounded-2xl flex flex-col mb-6 border ${borderClass} shadow-2xl relative overflow-hidden backdrop-blur-md"><div class="absolute top-0 right-0 bg-black/50 px-3 py-1 text-[8px] font-bold text-gray-400 uppercase tracking-widest rounded-bl-xl border-b border-l border-white/10">Instant Boost</div><p class="text-[11px] text-gray-300 mb-8 leading-relaxed text-center font-medium">Dies fügt deinem Account direkt XP/Level hinzu.<br><span class="text-white font-black uppercase tracking-widest block mt-3 text-2xl ${textClass}">+${info} ${unit}</span></p><button type="button" id="boost-claim-btn" onclick="window.claimBoost(${lvl}, '${tier}', '${type}', '${info}')" class="w-full btn-grind">BOOST AKTIVIEREN</button></div>`;
             } else if (type === 'qr') {
-                contentHtml = `<div id="redeem-container" class="bg-[#1f1f1f] p-6 rounded-sm flex flex-col mb-6 border ${borderClass} shadow-2xl relative overflow-hidden"><div class="absolute top-0 right-0 bg-[#000] px-2 py-1 text-[8px] font-bold text-gray-500 uppercase tracking-widest rounded-bl-sm">One-Time Use</div><p class="text-[11px] text-gray-300 mb-8 leading-relaxed text-center font-medium">${info}<br><span class="text-white font-black uppercase tracking-widest block mt-3 border-t border-white/10 pt-3">Das Personal muss das Einlösen bestätigen!</span></p><div onmousedown="window.startRedeemHold(${lvl}, '${tier}', event)" onmouseup="window.stopRedeemHold()" onmouseleave="window.stopRedeemHold()" ontouchstart="window.startRedeemHold(${lvl}, '${tier}', event)" ontouchend="window.stopRedeemHold()" class="relative w-full h-16 bg-black border border-white/20 rounded-sm overflow-hidden cursor-pointer flex items-center justify-center group"><div id="redeem-btn-fill" class="absolute left-0 top-0 bottom-0 w-0 ${bgClass} z-0" style="transition: none;"></div><span id="redeem-btn-text" class="relative z-10 text-white font-black italic uppercase tracking-widest text-sm pointer-events-none drop-shadow-md">Hold to Redeem</span></div></div>`;
+                contentHtml = `<div id="redeem-container" class="bg-white/5 p-6 rounded-2xl flex flex-col mb-6 border ${borderClass} shadow-2xl relative overflow-hidden backdrop-blur-md"><div class="absolute top-0 right-0 bg-black/50 px-3 py-1 text-[8px] font-bold text-gray-400 uppercase tracking-widest rounded-bl-xl border-b border-l border-white/10">One-Time Use</div><p class="text-[11px] text-gray-300 mb-8 leading-relaxed text-center font-medium">${info}<br><span class="text-white font-black uppercase tracking-widest block mt-3 border-t border-white/10 pt-3">Das Personal muss das Einlösen bestätigen!</span></p><div onmousedown="window.startRedeemHold(${lvl}, '${tier}', event)" onmouseup="window.stopRedeemHold()" onmouseleave="window.stopRedeemHold()" ontouchstart="window.startRedeemHold(${lvl}, '${tier}', event)" ontouchend="window.stopRedeemHold()" class="relative w-full h-16 bg-black/50 border border-white/20 rounded-xl overflow-hidden cursor-pointer flex items-center justify-center group"><div id="redeem-btn-fill" class="absolute left-0 top-0 bottom-0 w-0 ${bgClass} z-0" style="transition: none;"></div><span id="redeem-btn-text" class="relative z-10 text-white font-black italic uppercase tracking-widest text-sm pointer-events-none drop-shadow-md">Hold to Redeem</span></div></div>`;
             } else if (type === 'shipping') {
                 const fieldsStr = reward[`${tier}_fields`] || 'Adresse oder Info...';
                 const fieldsArr = fieldsStr.split(',').map(s => s.trim()).filter(s => s);
@@ -862,16 +918,16 @@
                 
                 if (fieldsArr.length > 0) {
                     fieldsArr.forEach((f, idx) => {
-                        fieldsHtml += `<input id="shipping_field_${idx}" type="text" placeholder="${f}" class="w-full p-3 bg-black border border-white/20 rounded-sm text-sm text-white outline-none focus:border-white mb-3 shipping-input-field" data-label="${f}">`;
+                        fieldsHtml += `<input id="shipping_field_${idx}" type="text" placeholder="${f}" class="w-full mb-3 shipping-input-field" data-label="${f}">`;
                     });
                 } else {
-                    fieldsHtml = `<input id="shipping_field_0" type="text" placeholder="Adresse oder Info..." class="w-full p-3 bg-black border border-white/20 rounded-sm text-sm text-white outline-none focus:border-white mb-3 shipping-input-field" data-label="Eingabe">`;
+                    fieldsHtml = `<input id="shipping_field_0" type="text" placeholder="Adresse oder Info..." class="w-full mb-3 shipping-input-field" data-label="Eingabe">`;
                 }
 
-                contentHtml = `<div class="bg-[#1f1f1f] p-6 rounded-sm flex flex-col mb-6 border border-white/10 relative"><div class="absolute top-0 right-0 bg-[#000] px-2 py-1 text-[8px] font-bold text-gray-500 uppercase tracking-widest rounded-bl-sm">One-Time Request</div><p class="text-xs text-gray-400 mb-4 leading-relaxed">${info}</p><div class="w-full">${fieldsHtml}</div><button type="button" onclick="window.submitShipping(${lvl}, '${tier}')" class="w-full ${bgClass} text-white font-black py-3 px-4 rounded-sm text-xs uppercase tracking-widest hover:opacity-80 transition">Versand anfordern</button></div>`;
+                contentHtml = `<div class="bg-white/5 p-6 rounded-2xl flex flex-col mb-6 border border-white/10 relative backdrop-blur-md"><div class="absolute top-0 right-0 bg-black/50 px-3 py-1 text-[8px] font-bold text-gray-400 uppercase tracking-widest rounded-bl-xl border-b border-l border-white/10">One-Time Request</div><p class="text-xs text-gray-400 mb-4 leading-relaxed">${info}</p><div class="w-full">${fieldsHtml}</div><button type="button" onclick="window.submitShipping(${lvl}, '${tier}')" class="w-full btn-grind mt-2">Versand anfordern</button></div>`;
             }
 
-            let innerHtml = `<p class="${textClass} text-[10px] font-black uppercase tracking-widest mb-1">Loot Stash</p><h3 class="text-2xl font-black italic uppercase tracking-tighter mb-6">${title}</h3>${contentHtml}<button type="button" onclick="window.closeModal()" class="w-full bg-[#111] text-gray-400 hover:bg-white hover:text-black font-black italic uppercase py-3 transition text-xs border border-white/5 rounded-sm">Schließen</button>`;
+            let innerHtml = `<p class="${textClass} text-[10px] font-black uppercase tracking-widest mb-1">Loot Stash</p><h3 class="text-2xl font-black italic uppercase tracking-tighter mb-6">${title}</h3>${contentHtml} <button type="button" onclick="window.closeModal()" class="text-xs text-gray-500 uppercase tracking-widest font-bold hover:text-white transition py-2 w-full">Abbrechen</button>`;
             window.openModal(innerHtml);
         };
 
@@ -907,7 +963,7 @@
 
         window.playGrindIntro = () => {
             const layer = document.createElement('div'); layer.id = 'intro-layer';
-            layer.innerHTML = `<div id="word1" class="word-flash text-gray-500">DROP IN.</div><div id="word2" class="word-flash text-white">CLEAR MISSIONS.</div><div id="word3" class="word-flash text-white">CLAIM LOOT.</div><div id="word4" class="word-flash grind-gradient" style="text-shadow: 0 0 40px rgba(255,77,0,0.5);">GRIND.</div>`;
+            layer.innerHTML = `<div id="word1" class="word-flash text-gray-500">DROP IN.</div><div id="word2" class="word-flash text-white">CLEAR MISSIONS.</div><div id="word3" class="word-flash text-white">CLAIM LOOT.</div><div id="word4" class="word-flash grind-gradient text-transparent bg-clip-text" style="filter: drop-shadow(0 0 20px rgba(255,77,0,0.5));">GRIND.</div>`;
             document.body.appendChild(layer); const timing = 700;
             setTimeout(() => { document.getElementById('word1').style.animation = `flashInOut ${timing}ms forwards`; }, 200);
             setTimeout(() => { document.getElementById('word2').style.animation = `flashInOut ${timing}ms forwards`; }, 200 + timing);
@@ -935,9 +991,9 @@
             const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
             canvas.width = 1080; canvas.height = 1920; const centerY = canvas.height / 2;
             
-            ctx.fillStyle = '#050505'; ctx.fillRect(0, 0, canvas.width, canvas.height);
-            const glow = ctx.createRadialGradient(540, centerY, 0, 540, centerY, 900); glow.addColorStop(0, 'rgba(255, 77, 0, 0.15)'); glow.addColorStop(1, 'transparent'); ctx.fillStyle = glow; ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.globalAlpha = 0.03; for (let i = 0; i < 70000; i++) { ctx.fillStyle = Math.random() > 0.5 ? '#ffffff' : '#000000'; ctx.fillRect(Math.random() * canvas.width, Math.random() * canvas.height, 2, 2); } ctx.globalAlpha = 1.0; 
+            ctx.fillStyle = '#000000'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            const glow = ctx.createRadialGradient(540, centerY, 0, 540, centerY, 900); glow.addColorStop(0, 'rgba(255, 77, 0, 0.2)'); glow.addColorStop(1, 'transparent'); ctx.fillStyle = glow; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.globalAlpha = 0.05; for (let i = 0; i < 70000; i++) { ctx.fillStyle = Math.random() > 0.5 ? '#ffffff' : '#000000'; ctx.fillRect(Math.random() * canvas.width, Math.random() * canvas.height, 2, 2); } ctx.globalAlpha = 1.0; 
 
             ctx.font = 'italic 900 130px "Inter", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
             const textGrind = 'GRIND'; const textDot = '.'; const wGrind = ctx.measureText(textGrind).width; const wDot = ctx.measureText(textDot).width;
@@ -950,10 +1006,10 @@
             ctx.fillStyle = '#ff4d00'; ctx.font = '900 65px "Inter", sans-serif'; if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "6px"; ctx.fillText(`LVL ${safeLvl} • ${rank}`, 540, centerY + 10); if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "0px";
 
             const barW = 800; const barH = 8; const startX = 540 - (barW / 2); const barY = centerY + 160;
-            ctx.fillStyle = '#1f1f1f'; ctx.fillRect(startX, barY, barW, barH);
+            ctx.fillStyle = 'rgba(255,255,255,0.1)'; ctx.fillRect(startX, barY, barW, barH);
             const progress = (safeXp % 1000) / 1000; ctx.fillStyle = '#ff4d00'; ctx.fillRect(startX, barY, barW * progress, barH);
 
-            ctx.fillStyle = '#777777'; ctx.font = '700 26px "Inter", sans-serif'; if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "4px"; ctx.fillText(`XP: ${safeXp} / ${safeLvl * 1000}   •   ${opsCount} OPERATIONS CLEARED`, 540, barY + 70); if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "0px";
+            ctx.fillStyle = '#aaaaaa'; ctx.font = '700 26px "Inter", sans-serif'; if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "4px"; ctx.fillText(`XP: ${safeXp} / ${safeLvl * 1000}   •   ${opsCount} OPERATIONS CLEARED`, 540, barY + 70); if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "0px";
             
             let daysLeftText = `SEASON 0${seasonNum} • ACTIVE`;
             if (state.seasonConfig && state.seasonConfig.end) {
@@ -972,7 +1028,7 @@
                 }
             }
             
-            ctx.fillStyle = '#333333'; ctx.font = '700 24px "Inter", sans-serif'; if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "8px"; ctx.fillText(daysLeftText, 540, 1800); if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "0px";
+            ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.font = '700 24px "Inter", sans-serif'; if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "8px"; ctx.fillText(daysLeftText, 540, 1800); if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "0px";
 
             let fileName = `GRIND_S0${seasonNum}_${(p.alias || 'Stranger').replace(/\s+/g, '')}.png`; 
             canvas.toBlob(async (blob) => {
@@ -993,15 +1049,15 @@
         }
 
         const getFooterHTML = () => `
-            <footer class="mt-20 border-t border-white/5 pt-8 text-center flex flex-col items-center justify-center gap-6 w-full max-w-6xl mx-auto px-6 relative z-10 pb-8">
-                <div class="flex flex-wrap justify-center gap-x-6 gap-y-3 text-[10px] uppercase font-bold tracking-[0.2em] text-gray-600">
+            <footer class="mt-20 border-t border-white/10 pt-8 text-center flex flex-col items-center justify-center gap-6 w-full max-w-6xl mx-auto px-6 relative z-10 pb-8 backdrop-blur-sm">
+                <div class="flex flex-wrap justify-center gap-x-6 gap-y-3 text-[10px] uppercase font-bold tracking-[0.2em] text-gray-500">
                     <span class="hover:text-white cursor-pointer transition" onclick="window.setView('impressum')">Impressum</span>
                     <span class="hidden md:inline">•</span>
                     <span class="hover:text-white cursor-pointer transition" onclick="window.setView('datenschutz')">Datenschutz</span>
                     <span class="hidden md:inline">•</span>
                     <span class="hover:text-white cursor-pointer transition" onclick="window.setView('agb')">AGB</span>
                 </div>
-                <p class="text-[#1f1f1f] text-[9px] uppercase tracking-widest font-black">© 2026 GRIND. NETWORK. ALL RIGHTS RESERVED.</p>
+                <p class="text-white/20 text-[9px] uppercase tracking-widest font-black">© 2026 GRIND. NETWORK. ALL RIGHTS RESERVED.</p>
             </footer>
         `;
 
@@ -1038,7 +1094,7 @@
                             <h1 class="text-4xl md:text-6xl font-black italic tracking-tighter mb-6 text-white leading-none">${msg}</h1>
                             <p class="text-gray-500 font-bold text-xs md:text-sm max-w-sm mx-auto uppercase tracking-widest leading-relaxed">${submsg}</p>
                             ${countdownHtml}
-                            <div class="mt-16 flex justify-center"><button type="button" onclick="window.handleLogout()" class="text-[10px] uppercase font-bold text-gray-600 hover:text-white transition tracking-widest border border-gray-800 hover:border-gray-500 px-6 py-3 rounded-sm bg-[#0a0a0a]">Log out</button></div>
+                            <div class="mt-16 flex justify-center"><button type="button" onclick="window.handleLogout()" class="text-[10px] uppercase font-bold text-gray-400 hover:text-white transition tracking-widest border border-white/10 px-6 py-3 rounded-2xl bg-white/5 backdrop-blur-md">Log out</button></div>
                         </div>
                         ${getFooterHTML()}
                     `;
@@ -1161,7 +1217,7 @@
                     <div class="max-w-3xl mx-auto px-6 py-12 w-full relative z-20">
                         <button onclick="window.goBack()" class="text-[#ff4d00] text-[10px] font-bold uppercase tracking-widest mb-10 flex items-center gap-2 hover:text-white transition"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg> Zurück</button>
                         <h1 class="text-3xl md:text-5xl font-black italic uppercase tracking-tighter mb-8">${title}</h1>
-                        <div class="legal-content bg-[#0a0a0a] border border-[#1f1f1f] p-6 md:p-10 rounded-sm shadow-xl">${content}</div>
+                        <div class="legal-content card p-6 md:p-10 shadow-xl">${content}</div>
                     </div>
                     ${getFooterHTML()}
                 `;
@@ -1177,11 +1233,11 @@
 
                 appDiv.innerHTML = `
                     <div class="flex-1 flex flex-col items-center justify-center p-6 min-h-[80vh] text-center animate-fade-in relative z-20">
-                        <div class="w-16 h-16 border-2 border-[#a855f7] rounded-full flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(168,85,247,0.3)] bg-[#0a0a0a]"><svg class="w-8 h-8 text-[#a855f7]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg></div>
+                        <div class="w-16 h-16 border-2 border-[#a855f7] rounded-full flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(168,85,247,0.3)] bg-black/50 backdrop-blur-md"><svg class="w-8 h-8 text-[#a855f7]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg></div>
                         <h2 class="text-4xl font-black italic tracking-tighter mb-2">GRIND. <span class="text-[#a855f7]">PRO</span></h2><p class="text-gray-400 font-bold uppercase tracking-widest text-[10px] mb-8 max-w-xs leading-relaxed">Schalte alle Premium-Rewards der Season 0${seasonNum} frei und maximiere deinen Progress.</p>
-                        <div class="bg-[#0a0a0a] border border-[#1f1f1f] p-8 rounded-sm mb-6 w-full max-w-sm shadow-2xl relative overflow-hidden group"><div class="absolute inset-0 bg-gradient-to-t from-[#a855f7]/10 to-transparent opacity-50"></div><div class="relative z-10"><div class="text-[10px] uppercase tracking-[0.2em] text-gray-500 font-bold mb-2">Season Pass</div><div id="dynamic-price-display" class="text-5xl font-black text-white italic tracking-tighter mb-8">${displayPrice} €</div><div id="paypal-button-container" class="w-full min-h-[150px] relative z-50 flex items-center justify-center"></div></div></div>
-                        <p class="text-[9px] text-gray-600 uppercase tracking-widest mt-2 mb-6 max-w-xs mx-auto leading-relaxed">Mit dem Kauf stimmst du unseren <span class="text-white underline cursor-pointer hover:text-[#a855f7]" onclick="window.setView('agb')">AGB</span> zu und verzichtest auf das Widerrufsrecht für diesen digitalen Inhalt.</p>
-                        <button type="button" onclick="window.setView('dashboard')" class="text-gray-600 hover:text-white text-[10px] uppercase tracking-[0.2em] font-bold transition">Zurück zum Grind.</button>
+                        <div class="card p-8 mb-6 w-full max-w-sm relative overflow-hidden group"><div class="absolute inset-0 bg-gradient-to-t from-[#a855f7]/10 to-transparent opacity-50"></div><div class="relative z-10"><div class="text-[10px] uppercase tracking-[0.2em] text-gray-500 font-bold mb-2">Season Pass</div><div id="dynamic-price-display" class="text-5xl font-black text-white italic tracking-tighter mb-8">${displayPrice} €</div><div id="paypal-button-container" class="w-full min-h-[150px] relative z-50 flex items-center justify-center"></div></div></div>
+                        <p class="text-[9px] text-gray-500 uppercase tracking-widest mt-2 mb-6 max-w-xs mx-auto leading-relaxed">Mit dem Kauf stimmst du unseren <span class="text-white underline cursor-pointer hover:text-[#a855f7]" onclick="window.setView('agb')">AGB</span> zu und verzichtest auf das Widerrufsrecht für diesen digitalen Inhalt.</p>
+                        <button type="button" onclick="window.setView('dashboard')" class="text-gray-400 hover:text-white text-[10px] uppercase tracking-[0.2em] font-bold transition">Zurück zum Grind.</button>
                     </div>
                     ${getFooterHTML()}
                 `;
@@ -1204,14 +1260,14 @@
                 appDiv.innerHTML = `
                     <div class="flex-1 flex flex-col items-center justify-center p-6 min-h-[80vh] text-center">
                         <h1 class="text-4xl md:text-5xl font-black italic tracking-tighter mb-2">IDENTIFICATION<span class="text-[#ff4d00]">.</span></h1>
-                        <p class="text-gray-500 font-bold uppercase tracking-widest text-[10px] mb-12 max-w-sm leading-relaxed">Wähle deine Base und finde deinen Health Tribe.</p>
+                        <p class="text-gray-400 font-bold uppercase tracking-widest text-[10px] mb-12 max-w-sm leading-relaxed">Wähle deine Base und finde deinen Health Tribe.</p>
                         <form onsubmit="window.submitOnboarding(event)" class="w-full max-w-sm space-y-4">
-                            <input id="onboard_name" type="text" placeholder="Dein Name" required class="w-full p-4 bg-[#0f0f0f] border border-[#1f1f1f] rounded-sm outline-none focus:border-[#ff4d00] text-white transition text-center text-xl tracking-widest uppercase font-black italic">
+                            <input id="onboard_name" type="text" placeholder="Dein Name" required class="w-full text-center text-xl tracking-widest uppercase font-black italic">
                             <div class="relative">
-                                <select id="onboard_city" required class="w-full p-4 bg-[#0f0f0f] border border-[#1f1f1f] rounded-sm outline-none focus:border-[#ff4d00] text-white transition text-center text-lg tracking-widest uppercase font-bold appearance-none cursor-pointer">
-                                    <option value="" disabled selected class="text-gray-600">Base wählen</option>
+                                <select id="onboard_city" required class="w-full text-center text-lg tracking-widest uppercase font-bold appearance-none cursor-pointer">
+                                    <option value="" disabled selected class="text-gray-500">Base wählen</option>
                                     <option value="Köln">Köln</option>
-                                    <option value="locked" disabled class="text-gray-600">Weitere Städte in Kürze...</option>
+                                    <option value="locked" disabled class="text-gray-500">Weitere Städte in Kürze...</option>
                                 </select>
                                 <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
@@ -1225,9 +1281,9 @@
 
             if (state.view === 'auth') {
                 const seasonNum = state.seasonConfig?.number || 1;
-                let authHtml = `<div class="flex-1 flex flex-col items-center justify-center p-6 min-h-[80vh] text-center"><h1 class="text-6xl md:text-8xl font-black italic tracking-tighter mb-2">GRIND<span class="text-[#ff4d00]">.</span></h1><p class="text-gray-500 font-bold uppercase tracking-widest text-xs mb-12 max-w-sm leading-relaxed">Season 0${seasonNum}</p><div class="w-full max-w-sm">`;
-                if (state.authStep === 'phone') { authHtml += `<form onsubmit="window.sendSMS(event)" class="space-y-4"><div class="flex gap-2"><select id="auth_prefix" class="w-24 p-4 bg-[#0f0f0f] border border-[#1f1f1f] rounded-sm outline-none focus:border-[#ff4d00] text-gray-400 text-center font-bold appearance-none cursor-pointer"><option value="+49">🇩🇪 +49</option><option value="+43">🇦🇹 +43</option><option value="+41">🇨🇭 +41</option></select><input id="auth_phone" type="tel" placeholder="170 1234567" required class="flex-1 p-4 bg-[#0f0f0f] border border-[#1f1f1f] rounded-sm outline-none focus:border-[#ff4d00] text-white transition text-center text-lg tracking-widest"></div><button id="auth_submit_btn" type="submit" class="w-full btn-grind py-4">Enter The Drop</button></form>`; } 
-                else { authHtml += `<form onsubmit="window.verifyCode(event)" class="space-y-4"><div class="text-center mb-6"><p class="text-gray-500 text-xs uppercase tracking-widest font-bold">Code gesendet an</p><p class="text-[#ff4d00] font-black tracking-widest mt-1 text-lg">${state.tempPhone}</p></div><input id="auth_code" type="text" placeholder="123456" required class="w-full p-4 bg-[#0f0f0f] border border-[#1f1f1f] rounded-sm outline-none focus:border-[#ff4d00] text-white transition text-center text-3xl font-mono tracking-[0.3em]"><button id="verify_submit_btn" type="submit" class="w-full btn-grind py-4">Verify Access</button><button type="button" onclick="window.goBackToPhone()" class="w-full text-center mt-4 text-xs text-gray-500 hover:text-white uppercase tracking-widest transition font-bold">Cancel</button></form>`; }
+                let authHtml = `<div class="flex-1 flex flex-col items-center justify-center p-6 min-h-[80vh] text-center"><h1 class="text-6xl md:text-8xl font-black italic tracking-tighter mb-2">GRIND<span class="text-[#ff4d00]">.</span></h1><p class="text-gray-400 font-bold uppercase tracking-widest text-xs mb-12 max-w-sm leading-relaxed">Season 0${seasonNum}</p><div class="w-full max-w-sm">`;
+                if (state.authStep === 'phone') { authHtml += `<form onsubmit="window.sendSMS(event)" class="space-y-4"><div class="flex gap-2"><select id="auth_prefix" class="w-24 text-center font-bold appearance-none cursor-pointer"><option value="+49">🇩🇪 +49</option><option value="+43">🇦🇹 +43</option><option value="+41">🇨🇭 +41</option></select><input id="auth_phone" type="tel" placeholder="170 1234567" required class="flex-1 text-center text-lg tracking-widest"></div><button id="auth_submit_btn" type="submit" class="w-full btn-grind py-4">Enter The Drop</button></form>`; } 
+                else { authHtml += `<form onsubmit="window.verifyCode(event)" class="space-y-4"><div class="text-center mb-6"><p class="text-gray-400 text-xs uppercase tracking-widest font-bold">Code gesendet an</p><p class="text-[#ff4d00] font-black tracking-widest mt-1 text-lg">${state.tempPhone}</p></div><input id="auth_code" type="text" placeholder="123456" required class="w-full text-center text-3xl font-mono tracking-[0.3em]"><button id="verify_submit_btn" type="submit" class="w-full btn-grind py-4">Verify Access</button><button type="button" onclick="window.goBackToPhone()" class="w-full text-center mt-4 text-xs text-gray-500 hover:text-white uppercase tracking-widest transition font-bold">Cancel</button></form>`; }
                 authHtml += `</div></div>`; appDiv.innerHTML = authHtml; return;
             }
 
@@ -1244,10 +1300,11 @@
                 const currentMonthWeek = state.currentWeekTab;
 
                 const displayXp = state.prevXp !== null ? state.prevXp : safeXp;
-                const targetXpProgress = (safeXp % 1000) / 10;
-                const oldXpProgress = state.prevXp !== null ? (state.prevXp % 1000) / 10 : targetXpProgress;
+                const targetXpProgress = (safeXp % 1000) / 10; // 0 to 99.9 percentage
+                
+                // Track calculations
+                const oldTrackProgress = state.prevXp !== null ? Math.min(29, (state.prevLvl || 1) - 1 + (state.prevXp % 1000) / 1000) : Math.min(29, safeLvl - 1 + (safeXp % 1000) / 1000);
                 const targetTrackProgress = Math.min(29, safeLvl - 1 + (safeXp % 1000) / 1000);
-                const oldTrackProgress = state.prevXp !== null ? Math.min(29, (state.prevLvl || 1) - 1 + (state.prevXp % 1000) / 1000) : targetTrackProgress;
 
                 // --- CALCULATE DAYS LEFT FOR SEASON ---
                 let seasonDaysLeftText = `SEASON 0${seasonNum} | ACTIVE`;
@@ -1258,11 +1315,7 @@
                     const diffTime = seasonEndDate.getTime() - new Date().getTime();
                     if (diffTime > 0) {
                         const dLeft = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-                        if (dLeft > 0) {
-                            seasonDaysLeftText = `NOCH ${dLeft} TAG${dLeft === 1 ? '' : 'E'} LEFT`;
-                        } else {
-                            seasonDaysLeftText = "LETZTER TAG";
-                        }
+                        seasonDaysLeftText = dLeft > 0 ? `NOCH ${dLeft} TAG${dLeft === 1 ? '' : 'E'} LEFT` : "LETZTER TAG";
                     } else {
                         seasonDaysLeftText = "SEASON ENDED";
                     }
@@ -1273,61 +1326,59 @@
                 const nowForWeek = new Date();
                 const daysUntilSunday = nowForWeek.getDay() === 0 ? 0 : 7 - nowForWeek.getDay();
                 let weekEndDate = new Date(nowForWeek.getFullYear(), nowForWeek.getMonth(), nowForWeek.getDate() + daysUntilSunday, 23, 59, 59, 999);
-                
-                if (seasonEndDate && seasonEndDate.getTime() < weekEndDate.getTime()) {
-                    weekEndDate = seasonEndDate;
-                }
+                if (seasonEndDate && seasonEndDate.getTime() < weekEndDate.getTime()) { weekEndDate = seasonEndDate; }
 
                 const diffTimeWeek = weekEndDate.getTime() - nowForWeek.getTime();
                 if (diffTimeWeek > 0) {
                     const dLeftWeek = Math.floor(diffTimeWeek / (1000 * 60 * 60 * 24));
-                    if (dLeftWeek > 0) {
-                        weekDaysLeftText = `NOCH ${dLeftWeek} TAG${dLeftWeek === 1 ? '' : 'E'} LEFT`;
-                    } else {
-                        weekDaysLeftText = "WOCHE ENDET HEUTE";
-                    }
+                    weekDaysLeftText = dLeftWeek > 0 ? `NOCH ${dLeftWeek} TAG${dLeftWeek === 1 ? '' : 'E'} LEFT` : "WOCHE ENDET HEUTE";
                 } else {
                     weekDaysLeftText = "WOCHE ABGELAUFEN";
                 }
 
+                // EXACT LOGO MATCH REQUESTED
                 let html = `
                     <header class="p-6 max-w-6xl mx-auto flex justify-between items-center w-full relative z-20">
                         <h1 class="text-3xl font-black italic tracking-tighter">GRIND<span class="text-[#ff4d00]">.</span></h1>
                         <div class="flex gap-3">
-                            <button type="button" onclick="window.generateShareCard()" class="text-[10px] uppercase font-bold text-gray-400 hover:text-white transition tracking-widest border border-gray-800 hover:border-[#ff4d00] px-3 py-1 rounded-sm bg-[#0a0a0a]">Export</button>
-                            <button type="button" onclick="window.handleLogout()" class="text-[10px] uppercase font-bold text-gray-500 hover:text-red-500 transition tracking-widest border border-gray-800 px-3 py-1 rounded-sm bg-[#0a0a0a]">Exit</button>
+                            <button type="button" onclick="window.generateShareCard()" class="text-[10px] uppercase font-bold text-gray-300 hover:text-white transition tracking-widest border border-white/10 px-3 py-1.5 rounded-xl bg-white/5 backdrop-blur-md">Export</button>
+                            <button type="button" onclick="window.handleLogout()" class="text-[10px] uppercase font-bold text-gray-400 hover:text-red-400 transition tracking-widest border border-white/10 px-3 py-1.5 rounded-xl bg-white/5 backdrop-blur-md">Exit</button>
                         </div>
                     </header>
 
                     <main class="max-w-6xl mx-auto px-6 w-full relative z-10 pb-10">
-                        <section class="mb-12 flex flex-col md:flex-row gap-8 items-center bg-[#0a0a0a] p-8 border border-[#1f1f1f] rounded-lg shadow-2xl relative overflow-hidden group">
-                            <div class="absolute inset-0 bg-gradient-to-r from-[#ff4d00] to-transparent opacity-0 group-hover:opacity-5 transition duration-1000"></div>
-                            <div class="flex-shrink-0 text-center md:text-left relative z-10">
-                                <p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-[0.4em] mb-2">Standing</p>
-                                <h2 id="main-lvl-text" class="text-6xl font-black italic tracking-tighter leading-none inline-block">LVL ${safeLvl}</h2>
-                                <p class="text-gray-500 font-mono mt-3 text-xs tracking-widest uppercase"><span class="text-white">${currentRank}</span></p>
-                                <p class="text-gray-600 font-bold italic mt-1 text-[10px] uppercase tracking-widest">${p.alias} <span class="ml-1 opacity-50">| ${p.city || 'Köln'}</span></p>
-                            </div>
-                            <div class="flex-grow w-full relative z-10">
-                                <div class="flex justify-between text-[10px] font-bold uppercase text-gray-500 mb-3 tracking-widest italic">
-                                    <span>XP: <span class="text-white" id="xp-counter-num">${displayXp}</span> / ${(safeLvl) * 1000}</span>
+                        <section class="mb-12 card p-8 flex flex-col items-center text-center">
+                            <p class="text-gray-400 text-[10px] font-bold uppercase tracking-[0.3em] mb-4">Current Standing</p>
+                            <div class="relative">
+                                <svg class="w-48 h-48 transform -rotate-90">
+                                    <circle cx="96" cy="96" r="88" stroke="rgba(255,255,255,0.05)" stroke-width="6" fill="none"></circle>
+                                    <circle id="top-xp-circle" cx="96" cy="96" r="88" stroke="url(#orange-grad)" stroke-width="6" fill="none" stroke-dasharray="553" stroke-dashoffset="553" stroke-linecap="round"></circle>
+                                    <defs>
+                                        <linearGradient id="orange-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                            <stop offset="0%" stop-color="#ff8800" />
+                                            <stop offset="100%" stop-color="#ff4d00" />
+                                        </linearGradient>
+                                    </defs>
+                                </svg>
+                                <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                    <span id="main-lvl-text" class="text-5xl font-black italic tracking-tighter">LVL ${safeLvl}</span>
+                                    <span class="text-[10px] uppercase tracking-widest text-[#ff4d00] font-bold mt-1">${currentRank}</span>
                                 </div>
-                                <div class="w-full bg-gray-900 h-3 rounded-full overflow-hidden border border-white/5 relative">
-                                    <div id="top-xp-bar" class="grind-gradient h-full transition-all duration-1000 ease-out xp-bar-glow" style="width: ${oldXpProgress}%"></div>
-                                </div>
                             </div>
+                            <p class="mt-6 text-sm text-gray-300 font-medium"><span id="xp-counter-num">${displayXp}</span> <span class="text-gray-500">/ ${(safeLvl) * 1000} XP</span></p>
+                            <p class="text-gray-500 font-bold italic mt-2 text-[10px] uppercase tracking-widest">${p.alias} <span class="ml-1 opacity-50">| ${p.city || 'Köln'}</span></p>
                         </section>
 
                         <section class="mb-16">
                             <div class="flex justify-between items-center mb-6 px-2">
-                                <div><h3 class="text-2xl font-black italic uppercase tracking-tighter">Grind Track <span class="text-[#ff4d00]">S0${seasonNum}</span></h3><p class="text-gray-500 text-[10px] font-bold tracking-widest mt-1">${seasonDaysLeftText}</p></div>
-                                <div>${hasPremium ? '<span class="bg-[#a855f7]/10 text-[#a855f7] border border-[#a855f7]/30 px-3 py-1.5 rounded-sm text-[9px] font-black uppercase tracking-widest shadow-[0_0_10px_rgba(168,85,247,0.2)]">PRO ACTIVE</span>' : '<button type="button" onclick="window.setView(\'paywall\')" class="btn-pro">Get Pro Pass</button>'}</div>
+                                <div><h3 class="text-2xl font-black italic uppercase tracking-tighter">Grind Track <span class="text-[#ff4d00]">S0${seasonNum}</span></h3><p class="text-gray-400 text-[10px] font-bold tracking-widest mt-1">${seasonDaysLeftText}</p></div>
+                                <div>${hasPremium ? '<span class="bg-[#a855f7]/20 text-[#d8b4fe] border border-[#a855f7]/40 px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest shadow-[0_0_15px_rgba(168,85,247,0.3)] backdrop-blur-md">PRO ACTIVE</span>' : '<button type="button" onclick="window.setView(\'paywall\')" class="btn-pro">Get Pro Pass</button>'}</div>
                             </div>
 
-                            <div id="pass-viewport" class="no-scrollbar overflow-x-auto py-8 relative flex items-center min-h-[280px] border-y border-white/5 bg-black/40 shadow-inner">
+                            <div id="pass-viewport" class="no-scrollbar overflow-x-auto py-8 relative flex items-center min-h-[280px] border-y border-white/5 bg-transparent">
                                 <div class="flex items-center px-6 relative" style="min-width: max-content;">
-                                    <div class="absolute top-1/2 left-[94px] right-[94px] h-[1px] bg-[#1f1f1f] z-0 -translate-y-1/2"></div>
-                                    <div id="track-line" class="absolute top-1/2 left-[94px] h-[2px] bg-[#ff4d00] shadow-[0_0_10px_rgba(255,77,0,0.5)] z-0 transition-all duration-1000 ease-out -translate-y-1/2" style="width: calc(140px * ${oldTrackProgress}); display: ${safeXp > 0 || state.prevXp > 0 ? 'block' : 'none'};"></div>
+                                    <div class="absolute top-1/2 left-[94px] right-[94px] h-[1px] bg-white/10 z-0 -translate-y-1/2"></div>
+                                    <div id="track-line" class="absolute top-1/2 left-[94px] h-[2px] bg-[#ff4d00] shadow-[0_0_15px_rgba(255,77,0,0.6)] z-0 transition-all duration-1000 ease-out -translate-y-1/2" style="width: calc(140px * ${oldTrackProgress}); display: ${safeXp > 0 || state.prevXp > 0 ? 'block' : 'none'};"></div>
                 `;
 
                 for (let i = 1; i <= 30; i++) {
@@ -1342,15 +1393,15 @@
                         <div id="level-node-${i}" class="level-node flex flex-col items-center relative z-10">
                             <div ${isUnlocked && r?.free && !freeClaimed ? `onclick="window.openClaimModal(${i}, 'free')" class="reward-box mb-4 unlocked cursor-pointer hover:scale-105"` : (freeClaimed ? `onclick="window.openClaimModal(${i}, 'free')" class="reward-box mb-4 unlocked opacity-50 cursor-pointer"` : `class="reward-box mb-4 opacity-60 scale-95"`)}>
                                 <span class="tag-free">FREE</span>
-                                ${freeClaimed && r?.free ? `<div class="absolute inset-0 bg-black/80 backdrop-blur-[2px] z-20 flex items-center justify-center rounded-[4px]"><span class="text-green-500 font-black text-xs uppercase italic transform -rotate-12"><svg class="w-6 h-6 drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></span></div>` : ''}
+                                ${freeClaimed && r?.free ? `<div class="completed-overlay rounded-2xl"><span class="text-green-400 font-black text-xs uppercase italic transform -rotate-12"><svg class="w-6 h-6 drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></span></div>` : ''}
                                 <span class="text-[10px] font-bold uppercase text-center px-2 text-gray-200 mt-3 relative z-10">${r?.free || '-'}</span>
                             </div>
                             
-                            <div id="circle-node-${i}" class="relative w-10 h-10 rounded-full flex items-center justify-center font-black italic text-xs ${isUnlocked ? 'grind-gradient text-black scale-110 shadow-[0_0_15px_rgba(255,77,0,0.5)]' : 'bg-gray-800 text-gray-400 border border-white/20'}">${i}</div>
+                            <div id="circle-node-${i}" class="relative w-10 h-10 rounded-full flex items-center justify-center font-black italic text-xs ${isUnlocked ? 'grind-gradient text-black scale-110 shadow-[0_0_20px_rgba(255,77,0,0.6)]' : 'bg-black/50 text-gray-400 border border-white/10 backdrop-blur-md'}">${i}</div>
                             
                             <div ${isProUnlocked && r?.pro && !proClaimed ? `onclick="window.openClaimModal(${i}, 'pro')" class="reward-box pro mt-5 unlocked scale-105 cursor-pointer"` : (proClaimed ? `onclick="window.openClaimModal(${i}, 'pro')" class="reward-box pro mt-5 unlocked opacity-50 cursor-pointer"` : `class="reward-box pro mt-5 opacity-70 scale-[0.98] hover:opacity-100"`)}>
                                 <span class="tag-pro italic">PRO</span>
-                                ${proClaimed && r?.pro ? `<div class="absolute inset-0 bg-black/80 backdrop-blur-[2px] z-20 flex items-center justify-center rounded-[4px]"><span class="text-[#a855f7] font-black text-xs uppercase italic transform -rotate-12"><svg class="w-6 h-6 drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></span></div>` : ''}
+                                ${proClaimed && r?.pro ? `<div class="completed-overlay rounded-2xl"><span class="text-[#d8b4fe] font-black text-xs uppercase italic transform -rotate-12"><svg class="w-6 h-6 drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></span></div>` : ''}
                                 <span class="text-[10px] font-bold uppercase text-center px-2 mt-4 relative z-10 ${isProUnlocked ? 'text-[#d8b4fe]' : 'text-purple-300'}">${r?.pro || '-'}</span>
                             </div>
                         </div>
@@ -1365,8 +1416,8 @@
                         <section class="max-w-3xl mx-auto mb-12">
                             <div class="flex flex-col gap-6 mb-10">
                                 <div class="flex justify-between items-end border-b border-white/10 pb-4">
-                                    <div><p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">Operations</p><h3 class="text-3xl font-black uppercase italic tracking-tighter">${(state.weeklyData[currentMonthWeek] || {title: 'Active Week'}).title}</h3><p class="text-gray-500 text-[10px] font-bold tracking-widest mt-1">${weekDaysLeftText}</p></div>
-                                    <span class="text-[10px] font-black bg-[#ff4d00] text-white px-3 py-1 italic shadow-[0_0_10px_rgba(255,77,0,0.4)]">LIVE</span>
+                                    <div><p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">Operations</p><h3 class="text-3xl font-black uppercase italic tracking-tighter">${(state.weeklyData[currentMonthWeek] || {title: 'Active Week'}).title}</h3><p class="text-gray-400 text-[10px] font-bold tracking-widest mt-1">${weekDaysLeftText}</p></div>
+                                    <span class="text-[10px] font-black bg-[#ff4d00] text-white px-3 py-1.5 rounded-md italic shadow-[0_0_15px_rgba(255,77,0,0.5)]">LIVE</span>
                                 </div>
                                 <div class="flex flex-wrap gap-2">
                 `;
@@ -1377,16 +1428,16 @@
                     const isMissed = weekNum < currentMonthWeek;
                     const isFuture = weekNum > currentMonthWeek;
                     
-                    let extraClass = isCurrent ? 'active' : 'opacity-30 cursor-not-allowed border-dashed';
-                    let badge = isMissed ? '<span class="text-red-500 ml-1 opacity-70">MISSED</span>' : (isFuture ? '<span class="text-gray-500 ml-1 opacity-70">LOCKED</span>' : '');
+                    let extraClass = isCurrent ? 'active' : 'opacity-40 cursor-not-allowed border-dashed';
+                    let badge = isMissed ? '<span class="text-red-400 ml-1 opacity-70">MISSED</span>' : (isFuture ? '<span class="text-gray-500 ml-1 opacity-70">LOCKED</span>' : '');
 
-                    html += `<button type="button" class="week-btn px-4 py-2 text-[10px] font-black uppercase transition rounded-sm ${extraClass}">W0${weekNum} ${badge}</button>`;
+                    html += `<button type="button" class="week-btn px-4 py-2 text-[10px] font-black uppercase transition rounded-xl ${extraClass}">W0${weekNum} ${badge}</button>`;
                 });
 
                 html += `</div></div><div class="space-y-4">`;
 
                 const currentMissions = state.weeklyData[currentMonthWeek]?.missions || [];
-                if (currentMissions.length === 0) html += `<div class="text-center p-8 text-gray-600 italic text-sm">Der Director bereitet die Operations vor. Stay focused.</div>`;
+                if (currentMissions.length === 0) html += `<div class="card text-center p-8 text-gray-400 italic text-sm">Der Director bereitet die Operations vor. Stay focused.</div>`;
 
                 currentMissions.forEach(m => {
                     const isCompleted = safeCompleted.includes(m.id);
@@ -1409,22 +1460,22 @@
                     if (isCompleted) btnText = 'Verified';
                     else if (isPending) btnText = 'Wird überprüft ⏳';
 
-                    let cardClasses = 'card p-6 rounded-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4 group relative overflow-hidden ';
+                    let cardClasses = 'card p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 group relative overflow-hidden ';
                     if (isCompleted) cardClasses += 'is-completed border-[#ff4d00]/30';
                     else if (isPending) cardClasses += 'is-pending border-yellow-500/30';
 
                     html += `
                         <div class="${cardClasses}">
-                            <div class="absolute left-0 top-0 bottom-0 w-1 ${isPending ? 'bg-yellow-500' : 'bg-[#ff4d00]'} opacity-0 group-hover:opacity-100 transition"></div>
+                            <div class="absolute inset-y-0 left-0 w-1 ${isPending ? 'bg-yellow-500' : 'bg-[#ff4d00]'} opacity-0 group-hover:opacity-100 transition"></div>
                             <div class="completed-overlay"><span class="text-[#ff4d00] font-black italic uppercase tracking-widest flex items-center gap-2"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Verified</span></div>
                             <div class="pending-overlay"><span class="text-yellow-500 font-black italic uppercase tracking-widest flex items-center gap-2"><svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> Wird überprüft</span></div>
                             <div class="pr-6 relative z-0 flex-1">
                                 <h4 class="font-black italic uppercase text-lg group-hover:text-[#ff4d00] transition tracking-tighter">${m.name}</h4><p class="text-gray-400 text-xs mt-1 font-medium leading-relaxed">${m.desc}</p>
-                                ${!isCompleted ? `<span class="inline-block mt-3 border border-gray-700 bg-black px-2 py-0.5 text-[8px] font-bold uppercase tracking-widest text-gray-400">${badgeText}</span>` : ''}
+                                ${!isCompleted ? `<span class="inline-block mt-3 bg-white/10 border border-white/10 px-3 py-1 rounded-xl text-[9px] font-bold uppercase tracking-widest text-white backdrop-blur-md">${badgeText}</span>` : ''}
                             </div>
                             <div class="text-left md:text-right flex-shrink-0 relative z-0 flex flex-col items-start md:items-end w-full md:w-auto mt-4 md:mt-0">
                                 <span class="block text-[#ff4d00] font-black text-2xl italic tracking-tighter mb-2">+${m.xp}</span>
-                                <button type="button" id="btn-${m.id}" onclick="${btnAction}" class="btn-grind w-full md:w-auto py-3 text-[10px]" ${(isCompleted || isPending) ? 'disabled' : ''}>${btnText}</button>
+                                <button type="button" id="btn-${m.id}" onclick="${btnAction}" class="btn-grind w-full md:w-auto" ${(isCompleted || isPending) ? 'disabled' : ''}>${btnText}</button>
                             </div>
                         </div>
                     `;
@@ -1438,14 +1489,14 @@
                             <div class="flex flex-col gap-6 mb-10">
                                 <div class="flex justify-between items-end border-b border-white/10 pb-4">
                                     <div><p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">Endless Grind</p><h3 class="text-3xl font-black uppercase italic tracking-tighter">Daily Habits</h3></div>
-                                    <span class="text-[10px] font-black bg-gray-800 text-gray-400 px-3 py-1 italic shadow-[0_0_10px_rgba(0,0,0,0.4)]">REPEATABLE</span>
+                                    <span class="text-[10px] font-black bg-white/5 border border-white/10 backdrop-blur-md text-gray-300 px-3 py-1.5 rounded-md italic shadow-[0_0_10px_rgba(0,0,0,0.4)]">REPEATABLE</span>
                                 </div>
                             </div>
                             <div class="space-y-4">
                 `;
 
                 if ((state.habitData || []).length === 0) {
-                    html += `<div class="text-center p-8 text-gray-600 italic text-sm">Derzeit keine Daily Habits aktiv.</div>`;
+                    html += `<div class="card text-center p-8 text-gray-400 italic text-sm">Derzeit keine Daily Habits aktiv.</div>`;
                 }
 
                 (state.habitData || []).forEach(m => {
@@ -1478,7 +1529,7 @@
                     }
                     
                     const isExpired = habDaysLeftText === "ABGELAUFEN";
-                    let cardClasses = 'card p-6 rounded-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4 group relative overflow-hidden ';
+                    let cardClasses = 'card p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 group relative overflow-hidden ';
                     if (isDoneToday) cardClasses += 'is-completed border-[#ff4d00]/30 opacity-75';
                     else if (isPending) cardClasses += 'is-pending border-yellow-500/30';
                     else if (isExpired) cardClasses += 'opacity-50 cursor-not-allowed';
@@ -1497,23 +1548,23 @@
 
                     html += `
                         <div class="${cardClasses}">
-                            <div class="absolute left-0 top-0 bottom-0 w-1 ${isPending ? 'bg-yellow-500' : (isDoneToday ? 'bg-[#ff4d00]' : 'bg-gray-600 group-hover:bg-[#ff4d00]')} transition"></div>
+                            <div class="absolute inset-y-0 left-0 w-1 ${isPending ? 'bg-yellow-500' : (isDoneToday ? 'bg-[#ff4d00]' : 'bg-gray-500 group-hover:bg-[#ff4d00]')} transition"></div>
                             ${isDoneToday ? `<div class="completed-overlay"><span class="text-[#ff4d00] font-black italic uppercase tracking-widest flex items-center gap-2"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> DONE TODAY</span></div>` : ''}
                             ${isPending ? `<div class="pending-overlay"><span class="text-yellow-500 font-black italic uppercase tracking-widest flex items-center gap-2"><svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> Wird überprüft</span></div>` : ''}
                             <div class="pr-6 relative z-0 flex-1 w-full">
                                 <div class="flex justify-between items-start mb-1">
                                     <h4 class="font-black italic uppercase text-lg group-hover:text-[#ff4d00] transition tracking-tighter break-words max-w-[70%]">${m.name}</h4>
-                                    <span class="text-[9px] font-bold text-gray-500 tracking-widest uppercase bg-black px-2 py-1 rounded-sm border border-gray-800">${habDaysLeftText}</span>
+                                    <span class="text-[9px] font-bold text-gray-400 tracking-widest uppercase bg-white/5 backdrop-blur-md px-2 py-1 rounded-md border border-white/10">${habDaysLeftText}</span>
                                 </div>
                                 <p class="text-gray-400 text-xs mt-1 font-medium leading-relaxed">${m.desc}</p>
                                 <div class="flex flex-wrap items-center gap-2 mt-3">
-                                    <span class="border border-gray-700 bg-black px-2 py-0.5 text-[8px] font-bold uppercase tracking-widest text-gray-400">${badgeText}</span>
-                                    ${m.streakBonus > 0 ? `<span class="border border-[#ff4d00]/30 bg-[#ff4d00]/10 text-[#ff4d00] px-2 py-0.5 text-[8px] font-bold uppercase tracking-widest shadow-[0_0_10px_rgba(255,77,0,0.2)]">🔥 Streak: ${activeStreak} (+${m.streakBonus} XP/Tag)</span>` : `<span class="border border-gray-700 bg-gray-900 text-gray-300 px-2 py-0.5 text-[8px] font-bold uppercase tracking-widest">🔥 Streak: ${activeStreak}</span>`}
+                                    <span class="bg-white/10 border border-white/10 text-white px-3 py-1.5 text-[9px] font-bold uppercase tracking-widest rounded-xl backdrop-blur-md">${badgeText}</span>
+                                    ${m.streakBonus > 0 ? `<span class="bg-[rgba(255,77,0,0.15)] border border-[rgba(255,77,0,0.3)] text-[#ff4d00] px-3 py-1.5 text-[9px] font-bold uppercase tracking-widest rounded-xl shadow-[0_0_15px_rgba(255,77,0,0.2)] backdrop-blur-md">🔥 Streak: ${activeStreak} (+${m.streakBonus} XP/Tag)</span>` : `<span class="bg-white/5 border border-white/10 text-gray-300 px-3 py-1.5 text-[9px] font-bold uppercase tracking-widest rounded-xl backdrop-blur-md">🔥 Streak: ${activeStreak}</span>`}
                                 </div>
                             </div>
                             <div class="text-left md:text-right flex-shrink-0 relative z-0 flex flex-col items-start md:items-end w-full md:w-auto mt-4 md:mt-0">
                                 <span class="block text-[#ff4d00] font-black text-2xl italic tracking-tighter mb-2">+${totalXpDisplay}</span>
-                                <button type="button" onclick="${btnAction}" class="btn-grind w-full md:w-auto py-3 text-[10px] bg-white text-black hover:bg-[#ff4d00] hover:text-white transition" ${(isDoneToday || isPending || isExpired) ? 'disabled' : ''}>${btnText}</button>
+                                <button type="button" onclick="${btnAction}" class="btn-grind w-full md:w-auto" ${(isDoneToday || isPending || isExpired) ? 'disabled' : ''}>${btnText}</button>
                             </div>
                         </div>
                     `;
@@ -1527,29 +1578,26 @@
                             <div class="flex flex-col gap-6 mb-8">
                                 <div class="flex justify-between items-end border-b border-white/10 pb-4">
                                     <div><p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">The Network</p><h3 class="text-3xl font-black uppercase italic tracking-tighter">Crew Activity</h3></div>
-                                    <span class="text-[10px] font-black bg-[#1f1f1f] text-gray-400 border border-white/5 px-3 py-1 italic">LIVE FEED</span>
+                                    <span class="text-[10px] font-black bg-white/5 border border-white/10 backdrop-blur-md text-gray-300 px-3 py-1.5 rounded-md italic">LIVE FEED</span>
                                 </div>
                             </div>
-
-                            <!-- SLEEK PREMIUM BOUNTY CTA -->
                 `;
 
-                // Berechne XP für den Button Text VOR dem Rendern
                 const myFriendsCount = (p.friends || []).length;
                 const nextBounty = (myFriendsCount + 1) * 100;
 
                 html += `
-                            <div class="card p-6 rounded-sm mb-8 border border-[#ff4d00]/20 relative overflow-hidden group">
-                                <div class="absolute inset-0 bg-gradient-to-r from-[#ff4d00]/5 to-transparent"></div>
+                            <div class="card p-6 md:p-8 rounded-3xl mb-8 border border-[#ff4d00]/30 shadow-[0_0_30px_rgba(255,77,0,0.15)] relative overflow-hidden group">
+                                <div class="absolute inset-0 bg-gradient-to-r from-[#ff4d00]/10 to-transparent"></div>
                                 <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
                                     <div class="text-center md:text-left flex-1">
                                         <p class="text-[#ff4d00] font-black italic uppercase tracking-widest text-sm mb-2 flex items-center justify-center md:justify-start gap-2">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                                             Bounty Active
                                         </p>
-                                        <p class="text-gray-400 text-[11px] leading-relaxed">Erweitere dein Network. Jeder neue Grinder bringt dir massive XP Boosts. Nächster Invite: <span class="text-white font-bold bg-white/10 px-2 py-0.5 rounded-sm">+${nextBounty} XP</span>.</p>
+                                        <p class="text-gray-300 text-xs leading-relaxed font-medium">Erweitere dein Network. Jeder neue Grinder bringt dir massive XP Boosts. Nächster Invite: <span class="text-white font-black bg-[#ff4d00]/20 px-2 py-1 rounded-md border border-[#ff4d00]/40">+${nextBounty} XP</span>.</p>
                                     </div>
-                                    <button type="button" onclick="window.openInviteModal()" class="w-full md:w-auto btn-bounty px-8 py-4 rounded-sm flex items-center justify-center gap-3 whitespace-nowrap flex-shrink-0">
+                                    <button type="button" onclick="window.openInviteModal()" class="w-full md:w-auto btn-bounty px-8 py-4 flex items-center justify-center gap-3 whitespace-nowrap flex-shrink-0">
                                         <svg class="w-5 h-5 text-[#ff4d00]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                                         <span class="font-black italic uppercase text-xs tracking-widest">Crew Erweitern</span>
                                     </button>
@@ -1557,32 +1605,27 @@
                             </div>
                 `;
 
-                // Feed-Logik: EIGENE AKTIVITÄTEN AUSBLENDEN!
                 const friendsList = p.friends || [];
-                const feedUsers = [...friendsList]; // Enthält NICHT p.alias!
-                
-                // Case-Insensitive Filterung 
+                const feedUsers = [...friendsList];
                 const feedUsersLower = feedUsers.map(u => (u || '').toLowerCase());
 
                 const feedActivities = (state.activities || [])
                     .filter(act => act.alias && feedUsersLower.includes(act.alias.toLowerCase()))
                     .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
-                    .slice(0, 10); // Top 10 anzeigen
+                    .slice(0, 10); 
 
                 if (feedActivities.length === 0) {
                     if (friendsList.length === 0) {
-                        html += `<div class="text-center p-8 text-gray-600 italic text-sm border border-white/5 rounded-sm bg-black/50">Deine Crew ist noch leer. <br><span class="text-[#ff4d00] font-bold">Lade Freunde ein und kassiere deinen XP Boost!</span></div>`;
+                        html += `<div class="card text-center p-8 text-gray-400 italic text-sm">Deine Crew ist noch leer. <br><span class="text-[#ff4d00] font-bold mt-2 block">Lade Freunde ein und kassiere deinen XP Boost!</span></div>`;
                     } else {
-                        html += `<div class="text-center p-8 text-gray-600 italic text-sm border border-white/5 rounded-sm bg-black/50">Noch keine Aktivität in deiner Crew. Time to grind!</div>`;
+                        html += `<div class="card text-center p-8 text-gray-400 italic text-sm">Noch keine Aktivität in deiner Crew. Time to grind!</div>`;
                     }
                 } else {
-                    html += `<div class="space-y-4 relative before:absolute before:inset-y-0 before:left-[19px] before:w-[2px] before:bg-[#1f1f1f]">`;
+                    html += `<div class="space-y-4 relative before:absolute before:inset-y-0 before:left-[19px] before:w-[2px] before:bg-white/10">`;
                     
                     feedActivities.forEach(act => {
                         const isProUser = act.isPro === true;
-                        
-                        // Dynamisches Color- & Icon-Mapping (Lila für Pro, Orange für Free)
-                        let iconSvg = 'M5 13l4 4L19 7'; // Default Mission
+                        let iconSvg = 'M5 13l4 4L19 7'; 
                         let colorClass = isProUser ? 'text-[#a855f7]' : 'text-[#ff4d00]';
                         let borderClass = isProUser ? 'border-[#a855f7]/30' : 'border-[#ff4d00]/30';
                         let shadowClass = '';
@@ -1590,37 +1633,32 @@
                         if (act.type === 'LEVEL_UP') {
                             iconSvg = 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6';
                             borderClass = isProUser ? 'border-[#a855f7]' : 'border-[#ff4d00]';
-                            shadowClass = isProUser ? 'shadow-[0_0_10px_rgba(168,85,247,0.3)]' : 'shadow-[0_0_10px_rgba(255,77,0,0.3)]';
+                            shadowClass = isProUser ? 'shadow-[0_0_15px_rgba(168,85,247,0.3)]' : 'shadow-[0_0_15px_rgba(255,77,0,0.3)]';
                         } else if (act.type === 'REDEEM') {
                             iconSvg = 'M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7';
                             borderClass = isProUser ? 'border-[#a855f7]' : 'border-[#ff4d00]';
-                            shadowClass = isProUser ? 'shadow-[0_0_10px_rgba(168,85,247,0.3)]' : 'shadow-[0_0_10px_rgba(255,77,0,0.3)]';
+                            shadowClass = isProUser ? 'shadow-[0_0_15px_rgba(168,85,247,0.3)]' : 'shadow-[0_0_15px_rgba(255,77,0,0.3)]';
                         } else if (act.type === 'PRO') {
                             iconSvg = 'M13 10V3L4 14h7v7l9-11h-7z';
                             colorClass = 'text-[#a855f7]';
                             borderClass = 'border-[#a855f7]';
-                            shadowClass = 'shadow-[0_0_15px_rgba(168,85,247,0.4)]';
+                            shadowClass = 'shadow-[0_0_20px_rgba(168,85,247,0.5)]';
                         }
 
                         const time = getRelativeTime(act.timestamp);
                         const displayName = act.alias;
-                        
-                        // Wenn der User Pro ist, wird der Name im Feed Lila (sonst Orange)
                         const nameColorClass = isProUser ? 'text-[#d8b4fe]' : 'text-[#ff4d00]';
-                        const proBadge = isProUser ? `<span class="ml-2 align-middle bg-[#a855f7]/20 text-[#a855f7] border border-[#a855f7]/30 text-[8px] px-1.5 py-0.5 rounded-sm font-black shadow-[0_0_10px_rgba(168,85,247,0.2)]">PRO</span>` : '';
-                        
-                        // NEU: Überschreibt alte hardcodierte Farben direkt zur Laufzeit! 
-                        // Egal ob PRO oder nicht, wir machen den Text (z.B. den Missions-Namen) farblich passend.
-                        const dynamicText = act.text.replace(/text-\[#[a-fA-F0-9]+\]/g, isProUser ? 'text-[#a855f7]' : 'text-[#ff4d00]');
+                        const proBadge = isProUser ? `<span class="ml-2 align-middle bg-[#a855f7]/20 text-[#d8b4fe] border border-[#a855f7]/40 text-[8px] px-1.5 py-0.5 rounded-md font-black shadow-[0_0_10px_rgba(168,85,247,0.2)] backdrop-blur-sm">PRO</span>` : '';
+                        const dynamicText = act.text.replace(/text-\[#[a-fA-F0-9]+\]/g, isProUser ? 'text-[#d8b4fe]' : 'text-[#ff4d00]');
 
                         html += `
                             <div class="flex gap-4 relative z-10">
-                                <div class="w-10 h-10 rounded-full bg-[#0a0a0a] border-2 ${borderClass} flex items-center justify-center flex-shrink-0 ${shadowClass}">
+                                <div class="w-10 h-10 rounded-full bg-black/50 backdrop-blur-md border-2 ${borderClass} flex items-center justify-center flex-shrink-0 ${shadowClass}">
                                     <svg class="w-4 h-4 ${colorClass}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${iconSvg}"></path></svg>
                                 </div>
-                                <div class="card p-4 rounded-sm flex-1">
+                                <div class="card p-4 flex-1">
                                     <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">${time}</p>
-                                    <p class="text-sm font-medium text-gray-300"><span class="${nameColorClass} italic uppercase font-black">${displayName}</span>${proBadge} <span class="text-gray-400 text-xs">${dynamicText}</span></p>
+                                    <p class="text-sm font-medium text-gray-300"><span class="${nameColorClass} italic uppercase font-black">${displayName}</span>${proBadge} <span class="text-gray-400 text-xs ml-1">${dynamicText}</span></p>
                                 </div>
                             </div>
                         `;
@@ -1646,20 +1684,32 @@
                         state.dashboardNeedsScroll = false;
                     }
 
-                    const topBar = document.getElementById('top-xp-bar'); 
+                    const topCircle = document.getElementById('top-xp-circle');
+                    const targetOffset = 553 - (553 * targetXpProgress / 100);
+                    
                     const trackLine = document.getElementById('track-line');
                     if (trackLine) trackLine.style.width = `calc(140px * ${targetTrackProgress})`;
 
                     if (state.prevLvl !== null && safeLvl > state.prevLvl) {
-                        if (topBar) {
-                            topBar.style.transition = 'width 1000ms ease-out'; topBar.style.width = '100%';
-                            setTimeout(() => { topBar.style.transition = 'none'; topBar.style.width = '0%'; void topBar.offsetWidth; topBar.style.transition = 'width 1000ms ease-out'; topBar.style.width = `${targetXpProgress}%`; }, 1000); 
+                        if (topCircle) {
+                            topCircle.style.transition = 'stroke-dashoffset 1000ms ease-out';
+                            topCircle.style.strokeDashoffset = '0'; // Voll
+                            setTimeout(() => {
+                                topCircle.style.transition = 'none';
+                                topCircle.style.strokeDashoffset = '553'; // Leer
+                                void topCircle.offsetWidth; // Reflow
+                                topCircle.style.transition = 'stroke-dashoffset 1000ms ease-out';
+                                topCircle.style.strokeDashoffset = targetOffset.toString();
+                            }, 1000);
                         }
                         if (passViewport && currentNode) {
                             const scrollLeft = currentNode.offsetLeft - (passViewport.offsetWidth / 2) + (currentNode.offsetWidth / 2);
                             passViewport.scrollTo({ left: scrollLeft, behavior: 'smooth' });
                         }
-                    } else if (topBar) { topBar.style.transition = 'width 1000ms ease-out'; topBar.style.width = `${targetXpProgress}%`; }
+                    } else if (topCircle) {
+                        topCircle.style.transition = 'stroke-dashoffset 1000ms ease-out';
+                        topCircle.style.strokeDashoffset = targetOffset.toString();
+                    }
 
                     if (state.prevXp !== null && state.prevXp < safeXp) {
                         window.scrollTo({ top: 0, behavior: 'smooth' }); animateValue('xp-counter-num', state.prevXp, safeXp, 1000);
@@ -1676,9 +1726,9 @@
             // --- 404 FALLBACK ---
             appDiv.innerHTML = `
                 <div class="flex-1 flex flex-col items-center justify-center text-center p-6 min-h-[80vh] relative z-20">
-                    <h1 class="text-8xl md:text-9xl font-black italic text-[#1f1f1f] tracking-tighter mb-4 select-none">404</h1>
+                    <h1 class="text-8xl md:text-9xl font-black italic text-white tracking-tighter mb-4 select-none drop-shadow-2xl">404</h1>
                     <p class="text-[#ff4d00] font-black uppercase tracking-[0.4em] mb-8 text-sm">Signal Lost</p>
-                    <p class="text-gray-500 font-bold max-w-xs text-xs leading-relaxed mb-10">Die angeforderte Position existiert nicht auf der Grind Map.</p>
+                    <p class="text-gray-400 font-bold max-w-xs text-xs leading-relaxed mb-10">Die angeforderte Position existiert nicht auf der Grind Map.</p>
                     <button onclick="window.setView('dashboard')" class="btn-grind">Return to Base</button>
                 </div>
             `;
@@ -1686,4 +1736,3 @@
     </script>
 </body>
 </html>
-
