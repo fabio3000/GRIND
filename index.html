@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -38,7 +39,7 @@
 
         /* --- VIDEO BACKGROUND --- */
         .video-bg-container {
-            position: fixed; inset: 0; z-index: 0; background: #000;
+            position: fixed; inset: 0; z-index: 0; background: #000; pointer-events: none;
         }
         .video-bg {
             width: 100%; height: 100%; object-fit: cover; opacity: 0.35;
@@ -48,7 +49,7 @@
             background: linear-gradient(to top, #000000 0%, rgba(0,0,0,0.7) 40%, rgba(0,0,0,0.4) 100%);
         }
         
-        /* --- ULTRA PREMIUM GLASS CARDS (PERFORMANCE OPTIMIZED) --- */
+        /* --- ULTRA PREMIUM GLASS CARDS --- */
         .card { 
             background: rgba(15, 15, 15, 0.6); 
             backdrop-filter: blur(12px); 
@@ -151,15 +152,17 @@
         .toast { pointer-events: auto; background: rgba(10,10,10,0.9); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.08); color: white; padding: 14px 20px; border-radius: 14px; font-size: 13px; box-shadow: 0 15px 30px rgba(0,0,0,0.6); transform: translateX(120%); transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); display: flex; align-items: center; gap: 12px; }
         .toast.show { transform: translateX(0); }
         
-        /* --- ANIMATIONS (CINEMATIC BUT FASTER) --- */
-        .completed-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.4); z-index: 10; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px); opacity: 0; transition: opacity 0.3s ease; border-radius: inherit; }
+        /* --- ANIMATIONS --- */
+        /* FIX: pointer-events: none is extremely important here to not block buttons! */
+        .completed-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.4); z-index: 10; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px); opacity: 0; transition: opacity 0.3s ease; border-radius: inherit; pointer-events: none; }
         .card.is-completed .completed-overlay { opacity: 1; pointer-events: auto; }
         
-        .pending-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.5); z-index: 10; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px); opacity: 0; transition: opacity 0.3s ease; border-radius: inherit; }
+        .pending-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.5); z-index: 10; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px); opacity: 0; transition: opacity 0.3s ease; border-radius: inherit; pointer-events: none; }
         .card.is-pending .pending-overlay { opacity: 1; pointer-events: auto; }
 
-        @keyframes blur-reveal { 0% { opacity: 0; transform: translateY(20px); filter: blur(5px); } 100% { opacity: 1; transform: translateY(0); filter: blur(0); } }
-        .animate-reveal { animation: blur-reveal 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; opacity: 0; will-change: transform, opacity; }
+        /* Performance Fix: Removed filter:blur() for smooth mobile animations */
+        @keyframes fast-reveal { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
+        .animate-reveal { animation: fast-reveal 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; opacity: 0; will-change: transform, opacity; }
 
         @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
         .animate-float { animation: float 5s ease-in-out infinite; }
@@ -170,11 +173,9 @@
         @keyframes pulse-soft { 0%, 100% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 rgba(255,77,0,0); } 50% { transform: scale(1.03); opacity: 0.95; box-shadow: 0 5px 20px rgba(255,77,0,0.2); } }
         .pulse-soft { animation: pulse-soft 2s infinite cubic-bezier(0.4, 0, 0.2, 1); }
 
-        /* Typography optimizations */
         h1, h2, h3, h4 { letter-spacing: -0.02em; }
         p { letter-spacing: 0.01em; }
         
-        /* Modals */
         #modal-container > div { background: rgba(15,15,15,0.85); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 25px 50px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.05); border-radius: 24px; }
     </style>
 </head>
@@ -228,7 +229,6 @@
         window.currentVerify = null;
         window.countdownInterval = null;
 
-        // Ensure Video Plays (especially important for mobile browsers)
         document.addEventListener('touchstart', function() {
             const video = document.getElementById('app-bg-video');
             if (video && video.paused) { video.play().catch(e => console.log("Auto-play prevented", e)); }
@@ -400,8 +400,8 @@
 
         window.openModal = (contentHtml) => {
             let container = document.getElementById('modal-container');
-            if(!container) { container = document.createElement('div'); container.id = 'modal-container'; container.className = 'fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300 overflow-y-auto'; document.body.appendChild(container); }
-            container.innerHTML = `<div class="card p-6 md:p-8 w-full max-w-md shadow-[0_30px_60px_rgba(0,0,0,0.8)] transform scale-95 transition-transform duration-300 relative my-auto"><button type="button" onclick="window.closeModal()" class="absolute top-5 right-5 text-gray-500 hover:text-white z-50 transition bg-black/40 p-2 rounded-full backdrop-blur-sm"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>${contentHtml}</div>`;
+            if(!container) { container = document.createElement('div'); container.id = 'modal-container'; container.className = 'fixed inset-0 z-[100] bg-black/80 backdrop-blur-xl flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-400 overflow-y-auto'; document.body.appendChild(container); }
+            container.innerHTML = `<div class="card p-6 md:p-8 w-full max-w-md shadow-[0_30px_60px_rgba(0,0,0,0.8)] transform scale-95 transition-transform duration-400 relative my-auto"><button type="button" onclick="window.closeModal()" class="absolute top-5 right-5 text-gray-500 hover:text-white z-50 transition bg-black/40 p-2 rounded-full backdrop-blur-sm"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>${contentHtml}</div>`;
             setTimeout(() => { container.classList.remove('opacity-0', 'pointer-events-none'); container.classList.add('opacity-100'); container.firstElementChild.classList.remove('scale-95'); container.firstElementChild.classList.add('scale-100'); }, 10);
         };
 
@@ -487,7 +487,7 @@
                             <svg class="w-8 h-8 text-[#ff4d00]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                         </div>
                         <h3 class="text-2xl font-black italic uppercase tracking-tighter mb-2">${theirAlias}</h3>
-                        <p class="text-gray-400 text-[11px] mb-6 leading-relaxed max-w-[200px] mx-auto">Möchtest du dich mit diesem Grinder verbinden?</p>
+                        <p class="text-gray-400 text-xs mb-6 leading-relaxed max-w-[200px] mx-auto">Möchtest du dich mit diesem Grinder verbinden?</p>
                         <div class="bg-[rgba(255,255,255,0.05)] py-1.5 px-4 rounded-xl inline-block mb-6 border border-white/5">
                             <p class="text-[#ff4d00] font-bold text-[10px] tracking-widest">+${nextXpBounty} XP BOUNTY</p>
                         </div>
@@ -624,9 +624,9 @@
             state.tempUploadData = null; window.currentVerify = { mid, xp, name, type, qrSolution };
             let innerHtml = `<p class="text-[#ff4d00] text-[9px] font-bold uppercase tracking-widest mb-1">Verify Operation</p><h3 class="text-2xl font-black italic uppercase tracking-tighter mb-6">${name}</h3>`;
             if(type === 'qr') {
-                innerHtml += `<div id="qr-placeholder" onclick="window.startQRScanner()" class="border border-[rgba(255,255,255,0.05)] p-8 mb-5 flex flex-col items-center justify-center bg-[rgba(255,255,255,0.02)] rounded-2xl hover:border-[#ff4d00]/30 cursor-pointer transition"><svg class="w-10 h-10 text-[#ff4d00] mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg><p class="text-xs text-gray-300 font-bold uppercase tracking-widest text-center">Kamera aktivieren</p></div><div id="qr-reader" class="hidden w-full mb-5 rounded-2xl overflow-hidden border border-white/5"></div><input id="verify_code_input" type="text" placeholder="Oder Code eingeben" class="w-full text-center text-xs tracking-widest uppercase mb-5 font-bold">`;
+                innerHtml += `<div id="qr-placeholder" onclick="window.startQRScanner()" class="border border-[rgba(255,255,255,0.05)] p-8 mb-4 flex flex-col items-center justify-center bg-[rgba(255,255,255,0.02)] rounded-2xl hover:border-[#ff4d00]/30 cursor-pointer transition"><svg class="w-10 h-10 text-[#ff4d00] mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg><p class="text-xs text-gray-300 font-bold uppercase tracking-widest text-center">Kamera aktivieren</p></div><div id="qr-reader" class="hidden w-full mb-4 rounded-2xl overflow-hidden border border-white/5"></div><input id="verify_code_input" type="text" placeholder="Oder Code eingeben" class="w-full text-center text-xs tracking-widest uppercase mb-4 font-bold">`;
             } else {
-                innerHtml += `<input type="file" id="proof_file_input" accept="image/*" class="hidden" onchange="window.handleFileSelect(event)"><div onclick="window.triggerFileInput()" class="border border-[rgba(255,255,255,0.05)] min-h-[140px] p-3 mb-5 flex flex-col items-center justify-center bg-[rgba(255,255,255,0.02)] rounded-2xl hover:border-[#ff4d00]/30 transition cursor-pointer overflow-hidden relative"><div id="upload-placeholder" class="text-center"><svg class="w-10 h-10 text-[#ff4d00] mb-2 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg><p class="text-[10px] text-gray-300 font-bold uppercase tracking-widest">Beweisfoto hochladen</p></div><img id="upload-preview" class="hidden absolute inset-0 w-full h-full object-cover"></div>`;
+                innerHtml += `<input type="file" id="proof_file_input" accept="image/*" class="hidden" onchange="window.handleFileSelect(event)"><div onclick="window.triggerFileInput()" class="border border-[rgba(255,255,255,0.05)] min-h-[140px] p-3 mb-4 flex flex-col items-center justify-center bg-[rgba(255,255,255,0.02)] rounded-2xl hover:border-[#ff4d00]/30 transition cursor-pointer overflow-hidden relative"><div id="upload-placeholder" class="text-center"><svg class="w-10 h-10 text-[#ff4d00] mb-2 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg><p class="text-[10px] text-gray-300 font-bold uppercase tracking-widest">Beweisfoto hochladen</p></div><img id="upload-preview" class="hidden absolute inset-0 w-full h-full object-cover"></div>`;
             }
             if (type === 'qr' && qrSolution) { innerHtml += `<button type="button" onclick="window.checkCode()" class="w-full btn-grind py-3.5">Code Prüfen</button>`; } 
             else { innerHtml += `<button type="button" onclick="window.submitVerification('${mid}', ${xp}, '${type}', '${name.replace(/'/g, "\\'")}')" class="w-full btn-grind py-3.5">Senden zur Prüfung</button>`; }
@@ -785,15 +785,15 @@
             let contentHtml = '';
 
             if (isAlreadyRedeemed && (type === 'qr' || type === 'shipping' || type === 'xp' || type === 'lvl')) {
-                contentHtml = `<div class="bg-[rgba(255,255,255,0.02)] p-6 rounded-2xl flex flex-col items-center justify-center mb-5 border border-white/5"><div class="w-12 h-12 rounded-full border border-gray-600 flex items-center justify-center mb-3 opacity-50"><svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div><p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold text-center">Bereits eingelöst<br><span class="font-normal text-[9px] mt-1 block text-gray-500">Dieser Loot ist nicht mehr verfügbar.</span></p></div>`;
+                contentHtml = `<div class="bg-[rgba(255,255,255,0.02)] p-6 rounded-2xl flex flex-col items-center justify-center mb-5 border border-white/5"><div class="w-10 h-10 rounded-full border border-gray-600 flex items-center justify-center mb-3 opacity-50"><svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div><p class="text-[11px] text-gray-400 uppercase tracking-widest font-bold text-center">Bereits eingelöst<br><span class="font-normal text-[9px] mt-1 block text-gray-500">Dieser Loot ist nicht mehr verfügbar.</span></p></div>`;
             } else if (type === 'link') {
                 const isUrl = info.startsWith('http');
-                contentHtml = `<div class="bg-[rgba(255,255,255,0.02)] p-6 rounded-2xl flex flex-col items-center justify-center mb-5 border ${borderClass}"><p class="text-[10px] text-gray-400 mb-4 uppercase tracking-widest font-bold">Access Code / Link</p>${isUrl ? `<a href="${info}" target="_blank" class="w-full ${bgClass} border font-bold py-3.5 px-5 rounded-xl text-center uppercase tracking-widest transition text-xs">Link öffnen</a>` : `<div class="w-full bg-black/40 text-white font-mono text-lg py-3.5 px-5 rounded-xl text-center select-all border border-white/10">${info}</div>`}</div>`;
+                contentHtml = `<div class="bg-[rgba(255,255,255,0.02)] p-6 rounded-2xl flex flex-col items-center justify-center mb-5 border ${borderClass}"><p class="text-[10px] text-gray-400 mb-4 uppercase tracking-widest font-bold">Access Code / Link</p>${isUrl ? `<a href="${info}" target="_blank" class="w-full ${bgClass} border font-bold py-3 px-4 rounded-xl text-center uppercase tracking-widest transition text-xs">Link öffnen</a>` : `<div class="w-full bg-black/40 text-white font-mono text-lg py-3 px-4 rounded-xl text-center select-all border border-white/10">${info}</div>`}</div>`;
             } else if (type === 'xp' || type === 'lvl') {
                 const isXp = type === 'xp'; const unit = isXp ? 'XP' : 'Level';
-                contentHtml = `<div class="bg-[rgba(255,255,255,0.02)] p-6 rounded-2xl flex flex-col mb-5 border ${borderClass} relative overflow-hidden"><div class="absolute top-0 right-0 bg-black/40 px-3 py-1 text-[8px] font-bold text-gray-400 uppercase tracking-widest rounded-bl-xl border-b border-l border-white/5">Instant Boost</div><p class="text-[11px] text-gray-400 mb-6 leading-relaxed text-center font-medium">Dies fügt deinem Account direkt XP/Level hinzu.<br><span class="text-white font-black uppercase tracking-widest block mt-2 text-2xl ${textClass}">+${info} ${unit}</span></p><button type="button" id="boost-claim-btn" onclick="window.claimBoost(${lvl}, '${tier}', '${type}', '${info}')" class="w-full btn-grind py-3.5">BOOST AKTIVIEREN</button></div>`;
+                contentHtml = `<div class="bg-[rgba(255,255,255,0.02)] p-6 rounded-2xl flex flex-col mb-5 border ${borderClass} relative overflow-hidden"><div class="absolute top-0 right-0 bg-black/40 px-3 py-1 text-[8px] font-bold text-gray-400 uppercase tracking-widest rounded-bl-xl border-b border-l border-white/5">Instant Boost</div><p class="text-[11px] text-gray-400 mb-6 leading-relaxed text-center font-medium">Dies fügt deinem Account direkt XP/Level hinzu.<br><span class="text-white font-black uppercase tracking-widest block mt-2 text-xl ${textClass}">+${info} ${unit}</span></p><button type="button" id="boost-claim-btn" onclick="window.claimBoost(${lvl}, '${tier}', '${type}', '${info}')" class="w-full btn-grind">BOOST AKTIVIEREN</button></div>`;
             } else if (type === 'qr') {
-                contentHtml = `<div id="redeem-container" class="bg-[rgba(255,255,255,0.02)] p-6 rounded-2xl flex flex-col mb-5 border ${borderClass} relative overflow-hidden"><div class="absolute top-0 right-0 bg-black/40 px-3 py-1 text-[8px] font-bold text-gray-400 uppercase tracking-widest rounded-bl-xl border-b border-l border-white/5">One-Time Use</div><p class="text-[11px] text-gray-300 mb-6 leading-relaxed text-center font-medium">${info}<br><span class="text-gray-500 font-bold uppercase tracking-widest block mt-3 border-t border-white/5 pt-3 text-[9px]">Personal muss bestätigen!</span></p><div onmousedown="window.startRedeemHold(${lvl}, '${tier}', event)" onmouseup="window.stopRedeemHold()" onmouseleave="window.stopRedeemHold()" ontouchstart="window.startRedeemHold(${lvl}, '${tier}', event)" ontouchend="window.stopRedeemHold()" class="relative w-full h-14 bg-black/50 border border-white/10 rounded-xl overflow-hidden cursor-pointer flex items-center justify-center group"><div id="redeem-btn-fill" class="absolute left-0 top-0 bottom-0 w-0 bg-[#ff4d00]/80 z-0" style="transition: none;"></div><span id="redeem-btn-text" class="relative z-10 text-white font-bold uppercase tracking-widest text-xs pointer-events-none">Hold to Redeem</span></div></div>`;
+                contentHtml = `<div id="redeem-container" class="bg-[rgba(255,255,255,0.02)] p-6 rounded-2xl flex flex-col mb-5 border ${borderClass} relative overflow-hidden"><div class="absolute top-0 right-0 bg-black/40 px-3 py-1 text-[8px] font-bold text-gray-400 uppercase tracking-widest rounded-bl-xl border-b border-l border-white/5">One-Time Use</div><p class="text-[11px] text-gray-300 mb-6 leading-relaxed text-center font-medium">${info}<br><span class="text-gray-500 font-bold uppercase tracking-widest block mt-3 border-t border-white/5 pt-3 text-[9px]">Das Personal muss das Einlösen bestätigen!</span></p><div onmousedown="window.startRedeemHold(${lvl}, '${tier}', event)" onmouseup="window.stopRedeemHold()" onmouseleave="window.stopRedeemHold()" ontouchstart="window.startRedeemHold(${lvl}, '${tier}', event)" ontouchend="window.stopRedeemHold()" class="relative w-full h-14 bg-black/50 border border-white/10 rounded-xl overflow-hidden cursor-pointer flex items-center justify-center group"><div id="redeem-btn-fill" class="absolute left-0 top-0 bottom-0 w-0 bg-[#ff4d00]/80 z-0" style="transition: none;"></div><span id="redeem-btn-text" class="relative z-10 text-white font-bold uppercase tracking-widest text-xs pointer-events-none">Hold to Redeem</span></div></div>`;
             } else if (type === 'shipping') {
                 const fieldsStr = reward[`${tier}_fields`] || 'Adresse oder Info...';
                 const fieldsArr = fieldsStr.split(',').map(s => s.trim()).filter(s => s);
@@ -806,10 +806,10 @@
                 } else {
                     fieldsHtml = `<input id="shipping_field_0" type="text" placeholder="Adresse oder Info..." class="w-full mb-3 shipping-input-field" data-label="Eingabe">`;
                 }
-                contentHtml = `<div class="bg-[rgba(255,255,255,0.02)] p-6 rounded-2xl flex flex-col mb-5 border border-white/5 relative"><div class="absolute top-0 right-0 bg-black/40 px-3 py-1 text-[8px] font-bold text-gray-400 uppercase tracking-widest rounded-bl-xl border-b border-l border-white/5">One-Time Request</div><p class="text-xs text-gray-400 mb-5 leading-relaxed">${info}</p><div class="w-full">${fieldsHtml}</div><button type="button" onclick="window.submitShipping(${lvl}, '${tier}')" class="w-full btn-grind mt-2 py-3.5">Versand anfordern</button></div>`;
+                contentHtml = `<div class="bg-[rgba(255,255,255,0.02)] p-6 rounded-2xl flex flex-col mb-5 border border-white/5 relative"><div class="absolute top-0 right-0 bg-black/40 px-3 py-1 text-[8px] font-bold text-gray-400 uppercase tracking-widest rounded-bl-xl border-b border-l border-white/5">One-Time Request</div><p class="text-[11px] text-gray-400 mb-4 leading-relaxed">${info}</p><div class="w-full">${fieldsHtml}</div><button type="button" onclick="window.submitShipping(${lvl}, '${tier}')" class="w-full btn-grind mt-2">Versand anfordern</button></div>`;
             }
 
-            let innerHtml = `<p class="${textClass} text-[9px] font-bold uppercase tracking-widest mb-1.5">Loot Stash</p><h3 class="text-2xl font-black italic uppercase tracking-tighter mb-6">${title}</h3>${contentHtml} <button type="button" onclick="window.closeModal()" class="text-[10px] text-gray-500 uppercase tracking-widest font-bold hover:text-white transition py-2 w-full mt-1">Abbrechen</button>`;
+            let innerHtml = `<p class="${textClass} text-[9px] font-bold uppercase tracking-widest mb-1.5">Loot Stash</p><h3 class="text-2xl font-black italic uppercase tracking-tighter mb-5">${title}</h3>${contentHtml} <button type="button" onclick="window.closeModal()" class="text-[10px] text-gray-500 uppercase tracking-widest font-bold hover:text-white transition py-2 w-full mt-1">Abbrechen</button>`;
             window.openModal(innerHtml);
         };
 
@@ -873,9 +873,9 @@
             const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
             canvas.width = 1080; canvas.height = 1920; const centerY = canvas.height / 2;
             
-            ctx.fillStyle = '#050505'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#000000'; ctx.fillRect(0, 0, canvas.width, canvas.height);
             const glow = ctx.createRadialGradient(540, centerY, 0, 540, centerY, 900); glow.addColorStop(0, 'rgba(255, 77, 0, 0.2)'); glow.addColorStop(1, 'transparent'); ctx.fillStyle = glow; ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.globalAlpha = 0.05; for (let i = 0; i < 60000; i++) { ctx.fillStyle = Math.random() > 0.5 ? '#ffffff' : '#000000'; ctx.fillRect(Math.random() * canvas.width, Math.random() * canvas.height, 2, 2); } ctx.globalAlpha = 1.0; 
+            ctx.globalAlpha = 0.05; for (let i = 0; i < 50000; i++) { ctx.fillStyle = Math.random() > 0.5 ? '#ffffff' : '#000000'; ctx.fillRect(Math.random() * canvas.width, Math.random() * canvas.height, 2, 2); } ctx.globalAlpha = 1.0; 
 
             ctx.font = 'italic 900 130px "Inter", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
             const textGrind = 'GRIND'; const textDot = '.'; const wGrind = ctx.measureText(textGrind).width; const wDot = ctx.measureText(textDot).width;
@@ -924,8 +924,8 @@
         }
 
         const getFooterHTML = () => `
-            <footer class="mt-16 border-t border-white/5 pt-8 text-center flex flex-col items-center justify-center gap-5 w-full max-w-6xl mx-auto px-6 relative z-10 pb-8 backdrop-blur-sm">
-                <div class="flex flex-wrap justify-center gap-x-6 gap-y-3 text-[9px] uppercase font-bold tracking-[0.2em] text-gray-500">
+            <footer class="mt-12 border-t border-white/5 pt-8 text-center flex flex-col items-center justify-center gap-5 w-full max-w-6xl mx-auto px-6 relative z-10 pb-8 backdrop-blur-sm">
+                <div class="flex flex-wrap justify-center gap-x-6 gap-y-3 text-[10px] uppercase font-bold tracking-[0.2em] text-gray-500">
                     <span class="hover:text-white cursor-pointer transition" onclick="window.setView('impressum')">Impressum</span>
                     <span class="hidden md:inline text-gray-700">•</span>
                     <span class="hover:text-white cursor-pointer transition" onclick="window.setView('datenschutz')">Datenschutz</span>
@@ -995,104 +995,43 @@
                         
                         <h2>Redaktionell verantwortlich</h2>
                         <p>Fabio Maines<br>Thieboldsgasse 117<br>50676 Köln</p>
-
-                        <h2>EU-Streitschlichtung</h2>
-                        <p>Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit: <a href="https://ec.europa.eu/consumers/odr/" target="_blank">https://ec.europa.eu/consumers/odr/</a>.<br>Unsere E-Mail-Adresse finden Sie oben im Impressum.</p>
-                        
-                        <h2>Verbraucher&shy;streit&shy;beilegung/Universal&shy;schlichtungs&shy;stelle</h2>
-                        <p>Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.</p>
                     `;
                 } else if (state.view === 'datenschutz') {
                     title = 'Datenschutzerklärung';
                     content = `
                         <h2>1. Datenschutz auf einen Blick</h2>
                         <h3>Allgemeine Hinweise</h3>
-                        <p>Die folgenden Hinweise geben einen einfachen Überblick darüber, was mit Ihren personenbezogenen Daten passiert, wenn Sie diese App ("GRIND.") nutzen. Personenbezogene Daten sind alle Daten, mit denen Sie persönlich identifiziert werden können.</p>
+                        <p>Die folgenden Hinweise geben einen einfachen Überblick darüber, was mit Ihren personenbezogenen Daten passiert, wenn Sie diese App ("GRIND.") nutzen.</p>
                         
                         <h3>Datenerfassung in der App</h3>
                         <p><strong>Wer ist verantwortlich für die Datenerfassung?</strong><br>
                         Die Datenverarbeitung erfolgt durch den App-Betreiber (siehe Impressum).</p>
                         
                         <p><strong>Wie erfassen wir Ihre Daten?</strong><br>
-                        Ihre Daten werden zum einen dadurch erhoben, dass Sie uns diese mitteilen. Hierbei handelt es sich z. B. um Daten, die Sie bei der Erstellung des Profils eingeben (Alias, Base/Stadt, Telefonnummer) oder wenn Sie uns Adressdaten für den Versand von physischen Loots mitteilen.</p>
-                        
-                        <p><strong>Wofür nutzen wir Ihre Daten?</strong><br>
-                        Ein Teil der Daten wird erhoben, um eine fehlerfreie Bereitstellung der App zu gewährleisten. Andere Daten können zur Analyse Ihres Nutzerverhaltens verwendet werden. Eingegebene Daten (wie Fotos zur Verifizierung oder Scans) dienen der Sicherstellung des "Grind Tracks" (Anti-Cheat-Mechaniken).</p>
-
-                        <h2>2. Hosting, Backend & Analysetools</h2>
-                        <h3>Hosting (GitHub Pages)</h3>
-                        <p>Wir hosten unsere Web-App bei GitHub Inc., 88 Colin P Kelly Jr St, San Francisco, CA 94107, USA. Wenn Sie die App aufrufen, erfasst GitHub Ihre IP-Adresse und weitere technische Daten (z.B. User-Agent). Weitere Informationen finden Sie in der Datenschutzerklärung von GitHub: <a href="https://docs.github.com/en/site-policy/privacy-policies/github-privacy-statement" target="_blank">GitHub Privacy Statement</a>.</p>
-
-                        <h3>Google Firebase</h3>
-                        <p>Wir nutzen Firebase von Google (Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland), um Benutzeranmeldungen (Authentication via SMS) und die Datenbank (Firestore) zu verwalten.<br>
-                        Ihre Telefonnummer, Ihr gewählter Alias, Ihr Fortschritt (XP) sowie hochgeladene Beweisfotos und ggf. Lieferadressen werden sicher in den Firebase-Datenbanken gespeichert. Die Datenübertragung in die USA stützt sich auf die Standardvertragsklauseln der EU-Kommission. Mehr Informationen finden Sie in der Datenschutzerklärung von Google.</p>
-                        
-                        <h3>Google Analytics & Search Console</h3>
-                        <p>Diese Website nutzt Funktionen des Webanalysedienstes Google Analytics und die Google Search Console. Anbieter ist die Google Ireland Limited. Wir haben die IP-Anonymisierung aktiviert. Google Analytics verwendet "Cookies", um eine Analyse der Benutzung der Website durch Sie zu ermöglichen.</p>
-
-                        <h2>3. Berechtigungen & Zugriffe</h2>
-                        <h3>Kamera-Zugriff</h3>
-                        <p>Für das Scannen von QR-Codes fragt die App nach der Berechtigung für die Kamera. Der Scanvorgang erfolgt lokal auf Ihrem Endgerät über die Bibliothek "html5-qrcode". Es werden keine Videostreams an unsere Server gesendet. Nur der im QR-Code ausgelesene Text wird zur Validierung an das System übertragen.</p>
-                        
-                        <h3>Foto-Upload</h3>
-                        <p>Wenn Sie ein Foto als "Beweis" für eine Mission hochladen, wird dieses Bild auf unseren Firebase-Servern gespeichert, um manuell oder maschinell validiert zu werden. Mit dem Upload erteilen Sie uns die Erlaubnis, dieses Bild zu diesem Zweck zu speichern und zu verarbeiten.</p>
-
-                        <h2>4. Zahlungsanbieter (PayPal)</h2>
-                        <p>Wir bieten in der App Zahlungen per PayPal an. Wenn Sie den "PRO Pass" erwerben, werden Ihre Zahlungsdaten zur Zahlungsabwicklung an die PayPal (Europe) S.à r.l. et Cie, S.C.A., 22-24 Boulevard Royal, L-2449 Luxembourg übermittelt. Wir speichern keine Bank- oder Kreditkartendaten in unserer eigenen Datenbank.</p>
-
-                        <h2>5. Ihre Rechte</h2>
-                        <p>Sie haben jederzeit das Recht, unentgeltlich Auskunft über Herkunft, Empfänger und Zweck Ihrer gespeicherten personenbezogenen Daten zu erhalten. Sie haben außerdem ein Recht, die Berichtigung oder Löschung dieser Daten zu verlangen. Hierzu können Sie sich jederzeit an die im Impressum angegebene Adresse wenden.</p>
+                        Ihre Daten werden zum einen dadurch erhoben, dass Sie uns diese mitteilen. Hierbei handelt es sich z. B. um Daten, die Sie bei der Erstellung des Profils eingeben.</p>
                     `;
                 } else if (state.view === 'agb') {
                     title = 'AGB';
                     content = `
                         <h2>§ 1 Geltungsbereich und Vertragsgegenstand</h2>
-                        <p>Diese Allgemeinen Geschäftsbedingungen (AGB) gelten für die Nutzung der "GRIND." Web-App (im Folgenden "App"). Die App bietet Nutzern die Möglichkeit, durch das Abschließen von Aufgaben ("Missions" / "Operations") Erfahrungspunkte (XP) zu sammeln und sich digitale oder physische Belohnungen ("Loots") freizuschalten.</p>
+                        <p>Diese Allgemeinen Geschäftsbedingungen (AGB) gelten für die Nutzung der "GRIND." Web-App.</p>
                         
                         <h2>§ 2 Nutzerkonto & Voraussetzungen</h2>
                         <ul>
-                            <li>Die Nutzung der App und insbesondere Käufe oder die Teilnahme an Gewinnspielen ist nur volljährigen Personen (ab 18 Jahren) gestattet.</li>
-                            <li>Die Registrierung erfolgt über eine gültige Handynummer. Der Nutzer ist verpflichtet, wahrheitsgemäße Angaben (z.B. bei Versandadressen) zu machen.</li>
+                            <li>Die Nutzung der App ist nur volljährigen Personen (ab 18 Jahren) gestattet.</li>
                             <li>Jeder Nutzer darf nur einen Account besitzen ("No Smurfing").</li>
                         </ul>
 
-                        <h2>§ 3 Der GRIND. PRO Pass (Kauf & Widerrufsverzicht)</h2>
-                        <p>Die App bietet einen kostenlosen Track ("Free") und einen Premium-Track ("PRO Pass").<br>
-                        <strong>(1) Art des Kaufs:</strong> Der "PRO Pass" ist ein Einmalkauf, der ausschließlich für die Dauer der aktuell laufenden "Season" gilt. Es handelt sich um <u>kein</u> Abonnement.<br>
-                        <strong>(2) Widerrufsverzicht:</strong> Der PRO Pass ist ein digitaler Inhalt. <strong>Mit dem Kauf stimmen Sie ausdrücklich zu, dass wir vor Ablauf der Widerrufsfrist mit der Ausführung des Vertrags (Freischaltung des PRO Passes) beginnen. Ihnen ist bekannt, dass Sie durch diese Zustimmung mit Beginn der Ausführung Ihr Widerrufsrecht verlieren.</strong> Eine Rückerstattung des Kaufpreises ist nach erfolgreicher Freischaltung ausgeschlossen.</p>
-
-                        <h2>§ 4 Fair Play, Anti-Cheat & Sanktionen</h2>
-                        <p>Der GRIND. Track basiert auf Ehrlichkeit. Jeglicher Versuch, das System oder andere Nutzer zu betrügen, wird strengstens geahndet.<br>
-                        <strong>Als Betrugsversuche ("Cheating") gelten insbesondere, aber nicht ausschließlich:</strong></p>
-                        <ul>
-                            <li>Das Hochladen von falschen, aus dem Internet kopierten, KI-generierten oder manipulierten Beweisfotos ("Faking").</li>
-                            <li>Das Weitergeben oder Einlösen von geleakten QR-Codes oder Access-Links an Dritte.</li>
-                            <li>Das Ausnutzen von technischen Fehlern ("Bugs") oder das Hacken der App.</li>
-                            <li>Die Erstellung von mehreren Accounts, um sich unfaire Vorteile zu verschaffen.</li>
-                        </ul>
-                        <p><strong>Sanktionen:</strong> Bei einem festgestellten Verstoß behalten wir uns das Recht vor, den Nutzer-Account <u>sofort und ohne Vorwarnung permanent zu sperren</u>. Ein Anspruch auf Reaktivierung, Auszahlung von noch nicht eingelösten Loots oder die Erstattung des gekauften "PRO Passes" besteht in diesem Fall ausdrücklich nicht. Wir behalten uns weitere rechtliche Schritte vor.</p>
-
-                        <h2>§ 5 Loots, Gutscheine & Gewinnspiele</h2>
-                        <p>In der App können "Loots" (z. B. T-Shirts, Vor-Ort-Gutscheine, Rabattcodes oder Auslosungen) freigeschaltet werden.</p>
-                        <ul>
-                            <li><strong>Physische Güter (z. B. Kleidung):</strong> Die Ausgabe von physischen Artikeln erfolgt nur "solange der Vorrat reicht". Es besteht kein Rechtsanspruch auf ein spezifisches Item oder eine spezifische Größe.</li>
-                            <li><strong>Gutscheine:</strong> Gutscheine von Partnern unterliegen den Bedingungen des jeweiligen Partners.</li>
-                            <li><strong>Auslosungen / Giveaways:</strong> Sofern eine Mission oder ein Loot die Teilnahme an einer Auslosung beinhaltet, gilt: Die Teilnahme ist unverbindlich, eine Gewinnausschüttung wird nicht garantiert. <strong>Der Rechtsweg ist ausgeschlossen.</strong> Eine Barauszahlung von Gewinnen oder Loots ist niemals möglich.</li>
-                        </ul>
-
-                        <h2>§ 6 Verfügbarkeit & Haftungsbeschränkung</h2>
-                        <p>Wir bemühen uns, die App ununterbrochen zur Verfügung zu stellen. Es besteht jedoch kein Anspruch auf ständige Erreichbarkeit. Wir haften nur für Vorsatz und grobe Fahrlässigkeit. Bei leichter Fahrlässigkeit haften wir nur bei Verletzung einer wesentlichen Vertragspflicht (Kardinalpflicht). Für Datenverlust oder Ausfälle aufgrund von Drittanbietern (z.B. Server-Ausfälle bei Google/Firebase) übernehmen wir keine Haftung.</p>
-
-                        <h2>§ 7 Änderungen der AGB</h2>
-                        <p>Wir behalten uns vor, diese AGB (z.B. für kommende Seasons) anzupassen. Änderungen werden innerhalb der App kommuniziert.</p>
+                        <h2>§ 3 Der GRIND. PRO Pass</h2>
+                        <p>Der "PRO Pass" ist ein Einmalkauf, der ausschließlich für die Dauer der aktuell laufenden "Season" gilt. Es handelt sich um <u>kein</u> Abonnement. Ein Widerruf nach der Freischaltung ist ausgeschlossen.</p>
                     `;
                 }
 
                 appDiv.innerHTML = `
-                    <div class="max-w-4xl mx-auto px-6 py-12 w-full relative z-20 animate-reveal">
-                        <button onclick="window.goBack()" class="text-gray-400 hover:text-white text-[10px] font-bold uppercase tracking-widest mb-8 flex items-center gap-2 transition bg-black/40 px-3 py-1.5 rounded-xl backdrop-blur-md border border-white/5"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg> Zurück</button>
-                        <h1 class="text-3xl md:text-5xl font-black italic uppercase tracking-tighter mb-8 text-white">${title}</h1>
-                        <div class="legal-content card p-8 shadow-2xl">${content}</div>
+                    <div class="max-w-3xl mx-auto px-6 py-12 w-full relative z-20">
+                        <button onclick="window.goBack()" class="text-gray-400 hover:text-white text-[10px] font-bold uppercase tracking-widest mb-8 flex items-center gap-2 transition"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg> Zurück</button>
+                        <h1 class="text-3xl md:text-4xl font-black italic uppercase tracking-tighter mb-8">${title}</h1>
+                        <div class="legal-content card p-8">${content}</div>
                     </div>
                     ${getFooterHTML()}
                 `;
@@ -1108,21 +1047,11 @@
 
                 appDiv.innerHTML = `
                     <div class="flex-1 flex flex-col items-center justify-center p-6 min-h-[80vh] text-center animate-reveal relative z-20">
-                        <div class="w-16 h-16 border border-[#a855f7]/40 rounded-2xl flex items-center justify-center mb-6 bg-black/60 backdrop-blur-xl shadow-[0_0_30px_rgba(168,85,247,0.3)]"><svg class="w-8 h-8 text-[#a855f7]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg></div>
-                        <h2 class="text-4xl md:text-5xl font-black italic tracking-tighter mb-3 text-white">GRIND. <span class="text-[#a855f7] drop-shadow-[0_0_15px_rgba(168,85,247,0.5)]">PRO</span></h2>
-                        <p class="text-gray-300 font-medium text-xs md:text-sm mb-8 max-w-sm leading-relaxed">Schalte alle Premium-Rewards der Season 0${seasonNum} frei und maximiere deinen Progress.</p>
-                        
-                        <div class="card p-8 mb-6 w-full max-w-md relative overflow-hidden group">
-                            <div class="absolute inset-0 bg-gradient-to-t from-[#a855f7]/10 to-transparent opacity-50"></div>
-                            <div class="relative z-10">
-                                <div class="text-[10px] uppercase tracking-[0.3em] text-[#d8b4fe] font-bold mb-2">Season Pass</div>
-                                <div id="dynamic-price-display" class="text-5xl font-black text-white italic tracking-tighter mb-8">${displayPrice} €</div>
-                                <div id="paypal-button-container" class="w-full min-h-[150px] relative z-50 flex items-center justify-center"></div>
-                            </div>
-                        </div>
-                        
-                        <p class="text-[9px] text-gray-500 uppercase tracking-widest mt-2 mb-6 max-w-xs mx-auto leading-relaxed">Mit dem Kauf stimmst du unseren <span class="text-white underline cursor-pointer hover:text-[#a855f7] transition" onclick="window.setView('agb')">AGB</span> zu.</p>
-                        <button type="button" onclick="window.setView('dashboard')" class="text-gray-400 hover:text-white text-[10px] uppercase tracking-[0.2em] font-bold transition bg-black/40 px-5 py-2.5 rounded-xl border border-white/5 backdrop-blur-md">Zurück zum Grind.</button>
+                        <div class="w-16 h-16 border border-[#a855f7]/30 rounded-2xl flex items-center justify-center mb-6 bg-white/5"><svg class="w-8 h-8 text-[#a855f7]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg></div>
+                        <h2 class="text-4xl font-black italic tracking-tighter mb-2">GRIND. <span class="text-[#a855f7]">PRO</span></h2><p class="text-gray-400 font-medium text-[11px] mb-8 max-w-xs leading-relaxed">Schalte alle Premium-Rewards der Season 0${seasonNum} frei und maximiere deinen Progress.</p>
+                        <div class="card p-8 mb-6 w-full max-w-sm relative overflow-hidden group"><div class="absolute inset-0 bg-gradient-to-t from-[#a855f7]/10 to-transparent opacity-50"></div><div class="relative z-10"><div class="text-[10px] uppercase tracking-[0.2em] text-gray-500 font-bold mb-2">Season Pass</div><div id="dynamic-price-display" class="text-5xl font-black text-white italic tracking-tighter mb-8">${displayPrice} €</div><div id="paypal-button-container" class="w-full min-h-[150px] relative z-50 flex items-center justify-center"></div></div></div>
+                        <p class="text-[9px] text-gray-500 uppercase tracking-widest mt-2 mb-6 max-w-xs mx-auto leading-relaxed">Mit dem Kauf stimmst du unseren <span class="text-white underline cursor-pointer hover:text-[#a855f7]" onclick="window.setView('agb')">AGB</span> zu.</p>
+                        <button type="button" onclick="window.setView('dashboard')" class="text-gray-500 hover:text-white text-[10px] uppercase tracking-[0.2em] font-bold transition">Zurück zum Grind</button>
                     </div>
                     ${getFooterHTML()}
                 `;
@@ -1137,28 +1066,28 @@
                             } catch(e) { console.error(e); } 
                             window.setView('dashboard'); 
                         }); } }).render('#paypal-button-container');
-                    } else if (!window.paypal) { document.getElementById('paypal-button-container').innerHTML = '<div class="text-red-500 text-xs font-bold">Zahlungssystem blockiert. Bitte neu laden.</div>'; }
+                    } else if (!window.paypal) { document.getElementById('paypal-button-container').innerHTML = '<div class="text-red-500 text-xs italic font-bold">Zahlungssystem blockiert. Bitte neu laden.</div>'; }
                 }, 100); return;
             }
 
             if (state.view === 'onboarding') {
                 appDiv.innerHTML = `
                     <div class="flex-1 flex flex-col items-center justify-center p-6 min-h-[80vh] text-center animate-reveal">
-                        <h1 class="text-4xl md:text-5xl font-black italic tracking-tighter mb-3 text-white">IDENTIFICATION<span class="text-[#ff4d00]">.</span></h1>
-                        <p class="text-gray-400 font-medium text-xs md:text-sm mb-10 max-w-sm leading-relaxed">Wähle deine Base und trete dem Network bei.</p>
-                        <form onsubmit="window.submitOnboarding(event)" class="w-full max-w-sm space-y-4 card p-6">
-                            <input id="onboard_name" type="text" placeholder="Dein Name / Alias" required class="w-full text-center font-bold text-base">
+                        <h1 class="text-4xl md:text-5xl font-black italic tracking-tighter mb-2">IDENTIFICATION<span class="text-[#ff4d00]">.</span></h1>
+                        <p class="text-gray-400 font-medium text-xs mb-10 max-w-sm leading-relaxed">Wähle deine Base und trete dem Network bei.</p>
+                        <form onsubmit="window.submitOnboarding(event)" class="w-full max-w-sm space-y-4">
+                            <input id="onboard_name" type="text" placeholder="Dein Name" required class="w-full text-center font-bold">
                             <div class="relative">
-                                <select id="onboard_city" required class="w-full text-center font-bold appearance-none cursor-pointer text-base">
+                                <select id="onboard_city" required class="w-full text-center font-bold appearance-none cursor-pointer">
                                     <option value="" disabled selected class="text-gray-500">Base wählen</option>
                                     <option value="Köln">Köln</option>
                                     <option value="locked" disabled class="text-gray-600">Weitere Städte in Kürze...</option>
                                 </select>
-                                <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                                <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                                 </div>
                             </div>
-                            <button type="submit" class="w-full btn-grind py-3.5 mt-2 text-xs">Confirm Identity</button>
+                            <button type="submit" class="w-full btn-grind py-4 mt-2">Confirm Identity</button>
                         </form>
                     </div>
                 `; return;
@@ -1166,9 +1095,9 @@
 
             if (state.view === 'auth') {
                 const seasonNum = state.seasonConfig?.number || 1;
-                let authHtml = `<div class="flex-1 flex flex-col items-center justify-center p-6 min-h-[80vh] text-center animate-reveal"><h1 class="text-6xl md:text-7xl font-black italic tracking-tighter mb-3 text-white drop-shadow-lg">GRIND<span class="text-[#ff4d00] drop-shadow-[0_0_15px_rgba(255,77,0,0.8)]">.</span></h1><p class="text-gray-400 font-bold uppercase tracking-[0.3em] text-[9px] mb-12">Season 0${seasonNum}</p><div class="w-full max-w-sm card p-6">`;
-                if (state.authStep === 'phone') { authHtml += `<form onsubmit="window.sendSMS(event)" class="space-y-4"><div class="flex gap-2"><select id="auth_prefix" class="w-24 text-center font-bold appearance-none cursor-pointer text-sm"><option value="+49">🇩🇪 +49</option><option value="+43">🇦🇹 +43</option><option value="+41">🇨🇭 +41</option></select><input id="auth_phone" type="tel" placeholder="170 1234567" required class="flex-1 text-center font-bold text-base tracking-wide"></div><button id="auth_submit_btn" type="submit" class="w-full btn-grind py-3.5 text-xs">Enter The Drop</button></form>`; } 
-                else { authHtml += `<form onsubmit="window.verifyCode(event)" class="space-y-4"><div class="text-center mb-6"><p class="text-gray-400 text-[10px] uppercase tracking-widest font-bold">Code gesendet an</p><p class="text-white font-black mt-1.5 text-lg">${state.tempPhone}</p></div><input id="auth_code" type="text" placeholder="123456" required class="w-full text-center text-3xl font-mono tracking-[0.4em] py-3"><button id="verify_submit_btn" type="submit" class="w-full btn-grind py-3.5 text-xs">Verify Access</button><button type="button" onclick="window.goBackToPhone()" class="w-full text-center mt-3 text-[10px] text-gray-500 hover:text-white uppercase tracking-widest transition font-bold py-2">Cancel</button></form>`; }
+                let authHtml = `<div class="flex-1 flex flex-col items-center justify-center p-6 min-h-[80vh] text-center animate-reveal"><h1 class="text-6xl md:text-8xl font-black italic tracking-tighter mb-2 text-white">GRIND<span class="text-[#ff4d00]">.</span></h1><p class="text-gray-400 font-bold uppercase tracking-[0.3em] text-[10px] mb-12">Season 0${seasonNum}</p><div class="w-full max-w-sm">`;
+                if (state.authStep === 'phone') { authHtml += `<form onsubmit="window.sendSMS(event)" class="space-y-4"><div class="flex gap-2"><select id="auth_prefix" class="w-24 text-center font-bold appearance-none cursor-pointer"><option value="+49">🇩🇪 +49</option><option value="+43">🇦🇹 +43</option><option value="+41">🇨🇭 +41</option></select><input id="auth_phone" type="tel" placeholder="170 1234567" required class="flex-1 text-center font-bold"></div><button id="auth_submit_btn" type="submit" class="w-full btn-grind py-4">Enter The Drop</button></form>`; } 
+                else { authHtml += `<form onsubmit="window.verifyCode(event)" class="space-y-4"><div class="text-center mb-6"><p class="text-gray-400 text-[10px] uppercase tracking-widest font-bold">Code gesendet an</p><p class="text-white font-bold mt-1 text-sm">${state.tempPhone}</p></div><input id="auth_code" type="text" placeholder="123456" required class="w-full text-center text-3xl font-mono tracking-[0.3em] py-3"><button id="verify_submit_btn" type="submit" class="w-full btn-grind py-4">Verify Access</button><button type="button" onclick="window.goBackToPhone()" class="w-full text-center mt-4 text-[10px] text-gray-500 hover:text-white uppercase tracking-widest transition font-bold py-2">Cancel</button></form>`; }
                 authHtml += `</div></div>`; appDiv.innerHTML = authHtml; return;
             }
 
@@ -1216,18 +1145,18 @@
 
                 let html = `
                     <header class="p-5 md:p-8 max-w-6xl mx-auto flex justify-between items-center w-full relative z-20 animate-reveal" style="animation-delay: 0.1s;">
-                        <h1 class="text-2xl md:text-3xl font-black italic tracking-tighter text-white drop-shadow-md">GRIND<span class="text-[#ff4d00]">.</span></h1>
+                        <h1 class="text-3xl md:text-4xl font-black italic tracking-tighter text-white drop-shadow-md">GRIND<span class="text-[#ff4d00]">.</span></h1>
                         <div class="flex gap-2">
-                            <button type="button" onclick="window.generateShareCard()" class="text-[9px] uppercase font-bold text-gray-300 hover:text-white transition tracking-widest border border-white/10 px-3 py-1.5 rounded-xl bg-black/40 backdrop-blur-md shadow-sm">Export</button>
-                            <button type="button" onclick="window.handleLogout()" class="text-[9px] uppercase font-bold text-gray-500 hover:text-red-400 transition tracking-widest border border-white/5 px-3 py-1.5 rounded-xl bg-black/40 backdrop-blur-md shadow-sm">Exit</button>
+                            <button type="button" onclick="window.generateShareCard()" class="text-[9px] md:text-[10px] uppercase font-bold text-gray-300 hover:text-white transition tracking-widest border border-white/10 px-3 py-1.5 rounded-xl bg-black/40 backdrop-blur-md shadow-sm">Export</button>
+                            <button type="button" onclick="window.handleLogout()" class="text-[9px] md:text-[10px] uppercase font-bold text-gray-400 hover:text-red-400 transition tracking-widest border border-white/5 px-3 py-1.5 rounded-xl bg-black/40 backdrop-blur-md shadow-sm">Exit</button>
                         </div>
                     </header>
 
                     <main class="max-w-6xl mx-auto px-5 w-full relative z-10 pb-12">
                         
                         <!-- STANDING -->
-                        <section class="mb-10 card p-8 flex flex-col items-center text-center animate-float shadow-[0_30px_60px_rgba(0,0,0,0.6)] border border-white/10">
-                            <p class="text-gray-400 text-[10px] font-bold uppercase tracking-[0.3em] mb-5">Current Standing</p>
+                        <section class="mb-10 card p-8 flex flex-col items-center text-center animate-float">
+                            <p class="text-gray-400 text-[10px] font-bold uppercase tracking-[0.3em] mb-4">Current Standing</p>
                             <div class="relative group">
                                 <svg class="w-48 h-48 transform -rotate-90">
                                     <circle cx="96" cy="96" r="88" stroke="rgba(255,255,255,0.04)" stroke-width="6" fill="none"></circle>
@@ -1241,23 +1170,23 @@
                                 </svg>
                                 <div class="absolute inset-0 flex flex-col items-center justify-center mt-1 transition-transform duration-300 group-hover:scale-105">
                                     <span id="main-lvl-text" class="text-5xl md:text-6xl font-black italic tracking-tighter text-white drop-shadow-sm">LVL ${safeLvl}</span>
-                                    <span class="text-[10px] uppercase tracking-[0.3em] text-transparent bg-clip-text grind-gradient font-black mt-1.5 drop-shadow-sm">${currentRank}</span>
+                                    <span class="text-[10px] uppercase tracking-[0.3em] text-transparent bg-clip-text grind-gradient font-black mt-1 drop-shadow-sm">${currentRank}</span>
                                 </div>
                             </div>
-                            <p class="mt-6 text-xs text-white font-bold tracking-wide"><span id="xp-counter-num">${displayXp}</span> <span class="text-gray-500 font-medium">/ ${(safeLvl) * 1000} XP</span></p>
+                            <p class="mt-5 text-sm text-white font-bold tracking-wide"><span id="xp-counter-num">${displayXp}</span> <span class="text-gray-500 font-medium">/ ${(safeLvl) * 1000} XP</span></p>
                             <div class="mt-3 bg-white/5 border border-white/5 px-3 py-1 rounded-full backdrop-blur-sm">
                                 <p class="text-gray-400 font-bold italic text-[10px] uppercase tracking-widest">${p.alias} <span class="ml-1 opacity-40">| ${p.city || 'Köln'}</span></p>
                             </div>
                         </section>
 
                         <!-- LOOT TRACK -->
-                        <section class="mb-14 animate-reveal" style="animation-delay: 0.2s;">
+                        <section class="mb-12 animate-reveal" style="animation-delay: 0.2s;">
                             <div class="flex justify-between items-center mb-5 px-1">
-                                <div><h3 class="text-xl md:text-2xl font-black italic uppercase tracking-tighter text-white drop-shadow-sm">Grind Track <span class="text-[#ff4d00]">S0${seasonNum}</span></h3><p class="text-gray-400 text-[9px] font-bold tracking-widest mt-1.5">${seasonDaysLeftText}</p></div>
+                                <div><h3 class="text-xl md:text-2xl font-black italic uppercase tracking-tighter text-white drop-shadow-sm">Grind Track <span class="text-[#ff4d00]">S0${seasonNum}</span></h3><p class="text-gray-400 text-[9px] font-bold tracking-widest mt-1">${seasonDaysLeftText}</p></div>
                                 <div>${hasPremium ? '<span class="bg-[#a855f7]/20 text-[#d8b4fe] border border-[#a855f7]/40 px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest shadow-[0_0_15px_rgba(168,85,247,0.2)] backdrop-blur-md">PRO ACTIVE</span>' : '<button type="button" onclick="window.setView(\'paywall\')" class="btn-pro">Get Pro Pass</button>'}</div>
                             </div>
 
-                            <div id="pass-viewport" class="no-scrollbar overflow-x-auto py-6 relative flex items-center min-h-[260px] border-y border-white/10 bg-black/30 backdrop-blur-md rounded-2xl shadow-inner">
+                            <div id="pass-viewport" class="no-scrollbar overflow-x-auto py-6 relative flex items-center min-h-[260px] border-y border-white/10 bg-black/40 backdrop-blur-md rounded-3xl shadow-inner">
                                 <div class="flex items-center px-6 relative" style="min-width: max-content;">
                                     <div class="absolute top-1/2 left-[85px] right-[85px] h-[1px] bg-white/10 z-0 -translate-y-1/2 rounded-full"></div>
                                     <div id="track-line" class="absolute top-1/2 left-[85px] h-[3px] bg-[#ff4d00] shadow-[0_0_15px_rgba(255,77,0,0.6)] z-0 transition-all duration-[700ms] ease-out -translate-y-1/2 rounded-full" style="width: calc(130px * ${oldTrackProgress}); display: ${safeXp > 0 || state.prevXp > 0 ? 'block' : 'none'};"></div>
@@ -1284,7 +1213,7 @@
                             <div ${isProUnlocked && r?.pro && !proClaimed ? `onclick="window.openClaimModal(${i}, 'pro')" class="reward-box pro mt-5 unlocked scale-105 cursor-pointer shadow-sm"` : (proClaimed ? `onclick="window.openClaimModal(${i}, 'pro')" class="reward-box pro mt-5 unlocked opacity-50 cursor-pointer"` : `class="reward-box pro mt-5 opacity-40 scale-[0.98] hover:opacity-100 transition-opacity"`)}>
                                 <span class="tag-pro italic">PRO</span>
                                 ${proClaimed && r?.pro ? `<div class="completed-overlay rounded-[16px]"><span class="text-[#d8b4fe] font-black text-[10px] uppercase italic transform -rotate-12"><svg class="w-5 h-5 drop-shadow-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></span></div>` : ''}
-                                <span class="text-[9px] font-bold uppercase text-center px-2 mt-4 relative z-10 ${isProUnlocked ? 'text-[#d8b4fe]' : 'text-purple-300'}">${r?.pro || '-'}</span>
+                                <span class="text-[9px] font-bold uppercase text-center px-2 mt-3 relative z-10 ${isProUnlocked ? 'text-[#d8b4fe]' : 'text-purple-300'}">${r?.pro || '-'}</span>
                             </div>
                         </div>
                     `;
@@ -1296,8 +1225,8 @@
                         </section>
 
                         <!-- OPERATIONS -->
-                        <section class="mb-14 animate-reveal" style="animation-delay: 0.3s;">
-                            <div class="flex flex-col gap-4 mb-6 px-1">
+                        <section class="mb-12 animate-reveal" style="animation-delay: 0.3s;">
+                            <div class="flex flex-col gap-4 mb-5 px-1">
                                 <div class="flex justify-between items-end border-b border-white/10 pb-3">
                                     <div>
                                         <p class="text-[#ff4d00] text-[9px] font-black uppercase tracking-widest mb-1 drop-shadow-sm">Operations</p>
@@ -1359,11 +1288,11 @@
                             <div class="pr-3 relative z-0 flex-1 w-full">
                                 <h4 class="font-black italic uppercase text-lg md:text-xl tracking-tighter text-white group-hover:text-[#ff4d00] transition-colors truncate">${m.name}</h4>
                                 <p class="text-gray-400 text-[11px] mt-1.5 leading-relaxed font-medium line-clamp-2">${m.desc}</p>
-                                ${!isCompleted ? `<span class="inline-block mt-3 bg-white/10 border border-white/10 px-2.5 py-1 rounded-md text-[8px] font-bold uppercase tracking-widest text-white backdrop-blur-sm">${badgeText}</span>` : ''}
+                                ${!isCompleted ? `<span class="inline-block mt-3 bg-white/10 border border-white/20 px-2.5 py-1 rounded-md text-[8px] font-bold uppercase tracking-widest text-white backdrop-blur-sm">${badgeText}</span>` : ''}
                             </div>
                             <div class="text-left md:text-right flex-shrink-0 relative z-0 flex flex-col items-start md:items-end w-full md:w-auto mt-3 md:mt-0">
                                 <span class="block text-[#ff4d00] font-black text-2xl md:text-3xl italic tracking-tighter mb-2 drop-shadow-sm">+${m.xp}</span>
-                                <button type="button" id="btn-${m.id}" onclick="${btnAction}" class="btn-grind w-full md:w-auto !py-2.5 !px-4" ${(isCompleted || isPending) ? 'disabled' : ''}>${btnText}</button>
+                                <button type="button" id="btn-${m.id}" onclick="${btnAction}" class="btn-grind w-full md:w-auto" ${(isCompleted || isPending) ? 'disabled' : ''}>${btnText}</button>
                             </div>
                         </div>
                     `;
@@ -1374,8 +1303,8 @@
                         </section>
                         
                         <!-- HABITS -->
-                        <section class="max-w-3xl mx-auto mb-14 animate-reveal" style="animation-delay: 0.4s;">
-                            <div class="flex flex-col gap-4 mb-6 px-1">
+                        <section class="max-w-3xl mx-auto mb-12 animate-reveal" style="animation-delay: 0.4s;">
+                            <div class="flex flex-col gap-4 mb-5 px-1">
                                 <div class="flex justify-between items-end border-b border-white/10 pb-3">
                                     <div>
                                         <p class="text-[#ff4d00] text-[9px] font-black uppercase tracking-widest mb-1 drop-shadow-sm">Endless Grind</p>
@@ -1444,15 +1373,15 @@
                                     <h4 class="font-black italic uppercase text-lg md:text-xl tracking-tighter text-white break-words max-w-[75%] group-hover:text-[#ff4d00] transition-colors">${m.name}</h4>
                                     <span class="text-[8px] font-bold text-gray-400 tracking-widest uppercase border border-white/10 bg-white/5 backdrop-blur-sm px-2 py-0.5 rounded shadow-sm">${habDaysLeftText}</span>
                                 </div>
-                                <p class="text-gray-400 text-[11px] mt-1 leading-relaxed font-medium line-clamp-2">${m.desc}</p>
+                                <p class="text-gray-400 text-[11px] mt-1.5 leading-relaxed font-medium line-clamp-2">${m.desc}</p>
                                 <div class="flex flex-wrap items-center gap-2.5 mt-3">
-                                    <span class="bg-white/10 border border-white/10 text-white px-2.5 py-1 text-[8px] font-black uppercase tracking-widest rounded-md backdrop-blur-sm shadow-sm">${badgeText}</span>
+                                    <span class="bg-white/10 border border-white/20 text-white px-2.5 py-1 text-[8px] font-black uppercase tracking-widest rounded-md backdrop-blur-sm shadow-sm">${badgeText}</span>
                                     ${m.streakBonus > 0 ? `<span class="bg-[#ff4d00]/15 border border-[#ff4d00]/20 text-[#ff4d00] px-2.5 py-1 text-[8px] font-black uppercase tracking-widest rounded-md shadow-[0_0_10px_rgba(255,77,0,0.15)] backdrop-blur-sm">🔥 Streak: ${activeStreak} (+${m.streakBonus})</span>` : `<span class="bg-white/5 border border-white/5 text-gray-400 px-2.5 py-1 text-[8px] font-black uppercase tracking-widest rounded-md backdrop-blur-sm">🔥 Streak: ${activeStreak}</span>`}
                                 </div>
                             </div>
                             <div class="text-left md:text-right flex-shrink-0 relative z-0 flex flex-col items-start md:items-end w-full md:w-auto mt-3 md:mt-0">
                                 <span class="block text-[#ff4d00] font-black text-2xl md:text-3xl italic tracking-tighter mb-2 drop-shadow-sm">+${totalXpDisplay}</span>
-                                <button type="button" onclick="${btnAction}" class="btn-grind w-full md:w-auto !py-2.5 !px-4" ${(isDoneToday || isPending || isExpired) ? 'disabled' : ''}>${btnText}</button>
+                                <button type="button" onclick="${btnAction}" class="btn-grind w-full md:w-auto" ${(isDoneToday || isPending || isExpired) ? 'disabled' : ''}>${btnText}</button>
                             </div>
                         </div>
                     `;
@@ -1464,7 +1393,7 @@
 
                         <!-- FEED -->
                         <section class="max-w-3xl mx-auto mb-10 animate-reveal" style="animation-delay: 0.5s;">
-                            <div class="flex flex-col gap-4 mb-6 px-1">
+                            <div class="flex flex-col gap-4 mb-5 px-1">
                                 <div class="flex justify-between items-end border-b border-white/10 pb-3">
                                     <div>
                                         <p class="text-[#ff4d00] text-[9px] font-black uppercase tracking-widest mb-1 drop-shadow-sm">The Network</p>
@@ -1480,15 +1409,15 @@
                 const nextBounty = (myFriendsCount + 1) * 100;
 
                 html += `
-                            <div class="card p-6 rounded-2xl mb-8 border border-[#ff4d00]/20 shadow-[0_10px_30px_rgba(255,77,0,0.1)] relative overflow-hidden group hover:border-[#ff4d00]/40 transition-colors">
-                                <div class="absolute inset-0 bg-gradient-to-r from-[#ff4d00]/5 to-transparent"></div>
+                            <div class="card p-6 rounded-2xl mb-6 border border-[#ff4d00]/20 shadow-[0_10px_30px_rgba(255,77,0,0.1)] relative overflow-hidden group hover:border-[#ff4d00]/40 transition-colors">
+                                <div class="absolute inset-0 bg-gradient-to-r from-[#ff4d00]/10 to-transparent"></div>
                                 <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-5">
                                     <div class="text-center md:text-left flex-1">
                                         <p class="text-[#ff4d00] font-black italic uppercase tracking-widest text-xs mb-2 flex items-center justify-center md:justify-start gap-1.5">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                                             Bounty Active
                                         </p>
-                                        <p class="text-gray-300 text-[11px] leading-relaxed font-medium">Erweitere dein Network. Jeder neue Grinder bringt dir XP. Nächster Invite: <span class="text-white font-black bg-white/10 px-1.5 py-0.5 rounded border border-white/10 shadow-sm">+${nextBounty} XP</span></p>
+                                        <p class="text-gray-300 text-[11px] leading-relaxed font-medium">Erweitere dein Network. Jeder neue Grinder bringt dir XP. Nächster Invite: <span class="text-white font-black bg-white/15 px-2 py-0.5 rounded border border-white/20 shadow-sm">+${nextBounty} XP</span></p>
                                     </div>
                                     <button type="button" onclick="window.openInviteModal()" class="w-full md:w-auto btn-grind px-6 py-3 flex items-center justify-center gap-2 whitespace-nowrap flex-shrink-0 shadow-sm">
                                         <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
@@ -1514,42 +1443,42 @@
                         html += `<div class="card text-center p-8 text-gray-400 italic text-xs">Noch keine Aktivität in deiner Crew. Time to grind!</div>`;
                     }
                 } else {
-                    html += `<div class="space-y-4 relative before:absolute before:inset-y-0 before:left-[19px] before:w-[1px] before:bg-white/10">`;
+                    html += `<div class="space-y-4">`;
                     
                     feedActivities.forEach(act => {
                         const isProUser = act.isPro === true;
                         let iconSvg = 'M5 13l4 4L19 7'; 
                         let colorClass = isProUser ? 'text-[#a855f7]' : 'text-[#ff4d00]';
-                        let borderClass = isProUser ? 'border-[#a855f7]/30' : 'border-[#ff4d00]/30';
+                        let borderClass = isProUser ? 'border-[#a855f7]/40' : 'border-[#ff4d00]/40';
                         let bgClass = isProUser ? 'bg-[#a855f7]/10' : 'bg-[#ff4d00]/10';
                         let shadowClass = '';
 
                         if (act.type === 'LEVEL_UP') {
                             iconSvg = 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6';
                             borderClass = isProUser ? 'border-[#a855f7]' : 'border-[#ff4d00]';
-                            shadowClass = isProUser ? 'shadow-[0_0_10px_rgba(168,85,247,0.3)]' : 'shadow-[0_0_10px_rgba(255,77,0,0.3)]';
+                            shadowClass = isProUser ? 'shadow-[0_0_15px_rgba(168,85,247,0.4)]' : 'shadow-[0_0_15px_rgba(255,77,0,0.4)]';
                         } else if (act.type === 'REDEEM') {
                             iconSvg = 'M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7';
                         } else if (act.type === 'PRO') {
                             iconSvg = 'M13 10V3L4 14h7v7l9-11h-7z';
                             colorClass = 'text-white'; bgClass = 'bg-[#a855f7]'; borderClass = 'border-[#a855f7]';
-                            shadowClass = 'shadow-[0_0_15px_rgba(168,85,247,0.4)]';
+                            shadowClass = 'shadow-[0_0_20px_rgba(168,85,247,0.6)]';
                         }
 
                         const time = getRelativeTime(act.timestamp);
                         const displayName = act.alias;
                         const nameColorClass = isProUser ? 'text-[#d8b4fe]' : 'text-[#ff4d00]';
-                        const proBadge = isProUser ? `<span class="ml-1.5 align-middle bg-[#a855f7]/15 text-[#d8b4fe] border border-[#a855f7]/30 text-[7px] px-1 py-0.5 rounded-sm font-black shadow-sm">PRO</span>` : '';
+                        const proBadge = isProUser ? `<span class="ml-2 align-middle bg-[#a855f7]/20 text-[#d8b4fe] border border-[#a855f7]/40 text-[8px] px-1.5 py-0.5 rounded-sm font-black shadow-[0_0_10px_rgba(168,85,247,0.2)]">PRO</span>` : '';
                         const dynamicText = act.text.replace(/text-\[#[a-fA-F0-9]+\]/g, isProUser ? 'text-[#d8b4fe]' : 'text-[#ff4d00]');
 
                         html += `
-                            <div class="flex gap-3.5 relative z-10 items-center group">
-                                <div class="w-10 h-10 rounded-full ${bgClass} backdrop-blur-sm border ${borderClass} flex items-center justify-center flex-shrink-0 ${shadowClass} transition-transform group-hover:scale-105">
+                            <div class="flex gap-4 relative z-10 items-center group">
+                                <div class="w-10 h-10 rounded-full ${bgClass} backdrop-blur-md border ${borderClass} flex items-center justify-center flex-shrink-0 ${shadowClass} transition-transform group-hover:scale-110">
                                     <svg class="w-4 h-4 ${colorClass}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${iconSvg}"></path></svg>
                                 </div>
-                                <div class="card p-4 flex-1 shadow-sm border-white/5 group-hover:border-white/10">
-                                    <p class="text-[8px] text-gray-500 font-bold uppercase tracking-widest mb-1">${time}</p>
-                                    <p class="text-[11px] font-medium text-gray-300 leading-relaxed"><span class="${nameColorClass} italic uppercase font-black tracking-wide">${displayName}</span>${proBadge} <span class="text-gray-400 text-[10px] ml-1">${dynamicText}</span></p>
+                                <div class="card p-4 flex-1 shadow-sm border-white/5 group-hover:border-white/20">
+                                    <p class="text-[9px] text-gray-500 font-bold uppercase tracking-widest mb-1.5">${time}</p>
+                                    <p class="text-xs font-medium text-gray-300 leading-relaxed"><span class="${nameColorClass} italic uppercase font-black tracking-wide">${displayName}</span>${proBadge} <span class="text-gray-400 ml-1">${dynamicText}</span></p>
                                 </div>
                             </div>
                         `;
@@ -1576,29 +1505,29 @@
                     }
 
                     const topCircle = document.getElementById('top-xp-circle');
-                    const targetOffset = 553 - (553 * targetXpProgress / 100);
+                    const targetOffset = 653 - (653 * targetXpProgress / 100);
                     
                     const trackLine = document.getElementById('track-line');
-                    if (trackLine) trackLine.style.width = `calc(130px * ${targetTrackProgress})`;
+                    if (trackLine) trackLine.style.width = `calc(150px * ${targetTrackProgress})`;
 
                     if (state.prevLvl !== null && safeLvl > state.prevLvl) {
                         if (topCircle) {
-                            topCircle.style.transition = 'stroke-dashoffset 700ms ease-out';
+                            topCircle.style.transition = 'stroke-dashoffset 800ms ease-out';
                             topCircle.style.strokeDashoffset = '0';
                             setTimeout(() => {
                                 topCircle.style.transition = 'none';
-                                topCircle.style.strokeDashoffset = '553';
+                                topCircle.style.strokeDashoffset = '653';
                                 void topCircle.offsetWidth;
-                                topCircle.style.transition = 'stroke-dashoffset 700ms ease-out';
+                                topCircle.style.transition = 'stroke-dashoffset 800ms ease-out';
                                 topCircle.style.strokeDashoffset = targetOffset.toString();
-                            }, 700);
+                            }, 800);
                         }
                         if (passViewport && currentNode) {
                             const scrollLeft = currentNode.offsetLeft - (passViewport.offsetWidth / 2) + (currentNode.offsetWidth / 2);
                             passViewport.scrollTo({ left: scrollLeft, behavior: 'smooth' });
                         }
                     } else if (topCircle) {
-                        topCircle.style.transition = 'stroke-dashoffset 700ms ease-out';
+                        topCircle.style.transition = 'stroke-dashoffset 800ms ease-out';
                         topCircle.style.strokeDashoffset = targetOffset.toString();
                     }
 
