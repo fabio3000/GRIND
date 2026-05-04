@@ -1684,5 +1684,31 @@
             `;
         }
     </script>
+	<!-- iOS INSTALL BANNER -->
+<div id="install-banner" class="hidden fixed bottom-6 left-4 right-4 bg-[#0a0a0a] border border-[#ff4d00] p-4 rounded-sm shadow-[0_0_20px_rgba(255,77,0,0.3)] z-[999999] flex justify-between items-center">
+    <div>
+        <p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">Level up</p>
+        <p class="text-white text-xs font-bold leading-relaxed">Tippe auf das <span class="bg-[#1f1f1f] text-gray-300 px-1 rounded border border-gray-700">Teilen-Symbol</span> unten und wähle <span class="bg-[#1f1f1f] text-gray-300 px-1 rounded border border-gray-700">+ Zum Home-Bildschirm</span>, um deine Habits täglich zu tracken.</p>
+    </div>
+    <button onclick="document.getElementById('install-banner').classList.add('hidden')" class="text-gray-500 hover:text-white ml-4 flex-shrink-0">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+    </button>
+</div>
+
+<script>
+    // Zeigt das Banner nur auf iOS-Geräten an, wenn die App im normalen Browser geöffnet ist
+    const isIos = () => {
+        const userAgent = window.navigator.userAgent.toLowerCase();
+        return /iphone|ipad|ipod/.test(userAgent);
+    };
+    const isInStandaloneMode = () => ('standalone' in window.navigator) && (window.navigator.standalone);
+
+    if (isIos() && !isInStandaloneMode()) {
+        setTimeout(() => {
+            document.getElementById('install-banner').classList.remove('hidden');
+        }, 2000); // Poppt nach 2 Sekunden lässig auf
+    }
+</script>
+
 </body>
 </html>
