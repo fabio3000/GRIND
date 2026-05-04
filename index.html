@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -42,35 +41,36 @@
             position: fixed; inset: 0; z-index: 0; background: #000;
         }
         .video-bg {
-            width: 100%; height: 100%; object-fit: cover; opacity: 0.4;
+            width: 100%; height: 100%; object-fit: cover; opacity: 0.35;
         }
         .video-overlay {
             position: absolute; inset: 0;
             background: linear-gradient(to top, #000000 0%, rgba(0,0,0,0.7) 40%, rgba(0,0,0,0.4) 100%);
         }
         
-        /* --- ULTRA PREMIUM GLASS CARDS --- */
+        /* --- ULTRA PREMIUM GLASS CARDS (PERFORMANCE OPTIMIZED) --- */
         .card { 
-            background: rgba(15, 15, 15, 0.55); 
-            backdrop-filter: blur(20px); 
-            -webkit-backdrop-filter: blur(20px); 
-            border: 1px solid rgba(255, 255, 255, 0.08); 
-            border-radius: 24px; 
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1); 
-            transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.3s ease; 
+            background: rgba(15, 15, 15, 0.6); 
+            backdrop-filter: blur(12px); 
+            -webkit-backdrop-filter: blur(12px); 
+            border: 1px solid rgba(255, 255, 255, 0.06); 
+            border-radius: 20px; 
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05); 
+            transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.2s ease; 
+            will-change: transform;
         }
-        .card:hover { border-color: rgba(255, 77, 0, 0.25); }
+        .card:hover { border-color: rgba(255, 77, 0, 0.2); }
 
         /* --- INPUTS & SELECTS --- */
         input, select, textarea {
             background: rgba(0, 0, 0, 0.4) !important;
-            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
             color: white !important;
-            border-radius: 16px !important;
-            padding: 16px 20px !important;
-            font-size: 14px !important;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
+            border-radius: 14px !important;
+            padding: 14px 16px !important;
+            font-size: 13px !important;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(8px);
         }
         input:focus, select:focus, textarea:focus { 
             border-color: #ff4d00 !important; 
@@ -81,93 +81,93 @@
 
         /* --- CLEAN BUTTONS --- */
         .btn-grind { 
-            background: rgba(255, 255, 255, 0.08); 
+            background: rgba(255, 255, 255, 0.06); 
             color: white; 
             font-weight: 700; 
             text-transform: uppercase; 
-            letter-spacing: 0.08em;
-            padding: 16px 28px; 
-            font-size: 13px; 
-            border-radius: 16px; 
-            border: 1px solid rgba(255, 255, 255, 0.15); 
-            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); 
+            letter-spacing: 0.06em;
+            padding: 14px 24px; 
+            font-size: 12px; 
+            border-radius: 14px; 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1); 
             cursor: pointer; 
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(8px);
         }
         .btn-grind:hover:not(:disabled) { 
             background: #ff4d00; 
             color: black;
             border-color: #ff4d00; 
-            box-shadow: 0 10px 25px rgba(255, 77, 0, 0.4);
+            box-shadow: 0 8px 20px rgba(255, 77, 0, 0.3);
             transform: translateY(-2px);
         }
         .btn-grind:active:not(:disabled) { transform: translateY(1px); }
         .btn-grind:disabled { background: rgba(255,255,255,0.02); color: #555; border-color: rgba(255,255,255,0.05); cursor: not-allowed; }
 
         .btn-pro { 
-            background: rgba(168, 85, 247, 0.1); 
+            background: rgba(168, 85, 247, 0.08); 
             color: #d8b4fe; 
             font-weight: 700; 
             text-transform: uppercase; 
             letter-spacing: 0.05em;
-            padding: 12px 20px; 
-            font-size: 11px; 
-            border-radius: 14px; 
-            border: 1px solid rgba(168, 85, 247, 0.3); 
-            transition: all 0.3s ease; 
+            padding: 10px 16px; 
+            font-size: 10px; 
+            border-radius: 12px; 
+            border: 1px solid rgba(168, 85, 247, 0.25); 
+            transition: all 0.2s ease; 
             cursor: pointer; 
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(8px);
         }
-        .btn-pro:hover { background: #a855f7; color: white; border-color: #a855f7; box-shadow: 0 10px 20px rgba(168, 85, 247, 0.3); transform: translateY(-2px); }
+        .btn-pro:hover { background: #a855f7; color: white; border-color: #a855f7; box-shadow: 0 8px 15px rgba(168, 85, 247, 0.3); transform: translateY(-1px); }
 
         /* --- LOOT NODES --- */
         .reward-box { 
-            width: 100px; height: 90px; 
-            background: rgba(255, 255, 255, 0.03); 
-            border: 1px solid rgba(255, 255, 255, 0.08); 
+            width: 90px; height: 80px; 
+            background: rgba(255, 255, 255, 0.02); 
+            border: 1px solid rgba(255, 255, 255, 0.06); 
             display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            position: relative; z-index: 10; border-radius: 20px; transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); 
-            backdrop-filter: blur(12px);
+            position: relative; z-index: 10; border-radius: 16px; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); 
+            backdrop-filter: blur(8px);
         }
-        .reward-box.unlocked { border-color: rgba(255, 77, 0, 0.4); background: rgba(255, 77, 0, 0.08); box-shadow: 0 10px 25px rgba(255, 77, 0, 0.15); }
-        .reward-box.pro { border-color: rgba(168, 85, 247, 0.2); height: 100px; width: 110px; }
-        .reward-box.pro.unlocked { background: rgba(168, 85, 247, 0.08); border-color: rgba(168, 85, 247, 0.5); box-shadow: 0 10px 30px rgba(168, 85, 247, 0.2); }
+        .reward-box.unlocked { border-color: rgba(255, 77, 0, 0.3); background: rgba(255, 77, 0, 0.06); box-shadow: 0 8px 20px rgba(255, 77, 0, 0.1); }
+        .reward-box.pro { border-color: rgba(168, 85, 247, 0.15); height: 90px; width: 100px; }
+        .reward-box.pro.unlocked { background: rgba(168, 85, 247, 0.06); border-color: rgba(168, 85, 247, 0.4); box-shadow: 0 8px 25px rgba(168, 85, 247, 0.15); }
 
-        .tag-free { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.1); color: white; font-size: 8px; font-weight: 700; padding: 4px 10px; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); text-transform: uppercase; border-radius: 8px; z-index: 30; backdrop-filter: blur(8px); }
-        .tag-pro { background: linear-gradient(135deg, #7c3aed, #9333ea); color: white; font-size: 9px; font-weight: 700; padding: 4px 12px; position: absolute; bottom: -12px; left: 50%; transform: translateX(-50%); text-transform: uppercase; border-radius: 8px; box-shadow: 0 6px 15px rgba(124,58,237,0.4); z-index: 30; }
+        .tag-free { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.08); color: white; font-size: 7px; font-weight: 700; padding: 3px 8px; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); text-transform: uppercase; border-radius: 6px; z-index: 30; backdrop-filter: blur(5px); }
+        .tag-pro { background: linear-gradient(135deg, #7c3aed, #9333ea); color: white; font-size: 8px; font-weight: 700; padding: 3px 10px; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); text-transform: uppercase; border-radius: 6px; box-shadow: 0 4px 10px rgba(124,58,237,0.3); z-index: 30; }
         
-        .week-btn { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; transition: all 0.3s; backdrop-filter: blur(8px); }
-        .week-btn.active { background: rgba(255, 77, 0, 0.15); color: #ff4d00; border-color: #ff4d00; box-shadow: 0 5px 15px rgba(255, 77, 0, 0.15); }
+        .week-btn { background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 10px; transition: all 0.2s; backdrop-filter: blur(5px); }
+        .week-btn.active { background: rgba(255, 77, 0, 0.12); color: #ff4d00; border-color: #ff4d00; box-shadow: 0 4px 12px rgba(255, 77, 0, 0.15); }
         
         /* --- UTILITIES --- */
         .grind-gradient { background: linear-gradient(135deg, #ff4d00, #ff8800); }
         .text-gradient { background: linear-gradient(135deg, #ff4d00, #ff8800); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; scroll-behavior: smooth; }
-        .level-node { min-width: 140px; position: relative; }
+        .level-node { min-width: 130px; position: relative; }
         
         /* --- TOASTS --- */
-        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 99999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
-        .toast { pointer-events: auto; background: rgba(10,10,10,0.85); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 16px 24px; border-radius: 16px; font-size: 14px; box-shadow: 0 20px 40px rgba(0,0,0,0.7); transform: translateX(120%); transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); display: flex; align-items: center; gap: 14px; }
+        #toast-container { position: fixed; top: 15px; right: 15px; z-index: 99999; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+        .toast { pointer-events: auto; background: rgba(10,10,10,0.9); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.08); color: white; padding: 14px 20px; border-radius: 14px; font-size: 13px; box-shadow: 0 15px 30px rgba(0,0,0,0.6); transform: translateX(120%); transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); display: flex; align-items: center; gap: 12px; }
         .toast.show { transform: translateX(0); }
         
-        /* --- ANIMATIONS (CINEMATIC) --- */
-        .completed-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.5); z-index: 10; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px); opacity: 0; transition: opacity 0.4s ease; border-radius: inherit; }
+        /* --- ANIMATIONS (CINEMATIC BUT FASTER) --- */
+        .completed-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.4); z-index: 10; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px); opacity: 0; transition: opacity 0.3s ease; border-radius: inherit; }
         .card.is-completed .completed-overlay { opacity: 1; pointer-events: auto; }
         
-        .pending-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.6); z-index: 10; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px); opacity: 0; transition: opacity 0.4s ease; border-radius: inherit; }
+        .pending-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.5); z-index: 10; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px); opacity: 0; transition: opacity 0.3s ease; border-radius: inherit; }
         .card.is-pending .pending-overlay { opacity: 1; pointer-events: auto; }
 
-        @keyframes blur-reveal { 0% { opacity: 0; transform: translateY(30px); filter: blur(10px); } 100% { opacity: 1; transform: translateY(0); filter: blur(0); } }
-        .animate-reveal { animation: blur-reveal 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; opacity: 0; }
+        @keyframes blur-reveal { 0% { opacity: 0; transform: translateY(20px); filter: blur(5px); } 100% { opacity: 1; transform: translateY(0); filter: blur(0); } }
+        .animate-reveal { animation: blur-reveal 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; opacity: 0; will-change: transform, opacity; }
 
-        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-        .animate-float { animation: float 6s ease-in-out infinite; }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+        .animate-float { animation: float 5s ease-in-out infinite; }
 
-        @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.15) translateY(-5px); } 100% { transform: scale(1) translateY(0); } }
-        .animate-pop { animation: pop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.1) translateY(-3px); } 100% { transform: scale(1) translateY(0); } }
+        .animate-pop { animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         
-        @keyframes pulse-soft { 0%, 100% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 rgba(255,77,0,0); } 50% { transform: scale(1.05); opacity: 0.9; box-shadow: 0 10px 30px rgba(255,77,0,0.3); } }
+        @keyframes pulse-soft { 0%, 100% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 rgba(255,77,0,0); } 50% { transform: scale(1.03); opacity: 0.95; box-shadow: 0 5px 20px rgba(255,77,0,0.2); } }
         .pulse-soft { animation: pulse-soft 2s infinite cubic-bezier(0.4, 0, 0.2, 1); }
 
         /* Typography optimizations */
@@ -175,17 +175,7 @@
         p { letter-spacing: 0.01em; }
         
         /* Modals */
-        #modal-container > div { background: rgba(15,15,15,0.75); backdrop-filter: blur(30px); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 40px 80px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.1); border-radius: 28px; }
-        
-        /* AGB & Datenschutz Tables/Links */
-        .legal-content h2 { color: white; font-weight: 900; font-style: italic; text-transform: uppercase; margin-top: 2.5rem; margin-bottom: 0.75rem; letter-spacing: 0.05em; font-size: 1.25rem; }
-        .legal-content h3 { color: #d4d4d4; font-weight: 700; margin-top: 1.5rem; margin-bottom: 0.5rem; }
-        .legal-content p { margin-bottom: 1rem; color: #a3a3a3; font-size: 0.875rem; line-height: 1.6; }
-        .legal-content ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 1rem; color: #a3a3a3; font-size: 0.875rem; }
-        .legal-content li { margin-bottom: 0.25rem; }
-        .legal-content strong { color: #ffffff; font-weight: bold; }
-        .legal-content a { color: #ff4d00; text-decoration: none; transition: color 0.2s; }
-        .legal-content a:hover { color: #ffffff; text-decoration: underline; }
+        #modal-container > div { background: rgba(15,15,15,0.85); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 25px 50px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.05); border-radius: 24px; }
     </style>
 </head>
 <body class="flex flex-col relative select-none">
@@ -200,7 +190,7 @@
     <div id="recaptcha-container"></div>
     
     <div id="app" class="flex-1 flex flex-col w-full z-10 relative pb-10">
-        <div class="flex-1 flex items-center justify-center min-h-[60vh]"><div class="w-12 h-12 border-t-2 border-l-2 border-[#ff4d00] rounded-full animate-spin"></div></div>
+        <div class="flex-1 flex items-center justify-center min-h-[60vh]"><div class="w-10 h-10 border-t-2 border-l-2 border-[#ff4d00] rounded-full animate-spin"></div></div>
     </div>
 
     <script type="module">
@@ -256,10 +246,10 @@
         window.showToast = (msg, type = 'success') => {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div'); toast.className = `toast ${type}`;
-            const icon = type === 'error' ? `<svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>` : `<svg class="w-6 h-6 text-[#ff4d00]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>`;
-            toast.innerHTML = `${icon} <div><div class="font-bold text-[10px] uppercase tracking-widest text-gray-400 mb-0.5">System</div><div class="font-medium">${msg}</div></div>`;
+            const icon = type === 'error' ? `<svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>` : `<svg class="w-5 h-5 text-[#ff4d00]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>`;
+            toast.innerHTML = `${icon} <div><div class="font-bold text-[9px] uppercase tracking-widest text-gray-400 mb-0.5">System</div><div class="font-medium text-xs">${msg}</div></div>`;
             container.appendChild(toast); setTimeout(() => toast.classList.add('show'), 10);
-            setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 500); }, 3500);
+            setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 3000);
         };
 
         window.logActivity = async (type, text) => {
@@ -315,7 +305,7 @@
             if (distance < 0) {
                 el.innerHTML = "LAUNCHING...";
                 if(window.countdownInterval) clearInterval(window.countdownInterval);
-                setTimeout(() => render(), 2000); 
+                setTimeout(() => render(), 1500); 
                 return;
             }
             const d = Math.floor(distance / (1000 * 60 * 60 * 24));
@@ -360,7 +350,7 @@
                             const crewCode = urlParams.get('crew');
                             if (crewCode) {
                                 window.history.replaceState({}, document.title, window.location.pathname);
-                                setTimeout(() => window.resolveInvite(crewCode), 1000);
+                                setTimeout(() => window.resolveInvite(crewCode), 800);
                             }
                         }
                         render();
@@ -374,7 +364,7 @@
                     }
                 });
 
-                const activitiesQuery = query(collection(db, 'plot_activities'), orderBy('timestamp', 'desc'), limit(50));
+                const activitiesQuery = query(collection(db, 'plot_activities'), orderBy('timestamp', 'desc'), limit(30));
                 onSnapshot(activitiesQuery, (snap) => {
                     if(snap && snap.docs) {
                         state.activities = snap.docs.map(d => d.data());
@@ -394,14 +384,14 @@
             if(window.stopRedeemHold) window.stopRedeemHold(); 
             const forceClose = () => {
                 const container = document.getElementById('modal-container');
-                if(container) { container.classList.remove('opacity-100'); container.classList.add('opacity-0', 'pointer-events-none'); setTimeout(() => container.innerHTML = '', 400); }
+                if(container) { container.classList.remove('opacity-100'); container.classList.add('opacity-0', 'pointer-events-none'); setTimeout(() => container.innerHTML = '', 300); }
             };
             if(window.html5QrCode) {
                 try {
                     if(window.html5QrCode.getState() === 2) { 
                         let closed = false; const finish = () => { if(closed) return; closed = true; window.html5QrCode = null; forceClose(); };
                         window.html5QrCode.stop().then(() => { try { window.html5QrCode.clear(); } catch(e){} finish(); }).catch(finish);
-                        setTimeout(finish, 800); return; 
+                        setTimeout(finish, 600); return; 
                     } else { window.html5QrCode.clear(); window.html5QrCode = null; }
                 } catch(e) { window.html5QrCode = null; }
             }
@@ -410,8 +400,8 @@
 
         window.openModal = (contentHtml) => {
             let container = document.getElementById('modal-container');
-            if(!container) { container = document.createElement('div'); container.id = 'modal-container'; container.className = 'fixed inset-0 z-[100] bg-black/80 backdrop-blur-xl flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-400 overflow-y-auto'; document.body.appendChild(container); }
-            container.innerHTML = `<div class="card p-8 md:p-10 w-full max-w-md shadow-[0_40px_80px_rgba(0,0,0,0.9)] transform scale-95 transition-transform duration-400 relative my-auto"><button type="button" onclick="window.closeModal()" class="absolute top-6 right-6 text-gray-500 hover:text-white z-50 transition bg-black/50 p-2 rounded-full backdrop-blur-md"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>${contentHtml}</div>`;
+            if(!container) { container = document.createElement('div'); container.id = 'modal-container'; container.className = 'fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300 overflow-y-auto'; document.body.appendChild(container); }
+            container.innerHTML = `<div class="card p-6 md:p-8 w-full max-w-md shadow-[0_30px_60px_rgba(0,0,0,0.8)] transform scale-95 transition-transform duration-300 relative my-auto"><button type="button" onclick="window.closeModal()" class="absolute top-5 right-5 text-gray-500 hover:text-white z-50 transition bg-black/40 p-2 rounded-full backdrop-blur-sm"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>${contentHtml}</div>`;
             setTimeout(() => { container.classList.remove('opacity-0', 'pointer-events-none'); container.classList.add('opacity-100'); container.firstElementChild.classList.remove('scale-95'); container.firstElementChild.classList.add('scale-100'); }, 10);
         };
 
@@ -422,34 +412,34 @@
             const nextXpBounty = (currentFriendsCount + 1) * 100;
             
             let innerHtml = `
-                <p class="text-[#ff4d00] text-[10px] font-bold uppercase tracking-widest mb-2">Network</p>
-                <h3 class="text-3xl font-black italic uppercase tracking-tighter mb-8">Crew Erweitern</h3>
+                <p class="text-[#ff4d00] text-[9px] font-bold uppercase tracking-widest mb-1">Network</p>
+                <h3 class="text-2xl font-black italic uppercase tracking-tighter mb-6">Crew Erweitern</h3>
                 
-                <div class="bg-[rgba(255,255,255,0.03)] p-5 rounded-2xl mb-6 border border-[rgba(255,255,255,0.05)] relative overflow-hidden">
-                    <div class="relative z-10 flex items-center gap-5">
-                        <div class="w-12 h-12 rounded-full border border-[#ff4d00]/30 flex items-center justify-center bg-[#ff4d00]/10 flex-shrink-0 shadow-[0_0_15px_rgba(255,77,0,0.2)]">
-                            <svg class="w-6 h-6 text-[#ff4d00]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                <div class="bg-[rgba(255,255,255,0.03)] p-4 rounded-xl mb-5 border border-[rgba(255,255,255,0.05)] relative overflow-hidden">
+                    <div class="relative z-10 flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-full border border-[#ff4d00]/30 flex items-center justify-center bg-[#ff4d00]/10 flex-shrink-0 shadow-[0_0_10px_rgba(255,77,0,0.15)]">
+                            <svg class="w-5 h-5 text-[#ff4d00]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                         </div>
                         <div>
-                            <p class="text-white font-bold text-sm tracking-wide">Bounty Active</p>
-                            <p class="text-gray-400 text-xs mt-1.5 leading-relaxed">Jeder Grinder, der joint, bringt dir <span class="text-[#ff4d00] font-bold">+${nextXpBounty} XP</span>.</p>
+                            <p class="text-white font-bold text-xs tracking-wide">Bounty Active</p>
+                            <p class="text-gray-400 text-[11px] mt-1 leading-relaxed">Jeder Grinder, der joint, bringt dir <span class="text-[#ff4d00] font-bold">+${nextXpBounty} XP</span>.</p>
                         </div>
                     </div>
                 </div>
                 
-                <div class="mb-6">
-                    <p class="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-3 ml-2">Option 1: Link teilen</p>
+                <div class="mb-5">
+                    <p class="text-[9px] text-gray-500 uppercase tracking-widest font-bold mb-2 ml-2">Option 1: Link teilen</p>
                     <div class="flex gap-2">
                         <input type="text" readonly value="${link}" class="flex-1 text-xs truncate">
-                        <button type="button" onclick="window.copyToClipboard('${link}')" class="btn-grind px-6 flex-shrink-0">Copy</button>
+                        <button type="button" onclick="window.copyToClipboard('${link}')" class="btn-grind px-5 flex-shrink-0">Copy</button>
                     </div>
                 </div>
 
                 <div>
-                    <p class="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-3 ml-2">Option 2: Code eingeben</p>
+                    <p class="text-[9px] text-gray-500 uppercase tracking-widest font-bold mb-2 ml-2">Option 2: Code eingeben</p>
                     <form onsubmit="window.submitManualCode(event)" class="flex gap-2">
-                        <input id="manual_crew_code" type="text" placeholder="CODE..." required class="flex-1 uppercase font-bold tracking-widest text-center">
-                        <button type="submit" class="btn-grind px-6">Add</button>
+                        <input id="manual_crew_code" type="text" placeholder="CODE..." required class="flex-1 uppercase font-bold tracking-widest text-center text-sm">
+                        <button type="submit" class="btn-grind px-5">Add</button>
                     </form>
                 </div>
             `;
@@ -493,16 +483,16 @@
 
                 let innerHtml = `
                     <div class="text-center">
-                        <div class="w-20 h-20 bg-[#ff4d00]/10 rounded-full mx-auto mb-6 border border-[#ff4d00]/30 flex items-center justify-center animate-pulse-slow shadow-[0_0_30px_rgba(255,77,0,0.2)]">
-                            <svg class="w-10 h-10 text-[#ff4d00]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                        <div class="w-16 h-16 bg-[#ff4d00]/10 rounded-full mx-auto mb-4 border border-[#ff4d00]/30 flex items-center justify-center animate-pulse-slow shadow-[0_0_20px_rgba(255,77,0,0.2)]">
+                            <svg class="w-8 h-8 text-[#ff4d00]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                         </div>
-                        <h3 class="text-3xl font-black italic uppercase tracking-tighter mb-3">${theirAlias}</h3>
-                        <p class="text-gray-400 text-sm mb-8 leading-relaxed max-w-[220px] mx-auto">Möchtest du dich mit diesem Grinder verbinden?</p>
-                        <div class="bg-[rgba(255,255,255,0.05)] py-2 px-5 rounded-xl inline-block mb-8 border border-white/5">
-                            <p class="text-[#ff4d00] font-bold text-xs tracking-widest">+${nextXpBounty} XP BOUNTY</p>
+                        <h3 class="text-2xl font-black italic uppercase tracking-tighter mb-2">${theirAlias}</h3>
+                        <p class="text-gray-400 text-[11px] mb-6 leading-relaxed max-w-[200px] mx-auto">Möchtest du dich mit diesem Grinder verbinden?</p>
+                        <div class="bg-[rgba(255,255,255,0.05)] py-1.5 px-4 rounded-xl inline-block mb-6 border border-white/5">
+                            <p class="text-[#ff4d00] font-bold text-[10px] tracking-widest">+${nextXpBounty} XP BOUNTY</p>
                         </div>
-                        <button type="button" onclick="window.confirmFriend('${theirUid}', '${theirAlias}')" class="w-full btn-grind py-4 mb-4">Verbinden</button>
-                        <button type="button" onclick="window.closeModal()" class="text-xs text-gray-500 hover:text-white transition py-2 font-medium tracking-wide">Abbrechen</button>
+                        <button type="button" onclick="window.confirmFriend('${theirUid}', '${theirAlias}')" class="w-full btn-grind py-3.5 mb-3">Verbinden</button>
+                        <button type="button" onclick="window.closeModal()" class="text-[10px] text-gray-500 hover:text-white transition py-2 font-medium tracking-wide uppercase">Abbrechen</button>
                     </div>
                 `;
                 window.openModal(innerHtml);
@@ -632,16 +622,16 @@
 
         window.openVerifyModal = (mid, xp, type, name, qrSolution = '') => {
             state.tempUploadData = null; window.currentVerify = { mid, xp, name, type, qrSolution };
-            let innerHtml = `<p class="text-[#ff4d00] text-[10px] font-bold uppercase tracking-widest mb-1">Verify Operation</p><h3 class="text-3xl font-black italic uppercase tracking-tighter mb-8">${name}</h3>`;
+            let innerHtml = `<p class="text-[#ff4d00] text-[9px] font-bold uppercase tracking-widest mb-1">Verify Operation</p><h3 class="text-2xl font-black italic uppercase tracking-tighter mb-6">${name}</h3>`;
             if(type === 'qr') {
-                innerHtml += `<div id="qr-placeholder" onclick="window.startQRScanner()" class="border border-[rgba(255,255,255,0.05)] p-10 mb-6 flex flex-col items-center justify-center bg-[rgba(255,255,255,0.02)] rounded-2xl hover:border-[#ff4d00]/30 cursor-pointer transition"><svg class="w-12 h-12 text-[#ff4d00] mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg><p class="text-sm text-gray-300 font-bold uppercase tracking-widest text-center">Kamera aktivieren</p></div><div id="qr-reader" class="hidden w-full mb-6 rounded-2xl overflow-hidden border border-white/5"></div><input id="verify_code_input" type="text" placeholder="Oder Code manuell eingeben" class="w-full text-center text-sm tracking-widest uppercase mb-6 font-bold">`;
+                innerHtml += `<div id="qr-placeholder" onclick="window.startQRScanner()" class="border border-[rgba(255,255,255,0.05)] p-8 mb-5 flex flex-col items-center justify-center bg-[rgba(255,255,255,0.02)] rounded-2xl hover:border-[#ff4d00]/30 cursor-pointer transition"><svg class="w-10 h-10 text-[#ff4d00] mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg><p class="text-xs text-gray-300 font-bold uppercase tracking-widest text-center">Kamera aktivieren</p></div><div id="qr-reader" class="hidden w-full mb-5 rounded-2xl overflow-hidden border border-white/5"></div><input id="verify_code_input" type="text" placeholder="Oder Code eingeben" class="w-full text-center text-xs tracking-widest uppercase mb-5 font-bold">`;
             } else {
-                innerHtml += `<input type="file" id="proof_file_input" accept="image/*" class="hidden" onchange="window.handleFileSelect(event)"><div onclick="window.triggerFileInput()" class="border border-[rgba(255,255,255,0.05)] min-h-[160px] p-4 mb-6 flex flex-col items-center justify-center bg-[rgba(255,255,255,0.02)] rounded-2xl hover:border-[#ff4d00]/30 transition cursor-pointer overflow-hidden relative"><div id="upload-placeholder" class="text-center"><svg class="w-12 h-12 text-[#ff4d00] mb-3 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg><p class="text-xs text-gray-300 font-bold uppercase tracking-widest">Beweisfoto hochladen</p></div><img id="upload-preview" class="hidden absolute inset-0 w-full h-full object-cover"></div>`;
+                innerHtml += `<input type="file" id="proof_file_input" accept="image/*" class="hidden" onchange="window.handleFileSelect(event)"><div onclick="window.triggerFileInput()" class="border border-[rgba(255,255,255,0.05)] min-h-[140px] p-3 mb-5 flex flex-col items-center justify-center bg-[rgba(255,255,255,0.02)] rounded-2xl hover:border-[#ff4d00]/30 transition cursor-pointer overflow-hidden relative"><div id="upload-placeholder" class="text-center"><svg class="w-10 h-10 text-[#ff4d00] mb-2 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg><p class="text-[10px] text-gray-300 font-bold uppercase tracking-widest">Beweisfoto hochladen</p></div><img id="upload-preview" class="hidden absolute inset-0 w-full h-full object-cover"></div>`;
             }
-            if (type === 'qr' && qrSolution) { innerHtml += `<button type="button" onclick="window.checkCode()" class="w-full btn-grind py-4">Code Prüfen</button>`; } 
-            else { innerHtml += `<button type="button" onclick="window.submitVerification('${mid}', ${xp}, '${type}', '${name.replace(/'/g, "\\'")}')" class="w-full btn-grind py-4">Senden zur Prüfung</button>`; }
+            if (type === 'qr' && qrSolution) { innerHtml += `<button type="button" onclick="window.checkCode()" class="w-full btn-grind py-3.5">Code Prüfen</button>`; } 
+            else { innerHtml += `<button type="button" onclick="window.submitVerification('${mid}', ${xp}, '${type}', '${name.replace(/'/g, "\\'")}')" class="w-full btn-grind py-3.5">Senden zur Prüfung</button>`; }
             
-            innerHtml += `<button type="button" onclick="window.closeModal()" class="w-full mt-4 text-xs text-gray-500 uppercase tracking-widest font-bold hover:text-white transition py-2">Abbrechen</button>`;
+            innerHtml += `<button type="button" onclick="window.closeModal()" class="w-full mt-3 text-[10px] text-gray-500 uppercase tracking-widest font-bold hover:text-white transition py-2">Abbrechen</button>`;
             window.openModal(innerHtml);
         };
 
@@ -743,7 +733,7 @@
                 const currentRedeemed = state.profile.redeemed || [];
                 if(!currentRedeemed.includes(rewardId)) { currentRedeemed.push(rewardId); await setDoc(doc(db, 'plot_users', state.user.uid), { redeemed: currentRedeemed }, { merge: true }); }
                 const container = document.getElementById('redeem-container');
-                if(container) { container.innerHTML = `<div class="flex flex-col items-center justify-center py-6 animate-pop"><div class="w-16 h-16 bg-green-500/20 text-green-500 border border-green-500/30 rounded-full flex items-center justify-center mb-6 shadow-[0_0_20px_rgba(34,197,94,0.3)]"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></div><h4 class="text-white font-black italic text-2xl uppercase tracking-widest text-center">Ticket<br>eingelöst</h4><p class="text-gray-400 text-xs mt-4 text-center leading-relaxed">Dieser Loot wurde erfolgreich<br>von deinem Konto abgebucht.</p></div>`; }
+                if(container) { container.innerHTML = `<div class="flex flex-col items-center justify-center py-5 animate-pop"><div class="w-12 h-12 bg-green-500/20 text-green-500 border border-green-500/30 rounded-full flex items-center justify-center mb-4 shadow-[0_0_15px_rgba(34,197,94,0.2)]"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></div><h4 class="text-white font-black italic text-xl uppercase tracking-widest text-center">Ticket<br>eingelöst</h4><p class="text-gray-400 text-[10px] mt-3 text-center leading-relaxed">Dieser Loot wurde erfolgreich<br>von deinem Konto abgebucht.</p></div>`; }
                 
                 window.logActivity('REDEEM', `hat '<span class="font-bold">${itemName}</span>' eingelöst.`);
                 window.showToast("Erfolgreich eingelöst!", "success");
@@ -795,15 +785,15 @@
             let contentHtml = '';
 
             if (isAlreadyRedeemed && (type === 'qr' || type === 'shipping' || type === 'xp' || type === 'lvl')) {
-                contentHtml = `<div class="bg-[rgba(255,255,255,0.02)] p-8 rounded-2xl flex flex-col items-center justify-center mb-6 border border-white/5"><div class="w-14 h-14 rounded-full border border-gray-600 flex items-center justify-center mb-4 opacity-50"><svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div><p class="text-xs text-gray-400 uppercase tracking-widest font-bold text-center">Bereits eingelöst<br><span class="font-normal text-[10px] mt-1 block text-gray-500">Dieser Loot ist nicht mehr verfügbar.</span></p></div>`;
+                contentHtml = `<div class="bg-[rgba(255,255,255,0.02)] p-6 rounded-2xl flex flex-col items-center justify-center mb-5 border border-white/5"><div class="w-12 h-12 rounded-full border border-gray-600 flex items-center justify-center mb-3 opacity-50"><svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div><p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold text-center">Bereits eingelöst<br><span class="font-normal text-[9px] mt-1 block text-gray-500">Dieser Loot ist nicht mehr verfügbar.</span></p></div>`;
             } else if (type === 'link') {
                 const isUrl = info.startsWith('http');
-                contentHtml = `<div class="bg-[rgba(255,255,255,0.02)] p-8 rounded-2xl flex flex-col items-center justify-center mb-6 border ${borderClass}"><p class="text-[11px] text-gray-400 mb-5 uppercase tracking-widest font-bold">Access Code / Link</p>${isUrl ? `<a href="${info}" target="_blank" class="w-full ${bgClass} border font-bold py-4 px-6 rounded-xl text-center uppercase tracking-widest transition text-sm">Link öffnen</a>` : `<div class="w-full bg-black/40 text-white font-mono text-xl py-4 px-6 rounded-xl text-center select-all border border-white/10">${info}</div>`}</div>`;
+                contentHtml = `<div class="bg-[rgba(255,255,255,0.02)] p-6 rounded-2xl flex flex-col items-center justify-center mb-5 border ${borderClass}"><p class="text-[10px] text-gray-400 mb-4 uppercase tracking-widest font-bold">Access Code / Link</p>${isUrl ? `<a href="${info}" target="_blank" class="w-full ${bgClass} border font-bold py-3.5 px-5 rounded-xl text-center uppercase tracking-widest transition text-xs">Link öffnen</a>` : `<div class="w-full bg-black/40 text-white font-mono text-lg py-3.5 px-5 rounded-xl text-center select-all border border-white/10">${info}</div>`}</div>`;
             } else if (type === 'xp' || type === 'lvl') {
                 const isXp = type === 'xp'; const unit = isXp ? 'XP' : 'Level';
-                contentHtml = `<div class="bg-[rgba(255,255,255,0.02)] p-8 rounded-2xl flex flex-col mb-6 border ${borderClass} relative overflow-hidden"><div class="absolute top-0 right-0 bg-black/40 px-3 py-1.5 text-[9px] font-bold text-gray-400 uppercase tracking-widest rounded-bl-xl border-b border-l border-white/5">Instant Boost</div><p class="text-xs text-gray-400 mb-8 leading-relaxed text-center font-medium">Dies fügt deinem Account direkt XP/Level hinzu.<br><span class="text-white font-black uppercase tracking-widest block mt-3 text-3xl ${textClass}">+${info} ${unit}</span></p><button type="button" id="boost-claim-btn" onclick="window.claimBoost(${lvl}, '${tier}', '${type}', '${info}')" class="w-full btn-grind py-4">BOOST AKTIVIEREN</button></div>`;
+                contentHtml = `<div class="bg-[rgba(255,255,255,0.02)] p-6 rounded-2xl flex flex-col mb-5 border ${borderClass} relative overflow-hidden"><div class="absolute top-0 right-0 bg-black/40 px-3 py-1 text-[8px] font-bold text-gray-400 uppercase tracking-widest rounded-bl-xl border-b border-l border-white/5">Instant Boost</div><p class="text-[11px] text-gray-400 mb-6 leading-relaxed text-center font-medium">Dies fügt deinem Account direkt XP/Level hinzu.<br><span class="text-white font-black uppercase tracking-widest block mt-2 text-2xl ${textClass}">+${info} ${unit}</span></p><button type="button" id="boost-claim-btn" onclick="window.claimBoost(${lvl}, '${tier}', '${type}', '${info}')" class="w-full btn-grind py-3.5">BOOST AKTIVIEREN</button></div>`;
             } else if (type === 'qr') {
-                contentHtml = `<div id="redeem-container" class="bg-[rgba(255,255,255,0.02)] p-8 rounded-2xl flex flex-col mb-6 border ${borderClass} relative overflow-hidden"><div class="absolute top-0 right-0 bg-black/40 px-3 py-1.5 text-[9px] font-bold text-gray-400 uppercase tracking-widest rounded-bl-xl border-b border-l border-white/5">One-Time Use</div><p class="text-xs text-gray-300 mb-8 leading-relaxed text-center font-medium">${info}<br><span class="text-gray-500 font-bold uppercase tracking-widest block mt-4 border-t border-white/5 pt-4 text-[10px]">Das Personal muss das Einlösen bestätigen!</span></p><div onmousedown="window.startRedeemHold(${lvl}, '${tier}', event)" onmouseup="window.stopRedeemHold()" onmouseleave="window.stopRedeemHold()" ontouchstart="window.startRedeemHold(${lvl}, '${tier}', event)" ontouchend="window.stopRedeemHold()" class="relative w-full h-16 bg-black/50 border border-white/10 rounded-xl overflow-hidden cursor-pointer flex items-center justify-center group"><div id="redeem-btn-fill" class="absolute left-0 top-0 bottom-0 w-0 bg-[#ff4d00]/80 z-0" style="transition: none;"></div><span id="redeem-btn-text" class="relative z-10 text-white font-bold uppercase tracking-widest text-sm pointer-events-none">Hold to Redeem</span></div></div>`;
+                contentHtml = `<div id="redeem-container" class="bg-[rgba(255,255,255,0.02)] p-6 rounded-2xl flex flex-col mb-5 border ${borderClass} relative overflow-hidden"><div class="absolute top-0 right-0 bg-black/40 px-3 py-1 text-[8px] font-bold text-gray-400 uppercase tracking-widest rounded-bl-xl border-b border-l border-white/5">One-Time Use</div><p class="text-[11px] text-gray-300 mb-6 leading-relaxed text-center font-medium">${info}<br><span class="text-gray-500 font-bold uppercase tracking-widest block mt-3 border-t border-white/5 pt-3 text-[9px]">Personal muss bestätigen!</span></p><div onmousedown="window.startRedeemHold(${lvl}, '${tier}', event)" onmouseup="window.stopRedeemHold()" onmouseleave="window.stopRedeemHold()" ontouchstart="window.startRedeemHold(${lvl}, '${tier}', event)" ontouchend="window.stopRedeemHold()" class="relative w-full h-14 bg-black/50 border border-white/10 rounded-xl overflow-hidden cursor-pointer flex items-center justify-center group"><div id="redeem-btn-fill" class="absolute left-0 top-0 bottom-0 w-0 bg-[#ff4d00]/80 z-0" style="transition: none;"></div><span id="redeem-btn-text" class="relative z-10 text-white font-bold uppercase tracking-widest text-xs pointer-events-none">Hold to Redeem</span></div></div>`;
             } else if (type === 'shipping') {
                 const fieldsStr = reward[`${tier}_fields`] || 'Adresse oder Info...';
                 const fieldsArr = fieldsStr.split(',').map(s => s.trim()).filter(s => s);
@@ -811,15 +801,15 @@
                 
                 if (fieldsArr.length > 0) {
                     fieldsArr.forEach((f, idx) => {
-                        fieldsHtml += `<input id="shipping_field_${idx}" type="text" placeholder="${f}" class="w-full mb-4 shipping-input-field" data-label="${f}">`;
+                        fieldsHtml += `<input id="shipping_field_${idx}" type="text" placeholder="${f}" class="w-full mb-3 shipping-input-field" data-label="${f}">`;
                     });
                 } else {
-                    fieldsHtml = `<input id="shipping_field_0" type="text" placeholder="Adresse oder Info..." class="w-full mb-4 shipping-input-field" data-label="Eingabe">`;
+                    fieldsHtml = `<input id="shipping_field_0" type="text" placeholder="Adresse oder Info..." class="w-full mb-3 shipping-input-field" data-label="Eingabe">`;
                 }
-                contentHtml = `<div class="bg-[rgba(255,255,255,0.02)] p-8 rounded-2xl flex flex-col mb-6 border border-white/5 relative"><div class="absolute top-0 right-0 bg-black/40 px-3 py-1.5 text-[9px] font-bold text-gray-400 uppercase tracking-widest rounded-bl-xl border-b border-l border-white/5">One-Time Request</div><p class="text-sm text-gray-400 mb-6 leading-relaxed">${info}</p><div class="w-full">${fieldsHtml}</div><button type="button" onclick="window.submitShipping(${lvl}, '${tier}')" class="w-full btn-grind mt-2 py-4">Versand anfordern</button></div>`;
+                contentHtml = `<div class="bg-[rgba(255,255,255,0.02)] p-6 rounded-2xl flex flex-col mb-5 border border-white/5 relative"><div class="absolute top-0 right-0 bg-black/40 px-3 py-1 text-[8px] font-bold text-gray-400 uppercase tracking-widest rounded-bl-xl border-b border-l border-white/5">One-Time Request</div><p class="text-xs text-gray-400 mb-5 leading-relaxed">${info}</p><div class="w-full">${fieldsHtml}</div><button type="button" onclick="window.submitShipping(${lvl}, '${tier}')" class="w-full btn-grind mt-2 py-3.5">Versand anfordern</button></div>`;
             }
 
-            let innerHtml = `<p class="${textClass} text-[10px] font-bold uppercase tracking-widest mb-2">Loot Stash</p><h3 class="text-3xl font-black italic uppercase tracking-tighter mb-8">${title}</h3>${contentHtml} <button type="button" onclick="window.closeModal()" class="text-xs text-gray-500 uppercase tracking-widest font-bold hover:text-white transition py-2 w-full mt-2">Abbrechen</button>`;
+            let innerHtml = `<p class="${textClass} text-[9px] font-bold uppercase tracking-widest mb-1.5">Loot Stash</p><h3 class="text-2xl font-black italic uppercase tracking-tighter mb-6">${title}</h3>${contentHtml} <button type="button" onclick="window.closeModal()" class="text-[10px] text-gray-500 uppercase tracking-widest font-bold hover:text-white transition py-2 w-full mt-1">Abbrechen</button>`;
             window.openModal(innerHtml);
         };
 
@@ -856,7 +846,7 @@
         window.playGrindIntro = () => {
             const layer = document.createElement('div'); layer.id = 'intro-layer';
             layer.innerHTML = `<div id="word1" class="word-flash text-gray-500">DROP IN.</div><div id="word2" class="word-flash text-white">CLEAR MISSIONS.</div><div id="word3" class="word-flash text-white">CLAIM LOOT.</div><div id="word4" class="word-flash text-gradient">GRIND.</div>`;
-            document.body.appendChild(layer); const timing = 600;
+            document.body.appendChild(layer); const timing = 500;
             setTimeout(() => { document.getElementById('word1').style.animation = `flashInOut ${timing}ms forwards`; }, 200);
             setTimeout(() => { document.getElementById('word2').style.animation = `flashInOut ${timing}ms forwards`; }, 200 + timing);
             setTimeout(() => { document.getElementById('word3').style.animation = `flashInOut ${timing}ms forwards`; }, 200 + (timing * 2));
@@ -934,15 +924,15 @@
         }
 
         const getFooterHTML = () => `
-            <footer class="mt-20 border-t border-white/5 pt-10 text-center flex flex-col items-center justify-center gap-6 w-full max-w-6xl mx-auto px-6 relative z-10 pb-10">
-                <div class="flex flex-wrap justify-center gap-x-8 gap-y-4 text-[10px] uppercase font-bold tracking-[0.2em] text-gray-500">
+            <footer class="mt-16 border-t border-white/5 pt-8 text-center flex flex-col items-center justify-center gap-5 w-full max-w-6xl mx-auto px-6 relative z-10 pb-8 backdrop-blur-sm">
+                <div class="flex flex-wrap justify-center gap-x-6 gap-y-3 text-[9px] uppercase font-bold tracking-[0.2em] text-gray-500">
                     <span class="hover:text-white cursor-pointer transition" onclick="window.setView('impressum')">Impressum</span>
                     <span class="hidden md:inline text-gray-700">•</span>
                     <span class="hover:text-white cursor-pointer transition" onclick="window.setView('datenschutz')">Datenschutz</span>
                     <span class="hidden md:inline text-gray-700">•</span>
                     <span class="hover:text-white cursor-pointer transition" onclick="window.setView('agb')">AGB</span>
                 </div>
-                <p class="text-white/20 text-[9px] uppercase tracking-widest font-black">© 2026 GRIND. NETWORK.</p>
+                <p class="text-white/10 text-[8px] uppercase tracking-widest font-black">© 2026 GRIND. NETWORK.</p>
             </footer>
         `;
 
@@ -950,7 +940,7 @@
         function render() {
             const appDiv = document.getElementById('app');
 
-            if (state.view === 'loading') { appDiv.innerHTML = `<div class="flex-1 flex items-center justify-center min-h-[60vh]"><div class="w-12 h-12 border-t-2 border-l-2 border-[#ff4d00] rounded-full animate-spin"></div></div>`; return; }
+            if (state.view === 'loading') { appDiv.innerHTML = `<div class="flex-1 flex items-center justify-center min-h-[60vh]"><div class="w-10 h-10 border-t-2 border-l-2 border-[#ff4d00] rounded-full animate-spin"></div></div>`; return; }
 
             // --- Season Status Intercept ---
             if (state.view === 'dashboard' || state.view === 'paywall') {
@@ -961,7 +951,7 @@
                     
                     if (sStatus.status === 'upcoming') {
                         msg = `SEASON 0${seasonNum} INCOMING`; submsg = "Bereite dich vor. Der Drop startet in Kürze.";
-                        countdownHtml = `<div class="mt-12 text-4xl md:text-6xl font-mono font-black text-transparent bg-clip-text grind-gradient tracking-widest drop-shadow-[0_0_20px_rgba(255,77,0,0.4)]" id="season-countdown">CALCULATING...</div>`;
+                        countdownHtml = `<div class="mt-10 text-3xl md:text-5xl font-mono font-black text-transparent bg-clip-text grind-gradient tracking-widest drop-shadow-[0_0_20px_rgba(255,77,0,0.4)]" id="season-countdown">CALCULATING...</div>`;
                         if(window.countdownInterval) clearInterval(window.countdownInterval);
                         window.countdownInterval = setInterval(window.updateCountdown, 1000); setTimeout(window.updateCountdown, 0);
                     } else if (sStatus.status === 'ended') {
@@ -971,15 +961,15 @@
 
                     appDiv.innerHTML = `
                         <div class="flex-1 flex flex-col items-center justify-center p-6 text-center min-h-[90dvh] relative z-20 animate-reveal">
-                            <div class="w-24 h-24 border border-[#ff4d00]/30 rounded-full flex items-center justify-center mb-10 animate-pulse-slow relative bg-black/50 backdrop-blur-md shadow-[0_0_30px_rgba(255,77,0,0.2)]">
+                            <div class="w-20 h-20 border border-[#ff4d00]/30 rounded-full flex items-center justify-center mb-8 animate-pulse-slow relative bg-black/50 backdrop-blur-md shadow-[0_0_30px_rgba(255,77,0,0.2)]">
                                 <div class="absolute inset-0 border-t-2 border-[#ff4d00] rounded-full animate-spin" style="animation-duration: 3s;"></div>
-                                <svg class="w-10 h-10 text-[#ff4d00]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                                <svg class="w-8 h-8 text-[#ff4d00]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                             </div>
-                            <p class="text-[#ff4d00] text-xs font-black uppercase tracking-[0.4em] mb-4">Grind Network</p>
-                            <h1 class="text-5xl md:text-7xl font-black italic tracking-tighter mb-6 text-white leading-none">${msg}</h1>
-                            <p class="text-gray-400 font-medium text-sm md:text-base max-w-md mx-auto leading-relaxed">${submsg}</p>
+                            <p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-[0.4em] mb-3">Grind Network</p>
+                            <h1 class="text-4xl md:text-6xl font-black italic tracking-tighter mb-4 text-white leading-none">${msg}</h1>
+                            <p class="text-gray-400 font-medium text-xs md:text-sm max-w-sm mx-auto leading-relaxed">${submsg}</p>
                             ${countdownHtml}
-                            <div class="mt-20 flex justify-center"><button type="button" onclick="window.handleLogout()" class="text-xs uppercase font-bold text-gray-400 hover:text-white transition tracking-widest border border-white/10 px-8 py-4 rounded-xl bg-black/40 backdrop-blur-md">Log out</button></div>
+                            <div class="mt-16 flex justify-center"><button type="button" onclick="window.handleLogout()" class="text-[10px] uppercase font-bold text-gray-400 hover:text-white transition tracking-widest border border-white/10 px-6 py-3 rounded-xl bg-black/40 backdrop-blur-md">Log out</button></div>
                         </div>
                         ${getFooterHTML()}
                     `;
@@ -1100,9 +1090,9 @@
 
                 appDiv.innerHTML = `
                     <div class="max-w-4xl mx-auto px-6 py-12 w-full relative z-20 animate-reveal">
-                        <button onclick="window.goBack()" class="text-gray-400 hover:text-white text-xs font-bold uppercase tracking-widest mb-8 flex items-center gap-2 transition bg-black/40 px-4 py-2 rounded-xl backdrop-blur-md border border-white/5"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg> Zurück</button>
-                        <h1 class="text-4xl md:text-6xl font-black italic uppercase tracking-tighter mb-10 text-white">${title}</h1>
-                        <div class="legal-content card p-8 md:p-12 shadow-2xl">${content}</div>
+                        <button onclick="window.goBack()" class="text-gray-400 hover:text-white text-[10px] font-bold uppercase tracking-widest mb-8 flex items-center gap-2 transition bg-black/40 px-3 py-1.5 rounded-xl backdrop-blur-md border border-white/5"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg> Zurück</button>
+                        <h1 class="text-3xl md:text-5xl font-black italic uppercase tracking-tighter mb-8 text-white">${title}</h1>
+                        <div class="legal-content card p-8 shadow-2xl">${content}</div>
                     </div>
                     ${getFooterHTML()}
                 `;
@@ -1118,21 +1108,21 @@
 
                 appDiv.innerHTML = `
                     <div class="flex-1 flex flex-col items-center justify-center p-6 min-h-[80vh] text-center animate-reveal relative z-20">
-                        <div class="w-20 h-20 border border-[#a855f7]/40 rounded-3xl flex items-center justify-center mb-8 bg-black/60 backdrop-blur-xl shadow-[0_0_40px_rgba(168,85,247,0.3)]"><svg class="w-10 h-10 text-[#a855f7]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg></div>
-                        <h2 class="text-5xl md:text-6xl font-black italic tracking-tighter mb-4 text-white">GRIND. <span class="text-[#a855f7] drop-shadow-[0_0_20px_rgba(168,85,247,0.5)]">PRO</span></h2>
-                        <p class="text-gray-300 font-medium text-sm md:text-base mb-10 max-w-sm leading-relaxed">Schalte alle Premium-Rewards der Season 0${seasonNum} frei und maximiere deinen Progress.</p>
+                        <div class="w-16 h-16 border border-[#a855f7]/40 rounded-2xl flex items-center justify-center mb-6 bg-black/60 backdrop-blur-xl shadow-[0_0_30px_rgba(168,85,247,0.3)]"><svg class="w-8 h-8 text-[#a855f7]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg></div>
+                        <h2 class="text-4xl md:text-5xl font-black italic tracking-tighter mb-3 text-white">GRIND. <span class="text-[#a855f7] drop-shadow-[0_0_15px_rgba(168,85,247,0.5)]">PRO</span></h2>
+                        <p class="text-gray-300 font-medium text-xs md:text-sm mb-8 max-w-sm leading-relaxed">Schalte alle Premium-Rewards der Season 0${seasonNum} frei und maximiere deinen Progress.</p>
                         
-                        <div class="card p-10 mb-8 w-full max-w-md relative overflow-hidden group">
+                        <div class="card p-8 mb-6 w-full max-w-md relative overflow-hidden group">
                             <div class="absolute inset-0 bg-gradient-to-t from-[#a855f7]/10 to-transparent opacity-50"></div>
                             <div class="relative z-10">
-                                <div class="text-xs uppercase tracking-[0.3em] text-[#d8b4fe] font-bold mb-3">Season Pass</div>
-                                <div id="dynamic-price-display" class="text-6xl font-black text-white italic tracking-tighter mb-10">${displayPrice} €</div>
+                                <div class="text-[10px] uppercase tracking-[0.3em] text-[#d8b4fe] font-bold mb-2">Season Pass</div>
+                                <div id="dynamic-price-display" class="text-5xl font-black text-white italic tracking-tighter mb-8">${displayPrice} €</div>
                                 <div id="paypal-button-container" class="w-full min-h-[150px] relative z-50 flex items-center justify-center"></div>
                             </div>
                         </div>
                         
-                        <p class="text-[10px] text-gray-500 uppercase tracking-widest mt-4 mb-8 max-w-xs mx-auto leading-relaxed">Mit dem Kauf stimmst du unseren <span class="text-white underline cursor-pointer hover:text-[#a855f7] transition" onclick="window.setView('agb')">AGB</span> zu.</p>
-                        <button type="button" onclick="window.setView('dashboard')" class="text-gray-400 hover:text-white text-xs uppercase tracking-[0.2em] font-bold transition bg-black/40 px-6 py-3 rounded-xl border border-white/5 backdrop-blur-md">Zurück zum Grind.</button>
+                        <p class="text-[9px] text-gray-500 uppercase tracking-widest mt-2 mb-6 max-w-xs mx-auto leading-relaxed">Mit dem Kauf stimmst du unseren <span class="text-white underline cursor-pointer hover:text-[#a855f7] transition" onclick="window.setView('agb')">AGB</span> zu.</p>
+                        <button type="button" onclick="window.setView('dashboard')" class="text-gray-400 hover:text-white text-[10px] uppercase tracking-[0.2em] font-bold transition bg-black/40 px-5 py-2.5 rounded-xl border border-white/5 backdrop-blur-md">Zurück zum Grind.</button>
                     </div>
                     ${getFooterHTML()}
                 `;
@@ -1147,28 +1137,28 @@
                             } catch(e) { console.error(e); } 
                             window.setView('dashboard'); 
                         }); } }).render('#paypal-button-container');
-                    } else if (!window.paypal) { document.getElementById('paypal-button-container').innerHTML = '<div class="text-red-500 text-sm font-bold">Zahlungssystem blockiert. Bitte neu laden.</div>'; }
+                    } else if (!window.paypal) { document.getElementById('paypal-button-container').innerHTML = '<div class="text-red-500 text-xs font-bold">Zahlungssystem blockiert. Bitte neu laden.</div>'; }
                 }, 100); return;
             }
 
             if (state.view === 'onboarding') {
                 appDiv.innerHTML = `
                     <div class="flex-1 flex flex-col items-center justify-center p-6 min-h-[80vh] text-center animate-reveal">
-                        <h1 class="text-5xl md:text-6xl font-black italic tracking-tighter mb-4 text-white">IDENTIFICATION<span class="text-[#ff4d00]">.</span></h1>
-                        <p class="text-gray-400 font-medium text-sm md:text-base mb-12 max-w-sm leading-relaxed">Wähle deine Base und trete dem Network bei.</p>
-                        <form onsubmit="window.submitOnboarding(event)" class="w-full max-w-sm space-y-5 card p-8">
-                            <input id="onboard_name" type="text" placeholder="Dein Name / Alias" required class="w-full text-center font-bold text-lg">
+                        <h1 class="text-4xl md:text-5xl font-black italic tracking-tighter mb-3 text-white">IDENTIFICATION<span class="text-[#ff4d00]">.</span></h1>
+                        <p class="text-gray-400 font-medium text-xs md:text-sm mb-10 max-w-sm leading-relaxed">Wähle deine Base und trete dem Network bei.</p>
+                        <form onsubmit="window.submitOnboarding(event)" class="w-full max-w-sm space-y-4 card p-6">
+                            <input id="onboard_name" type="text" placeholder="Dein Name / Alias" required class="w-full text-center font-bold text-base">
                             <div class="relative">
-                                <select id="onboard_city" required class="w-full text-center font-bold appearance-none cursor-pointer text-lg">
+                                <select id="onboard_city" required class="w-full text-center font-bold appearance-none cursor-pointer text-base">
                                     <option value="" disabled selected class="text-gray-500">Base wählen</option>
                                     <option value="Köln">Köln</option>
                                     <option value="locked" disabled class="text-gray-600">Weitere Städte in Kürze...</option>
                                 </select>
-                                <div class="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                                 </div>
                             </div>
-                            <button type="submit" class="w-full btn-grind py-4 mt-4 text-sm">Confirm Identity</button>
+                            <button type="submit" class="w-full btn-grind py-3.5 mt-2 text-xs">Confirm Identity</button>
                         </form>
                     </div>
                 `; return;
@@ -1176,9 +1166,9 @@
 
             if (state.view === 'auth') {
                 const seasonNum = state.seasonConfig?.number || 1;
-                let authHtml = `<div class="flex-1 flex flex-col items-center justify-center p-6 min-h-[80vh] text-center animate-reveal"><h1 class="text-7xl md:text-9xl font-black italic tracking-tighter mb-4 text-white drop-shadow-lg">GRIND<span class="text-[#ff4d00] drop-shadow-[0_0_20px_rgba(255,77,0,0.8)]">.</span></h1><p class="text-gray-400 font-bold uppercase tracking-[0.4em] text-xs mb-16">Season 0${seasonNum}</p><div class="w-full max-w-sm card p-8">`;
-                if (state.authStep === 'phone') { authHtml += `<form onsubmit="window.sendSMS(event)" class="space-y-5"><div class="flex gap-3"><select id="auth_prefix" class="w-28 text-center font-bold appearance-none cursor-pointer text-base"><option value="+49">🇩🇪 +49</option><option value="+43">🇦🇹 +43</option><option value="+41">🇨🇭 +41</option></select><input id="auth_phone" type="tel" placeholder="170 1234567" required class="flex-1 text-center font-bold text-lg tracking-wide"></div><button id="auth_submit_btn" type="submit" class="w-full btn-grind py-4 text-sm">Enter The Drop</button></form>`; } 
-                else { authHtml += `<form onsubmit="window.verifyCode(event)" class="space-y-5"><div class="text-center mb-8"><p class="text-gray-400 text-[11px] uppercase tracking-widest font-bold">Code gesendet an</p><p class="text-white font-black mt-2 text-xl">${state.tempPhone}</p></div><input id="auth_code" type="text" placeholder="123456" required class="w-full text-center text-4xl font-mono tracking-[0.4em] py-4"><button id="verify_submit_btn" type="submit" class="w-full btn-grind py-4 text-sm">Verify Access</button><button type="button" onclick="window.goBackToPhone()" class="w-full text-center mt-4 text-xs text-gray-500 hover:text-white uppercase tracking-widest transition font-bold py-2">Cancel</button></form>`; }
+                let authHtml = `<div class="flex-1 flex flex-col items-center justify-center p-6 min-h-[80vh] text-center animate-reveal"><h1 class="text-6xl md:text-7xl font-black italic tracking-tighter mb-3 text-white drop-shadow-lg">GRIND<span class="text-[#ff4d00] drop-shadow-[0_0_15px_rgba(255,77,0,0.8)]">.</span></h1><p class="text-gray-400 font-bold uppercase tracking-[0.3em] text-[9px] mb-12">Season 0${seasonNum}</p><div class="w-full max-w-sm card p-6">`;
+                if (state.authStep === 'phone') { authHtml += `<form onsubmit="window.sendSMS(event)" class="space-y-4"><div class="flex gap-2"><select id="auth_prefix" class="w-24 text-center font-bold appearance-none cursor-pointer text-sm"><option value="+49">🇩🇪 +49</option><option value="+43">🇦🇹 +43</option><option value="+41">🇨🇭 +41</option></select><input id="auth_phone" type="tel" placeholder="170 1234567" required class="flex-1 text-center font-bold text-base tracking-wide"></div><button id="auth_submit_btn" type="submit" class="w-full btn-grind py-3.5 text-xs">Enter The Drop</button></form>`; } 
+                else { authHtml += `<form onsubmit="window.verifyCode(event)" class="space-y-4"><div class="text-center mb-6"><p class="text-gray-400 text-[10px] uppercase tracking-widest font-bold">Code gesendet an</p><p class="text-white font-black mt-1.5 text-lg">${state.tempPhone}</p></div><input id="auth_code" type="text" placeholder="123456" required class="w-full text-center text-3xl font-mono tracking-[0.4em] py-3"><button id="verify_submit_btn" type="submit" class="w-full btn-grind py-3.5 text-xs">Verify Access</button><button type="button" onclick="window.goBackToPhone()" class="w-full text-center mt-3 text-[10px] text-gray-500 hover:text-white uppercase tracking-widest transition font-bold py-2">Cancel</button></form>`; }
                 authHtml += `</div></div>`; appDiv.innerHTML = authHtml; return;
             }
 
@@ -1225,23 +1215,23 @@
                 } else { weekDaysLeftText = "WOCHE ABGELAUFEN"; }
 
                 let html = `
-                    <header class="p-6 md:p-8 max-w-6xl mx-auto flex justify-between items-center w-full relative z-20 animate-reveal" style="animation-delay: 0.1s;">
-                        <h1 class="text-3xl md:text-4xl font-black italic tracking-tighter text-white drop-shadow-md">GRIND<span class="text-[#ff4d00]">.</span></h1>
-                        <div class="flex gap-3">
-                            <button type="button" onclick="window.generateShareCard()" class="text-[10px] md:text-xs uppercase font-bold text-gray-300 hover:text-white transition tracking-widest border border-white/10 px-4 py-2 rounded-xl bg-black/40 backdrop-blur-md shadow-lg">Export</button>
-                            <button type="button" onclick="window.handleLogout()" class="text-[10px] md:text-xs uppercase font-bold text-gray-500 hover:text-red-400 transition tracking-widest border border-white/5 px-4 py-2 rounded-xl bg-black/40 backdrop-blur-md shadow-lg">Exit</button>
+                    <header class="p-5 md:p-8 max-w-6xl mx-auto flex justify-between items-center w-full relative z-20 animate-reveal" style="animation-delay: 0.1s;">
+                        <h1 class="text-2xl md:text-3xl font-black italic tracking-tighter text-white drop-shadow-md">GRIND<span class="text-[#ff4d00]">.</span></h1>
+                        <div class="flex gap-2">
+                            <button type="button" onclick="window.generateShareCard()" class="text-[9px] uppercase font-bold text-gray-300 hover:text-white transition tracking-widest border border-white/10 px-3 py-1.5 rounded-xl bg-black/40 backdrop-blur-md shadow-sm">Export</button>
+                            <button type="button" onclick="window.handleLogout()" class="text-[9px] uppercase font-bold text-gray-500 hover:text-red-400 transition tracking-widest border border-white/5 px-3 py-1.5 rounded-xl bg-black/40 backdrop-blur-md shadow-sm">Exit</button>
                         </div>
                     </header>
 
-                    <main class="max-w-6xl mx-auto px-6 w-full relative z-10 pb-12">
+                    <main class="max-w-6xl mx-auto px-5 w-full relative z-10 pb-12">
                         
                         <!-- STANDING -->
-                        <section class="mb-12 card p-10 flex flex-col items-center text-center animate-float shadow-[0_40px_80px_rgba(0,0,0,0.8)] border border-white/10">
-                            <p class="text-gray-400 text-[11px] font-bold uppercase tracking-[0.4em] mb-6">Current Standing</p>
+                        <section class="mb-10 card p-8 flex flex-col items-center text-center animate-float shadow-[0_30px_60px_rgba(0,0,0,0.6)] border border-white/10">
+                            <p class="text-gray-400 text-[10px] font-bold uppercase tracking-[0.3em] mb-5">Current Standing</p>
                             <div class="relative group">
-                                <svg class="w-56 h-56 transform -rotate-90">
-                                    <circle cx="112" cy="112" r="104" stroke="rgba(255,255,255,0.04)" stroke-width="6" fill="none"></circle>
-                                    <circle id="top-xp-circle" cx="112" cy="112" r="104" stroke="url(#orange-grad)" stroke-width="6" fill="none" stroke-dasharray="653" stroke-dashoffset="653" stroke-linecap="round" class="transition-all duration-1000 ease-out" style="filter: drop-shadow(0 0 10px rgba(255,77,0,0.4));"></circle>
+                                <svg class="w-48 h-48 transform -rotate-90">
+                                    <circle cx="96" cy="96" r="88" stroke="rgba(255,255,255,0.04)" stroke-width="6" fill="none"></circle>
+                                    <circle id="top-xp-circle" cx="96" cy="96" r="88" stroke="url(#orange-grad)" stroke-width="6" fill="none" stroke-dasharray="553" stroke-dashoffset="553" stroke-linecap="round" class="transition-all duration-[700ms] ease-out" style="filter: drop-shadow(0 0 8px rgba(255,77,0,0.3));"></circle>
                                     <defs>
                                         <linearGradient id="orange-grad" x1="0%" y1="0%" x2="100%" y2="0%">
                                             <stop offset="0%" stop-color="#ff8800" />
@@ -1249,28 +1239,28 @@
                                         </linearGradient>
                                     </defs>
                                 </svg>
-                                <div class="absolute inset-0 flex flex-col items-center justify-center mt-2 transition-transform duration-300 group-hover:scale-105">
-                                    <span id="main-lvl-text" class="text-6xl md:text-7xl font-black italic tracking-tighter text-white drop-shadow-md">LVL ${safeLvl}</span>
-                                    <span class="text-[11px] uppercase tracking-[0.3em] text-transparent bg-clip-text grind-gradient font-black mt-2 drop-shadow-sm">${currentRank}</span>
+                                <div class="absolute inset-0 flex flex-col items-center justify-center mt-1 transition-transform duration-300 group-hover:scale-105">
+                                    <span id="main-lvl-text" class="text-5xl md:text-6xl font-black italic tracking-tighter text-white drop-shadow-sm">LVL ${safeLvl}</span>
+                                    <span class="text-[10px] uppercase tracking-[0.3em] text-transparent bg-clip-text grind-gradient font-black mt-1.5 drop-shadow-sm">${currentRank}</span>
                                 </div>
                             </div>
-                            <p class="mt-8 text-sm text-white font-bold tracking-wide"><span id="xp-counter-num">${displayXp}</span> <span class="text-gray-500 font-medium">/ ${(safeLvl) * 1000} XP</span></p>
-                            <div class="mt-4 bg-white/5 border border-white/5 px-4 py-1.5 rounded-full backdrop-blur-sm">
-                                <p class="text-gray-400 font-bold italic text-[11px] uppercase tracking-widest">${p.alias} <span class="ml-1 opacity-40">| ${p.city || 'Köln'}</span></p>
+                            <p class="mt-6 text-xs text-white font-bold tracking-wide"><span id="xp-counter-num">${displayXp}</span> <span class="text-gray-500 font-medium">/ ${(safeLvl) * 1000} XP</span></p>
+                            <div class="mt-3 bg-white/5 border border-white/5 px-3 py-1 rounded-full backdrop-blur-sm">
+                                <p class="text-gray-400 font-bold italic text-[10px] uppercase tracking-widest">${p.alias} <span class="ml-1 opacity-40">| ${p.city || 'Köln'}</span></p>
                             </div>
                         </section>
 
                         <!-- LOOT TRACK -->
-                        <section class="mb-20 animate-reveal" style="animation-delay: 0.3s;">
-                            <div class="flex justify-between items-center mb-6 px-2">
-                                <div><h3 class="text-2xl md:text-3xl font-black italic uppercase tracking-tighter text-white drop-shadow-md">Grind Track <span class="text-[#ff4d00]">S0${seasonNum}</span></h3><p class="text-gray-400 text-[10px] font-bold tracking-widest mt-2">${seasonDaysLeftText}</p></div>
-                                <div>${hasPremium ? '<span class="bg-[#a855f7]/20 text-[#d8b4fe] border border-[#a855f7]/40 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-[0_0_20px_rgba(168,85,247,0.3)] backdrop-blur-md">PRO ACTIVE</span>' : '<button type="button" onclick="window.setView(\'paywall\')" class="btn-pro px-5 py-2.5 text-xs">Get Pro Pass</button>'}</div>
+                        <section class="mb-14 animate-reveal" style="animation-delay: 0.2s;">
+                            <div class="flex justify-between items-center mb-5 px-1">
+                                <div><h3 class="text-xl md:text-2xl font-black italic uppercase tracking-tighter text-white drop-shadow-sm">Grind Track <span class="text-[#ff4d00]">S0${seasonNum}</span></h3><p class="text-gray-400 text-[9px] font-bold tracking-widest mt-1.5">${seasonDaysLeftText}</p></div>
+                                <div>${hasPremium ? '<span class="bg-[#a855f7]/20 text-[#d8b4fe] border border-[#a855f7]/40 px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest shadow-[0_0_15px_rgba(168,85,247,0.2)] backdrop-blur-md">PRO ACTIVE</span>' : '<button type="button" onclick="window.setView(\'paywall\')" class="btn-pro">Get Pro Pass</button>'}</div>
                             </div>
 
-                            <div id="pass-viewport" class="no-scrollbar overflow-x-auto py-8 relative flex items-center min-h-[300px] border-y border-white/10 bg-black/40 backdrop-blur-md rounded-3xl shadow-inner">
-                                <div class="flex items-center px-8 relative" style="min-width: max-content;">
-                                    <div class="absolute top-1/2 left-[105px] right-[105px] h-[2px] bg-white/10 z-0 -translate-y-1/2 rounded-full"></div>
-                                    <div id="track-line" class="absolute top-1/2 left-[105px] h-[4px] bg-[#ff4d00] shadow-[0_0_20px_rgba(255,77,0,0.8)] z-0 transition-all duration-1000 ease-out -translate-y-1/2 rounded-full" style="width: calc(150px * ${oldTrackProgress}); display: ${safeXp > 0 || state.prevXp > 0 ? 'block' : 'none'};"></div>
+                            <div id="pass-viewport" class="no-scrollbar overflow-x-auto py-6 relative flex items-center min-h-[260px] border-y border-white/10 bg-black/30 backdrop-blur-md rounded-2xl shadow-inner">
+                                <div class="flex items-center px-6 relative" style="min-width: max-content;">
+                                    <div class="absolute top-1/2 left-[85px] right-[85px] h-[1px] bg-white/10 z-0 -translate-y-1/2 rounded-full"></div>
+                                    <div id="track-line" class="absolute top-1/2 left-[85px] h-[3px] bg-[#ff4d00] shadow-[0_0_15px_rgba(255,77,0,0.6)] z-0 transition-all duration-[700ms] ease-out -translate-y-1/2 rounded-full" style="width: calc(130px * ${oldTrackProgress}); display: ${safeXp > 0 || state.prevXp > 0 ? 'block' : 'none'};"></div>
                 `;
 
                 for (let i = 1; i <= 30; i++) {
@@ -1282,19 +1272,19 @@
                     const proClaimed = safeRedeemed.includes(`lvl${i}_pro`);
 
                     html += `
-                        <div id="level-node-${i}" class="level-node min-w-[150px] flex flex-col items-center relative z-10">
-                            <div ${isUnlocked && r?.free && !freeClaimed ? `onclick="window.openClaimModal(${i}, 'free')" class="reward-box mb-5 unlocked cursor-pointer hover:scale-105 shadow-lg"` : (freeClaimed ? `onclick="window.openClaimModal(${i}, 'free')" class="reward-box mb-5 unlocked opacity-50 cursor-pointer"` : `class="reward-box mb-5 opacity-40 scale-95"`)}>
+                        <div id="level-node-${i}" class="level-node min-w-[130px] flex flex-col items-center relative z-10">
+                            <div ${isUnlocked && r?.free && !freeClaimed ? `onclick="window.openClaimModal(${i}, 'free')" class="reward-box mb-4 unlocked cursor-pointer hover:scale-105 shadow-sm"` : (freeClaimed ? `onclick="window.openClaimModal(${i}, 'free')" class="reward-box mb-4 unlocked opacity-50 cursor-pointer"` : `class="reward-box mb-4 opacity-40 scale-95"`)}>
                                 <span class="tag-free">FREE</span>
-                                ${freeClaimed && r?.free ? `<div class="completed-overlay rounded-[20px]"><span class="text-green-400 font-black text-xs uppercase italic transform -rotate-12"><svg class="w-6 h-6 drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></span></div>` : ''}
-                                <span class="text-[10px] font-bold uppercase text-center px-2 text-gray-300 mt-2 relative z-10">${r?.free || '-'}</span>
+                                ${freeClaimed && r?.free ? `<div class="completed-overlay rounded-[16px]"><span class="text-green-400 font-black text-xs uppercase italic transform -rotate-12"><svg class="w-5 h-5 drop-shadow-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></span></div>` : ''}
+                                <span class="text-[9px] font-bold uppercase text-center px-2 text-gray-300 mt-2 relative z-10">${r?.free || '-'}</span>
                             </div>
                             
-                            <div id="circle-node-${i}" class="relative w-10 h-10 rounded-full flex items-center justify-center font-black italic text-sm transition-all duration-300 ${isUnlocked ? 'grind-gradient text-black scale-110 shadow-[0_0_25px_rgba(255,77,0,0.7)]' : 'bg-black/60 text-gray-500 border-2 border-white/10 backdrop-blur-md'}">${i}</div>
+                            <div id="circle-node-${i}" class="relative w-9 h-9 rounded-full flex items-center justify-center font-black italic text-xs transition-all duration-300 ${isUnlocked ? 'grind-gradient text-black scale-110 shadow-[0_0_20px_rgba(255,77,0,0.5)]' : 'bg-black/60 text-gray-500 border border-white/10 backdrop-blur-md'}">${i}</div>
                             
-                            <div ${isProUnlocked && r?.pro && !proClaimed ? `onclick="window.openClaimModal(${i}, 'pro')" class="reward-box pro mt-6 unlocked scale-105 cursor-pointer shadow-lg"` : (proClaimed ? `onclick="window.openClaimModal(${i}, 'pro')" class="reward-box pro mt-6 unlocked opacity-50 cursor-pointer"` : `class="reward-box pro mt-6 opacity-40 scale-[0.98] hover:opacity-100 transition-opacity"`)}>
+                            <div ${isProUnlocked && r?.pro && !proClaimed ? `onclick="window.openClaimModal(${i}, 'pro')" class="reward-box pro mt-5 unlocked scale-105 cursor-pointer shadow-sm"` : (proClaimed ? `onclick="window.openClaimModal(${i}, 'pro')" class="reward-box pro mt-5 unlocked opacity-50 cursor-pointer"` : `class="reward-box pro mt-5 opacity-40 scale-[0.98] hover:opacity-100 transition-opacity"`)}>
                                 <span class="tag-pro italic">PRO</span>
-                                ${proClaimed && r?.pro ? `<div class="completed-overlay rounded-[20px]"><span class="text-[#d8b4fe] font-black text-xs uppercase italic transform -rotate-12"><svg class="w-6 h-6 drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></span></div>` : ''}
-                                <span class="text-[10px] font-bold uppercase text-center px-2 mt-4 relative z-10 ${isProUnlocked ? 'text-[#d8b4fe]' : 'text-purple-300'}">${r?.pro || '-'}</span>
+                                ${proClaimed && r?.pro ? `<div class="completed-overlay rounded-[16px]"><span class="text-[#d8b4fe] font-black text-[10px] uppercase italic transform -rotate-12"><svg class="w-5 h-5 drop-shadow-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></span></div>` : ''}
+                                <span class="text-[9px] font-bold uppercase text-center px-2 mt-4 relative z-10 ${isProUnlocked ? 'text-[#d8b4fe]' : 'text-purple-300'}">${r?.pro || '-'}</span>
                             </div>
                         </div>
                     `;
@@ -1306,16 +1296,16 @@
                         </section>
 
                         <!-- OPERATIONS -->
-                        <section class="mb-16 animate-reveal" style="animation-delay: 0.4s;">
-                            <div class="flex flex-col gap-5 mb-8 px-2">
-                                <div class="flex justify-between items-end border-b border-white/10 pb-4">
+                        <section class="mb-14 animate-reveal" style="animation-delay: 0.3s;">
+                            <div class="flex flex-col gap-4 mb-6 px-1">
+                                <div class="flex justify-between items-end border-b border-white/10 pb-3">
                                     <div>
-                                        <p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1.5 drop-shadow-sm">Operations</p>
-                                        <h3 class="text-2xl md:text-3xl font-black uppercase italic tracking-tighter text-white">${(state.weeklyData[currentMonthWeek] || {title: 'Active Week'}).title}</h3>
+                                        <p class="text-[#ff4d00] text-[9px] font-black uppercase tracking-widest mb-1 drop-shadow-sm">Operations</p>
+                                        <h3 class="text-xl md:text-2xl font-black uppercase italic tracking-tighter text-white">${(state.weeklyData[currentMonthWeek] || {title: 'Active Week'}).title}</h3>
                                     </div>
-                                    <span class="text-[9px] font-black bg-[#ff4d00]/20 border border-[#ff4d00]/40 text-[#ff4d00] px-3 py-1.5 rounded-lg italic shadow-[0_0_15px_rgba(255,77,0,0.3)] backdrop-blur-sm">LIVE</span>
+                                    <span class="text-[8px] font-black bg-[#ff4d00]/20 border border-[#ff4d00]/30 text-[#ff4d00] px-2.5 py-1 rounded-md italic shadow-[0_0_10px_rgba(255,77,0,0.2)] backdrop-blur-sm">LIVE</span>
                                 </div>
-                                <div class="flex gap-3 overflow-x-auto no-scrollbar pb-2">
+                                <div class="flex gap-2.5 overflow-x-auto no-scrollbar pb-1">
                 `;
 
                 [1, 2, 3, 4].forEach(w => {
@@ -1327,13 +1317,13 @@
                     let extraClass = isCurrent ? 'active' : 'opacity-50 border-dashed hover:opacity-100 hover:bg-white/5';
                     let badge = isMissed ? '<span class="text-red-400 ml-1.5 opacity-80">MISSED</span>' : (isFuture ? '<span class="text-gray-500 ml-1.5 opacity-80">LOCKED</span>' : '');
 
-                    html += `<button type="button" class="week-btn px-4 py-2 text-[10px] font-bold uppercase transition rounded-xl ${extraClass}">W0${weekNum} ${badge}</button>`;
+                    html += `<button type="button" class="week-btn px-3 py-1.5 text-[9px] font-bold uppercase transition rounded-lg ${extraClass}">W0${weekNum} ${badge}</button>`;
                 });
 
-                html += `</div></div><div class="space-y-5">`;
+                html += `</div></div><div class="space-y-4">`;
 
                 const currentMissions = state.weeklyData[currentMonthWeek]?.missions || [];
-                if (currentMissions.length === 0) html += `<div class="card text-center p-8 text-gray-400 italic text-sm">Der Director bereitet die Operations vor. Stay focused.</div>`;
+                if (currentMissions.length === 0) html += `<div class="card text-center p-6 text-gray-400 italic text-xs">Der Director bereitet die Operations vor. Stay focused.</div>`;
 
                 currentMissions.forEach(m => {
                     const isCompleted = safeCompleted.includes(m.id);
@@ -1356,24 +1346,24 @@
                     if (isCompleted) btnText = 'Verified';
                     else if (isPending) btnText = 'Wird überprüft...';
 
-                    let cardClasses = 'card p-6 md:p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-5 relative overflow-hidden group ';
+                    let cardClasses = 'card p-5 md:p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative overflow-hidden group ';
                     if (isCompleted) cardClasses += 'is-completed border-[#ff4d00]/30 shadow-none opacity-80';
                     else if (isPending) cardClasses += 'is-pending border-yellow-500/30';
 
                     html += `
                         <div class="${cardClasses}">
-                            <div class="absolute inset-y-0 left-0 w-1.5 ${isPending ? 'bg-yellow-500' : 'bg-[#ff4d00]'} opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                            <div class="completed-overlay"><span class="text-[#ff4d00] font-black italic uppercase tracking-widest flex items-center gap-2 text-base"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg> Verified</span></div>
-                            <div class="pending-overlay"><span class="text-yellow-400 font-black italic uppercase tracking-widest flex items-center gap-2 text-base"><svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> Check</span></div>
+                            <div class="absolute inset-y-0 left-0 w-1 ${isPending ? 'bg-yellow-500' : 'bg-[#ff4d00]'} opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                            <div class="completed-overlay"><span class="text-[#ff4d00] font-black italic uppercase tracking-widest flex items-center gap-2 text-sm"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg> Verified</span></div>
+                            <div class="pending-overlay"><span class="text-yellow-400 font-black italic uppercase tracking-widest flex items-center gap-2 text-sm"><svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> Check</span></div>
                             
-                            <div class="pr-4 relative z-0 flex-1">
-                                <h4 class="font-black italic uppercase text-xl md:text-2xl tracking-tighter text-white group-hover:text-[#ff4d00] transition-colors">${m.name}</h4>
-                                <p class="text-gray-400 text-xs mt-2 leading-relaxed font-medium">${m.desc}</p>
-                                ${!isCompleted ? `<span class="inline-block mt-4 bg-white/10 border border-white/20 px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest text-white backdrop-blur-md shadow-sm">${badgeText}</span>` : ''}
+                            <div class="pr-3 relative z-0 flex-1 w-full">
+                                <h4 class="font-black italic uppercase text-lg md:text-xl tracking-tighter text-white group-hover:text-[#ff4d00] transition-colors truncate">${m.name}</h4>
+                                <p class="text-gray-400 text-[11px] mt-1.5 leading-relaxed font-medium line-clamp-2">${m.desc}</p>
+                                ${!isCompleted ? `<span class="inline-block mt-3 bg-white/10 border border-white/10 px-2.5 py-1 rounded-md text-[8px] font-bold uppercase tracking-widest text-white backdrop-blur-sm">${badgeText}</span>` : ''}
                             </div>
-                            <div class="text-left md:text-right flex-shrink-0 relative z-0 flex flex-col items-start md:items-end w-full md:w-auto mt-2 md:mt-0">
-                                <span class="block text-[#ff4d00] font-black text-3xl md:text-4xl italic tracking-tighter mb-3 drop-shadow-md">+${m.xp}</span>
-                                <button type="button" id="btn-${m.id}" onclick="${btnAction}" class="btn-grind w-full md:w-auto" ${(isCompleted || isPending) ? 'disabled' : ''}>${btnText}</button>
+                            <div class="text-left md:text-right flex-shrink-0 relative z-0 flex flex-col items-start md:items-end w-full md:w-auto mt-3 md:mt-0">
+                                <span class="block text-[#ff4d00] font-black text-2xl md:text-3xl italic tracking-tighter mb-2 drop-shadow-sm">+${m.xp}</span>
+                                <button type="button" id="btn-${m.id}" onclick="${btnAction}" class="btn-grind w-full md:w-auto !py-2.5 !px-4" ${(isCompleted || isPending) ? 'disabled' : ''}>${btnText}</button>
                             </div>
                         </div>
                     `;
@@ -1384,21 +1374,21 @@
                         </section>
                         
                         <!-- HABITS -->
-                        <section class="max-w-3xl mx-auto mb-16 animate-reveal" style="animation-delay: 0.5s;">
-                            <div class="flex flex-col gap-5 mb-8 px-2">
-                                <div class="flex justify-between items-end border-b border-white/10 pb-4">
+                        <section class="max-w-3xl mx-auto mb-14 animate-reveal" style="animation-delay: 0.4s;">
+                            <div class="flex flex-col gap-4 mb-6 px-1">
+                                <div class="flex justify-between items-end border-b border-white/10 pb-3">
                                     <div>
-                                        <p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1.5 drop-shadow-sm">Endless Grind</p>
-                                        <h3 class="text-2xl md:text-3xl font-black uppercase italic tracking-tighter text-white">Daily Habits</h3>
+                                        <p class="text-[#ff4d00] text-[9px] font-black uppercase tracking-widest mb-1 drop-shadow-sm">Endless Grind</p>
+                                        <h3 class="text-xl md:text-2xl font-black uppercase italic tracking-tighter text-white">Daily Habits</h3>
                                     </div>
-                                    <span class="text-[9px] font-black bg-white/10 border border-white/20 text-gray-300 px-3 py-1.5 rounded-md italic shadow-sm backdrop-blur-sm">REPEATABLE</span>
+                                    <span class="text-[8px] font-black bg-white/10 border border-white/10 text-gray-300 px-2.5 py-1 rounded-md italic shadow-sm backdrop-blur-sm">REPEATABLE</span>
                                 </div>
                             </div>
-                            <div class="space-y-5">
+                            <div class="space-y-4">
                 `;
 
                 if ((state.habitData || []).length === 0) {
-                    html += `<div class="card text-center p-8 text-gray-500 italic text-sm">Derzeit keine Daily Habits aktiv.</div>`;
+                    html += `<div class="card text-center p-6 text-gray-500 italic text-xs">Derzeit keine Daily Habits aktiv.</div>`;
                 }
 
                 (state.habitData || []).forEach(m => {
@@ -1428,7 +1418,7 @@
                     }
                     
                     const isExpired = habDaysLeftText === "ABGELAUFEN";
-                    let cardClasses = 'card p-6 md:p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-5 relative overflow-hidden group ';
+                    let cardClasses = 'card p-5 md:p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative overflow-hidden group ';
                     if (isDoneToday) cardClasses += 'is-completed border-[#ff4d00]/30 shadow-none opacity-80';
                     else if (isPending) cardClasses += 'is-pending border-yellow-500/30';
                     else if (isExpired) cardClasses += 'opacity-40 cursor-not-allowed';
@@ -1446,23 +1436,23 @@
                     html += `
                         <div class="${cardClasses}">
                             <div class="absolute inset-y-0 left-0 w-1.5 ${isPending ? 'bg-yellow-500' : (isDoneToday ? 'bg-[#ff4d00]' : 'bg-transparent group-hover:bg-[#ff4d00]')} transition-colors duration-300"></div>
-                            ${isDoneToday ? `<div class="completed-overlay"><span class="text-[#ff4d00] font-black italic uppercase tracking-widest flex items-center gap-2 text-base"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg> DONE TODAY</span></div>` : ''}
-                            ${isPending ? `<div class="pending-overlay"><span class="text-yellow-400 font-black italic uppercase tracking-widest flex items-center gap-2 text-base"><svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> Check</span></div>` : ''}
+                            ${isDoneToday ? `<div class="completed-overlay"><span class="text-[#ff4d00] font-black italic uppercase tracking-widest flex items-center gap-2 text-sm"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg> DONE TODAY</span></div>` : ''}
+                            ${isPending ? `<div class="pending-overlay"><span class="text-yellow-400 font-black italic uppercase tracking-widest flex items-center gap-2 text-sm"><svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> Check</span></div>` : ''}
                             
-                            <div class="pr-4 relative z-0 flex-1 w-full">
-                                <div class="flex justify-between items-start mb-2">
-                                    <h4 class="font-black italic uppercase text-xl md:text-2xl tracking-tighter text-white break-words max-w-[75%] group-hover:text-[#ff4d00] transition-colors">${m.name}</h4>
-                                    <span class="text-[9px] font-bold text-gray-400 tracking-widest uppercase border border-white/20 bg-white/5 backdrop-blur-md px-2.5 py-1 rounded-md shadow-sm">${habDaysLeftText}</span>
+                            <div class="pr-3 relative z-0 flex-1 w-full">
+                                <div class="flex justify-between items-start mb-1.5">
+                                    <h4 class="font-black italic uppercase text-lg md:text-xl tracking-tighter text-white break-words max-w-[75%] group-hover:text-[#ff4d00] transition-colors">${m.name}</h4>
+                                    <span class="text-[8px] font-bold text-gray-400 tracking-widest uppercase border border-white/10 bg-white/5 backdrop-blur-sm px-2 py-0.5 rounded shadow-sm">${habDaysLeftText}</span>
                                 </div>
-                                <p class="text-gray-400 text-xs mt-2 leading-relaxed font-medium">${m.desc}</p>
-                                <div class="flex flex-wrap items-center gap-3 mt-4">
-                                    <span class="bg-white/10 border border-white/20 text-white px-3 py-1.5 text-[9px] font-black uppercase tracking-widest rounded-lg backdrop-blur-md shadow-sm">${badgeText}</span>
-                                    ${m.streakBonus > 0 ? `<span class="bg-[#ff4d00]/15 border border-[#ff4d00]/30 text-[#ff4d00] px-3 py-1.5 text-[9px] font-black uppercase tracking-widest rounded-lg shadow-[0_0_15px_rgba(255,77,0,0.2)] backdrop-blur-md">🔥 Streak: ${activeStreak} (+${m.streakBonus} XP/Tag)</span>` : `<span class="bg-white/5 border border-white/10 text-gray-400 px-3 py-1.5 text-[9px] font-black uppercase tracking-widest rounded-lg backdrop-blur-md">🔥 Streak: ${activeStreak}</span>`}
+                                <p class="text-gray-400 text-[11px] mt-1 leading-relaxed font-medium line-clamp-2">${m.desc}</p>
+                                <div class="flex flex-wrap items-center gap-2.5 mt-3">
+                                    <span class="bg-white/10 border border-white/10 text-white px-2.5 py-1 text-[8px] font-black uppercase tracking-widest rounded-md backdrop-blur-sm shadow-sm">${badgeText}</span>
+                                    ${m.streakBonus > 0 ? `<span class="bg-[#ff4d00]/15 border border-[#ff4d00]/20 text-[#ff4d00] px-2.5 py-1 text-[8px] font-black uppercase tracking-widest rounded-md shadow-[0_0_10px_rgba(255,77,0,0.15)] backdrop-blur-sm">🔥 Streak: ${activeStreak} (+${m.streakBonus})</span>` : `<span class="bg-white/5 border border-white/5 text-gray-400 px-2.5 py-1 text-[8px] font-black uppercase tracking-widest rounded-md backdrop-blur-sm">🔥 Streak: ${activeStreak}</span>`}
                                 </div>
                             </div>
-                            <div class="text-left md:text-right flex-shrink-0 relative z-0 flex flex-col items-start md:items-end w-full md:w-auto mt-4 md:mt-0">
-                                <span class="block text-[#ff4d00] font-black text-3xl md:text-4xl italic tracking-tighter mb-3 drop-shadow-md">+${totalXpDisplay}</span>
-                                <button type="button" onclick="${btnAction}" class="btn-grind w-full md:w-auto" ${(isDoneToday || isPending || isExpired) ? 'disabled' : ''}>${btnText}</button>
+                            <div class="text-left md:text-right flex-shrink-0 relative z-0 flex flex-col items-start md:items-end w-full md:w-auto mt-3 md:mt-0">
+                                <span class="block text-[#ff4d00] font-black text-2xl md:text-3xl italic tracking-tighter mb-2 drop-shadow-sm">+${totalXpDisplay}</span>
+                                <button type="button" onclick="${btnAction}" class="btn-grind w-full md:w-auto !py-2.5 !px-4" ${(isDoneToday || isPending || isExpired) ? 'disabled' : ''}>${btnText}</button>
                             </div>
                         </div>
                     `;
@@ -1473,14 +1463,14 @@
                         </section>
 
                         <!-- FEED -->
-                        <section class="max-w-3xl mx-auto mb-12 animate-reveal" style="animation-delay: 0.6s;">
-                            <div class="flex flex-col gap-5 mb-8 px-2">
-                                <div class="flex justify-between items-end border-b border-white/10 pb-4">
+                        <section class="max-w-3xl mx-auto mb-10 animate-reveal" style="animation-delay: 0.5s;">
+                            <div class="flex flex-col gap-4 mb-6 px-1">
+                                <div class="flex justify-between items-end border-b border-white/10 pb-3">
                                     <div>
-                                        <p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1.5 drop-shadow-sm">The Network</p>
-                                        <h3 class="text-2xl md:text-3xl font-black uppercase italic tracking-tighter text-white">Crew Activity</h3>
+                                        <p class="text-[#ff4d00] text-[9px] font-black uppercase tracking-widest mb-1 drop-shadow-sm">The Network</p>
+                                        <h3 class="text-xl md:text-2xl font-black uppercase italic tracking-tighter text-white">Crew Activity</h3>
                                     </div>
-                                    <span class="text-[9px] font-black bg-white/10 border border-white/20 text-gray-300 px-3 py-1.5 rounded-md italic backdrop-blur-sm">LIVE FEED</span>
+                                    <span class="text-[8px] font-black bg-white/10 border border-white/10 text-gray-300 px-2.5 py-1 rounded-md italic backdrop-blur-sm">LIVE FEED</span>
                                 </div>
                             </div>
 
@@ -1490,19 +1480,19 @@
                 const nextBounty = (myFriendsCount + 1) * 100;
 
                 html += `
-                            <div class="card p-8 rounded-2xl mb-10 border border-[#ff4d00]/30 shadow-[0_20px_40px_rgba(255,77,0,0.15)] relative overflow-hidden group hover:border-[#ff4d00]/50 transition-colors">
-                                <div class="absolute inset-0 bg-gradient-to-r from-[#ff4d00]/10 to-transparent"></div>
-                                <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+                            <div class="card p-6 rounded-2xl mb-8 border border-[#ff4d00]/20 shadow-[0_10px_30px_rgba(255,77,0,0.1)] relative overflow-hidden group hover:border-[#ff4d00]/40 transition-colors">
+                                <div class="absolute inset-0 bg-gradient-to-r from-[#ff4d00]/5 to-transparent"></div>
+                                <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-5">
                                     <div class="text-center md:text-left flex-1">
-                                        <p class="text-[#ff4d00] font-black italic uppercase tracking-widest text-sm mb-3 flex items-center justify-center md:justify-start gap-2">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                        <p class="text-[#ff4d00] font-black italic uppercase tracking-widest text-xs mb-2 flex items-center justify-center md:justify-start gap-1.5">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                                             Bounty Active
                                         </p>
-                                        <p class="text-gray-300 text-xs leading-relaxed font-medium">Erweitere dein Network. Jeder neue Grinder bringt dir massive XP. Nächster Invite: <span class="text-white font-black bg-white/15 px-2 py-1 rounded-md ml-1 border border-white/20 shadow-sm">+${nextBounty} XP</span></p>
+                                        <p class="text-gray-300 text-[11px] leading-relaxed font-medium">Erweitere dein Network. Jeder neue Grinder bringt dir XP. Nächster Invite: <span class="text-white font-black bg-white/10 px-1.5 py-0.5 rounded border border-white/10 shadow-sm">+${nextBounty} XP</span></p>
                                     </div>
-                                    <button type="button" onclick="window.openInviteModal()" class="w-full md:w-auto btn-grind px-8 py-4 flex items-center justify-center gap-3 whitespace-nowrap flex-shrink-0 shadow-[0_10px_20px_rgba(255,77,0,0.2)]">
-                                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                                        <span class="font-black italic uppercase text-xs tracking-widest">Crew Erweitern</span>
+                                    <button type="button" onclick="window.openInviteModal()" class="w-full md:w-auto btn-grind px-6 py-3 flex items-center justify-center gap-2 whitespace-nowrap flex-shrink-0 shadow-sm">
+                                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                        <span class="font-black italic uppercase text-[10px] tracking-widest">Crew Erweitern</span>
                                     </button>
                                 </div>
                             </div>
@@ -1519,47 +1509,47 @@
 
                 if (feedActivities.length === 0) {
                     if (friendsList.length === 0) {
-                        html += `<div class="card text-center p-10 text-gray-400 italic text-sm">Deine Crew ist noch leer. <br><span class="text-[#ff4d00] font-bold mt-2 block">Lade Freunde ein und kassiere deinen XP Boost!</span></div>`;
+                        html += `<div class="card text-center p-8 text-gray-400 italic text-xs">Deine Crew ist noch leer. <br><span class="text-[#ff4d00] font-medium mt-1 block">Lade Freunde ein und kassiere deinen XP Boost!</span></div>`;
                     } else {
-                        html += `<div class="card text-center p-10 text-gray-400 italic text-sm">Noch keine Aktivität in deiner Crew. Time to grind!</div>`;
+                        html += `<div class="card text-center p-8 text-gray-400 italic text-xs">Noch keine Aktivität in deiner Crew. Time to grind!</div>`;
                     }
                 } else {
-                    html += `<div class="space-y-6 relative before:absolute before:inset-y-0 before:left-[23px] before:w-[2px] before:bg-white/10">`;
+                    html += `<div class="space-y-4 relative before:absolute before:inset-y-0 before:left-[19px] before:w-[1px] before:bg-white/10">`;
                     
                     feedActivities.forEach(act => {
                         const isProUser = act.isPro === true;
                         let iconSvg = 'M5 13l4 4L19 7'; 
                         let colorClass = isProUser ? 'text-[#a855f7]' : 'text-[#ff4d00]';
-                        let borderClass = isProUser ? 'border-[#a855f7]/40' : 'border-[#ff4d00]/40';
+                        let borderClass = isProUser ? 'border-[#a855f7]/30' : 'border-[#ff4d00]/30';
                         let bgClass = isProUser ? 'bg-[#a855f7]/10' : 'bg-[#ff4d00]/10';
                         let shadowClass = '';
 
                         if (act.type === 'LEVEL_UP') {
                             iconSvg = 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6';
                             borderClass = isProUser ? 'border-[#a855f7]' : 'border-[#ff4d00]';
-                            shadowClass = isProUser ? 'shadow-[0_0_15px_rgba(168,85,247,0.4)]' : 'shadow-[0_0_15px_rgba(255,77,0,0.4)]';
+                            shadowClass = isProUser ? 'shadow-[0_0_10px_rgba(168,85,247,0.3)]' : 'shadow-[0_0_10px_rgba(255,77,0,0.3)]';
                         } else if (act.type === 'REDEEM') {
                             iconSvg = 'M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7';
                         } else if (act.type === 'PRO') {
                             iconSvg = 'M13 10V3L4 14h7v7l9-11h-7z';
                             colorClass = 'text-white'; bgClass = 'bg-[#a855f7]'; borderClass = 'border-[#a855f7]';
-                            shadowClass = 'shadow-[0_0_20px_rgba(168,85,247,0.6)]';
+                            shadowClass = 'shadow-[0_0_15px_rgba(168,85,247,0.4)]';
                         }
 
                         const time = getRelativeTime(act.timestamp);
                         const displayName = act.alias;
                         const nameColorClass = isProUser ? 'text-[#d8b4fe]' : 'text-[#ff4d00]';
-                        const proBadge = isProUser ? `<span class="ml-2 align-middle bg-[#a855f7]/20 text-[#d8b4fe] border border-[#a855f7]/40 text-[8px] px-1.5 py-0.5 rounded-sm font-black shadow-[0_0_10px_rgba(168,85,247,0.2)]">PRO</span>` : '';
+                        const proBadge = isProUser ? `<span class="ml-1.5 align-middle bg-[#a855f7]/15 text-[#d8b4fe] border border-[#a855f7]/30 text-[7px] px-1 py-0.5 rounded-sm font-black shadow-sm">PRO</span>` : '';
                         const dynamicText = act.text.replace(/text-\[#[a-fA-F0-9]+\]/g, isProUser ? 'text-[#d8b4fe]' : 'text-[#ff4d00]');
 
                         html += `
-                            <div class="flex gap-5 relative z-10 items-center group">
-                                <div class="w-12 h-12 rounded-full ${bgClass} backdrop-blur-md border-2 ${borderClass} flex items-center justify-center flex-shrink-0 ${shadowClass} transition-transform group-hover:scale-110">
-                                    <svg class="w-5 h-5 ${colorClass}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${iconSvg}"></path></svg>
+                            <div class="flex gap-3.5 relative z-10 items-center group">
+                                <div class="w-10 h-10 rounded-full ${bgClass} backdrop-blur-sm border ${borderClass} flex items-center justify-center flex-shrink-0 ${shadowClass} transition-transform group-hover:scale-105">
+                                    <svg class="w-4 h-4 ${colorClass}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${iconSvg}"></path></svg>
                                 </div>
-                                <div class="card p-5 flex-1 shadow-md border-white/5 group-hover:border-white/20">
-                                    <p class="text-[9px] text-gray-500 font-bold uppercase tracking-widest mb-1.5">${time}</p>
-                                    <p class="text-sm font-medium text-gray-300 leading-relaxed"><span class="${nameColorClass} italic uppercase font-black tracking-wide">${displayName}</span>${proBadge} <span class="text-gray-400 text-xs ml-1">${dynamicText}</span></p>
+                                <div class="card p-4 flex-1 shadow-sm border-white/5 group-hover:border-white/10">
+                                    <p class="text-[8px] text-gray-500 font-bold uppercase tracking-widest mb-1">${time}</p>
+                                    <p class="text-[11px] font-medium text-gray-300 leading-relaxed"><span class="${nameColorClass} italic uppercase font-black tracking-wide">${displayName}</span>${proBadge} <span class="text-gray-400 text-[10px] ml-1">${dynamicText}</span></p>
                                 </div>
                             </div>
                         `;
@@ -1586,29 +1576,29 @@
                     }
 
                     const topCircle = document.getElementById('top-xp-circle');
-                    const targetOffset = 653 - (653 * targetXpProgress / 100);
+                    const targetOffset = 553 - (553 * targetXpProgress / 100);
                     
                     const trackLine = document.getElementById('track-line');
-                    if (trackLine) trackLine.style.width = `calc(150px * ${targetTrackProgress})`;
+                    if (trackLine) trackLine.style.width = `calc(130px * ${targetTrackProgress})`;
 
                     if (state.prevLvl !== null && safeLvl > state.prevLvl) {
                         if (topCircle) {
-                            topCircle.style.transition = 'stroke-dashoffset 800ms ease-out';
+                            topCircle.style.transition = 'stroke-dashoffset 700ms ease-out';
                             topCircle.style.strokeDashoffset = '0';
                             setTimeout(() => {
                                 topCircle.style.transition = 'none';
-                                topCircle.style.strokeDashoffset = '653';
+                                topCircle.style.strokeDashoffset = '553';
                                 void topCircle.offsetWidth;
-                                topCircle.style.transition = 'stroke-dashoffset 800ms ease-out';
+                                topCircle.style.transition = 'stroke-dashoffset 700ms ease-out';
                                 topCircle.style.strokeDashoffset = targetOffset.toString();
-                            }, 800);
+                            }, 700);
                         }
                         if (passViewport && currentNode) {
                             const scrollLeft = currentNode.offsetLeft - (passViewport.offsetWidth / 2) + (currentNode.offsetWidth / 2);
                             passViewport.scrollTo({ left: scrollLeft, behavior: 'smooth' });
                         }
                     } else if (topCircle) {
-                        topCircle.style.transition = 'stroke-dashoffset 800ms ease-out';
+                        topCircle.style.transition = 'stroke-dashoffset 700ms ease-out';
                         topCircle.style.strokeDashoffset = targetOffset.toString();
                     }
 
@@ -1627,13 +1617,14 @@
             // --- 404 FALLBACK ---
             appDiv.innerHTML = `
                 <div class="flex-1 flex flex-col items-center justify-center text-center p-6 min-h-[80vh] relative z-20 animate-reveal">
-                    <h1 class="text-[8rem] md:text-[12rem] font-black italic text-white tracking-tighter mb-4 select-none opacity-20 drop-shadow-2xl">404</h1>
-                    <p class="text-[#ff4d00] font-black uppercase tracking-[0.4em] mb-6 text-sm">Signal Lost</p>
-                    <p class="text-gray-400 font-medium max-w-sm text-sm leading-relaxed mb-12">Die angeforderte Position existiert nicht im Network.</p>
-                    <button onclick="window.setView('dashboard')" class="btn-grind py-4 px-10">Return to Base</button>
+                    <h1 class="text-[6rem] md:text-[10rem] font-black italic text-white tracking-tighter mb-2 select-none opacity-20 drop-shadow-lg">404</h1>
+                    <p class="text-[#ff4d00] font-black uppercase tracking-[0.4em] mb-4 text-xs">Signal Lost</p>
+                    <p class="text-gray-400 font-medium max-w-sm text-xs leading-relaxed mb-10">Die angeforderte Position existiert nicht im Network.</p>
+                    <button onclick="window.setView('dashboard')" class="btn-grind py-3 px-8">Return to Base</button>
                 </div>
             `;
         }
     </script>
 </body>
 </html>
+
