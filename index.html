@@ -1,17 +1,20 @@
-```html
+
 <!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
-    <!-- SEO & GOOGLE DISCOVERABILITY -->
+    <!-- ========================================== -->
+    <!-- SEO & GOOGLE DISCOVERABILITY               -->
+    <!-- ========================================== -->
     <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
     <meta name="description" content="Verwandle deinen Alltag in ein Spiel. Sammle XP durch Fitness, Habits und Hustle. Schalte echte Rewards frei und miss dich mit deiner Crew. Join the GRIND Network.">
     <meta name="keywords" content="Habit Tracker, Fitness App, Gamification, Motivation, Health, Eisbaden, Run Club, XP sammeln">
     
     <title>GRIND. | Level up your life</title>
     
+    <!-- Externe Ressourcen (Tailwind, Fonts, Icons) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&display=swap" rel="stylesheet">
     
@@ -33,32 +36,31 @@
 
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script src="https://www.paypal.com/sdk/js?client-id=AboxAT2qskA0lY5-23Kj2tu_qY3bOK57rq_LbhtE_cdVOBT37fSHGacBKjgl-zx1XcJM9AZql96OCwc8&currency=EUR"></script>
+    
+    <!-- ========================================== -->
+    <!-- CUSTOM CSS                                 -->
+    <!-- ========================================== -->
     <style>
-        /* --- MODULE: CORE & BACKGROUNDS --- */
+        /* Basis-Styling */
         body { 
             font-family: 'Inter', sans-serif; 
             background-color: #050505; 
             color: #ffffff; 
             overflow-x: hidden; 
+            background-image: radial-gradient(circle at 50% 0%, #1a0a00 0%, #050505 60%);
             min-height: 100vh;
             overscroll-behavior-y: none;
-            transition: background-image 1.5s ease-in-out; /* Smooth transition for dynamic BG */
         }
-
-        /* Dynamic Background Classes */
-        .bg-lvl-default { background-image: radial-gradient(circle at 50% 0%, #1a0a00 0%, #050505 60%); }
-        .bg-lvl-purple { background-image: radial-gradient(circle at 50% 0%, #140024 0%, #050505 65%); }
-        .bg-lvl-blue { background-image: radial-gradient(circle at 50% 0%, #000c24 0%, #050505 65%); }
-        .bg-lvl-red { background-image: radial-gradient(circle at 50% 0%, #240000 0%, #050505 70%); }
         
-        /* --- MODULE: COMPONENTS & TRACK --- */
         .grind-gradient { background: linear-gradient(90deg, #ff4d00, #ff8800); }
         .card { background: #0f0f0f; border: 1px solid #1f1f1f; transition: all 0.3s ease; }
         .card:hover { border-color: #ff4d00; box-shadow: 0 0 20px rgba(255, 77, 0, 0.1); }
         
+        /* Scrollbars verstecken */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; scroll-behavior: smooth; }
         
+        /* Level Nodes im Track */
         .level-node { min-width: 140px; position: relative; }
         
         .reward-box { width: 100px; height: 85px; border: 1px solid #1f1f1f; background: #0a0a0a; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; z-index: 10; border-radius: 4px; transition: all 0.3s ease; }
@@ -72,22 +74,15 @@
         .week-btn { border: 1px solid #1f1f1f; background: #0a0a0a; transition: all 0.2s; }
         .week-btn.active { background: #ff4d00; color: white; border-color: #ff4d00; font-weight: 900; box-shadow: 0 0 15px rgba(255, 77, 0, 0.2); }
         
-        /* --- MODULE: NOTIFICATIONS & TOASTS --- */
+        /* Toast Notifications */
         #toast-container { position: fixed; top: 20px; right: 20px; z-index: 99999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
         .toast { pointer-events: auto; background: #0a0a0a; border: 1px solid #1f1f1f; color: white; padding: 16px 24px; border-radius: 4px; font-size: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.8); transform: translateX(120%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: flex; align-items: center; gap: 12px; }
         .toast.show { transform: translateX(0); }
         .toast.success { border-left: 4px solid #ff4d00; }
         .toast.error { border-left: 4px solid #dc2626; }
         .toast.info { border-left: 4px solid #3b82f6; }
-        .toast.flame { border-left: 4px solid #facc15; animation: flame-pop 0.5s ease; } /* New Flame Toast */
         
-        @keyframes flame-pop {
-            0% { transform: scale(0.5) translateX(100%); opacity: 0; }
-            70% { transform: scale(1.1) translateX(-5%); opacity: 1; }
-            100% { transform: scale(1) translateX(0); }
-        }
-
-        /* --- MODULE: BUTTONS & ANIMATIONS --- */
+        /* Buttons */
         .btn-grind { background: white; color: black; font-weight: 900; font-style: italic; text-transform: uppercase; padding: 12px 24px; font-size: 12px; transition: all 0.2s; box-shadow: 0 4px 15px rgba(255,255,255,0.1); cursor: pointer; border-radius: 4px; border: none; }
         .btn-grind:hover { background: #ff4d00; color: white; box-shadow: 0 4px 20px rgba(255, 77, 0, 0.4); }
         .btn-grind:disabled { background: #1f1f1f; color: #555; cursor: not-allowed; box-shadow: none; border-color: #1f1f1f; }
@@ -95,7 +90,7 @@
         .btn-pro { background: #1a0a2e; color: #a855f7; font-weight: 900; font-style: italic; text-transform: uppercase; padding: 12px 24px; font-size: 12px; transition: all 0.2s; box-shadow: 0 4px 15px rgba(168,85,247,0.1); cursor: pointer; border-radius: 4px; border: 1px solid rgba(168,85,247,0.3); }
         .btn-pro:hover { background: #a855f7; color: white; box-shadow: 0 4px 20px rgba(168,85,247,0.4); border-color: #a855f7; }
         
-        /* PREMIUM BOUNTY BUTTON ANIMATION */
+        /* Premium Bounty Button Animation */
         @keyframes subtle-pulse {
             0%, 100% { opacity: 1; box-shadow: 0 0 10px rgba(255, 77, 0, 0.1); border-color: rgba(255, 77, 0, 0.3); }
             50% { opacity: 0.95; box-shadow: 0 0 20px rgba(255, 77, 0, 0.4); border-color: rgba(255, 77, 0, 0.6); }
@@ -115,6 +110,7 @@
             transform: translateY(-2px);
         }
 
+        /* Overlays & Animations */
         .completed-overlay { position: absolute; inset: 0; background: rgba(5,5,5,0.8); z-index: 10; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px); opacity: 0; transition: opacity 0.3s; pointer-events: none; }
         .card.is-completed .completed-overlay { opacity: 1; pointer-events: auto; }
         
@@ -127,6 +123,7 @@
         @keyframes shine { 100% { left: 200%; } }
         .xp-bar-glow { position: relative; overflow: hidden; }
         .xp-bar-glow::after { content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent); animation: shine 2.5s infinite; }
+        
         .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -134,9 +131,11 @@
         .animate-pulse-slow { animation: pulse-slow 4s ease-in-out infinite; }
         .glitch-bg { background-image: radial-gradient(circle at 50% 50%, #1a0a00 0%, #050505 80%); }
 
+        /* reCAPTCHA Badge verstecken/dimmen */
         .grecaptcha-badge { filter: invert(1) grayscale(0.2) opacity(0.3); transition: all 0.5s ease !important; bottom: 20px !important; }
         .grecaptcha-badge:hover { filter: invert(1) grayscale(0) opacity(0.8); }
 		
+        /* Intro Animation */
         #intro-layer {
             position: fixed; inset: 0; z-index: 999999;
             background-color: #050505; display: flex; align-items: center; justify-content: center;
@@ -156,6 +155,7 @@
             100% { opacity: 0; transform: translate(-50%, -50%) scale(1.1); filter: blur(4px); }
         }
         
+        /* Legal Pages Styling */
         .legal-content h2 { color: white; font-weight: 900; font-style: italic; text-transform: uppercase; margin-top: 2.5rem; margin-bottom: 0.75rem; letter-spacing: 0.05em; font-size: 1.25rem; }
         .legal-content h3 { color: #d4d4d4; font-weight: 700; margin-top: 1.5rem; margin-bottom: 0.5rem; }
         .legal-content p { margin-bottom: 1rem; color: #a3a3a3; font-size: 0.875rem; line-height: 1.6; }
@@ -166,21 +166,29 @@
         .legal-content a:hover { color: #ffffff; text-decoration: underline; }
     </style>
 </head>
-<body class="flex flex-col relative select-none bg-lvl-default">
+<body class="flex flex-col relative select-none">
 
+    <!-- ========================================== -->
+    <!-- BASIS CONTAINER                            -->
+    <!-- ========================================== -->
     <div id="toast-container"></div>
     <div id="recaptcha-container"></div>
     
     <div id="app" class="flex-1 flex flex-col w-full z-10 relative pb-10">
-        <div class="flex-1 flex items-center justify-center min-h-[60vh]"><div class="w-16 h-16 border-t-4 border-l-4 border-[#ff4d00] rounded-full animate-spin"></div></div>
+        <div class="flex-1 flex items-center justify-center min-h-[60vh]">
+            <div class="w-16 h-16 border-t-4 border-l-4 border-[#ff4d00] rounded-full animate-spin"></div>
+        </div>
     </div>
 
+    <!-- ========================================== -->
+    <!-- JAVASCRIPT APP LOGIC                       -->
+    <!-- ========================================== -->
     <script type="module">
-        /* --- MODULE 1: FIREBASE INIT --- */
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, updateDoc, arrayUnion, arrayRemove, onSnapshot, collection, addDoc, query, where, getDocs, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, updateDoc, arrayUnion, onSnapshot, collection, addDoc, query, where, getDocs, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // --- 1. FIREBASE CONFIG & INITIALIZATION ---
         const firebaseConfig = {
             apiKey: "AIzaSyDtwsvmYSONjFufhbJ5I8G_RAMffnh7re0",
             authDomain: "theplot-app.firebaseapp.com",
@@ -194,26 +202,38 @@
         const auth = getAuth(appInit);
         const db = getFirestore(appInit);
 
-        /* --- MODULE 2: APP STATE --- */
+        // --- 2. GLOBAL STATE ---
         let state = {
-            user: null, profile: null, prevXp: null, prevLvl: null,
-            bundlePrice: '19.00', view: 'loading', prevView: 'dashboard',
+            user: null, 
+            profile: null, 
+            prevXp: null, 
+            prevLvl: null,
+            bundlePrice: '19.00', 
+            view: 'loading', 
+            prevView: 'dashboard',
             currentWeekTab: 1,
-            authStep: 'phone', tempPhone: '', tempUploadData: null,
+            authStep: 'phone', 
+            tempPhone: '', 
+            tempUploadData: null,
             weeklyData: { 1: { title: "Loading...", startOffset: 0, missions: [] } },
-            rewardData: [], habitData: [], pendingMissions: [], activities: [],
+            rewardData: [], 
+            habitData: [], 
+            pendingMissions: [], 
+            activities: [],
             seasonConfig: null,
-            dashboardNeedsScroll: true,
-            seenFlames: {} // NEU: Tracker für Notifications, damit es nicht spammt
+            dashboardNeedsScroll: true
         };
 
         const RANKS = ["Rookie", "Grinder", "Hustler", "Athlete", "Machine", "Legend"];
 
-        let holdTimer = null; let holdProgress = 0; let isRedeeming = false;
+        // --- 3. GLOBALE VARIABLEN & TIMER ---
+        let holdTimer = null; 
+        let holdProgress = 0; 
+        let isRedeeming = false;
         window.currentVerify = null;
         window.countdownInterval = null;
 
-        /* --- MODULE 3: UTILITIES & TOASTS --- */
+        // --- 4. HELPER FUNKTIONEN ---
         const getRelativeTime = (timestamp) => {
             if(!timestamp) return "Gerade eben";
             const diff = Math.floor((Date.now() - timestamp) / 1000);
@@ -225,18 +245,21 @@
 
         window.showToast = (msg, type = 'success') => {
             const container = document.getElementById('toast-container');
-            const toast = document.createElement('div'); toast.className = `toast ${type}`;
+            const toast = document.createElement('div'); 
+            toast.className = `toast ${type}`;
             
-            let icon = '';
-            if(type === 'error') icon = `<svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
-            else if(type === 'flame') icon = `<span class="text-xl">🔥</span>`;
-            else icon = `<svg class="w-5 h-5 text-[#ff4d00]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>`;
+            const icon = type === 'error' 
+                ? `<svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>` 
+                : `<svg class="w-5 h-5 text-[#ff4d00]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>`;
             
-            const typeLabel = type === 'flame' ? 'Reaction' : 'System';
-            toast.innerHTML = `${icon} <div><div class="font-black text-[10px] uppercase tracking-widest text-gray-400 mb-0.5">${typeLabel}</div><div>${msg}</div></div>`;
+            toast.innerHTML = `${icon} <div><div class="font-black text-[10px] uppercase tracking-widest text-gray-400 mb-0.5">System</div><div>${msg}</div></div>`;
+            container.appendChild(toast); 
             
-            container.appendChild(toast); setTimeout(() => toast.classList.add('show'), 10);
-            setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 4000);
+            setTimeout(() => toast.classList.add('show'), 10);
+            setTimeout(() => { 
+                toast.classList.remove('show'); 
+                setTimeout(() => toast.remove(), 400); 
+            }, 4000);
         };
 
         window.logActivity = async (type, text) => {
@@ -247,7 +270,6 @@
                     isPro: !!state.profile.hasPremium, 
                     type: type, 
                     text: text,
-                    flames: [], // NEU: Array für Reaktionen
                     timestamp: Date.now()
                 };
                 
@@ -259,45 +281,7 @@
             }
         };
 
-        /* --- MODULE 4: BACKGROUND & FLAME LOGIC --- */
-        window.updateBackground = (lvl) => {
-            const body = document.body;
-            body.classList.remove('bg-lvl-default', 'bg-lvl-purple', 'bg-lvl-blue', 'bg-lvl-red');
-            if (lvl >= 30) body.classList.add('bg-lvl-red');
-            else if (lvl >= 20) body.classList.add('bg-lvl-blue');
-            else if (lvl >= 10) body.classList.add('bg-lvl-purple');
-            else body.classList.add('bg-lvl-default');
-        };
-
-        window.toggleFlame = async (actId) => {
-            if(!state.user) return;
-            const act = state.activities.find(a => a.id === actId);
-            if(!act) return;
-            const actRef = doc(db, 'plot_activities', actId);
-            const hasReacted = (act.flames || []).includes(state.user.uid);
-            try {
-                if (hasReacted) { await updateDoc(actRef, { flames: arrayRemove(state.user.uid) }); } 
-                else { await updateDoc(actRef, { flames: arrayUnion(state.user.uid) }); }
-            } catch(e) { console.error("Reaction Error", e); }
-        };
-
-        window.checkFlameNotifications = (activities) => {
-            if(!state.user || !state.profile) return;
-            activities.forEach(act => {
-                // Wenn es MEINE Aktivität ist
-                if(act.alias === state.profile.alias && act.id) {
-                    const currentFlames = (act.flames || []).length;
-                    const seen = state.seenFlames[act.id];
-                    // Notification auslösen, wenn wir bereits geladen waren (seen !== undefined) und die Flammenzahl steigt
-                    if (seen !== undefined && currentFlames > seen) {
-                        window.showToast("Dein Beitrag hat eine 🔥 erhalten!", "flame");
-                    }
-                    state.seenFlames[act.id] = currentFlames; // Update Tracker
-                }
-            });
-        };
-
-        /* --- MODULE 5: SEASON LOGIC --- */
+        // --- 5. SEASON & WEEK LOGIC ---
         const getActiveWeek = () => {
             if(!state.seasonConfig || !state.seasonConfig.start) return 1;
             const now = new Date();
@@ -317,7 +301,6 @@
             const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)); 
             
             let week = 2 + Math.floor(diffDays / 7);
-            
             return Math.max(1, Math.min(week, 4));
         };
 
@@ -338,6 +321,7 @@
         window.updateCountdown = () => {
             const el = document.getElementById('season-countdown');
             if(!el || !state.seasonConfig) return;
+            
             const start = new Date(state.seasonConfig.start).getTime();
             const now = new Date().getTime();
             const distance = start - now;
@@ -357,6 +341,7 @@
             el.innerHTML = `${days}D ${hours.toString().padStart(2, '0')}H ${minutes.toString().padStart(2, '0')}M ${seconds.toString().padStart(2, '0')}S`;
         };
 
+        // --- 6. DATEN LADEN & AUTH LISTENER ---
         const setupSeasonData = () => {
             onSnapshot(doc(db, 'system', 'grind_season'), (docSnap) => {
                 if (docSnap.exists()) {
@@ -371,16 +356,14 @@
             });
         };
 
-        /* --- MODULE 6: FIRESTORE DATA SYNC --- */
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 state.user = user;
                 onSnapshot(doc(db, 'plot_users', user.uid), (docSnap) => {
                     if (docSnap.exists()) {
                         state.profile = docSnap.data();
-                        window.updateBackground(state.profile.lvl || 1); // Background Update einspielen
                         
-                        // Auto-Generate Crew Code
+                        // Auto-Generate Crew Code falls nicht vorhanden
                         if (!state.profile.crewCode) {
                             const generatedCode = Math.random().toString(36).substring(2, 8).toUpperCase();
                             state.profile.crewCode = generatedCode;
@@ -400,23 +383,27 @@
                             }
                         }
                         render();
-                    } else { state.view = 'onboarding'; render(); }
+                    } else { 
+                        state.view = 'onboarding'; 
+                        render(); 
+                    }
                 });
                 
+                // Pending Proofs laden
                 onSnapshot(collection(db, 'plot_pending_proofs'), (snap) => {
                     if (snap && snap.docs) {
-                        state.pendingMissions = snap.docs.map(d => d.data()).filter(data => data.uid === state.user.uid).map(data => data.mid);
+                        state.pendingMissions = snap.docs.map(d => d.data())
+                                                         .filter(data => data.uid === state.user.uid)
+                                                         .map(data => data.mid);
                         if(state.view === 'dashboard') render();
                     }
                 });
 
-                // ACTIVITIES FEED LISTENERS (inkl. ID Mapping für Flame Reactions)
+                // Activities Feed laden
                 const activitiesQuery = query(collection(db, 'plot_activities'), orderBy('timestamp', 'desc'), limit(50));
                 onSnapshot(activitiesQuery, (snap) => {
                     if(snap && snap.docs) {
-                        const acts = snap.docs.map(d => ({ id: d.id, ...d.data() })); // ID explizit laden
-                        window.checkFlameNotifications(acts); // Notifications checken
-                        state.activities = acts;
+                        state.activities = snap.docs.map(d => d.data());
                         if(state.view === 'dashboard') render();
                     }
                 }, (error) => {
@@ -428,24 +415,46 @@
                     if (docSnap.exists()) state.bundlePrice = docSnap.data().bundlePrice; 
                     if (state.view === 'paywall') render(); 
                 });
-            } else { state.user = null; state.profile = null; state.view = 'auth'; state.authStep = 'phone'; render(); }
+            } else { 
+                state.user = null; 
+                state.profile = null; 
+                state.view = 'auth'; 
+                state.authStep = 'phone'; 
+                render(); 
+            }
         });
 
-        /* --- MODULE 7: MODALS & QR LOGIC --- */
+        // --- 7. MODALS & UI UTILITIES ---
         window.closeModal = () => {
             if(window.stopRedeemHold) window.stopRedeemHold(); 
             const forceClose = () => {
                 const container = document.getElementById('modal-container');
-                if(container) { container.classList.remove('opacity-100'); container.classList.add('opacity-0', 'pointer-events-none'); setTimeout(() => container.innerHTML = '', 300); }
+                if(container) { 
+                    container.classList.remove('opacity-100'); 
+                    container.classList.add('opacity-0', 'pointer-events-none'); 
+                    setTimeout(() => container.innerHTML = '', 300); 
+                }
             };
             if(window.html5QrCode) {
                 try {
                     const qrState = window.html5QrCode.getState();
                     if(qrState === 2) { 
-                        let closed = false; const finish = () => { if(closed) return; closed = true; window.html5QrCode = null; forceClose(); };
-                        window.html5QrCode.stop().then(() => { try { window.html5QrCode.clear(); } catch(e){} finish(); }).catch(finish);
-                        setTimeout(finish, 800); return; 
-                    } else { window.html5QrCode.clear(); window.html5QrCode = null; }
+                        let closed = false; 
+                        const finish = () => { 
+                            if(closed) return; 
+                            closed = true; 
+                            window.html5QrCode = null; 
+                            forceClose(); 
+                        };
+                        window.html5QrCode.stop()
+                            .then(() => { try { window.html5QrCode.clear(); } catch(e){} finish(); })
+                            .catch(finish);
+                        setTimeout(finish, 800); 
+                        return; 
+                    } else { 
+                        window.html5QrCode.clear(); 
+                        window.html5QrCode = null; 
+                    }
                 } catch(e) { window.html5QrCode = null; }
             }
             forceClose();
@@ -453,17 +462,33 @@
 
         window.openModal = (contentHtml) => {
             let container = document.getElementById('modal-container');
-            if(!container) { container = document.createElement('div'); container.id = 'modal-container'; container.className = 'fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300 overflow-y-auto'; document.body.appendChild(container); }
-            container.innerHTML = `<div class="bg-[#0a0a0a] border border-[#1f1f1f] p-8 rounded-sm max-w-md w-full shadow-[0_0_40px_rgba(255,77,0,0.1)] transform scale-95 transition-transform duration-300 relative my-auto"><button type="button" onclick="window.closeModal()" class="absolute top-4 right-4 text-gray-500 hover:text-white z-50"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>${contentHtml}</div>`;
-            setTimeout(() => { container.classList.remove('opacity-0', 'pointer-events-none'); container.classList.add('opacity-100'); container.firstElementChild.classList.remove('scale-95'); container.firstElementChild.classList.add('scale-100'); }, 10);
+            if(!container) { 
+                container = document.createElement('div'); 
+                container.id = 'modal-container'; 
+                container.className = 'fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300 overflow-y-auto'; 
+                document.body.appendChild(container); 
+            }
+            container.innerHTML = `
+                <div class="bg-[#0a0a0a] border border-[#1f1f1f] p-8 rounded-sm max-w-md w-full shadow-[0_0_40px_rgba(255,77,0,0.1)] transform scale-95 transition-transform duration-300 relative my-auto">
+                    <button type="button" onclick="window.closeModal()" class="absolute top-4 right-4 text-gray-500 hover:text-white z-50">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                    ${contentHtml}
+                </div>`;
+            
+            setTimeout(() => { 
+                container.classList.remove('opacity-0', 'pointer-events-none'); 
+                container.classList.add('opacity-100'); 
+                container.firstElementChild.classList.remove('scale-95'); 
+                container.firstElementChild.classList.add('scale-100'); 
+            }, 10);
         };
 
-        // --- CREW INVITE SYSTEM ---
+        // --- 8. CREW & INVITE SYSTEM ---
         window.openInviteModal = () => {
             if(!state.profile) return;
             const link = `${window.location.origin}/?crew=${state.profile.crewCode || ''}`;
             
-            // Berechne aktuellen XP Bonus für nächsten Freund
             const currentFriendsCount = (state.profile.friends || []).length;
             const nextXpBounty = (currentFriendsCount + 1) * 100;
             
@@ -557,7 +582,6 @@
                     return window.showToast(`${theirAlias} ist bereits in deiner Crew.`, "info");
                 }
 
-                // XP Bounty dynamisch für Bestätigungsfenster
                 const nextXpBounty = (myFriends.length + 1) * 100;
 
                 let innerHtml = `
@@ -586,8 +610,8 @@
         window.confirmFriend = async (theirUid, theirAlias) => {
             const btn = document.querySelector('#modal-container button.btn-grind');
             if(btn) { btn.innerText = "Connecting..."; btn.disabled = true; }
+            
             try {
-                // Dynamische Bounty Berechnen
                 const myFriends = state.profile.friends || [];
                 const nextXpBounty = (myFriends.length + 1) * 100;
                 
@@ -595,12 +619,10 @@
                 const newXp = (state.profile.xp || 0) + nextXpBounty;
                 const newLvl = Math.floor(newXp / 1000) + 1;
 
-                // Mutual Update beim Freund
                 await updateDoc(doc(db, 'plot_users', theirUid), {
                     friends: arrayUnion(state.profile.alias)
                 }).catch(e => console.warn("Mutual update gescheitert.", e));
 
-                // Eigenes Profil Update inkl. XP Belohnung
                 await updateDoc(doc(db, 'plot_users', state.user.uid), {
                     friends: arrayUnion(theirAlias),
                     xp: newXp,
@@ -621,7 +643,7 @@
             }
         };
 
-        /* --- MODULE 8: REWARDS & SHIPPING --- */
+        // --- 9. MISSIONS & REWARDS LOGIK ---
         window.submitShipping = async (lvl, tier) => {
             const inputs = document.querySelectorAll('.shipping-input-field');
             let addressString = "";
@@ -640,16 +662,28 @@
 
             const btn = document.querySelector('#modal-container button.bg-\\[\\#ff4d00\\], #modal-container button.bg-\\[\\#a855f7\\]'); 
             if(btn) { btn.innerText = "Senden..."; btn.disabled = true; }
+            
             const rewardId = `lvl${lvl}_${tier}`;
-
             const reward = state.rewardData.find(r => r.lvl === lvl);
             const itemName = reward ? reward[tier] : 'Unbekanntes Item';
 
             try {
-                await addDoc(collection(db, 'plot_shipping_requests'), { uid: state.user.uid, alias: state.profile?.alias || 'Grinder', lvl: lvl, tier: tier, itemName: itemName, address: addressString, timestamp: new Date(), status: 'pending' });
+                await addDoc(collection(db, 'plot_shipping_requests'), { 
+                    uid: state.user.uid, 
+                    alias: state.profile?.alias || 'Grinder', 
+                    lvl: lvl, 
+                    tier: tier, 
+                    itemName: itemName, 
+                    address: addressString, 
+                    timestamp: new Date(), 
+                    status: 'pending' 
+                });
                 
                 const currentRedeemed = state.profile?.redeemed || [];
-                if(!currentRedeemed.includes(rewardId)) { currentRedeemed.push(rewardId); await setDoc(doc(db, 'plot_users', state.user.uid), { redeemed: currentRedeemed }, { merge: true }); }
+                if(!currentRedeemed.includes(rewardId)) { 
+                    currentRedeemed.push(rewardId); 
+                    await setDoc(doc(db, 'plot_users', state.user.uid), { redeemed: currentRedeemed }, { merge: true }); 
+                }
                 
                 try {
                     let emailPayload = {
@@ -663,22 +697,29 @@
                     };
                     Object.assign(emailPayload, addressData);
                     fetch("https://formsubmit.co/ajax/Fabio.maines@grind-app.de", {
-                        method: "POST", headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify(emailPayload)
+                        method: "POST", 
+                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, 
+                        body: JSON.stringify(emailPayload)
                     }).catch(e => console.log("Email error:", e));
                 } catch(mailErr) { console.log(mailErr); }
 
                 window.logActivity('REDEEM', `hat physischen Loot ('<span class="font-bold">${itemName}</span>') angefordert.`);
-                window.showToast("Anfrage für physical Loot gesendet!", "success"); window.closeModal();
+                window.showToast("Anfrage für physical Loot gesendet!", "success"); 
+                window.closeModal();
             } catch(e) { 
-                console.error(e); window.showToast("Fehler: " + (e.message || "Netzwerkfehler"), "error"); 
+                console.error(e); 
+                window.showToast("Fehler: " + (e.message || "Netzwerkfehler"), "error"); 
                 if(btn) { btn.innerText = "Versand anfordern"; btn.disabled = false; } 
             }
         };
 
         window.claimInstantMission = async (mid, xp, name) => {
-            const btn = document.getElementById(`btn-${mid}`); if(btn) { btn.innerText = "Claiming..."; btn.disabled = true; }
+            const btn = document.getElementById(`btn-${mid}`); 
+            if(btn) { btn.innerText = "Claiming..."; btn.disabled = true; }
+            
             try {
-                const currentCompleted = state.profile.completed || []; const isRepeatable = String(mid).startsWith('rep_');
+                const currentCompleted = state.profile.completed || []; 
+                const isRepeatable = String(mid).startsWith('rep_');
                 let updatePayload = {};
                 let claimSuccess = false;
                 
@@ -701,15 +742,18 @@
                         const newStreak = activeStreak + 1;
                         const finalXp = xp + (newStreak > 1 ? (newStreak - 1) * streakBonus : 0);
                         const newTotalXp = (state.profile.xp || 0) + finalXp;
-                        streaks[mid] = { streak: newStreak, lastDate: todayStr };
                         
+                        streaks[mid] = { streak: newStreak, lastDate: todayStr };
                         newLvl = Math.floor(newTotalXp / 1000) + 1;
                         updatePayload = { xp: newTotalXp, lvl: newLvl, streaks: streaks };
                         claimSuccess = true;
                         window.showToast(`+${finalXp} XP für ${name}! (Streak: ${newStreak}🔥)`, "success");
-                    } else { window.showToast("Heute bereits erledigt!", "error"); }
+                    } else { 
+                        window.showToast("Heute bereits erledigt!", "error"); 
+                    }
                 } else if (!currentCompleted.includes(mid)) {
-                    const newXp = (state.profile.xp || 0) + xp; const newCompleted = [...currentCompleted, mid];
+                    const newXp = (state.profile.xp || 0) + xp; 
+                    const newCompleted = [...currentCompleted, mid];
                     newLvl = Math.floor(newXp / 1000) + 1;
                     updatePayload = { xp: newXp, lvl: newLvl, completed: newCompleted };
                     claimSuccess = true;
@@ -722,55 +766,145 @@
                     if(newLvl > oldLvl) {
                         window.logActivity('LEVEL_UP', `hat <span class="font-bold">Level ${newLvl}</span> erreicht!`);
                     }
+                } else if (btn) { 
+                    btn.innerText = "Claim XP"; 
+                    btn.disabled = false; 
                 }
-                else if (btn) { btn.innerText = "Claim XP"; btn.disabled = false; }
-            } catch(e) { window.showToast("Fehler beim Claimen.", "error"); if(btn) { btn.innerText = "Claim XP"; btn.disabled = false; } }
+            } catch(e) { 
+                window.showToast("Fehler beim Claimen.", "error"); 
+                if(btn) { btn.innerText = "Claim XP"; btn.disabled = false; } 
+            }
         };
 
+        // --- 10. QR & UPLOAD VERIFICATION ---
         window.startQRScanner = () => {
-            document.getElementById('qr-placeholder').classList.add('hidden'); document.getElementById('qr-reader').classList.remove('hidden');
+            document.getElementById('qr-placeholder').classList.add('hidden'); 
+            document.getElementById('qr-reader').classList.remove('hidden');
             try {
                 window.html5QrCode = new Html5Qrcode("qr-reader");
                 window.html5QrCode.start(
-                    { facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 } },
+                    { facingMode: "environment" }, 
+                    { fps: 10, qrbox: { width: 250, height: 250 } },
                     (decodedText) => {
                         document.getElementById('verify_code_input').value = decodedText;
-                        if (window.currentVerify && window.currentVerify.qrSolution) { window.checkCode(decodedText); } else { window.showToast("Code erfasst!", "success"); }
-                        try { if(window.html5QrCode) { const stopAndHide = () => { document.getElementById('qr-reader').classList.add('hidden'); document.getElementById('qr-placeholder').classList.remove('hidden'); window.html5QrCode = null; }; window.html5QrCode.stop().then(() => { try { window.html5QrCode.clear(); } catch(e){} stopAndHide(); }).catch(stopAndHide); } } catch(e) {}
-                    }, (err) => {}
-                ).catch(err => { window.showToast("Kamera Zugriff verweigert.", "error"); document.getElementById('qr-reader').classList.add('hidden'); document.getElementById('qr-placeholder').classList.remove('hidden'); });
+                        if (window.currentVerify && window.currentVerify.qrSolution) { 
+                            window.checkCode(decodedText); 
+                        } else { 
+                            window.showToast("Code erfasst!", "success"); 
+                        }
+                        try { 
+                            if(window.html5QrCode) { 
+                                const stopAndHide = () => { 
+                                    document.getElementById('qr-reader').classList.add('hidden'); 
+                                    document.getElementById('qr-placeholder').classList.remove('hidden'); 
+                                    window.html5QrCode = null; 
+                                }; 
+                                window.html5QrCode.stop()
+                                    .then(() => { try { window.html5QrCode.clear(); } catch(e){} stopAndHide(); })
+                                    .catch(stopAndHide); 
+                            } 
+                        } catch(e) {}
+                    }, 
+                    (err) => {}
+                ).catch(err => { 
+                    window.showToast("Kamera Zugriff verweigert.", "error"); 
+                    document.getElementById('qr-reader').classList.add('hidden'); 
+                    document.getElementById('qr-placeholder').classList.remove('hidden'); 
+                });
             } catch (e) { window.showToast("Scanner Error.", "error"); }
         };
 
         window.triggerFileInput = () => document.getElementById('proof_file_input').click();
         
         window.handleFileSelect = (e) => {
-            const file = e.target.files[0]; if(!file) return; const reader = new FileReader();
-            reader.onload = (ev) => { const img = new Image(); img.onload = () => { const canvas = document.createElement('canvas'); let width = img.width; let height = img.height; const MAX_SIZE = 800; if (width > height && width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } else if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } canvas.width = width; canvas.height = height; canvas.getContext('2d').drawImage(img, 0, 0, width, height); const compressedData = canvas.toDataURL('image/jpeg', 0.7); document.getElementById('upload-preview').src = compressedData; document.getElementById('upload-preview').classList.remove('hidden'); document.getElementById('upload-placeholder').classList.add('hidden'); state.tempUploadData = compressedData; }; img.src = ev.target.result; }; reader.readAsDataURL(file);
+            const file = e.target.files[0]; 
+            if(!file) return; 
+            
+            const reader = new FileReader();
+            reader.onload = (ev) => { 
+                const img = new Image(); 
+                img.onload = () => { 
+                    const canvas = document.createElement('canvas'); 
+                    let width = img.width; 
+                    let height = img.height; 
+                    const MAX_SIZE = 800; 
+                    
+                    if (width > height && width > MAX_SIZE) { 
+                        height *= MAX_SIZE / width; 
+                        width = MAX_SIZE; 
+                    } else if (height > MAX_SIZE) { 
+                        width *= MAX_SIZE / height; 
+                        height = MAX_SIZE; 
+                    } 
+                    
+                    canvas.width = width; 
+                    canvas.height = height; 
+                    canvas.getContext('2d').drawImage(img, 0, 0, width, height); 
+                    
+                    const compressedData = canvas.toDataURL('image/jpeg', 0.7); 
+                    document.getElementById('upload-preview').src = compressedData; 
+                    document.getElementById('upload-preview').classList.remove('hidden'); 
+                    document.getElementById('upload-placeholder').classList.add('hidden'); 
+                    state.tempUploadData = compressedData; 
+                }; 
+                img.src = ev.target.result; 
+            }; 
+            reader.readAsDataURL(file);
         };
 
         window.openVerifyModal = (mid, xp, type, name, qrSolution = '') => {
-            state.tempUploadData = null; window.currentVerify = { mid, xp, name, type, qrSolution };
-            let innerHtml = `<p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">Verify Operation</p><h3 class="text-2xl font-black italic uppercase tracking-tighter mb-6">${name}</h3>`;
+            state.tempUploadData = null; 
+            window.currentVerify = { mid, xp, name, type, qrSolution };
+            
+            let innerHtml = `
+                <p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">Verify Operation</p>
+                <h3 class="text-2xl font-black italic uppercase tracking-tighter mb-6">${name}</h3>
+            `;
+            
             if(type === 'qr') {
-                innerHtml += `<div id="qr-placeholder" onclick="window.startQRScanner()" class="border-2 border-dashed border-[#1f1f1f] p-8 mb-4 flex flex-col items-center justify-center bg-black/50 rounded-sm hover:border-[#ff4d00] cursor-pointer transition"><svg class="w-12 h-12 text-[#ff4d00] mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg><p class="text-xs text-white font-bold uppercase tracking-widest text-center">Kamera aktivieren</p></div><div id="qr-reader" class="hidden w-full mb-4 rounded-sm overflow-hidden border border-[#1f1f1f]"></div><input id="verify_code_input" type="text" placeholder="Oder Code manuell eingeben" class="w-full p-4 bg-[#0f0f0f] border border-[#1f1f1f] rounded-sm outline-none focus:border-[#ff4d00] text-white text-center text-sm tracking-widest uppercase mb-6">`;
+                innerHtml += `
+                    <div id="qr-placeholder" onclick="window.startQRScanner()" class="border-2 border-dashed border-[#1f1f1f] p-8 mb-4 flex flex-col items-center justify-center bg-black/50 rounded-sm hover:border-[#ff4d00] cursor-pointer transition">
+                        <svg class="w-12 h-12 text-[#ff4d00] mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+                        <p class="text-xs text-white font-bold uppercase tracking-widest text-center">Kamera aktivieren</p>
+                    </div>
+                    <div id="qr-reader" class="hidden w-full mb-4 rounded-sm overflow-hidden border border-[#1f1f1f]"></div>
+                    <input id="verify_code_input" type="text" placeholder="Oder Code manuell eingeben" class="w-full p-4 bg-[#0f0f0f] border border-[#1f1f1f] rounded-sm outline-none focus:border-[#ff4d00] text-white text-center text-sm tracking-widest uppercase mb-6">
+                `;
             } else {
-                innerHtml += `<input type="file" id="proof_file_input" accept="image/*" class="hidden" onchange="window.handleFileSelect(event)"><div onclick="window.triggerFileInput()" class="border-2 border-dashed border-[#1f1f1f] min-h-[150px] p-2 mb-6 flex flex-col items-center justify-center bg-black/50 rounded-sm hover:border-[#ff4d00] transition cursor-pointer overflow-hidden relative"><div id="upload-placeholder" class="text-center"><svg class="w-12 h-12 text-[#ff4d00] mb-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg><p class="text-xs text-white font-bold uppercase tracking-widest">Beweisfoto hochladen</p></div><img id="upload-preview" class="hidden absolute inset-0 w-full h-full object-cover"></div>`;
+                innerHtml += `
+                    <input type="file" id="proof_file_input" accept="image/*" class="hidden" onchange="window.handleFileSelect(event)">
+                    <div onclick="window.triggerFileInput()" class="border-2 border-dashed border-[#1f1f1f] min-h-[150px] p-2 mb-6 flex flex-col items-center justify-center bg-black/50 rounded-sm hover:border-[#ff4d00] transition cursor-pointer overflow-hidden relative">
+                        <div id="upload-placeholder" class="text-center">
+                            <svg class="w-12 h-12 text-[#ff4d00] mb-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                            <p class="text-xs text-white font-bold uppercase tracking-widest">Beweisfoto hochladen</p>
+                        </div>
+                        <img id="upload-preview" class="hidden absolute inset-0 w-full h-full object-cover">
+                    </div>
+                `;
             }
-            if (type === 'qr' && qrSolution) { innerHtml += `<button type="button" onclick="window.checkCode()" class="w-full btn-grind py-4">Code Prüfen</button>`; } 
-            else { innerHtml += `<button type="button" onclick="window.submitVerification('${mid}', ${xp}, '${type}', '${name.replace(/'/g, "\\'")}')" class="w-full btn-grind py-4">Senden zur Prüfung</button>`; }
+            
+            if (type === 'qr' && qrSolution) { 
+                innerHtml += `<button type="button" onclick="window.checkCode()" class="w-full btn-grind py-4">Code Prüfen</button>`; 
+            } else { 
+                innerHtml += `<button type="button" onclick="window.submitVerification('${mid}', ${xp}, '${type}', '${name.replace(/'/g, "\\'")}')" class="w-full btn-grind py-4">Senden zur Prüfung</button>`; 
+            }
             window.openModal(innerHtml);
         };
 
         window.checkCode = async (scannedValue = null) => {
             const val = scannedValue || document.getElementById('verify_code_input').value.trim();
-            if(!window.currentVerify) return; const { mid, xp, name, qrSolution } = window.currentVerify;
+            if(!window.currentVerify) return; 
+            
+            const { mid, xp, name, qrSolution } = window.currentVerify;
             if(!val) return window.showToast("Bitte Code eingeben.", "error");
 
             if (val.toLowerCase() === qrSolution.toLowerCase()) {
-                const btn = document.querySelector('#modal-container button.btn-grind'); if(btn) { btn.innerText = "Verifying..."; btn.disabled = true; }
+                const btn = document.querySelector('#modal-container button.btn-grind'); 
+                if(btn) { btn.innerText = "Verifying..."; btn.disabled = true; }
+                
                 try {
-                    const currentCompleted = state.profile.completed || []; const isRepeatable = String(mid).startsWith('rep_');
+                    const currentCompleted = state.profile.completed || []; 
+                    const isRepeatable = String(mid).startsWith('rep_');
                     let updatePayload = {};
                     let claimSuccess = false;
                     
@@ -793,15 +927,18 @@
                             const newStreak = activeStreak + 1;
                             const finalXp = xp + (newStreak > 1 ? (newStreak - 1) * streakBonus : 0);
                             const newTotalXp = (state.profile.xp || 0) + finalXp;
-                            streaks[mid] = { streak: newStreak, lastDate: todayStr };
                             
+                            streaks[mid] = { streak: newStreak, lastDate: todayStr };
                             newLvl = Math.floor(newTotalXp / 1000) + 1;
                             updatePayload = { xp: newTotalXp, lvl: newLvl, streaks: streaks };
                             claimSuccess = true;
                             window.showToast(`+${finalXp} XP für ${name}! (Streak: ${newStreak}🔥)`, "success");
-                        } else { window.showToast("Heute bereits erledigt!", "error"); }
+                        } else { 
+                            window.showToast("Heute bereits erledigt!", "error"); 
+                        }
                     } else if (!currentCompleted.includes(mid)) {
-                        const newXp = (state.profile.xp || 0) + xp; const newCompleted = [...currentCompleted, mid];
+                        const newXp = (state.profile.xp || 0) + xp; 
+                        const newCompleted = [...currentCompleted, mid];
                         newLvl = Math.floor(newXp / 1000) + 1;
                         updatePayload = { xp: newXp, lvl: newLvl, completed: newCompleted };
                         claimSuccess = true;
@@ -816,60 +953,134 @@
                         }
                     }
                     window.closeModal();
-                } catch(e) { window.showToast("Systemfehler.", "error"); if(btn) { btn.innerText = "Code Prüfen"; btn.disabled = false; } }
-            } else { window.showToast("Falscher Code.", "error"); }
+                } catch(e) { 
+                    window.showToast("Systemfehler.", "error"); 
+                    if(btn) { btn.innerText = "Code Prüfen"; btn.disabled = false; } 
+                }
+            } else { 
+                window.showToast("Falscher Code.", "error"); 
+            }
         };
 
         window.submitVerification = async (mid, xp, type, name) => {
             let data = null;
-            if (type === 'qr') { data = document.getElementById('verify_code_input').value.trim(); if(!data) return window.showToast("Bitte Code eingeben.", "error"); } 
-            else { data = state.tempUploadData; if(!data) return window.showToast("Bitte lade ein Foto hoch.", "error"); }
-            const btn = document.querySelector('#modal-container button.btn-grind'); if(btn) { btn.innerText = "Transmitting..."; btn.disabled = true; }
-            const timeout = setTimeout(() => { if(btn && btn.innerText === "Transmitting...") { btn.disabled = false; btn.innerText = "Erneut Senden"; window.showToast("Zeitüberschreitung.", "error"); } }, 10000);
+            if (type === 'qr') { 
+                data = document.getElementById('verify_code_input').value.trim(); 
+                if(!data) return window.showToast("Bitte Code eingeben.", "error"); 
+            } else { 
+                data = state.tempUploadData; 
+                if(!data) return window.showToast("Bitte lade ein Foto hoch.", "error"); 
+            }
+            
+            const btn = document.querySelector('#modal-container button.btn-grind'); 
+            if(btn) { btn.innerText = "Transmitting..."; btn.disabled = true; }
+            
+            const timeout = setTimeout(() => { 
+                if(btn && btn.innerText === "Transmitting...") { 
+                    btn.disabled = false; 
+                    btn.innerText = "Erneut Senden"; 
+                    window.showToast("Zeitüberschreitung.", "error"); 
+                } 
+            }, 10000);
+            
             try {
                 await addDoc(collection(db, 'plot_pending_proofs'), { 
-                    uid: state.user.uid, alias: state.profile.alias || 'Grinder', mid, 
-                    missionName: name, xp, type, data, timestamp: new Date(),
+                    uid: state.user.uid, 
+                    alias: state.profile.alias || 'Grinder', 
+                    mid, 
+                    missionName: name, 
+                    xp, 
+                    type, 
+                    data, 
+                    timestamp: new Date(),
                     submissionDate: new Date().toISOString().split('T')[0]
                 });
-                clearTimeout(timeout); window.showToast("Gesendet. Warte auf Überprüfung.", "info"); window.closeModal();
-            } catch(e) { clearTimeout(timeout); window.showToast("Systemfehler beim Senden.", "error"); if(btn) { btn.innerText = "Erneut Senden"; btn.disabled = false; } }
+                clearTimeout(timeout); 
+                window.showToast("Gesendet. Warte auf Überprüfung.", "info"); 
+                window.closeModal();
+            } catch(e) { 
+                clearTimeout(timeout); 
+                window.showToast("Systemfehler beim Senden.", "error"); 
+                if(btn) { btn.innerText = "Erneut Senden"; btn.disabled = false; } 
+            }
         };
 
+        // --- 11. REWARDS CLAIM LOGIC ---
         window.startRedeemHold = (lvl, tier, event) => {
-            if(isRedeeming) return; if(event && event.type === 'touchstart') event.preventDefault(); 
-            const btn = document.getElementById('redeem-btn-fill'); const text = document.getElementById('redeem-btn-text'); if(!btn || !text) return;
-            text.innerText = "HOLDING..."; let lastTime = performance.now();
+            if(isRedeeming) return; 
+            if(event && event.type === 'touchstart') event.preventDefault(); 
+            
+            const btn = document.getElementById('redeem-btn-fill'); 
+            const text = document.getElementById('redeem-btn-text'); 
+            if(!btn || !text) return;
+            
+            text.innerText = "HOLDING..."; 
+            let lastTime = performance.now();
+            
             const updateFill = (currentTime) => {
-                const deltaTime = currentTime - lastTime; lastTime = currentTime; holdProgress += (deltaTime / 1500) * 100; 
-                if(holdProgress >= 100) { holdProgress = 100; btn.style.width = "100%"; window.executeRedeem(lvl, tier); return; }
-                btn.style.width = `${holdProgress}%`; holdTimer = requestAnimationFrame(updateFill);
+                const deltaTime = currentTime - lastTime; 
+                lastTime = currentTime; 
+                holdProgress += (deltaTime / 1500) * 100; 
+                
+                if(holdProgress >= 100) { 
+                    holdProgress = 100; 
+                    btn.style.width = "100%"; 
+                    window.executeRedeem(lvl, tier); 
+                    return; 
+                }
+                btn.style.width = `${holdProgress}%`; 
+                holdTimer = requestAnimationFrame(updateFill);
             };
             holdTimer = requestAnimationFrame(updateFill);
         };
 
         window.stopRedeemHold = () => {
-            if(isRedeeming) return; cancelAnimationFrame(holdTimer); holdProgress = 0;
-            const btn = document.getElementById('redeem-btn-fill'); const text = document.getElementById('redeem-btn-text');
-            if(btn) btn.style.width = "0%"; if(text) text.innerText = "HOLD TO REDEEM";
+            if(isRedeeming) return; 
+            cancelAnimationFrame(holdTimer); 
+            holdProgress = 0;
+            
+            const btn = document.getElementById('redeem-btn-fill'); 
+            const text = document.getElementById('redeem-btn-text');
+            if(btn) btn.style.width = "0%"; 
+            if(text) text.innerText = "HOLD TO REDEEM";
         };
 
         window.executeRedeem = async (lvl, tier) => {
             isRedeeming = true;
-            const text = document.getElementById('redeem-btn-text'); if(text) text.innerText = "VERIFYING...";
+            const text = document.getElementById('redeem-btn-text'); 
+            if(text) text.innerText = "VERIFYING...";
+            
             const rewardId = `lvl${lvl}_${tier}`;
             try {
                 const reward = state.rewardData.find(r => r.lvl === lvl);
                 const itemName = reward ? reward[tier] : 'Loot';
 
                 const currentRedeemed = state.profile.redeemed || [];
-                if(!currentRedeemed.includes(rewardId)) { currentRedeemed.push(rewardId); await setDoc(doc(db, 'plot_users', state.user.uid), { redeemed: currentRedeemed }, { merge: true }); }
+                if(!currentRedeemed.includes(rewardId)) { 
+                    currentRedeemed.push(rewardId); 
+                    await setDoc(doc(db, 'plot_users', state.user.uid), { redeemed: currentRedeemed }, { merge: true }); 
+                }
+                
                 const container = document.getElementById('redeem-container');
-                if(container) { container.innerHTML = `<div class="flex flex-col items-center justify-center py-6 animate-pop"><div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mb-4 shadow-[0_0_30px_rgba(34,197,94,0.5)]"><svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></div><h4 class="text-white font-black italic text-xl uppercase tracking-widest text-center">Ticket<br>eingelöst</h4><p class="text-gray-400 text-xs mt-3 text-center">Dieser Loot wurde erfolgreich<br>von deinem Konto abgebucht.</p></div>`; }
+                if(container) { 
+                    container.innerHTML = `
+                        <div class="flex flex-col items-center justify-center py-6 animate-pop">
+                            <div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mb-4 shadow-[0_0_30px_rgba(34,197,94,0.5)]">
+                                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                            </div>
+                            <h4 class="text-white font-black italic text-xl uppercase tracking-widest text-center">Ticket<br>eingelöst</h4>
+                            <p class="text-gray-400 text-xs mt-3 text-center">Dieser Loot wurde erfolgreich<br>von deinem Konto abgebucht.</p>
+                        </div>`; 
+                }
                 
                 window.logActivity('REDEEM', `hat '<span class="font-bold">${itemName}</span>' eingelöst.`);
                 window.showToast("Erfolgreich eingelöst!", "success");
-            } catch (e) { window.showToast("Fehler beim Einlösen.", "error"); window.stopRedeemHold(); } finally { isRedeeming = false; }
+            } catch (e) { 
+                window.showToast("Fehler beim Einlösen.", "error"); 
+                window.stopRedeemHold(); 
+            } finally { 
+                isRedeeming = false; 
+            }
         };
 
         window.claimBoost = async (rewardLvl, tier, type, amountStr) => {
@@ -907,27 +1118,66 @@
                 }
 
                 window.showToast(`BOOST AKTIVIERT!`, "success");
-            } catch(e) { window.showToast("Fehler beim Einlösen.", "error"); if(btn) { btn.innerText = "BOOST AKTIVIEREN"; btn.disabled = false; } }
+            } catch(e) { 
+                window.showToast("Fehler beim Einlösen.", "error"); 
+                if(btn) { btn.innerText = "BOOST AKTIVIEREN"; btn.disabled = false; } 
+            }
         };
 
         window.openClaimModal = (lvl, tier) => {
-            isRedeeming = false; holdProgress = 0;
-            const reward = state.rewardData.find(r => r.lvl === lvl); if(!reward) return;
-            const title = reward[tier]; const type = reward[`${tier}_type`] || 'qr'; const info = reward[`${tier}_info`] || 'Zeige diesen Screen beim Partner vor Ort vor.';
-            const isPro = tier === 'pro'; const textClass = isPro ? 'text-[#a855f7]' : 'text-[#ff4d00]'; const bgClass = isPro ? 'bg-[#a855f7]' : 'bg-[#ff4d00]'; const borderClass = isPro ? 'border-[#a855f7]/30' : 'border-[#ff4d00]/30';
-            const rewardId = `lvl${lvl}_${tier}`; const isAlreadyRedeemed = (state.profile.redeemed || []).includes(rewardId);
+            isRedeeming = false; 
+            holdProgress = 0;
+            const reward = state.rewardData.find(r => r.lvl === lvl); 
+            if(!reward) return;
+            
+            const title = reward[tier]; 
+            const type = reward[`${tier}_type`] || 'qr'; 
+            const info = reward[`${tier}_info`] || 'Zeige diesen Screen beim Partner vor Ort vor.';
+            const isPro = tier === 'pro'; 
+            
+            const textClass = isPro ? 'text-[#a855f7]' : 'text-[#ff4d00]'; 
+            const bgClass = isPro ? 'bg-[#a855f7]' : 'bg-[#ff4d00]'; 
+            const borderClass = isPro ? 'border-[#a855f7]/30' : 'border-[#ff4d00]/30';
+            
+            const rewardId = `lvl${lvl}_${tier}`; 
+            const isAlreadyRedeemed = (state.profile.redeemed || []).includes(rewardId);
+            
             let contentHtml = '';
 
             if (isAlreadyRedeemed && (type === 'qr' || type === 'shipping' || type === 'xp' || type === 'lvl')) {
-                contentHtml = `<div class="bg-[#111] p-8 rounded-sm flex flex-col items-center justify-center mb-6 border border-white/5 shadow-inner"><div class="w-12 h-12 rounded-full border-2 border-gray-600 flex items-center justify-center mb-4 opacity-50"><svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div><p class="text-xs text-gray-500 uppercase tracking-widest font-bold text-center">Bereits eingelöst<br><span class="font-normal text-[10px] mt-1 block">Dieser Loot ist nicht mehr verfügbar.</span></p></div>`;
+                contentHtml = `
+                    <div class="bg-[#111] p-8 rounded-sm flex flex-col items-center justify-center mb-6 border border-white/5 shadow-inner">
+                        <div class="w-12 h-12 rounded-full border-2 border-gray-600 flex items-center justify-center mb-4 opacity-50">
+                            <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        </div>
+                        <p class="text-xs text-gray-500 uppercase tracking-widest font-bold text-center">Bereits eingelöst<br><span class="font-normal text-[10px] mt-1 block">Dieser Loot ist nicht mehr verfügbar.</span></p>
+                    </div>`;
             } else if (type === 'link') {
                 const isUrl = info.startsWith('http');
-                contentHtml = `<div class="bg-[#1f1f1f] p-6 rounded-sm flex flex-col items-center justify-center mb-6 border ${borderClass}"><p class="text-xs text-gray-400 mb-4 uppercase tracking-widest font-bold">Access Code / Link</p>${isUrl ? `<a href="${info}" target="_blank" class="w-full ${bgClass} text-white font-black py-3 px-4 rounded-sm text-center uppercase tracking-widest hover:opacity-80 transition">Link öffnen</a>` : `<div class="w-full bg-black text-white font-mono text-xl py-3 px-4 rounded-sm text-center select-all border border-white/10">${info}</div>`}</div>`;
+                contentHtml = `
+                    <div class="bg-[#1f1f1f] p-6 rounded-sm flex flex-col items-center justify-center mb-6 border ${borderClass}">
+                        <p class="text-xs text-gray-400 mb-4 uppercase tracking-widest font-bold">Access Code / Link</p>
+                        ${isUrl ? `<a href="${info}" target="_blank" class="w-full ${bgClass} text-white font-black py-3 px-4 rounded-sm text-center uppercase tracking-widest hover:opacity-80 transition">Link öffnen</a>` : `<div class="w-full bg-black text-white font-mono text-xl py-3 px-4 rounded-sm text-center select-all border border-white/10">${info}</div>`}
+                    </div>`;
             } else if (type === 'xp' || type === 'lvl') {
-                const isXp = type === 'xp'; const unit = isXp ? 'XP' : 'Level';
-                contentHtml = `<div class="bg-[#1f1f1f] p-6 rounded-sm flex flex-col mb-6 border ${borderClass} shadow-2xl relative overflow-hidden"><div class="absolute top-0 right-0 bg-[#000] px-2 py-1 text-[8px] font-bold text-gray-500 uppercase tracking-widest rounded-bl-sm">Instant Boost</div><p class="text-[11px] text-gray-300 mb-8 leading-relaxed text-center font-medium">Dies fügt deinem Account direkt XP/Level hinzu.<br><span class="text-white font-black uppercase tracking-widest block mt-3 text-2xl ${textClass}">+${info} ${unit}</span></p><button type="button" id="boost-claim-btn" onclick="window.claimBoost(${lvl}, '${tier}', '${type}', '${info}')" class="w-full ${bgClass} text-white font-black py-4 px-4 rounded-sm text-sm uppercase tracking-widest shadow-[0_0_20px_rgba(255,77,0,0.4)] hover:scale-[1.02] transition">BOOST AKTIVIEREN</button></div>`;
+                const isXp = type === 'xp'; 
+                const unit = isXp ? 'XP' : 'Level';
+                contentHtml = `
+                    <div class="bg-[#1f1f1f] p-6 rounded-sm flex flex-col mb-6 border ${borderClass} shadow-2xl relative overflow-hidden">
+                        <div class="absolute top-0 right-0 bg-[#000] px-2 py-1 text-[8px] font-bold text-gray-500 uppercase tracking-widest rounded-bl-sm">Instant Boost</div>
+                        <p class="text-[11px] text-gray-300 mb-8 leading-relaxed text-center font-medium">Dies fügt deinem Account direkt XP/Level hinzu.<br><span class="text-white font-black uppercase tracking-widest block mt-3 text-2xl ${textClass}">+${info} ${unit}</span></p>
+                        <button type="button" id="boost-claim-btn" onclick="window.claimBoost(${lvl}, '${tier}', '${type}', '${info}')" class="w-full ${bgClass} text-white font-black py-4 px-4 rounded-sm text-sm uppercase tracking-widest shadow-[0_0_20px_rgba(255,77,0,0.4)] hover:scale-[1.02] transition">BOOST AKTIVIEREN</button>
+                    </div>`;
             } else if (type === 'qr') {
-                contentHtml = `<div id="redeem-container" class="bg-[#1f1f1f] p-6 rounded-sm flex flex-col mb-6 border ${borderClass} shadow-2xl relative overflow-hidden"><div class="absolute top-0 right-0 bg-[#000] px-2 py-1 text-[8px] font-bold text-gray-500 uppercase tracking-widest rounded-bl-sm">One-Time Use</div><p class="text-[11px] text-gray-300 mb-8 leading-relaxed text-center font-medium">${info}<br><span class="text-white font-black uppercase tracking-widest block mt-3 border-t border-white/10 pt-3">Das Personal muss das Einlösen bestätigen!</span></p><div onmousedown="window.startRedeemHold(${lvl}, '${tier}', event)" onmouseup="window.stopRedeemHold()" onmouseleave="window.stopRedeemHold()" ontouchstart="window.startRedeemHold(${lvl}, '${tier}', event)" ontouchend="window.stopRedeemHold()" class="relative w-full h-16 bg-black border border-white/20 rounded-sm overflow-hidden cursor-pointer flex items-center justify-center group"><div id="redeem-btn-fill" class="absolute left-0 top-0 bottom-0 w-0 ${bgClass} z-0" style="transition: none;"></div><span id="redeem-btn-text" class="relative z-10 text-white font-black italic uppercase tracking-widest text-sm pointer-events-none drop-shadow-md">Hold to Redeem</span></div></div>`;
+                contentHtml = `
+                    <div id="redeem-container" class="bg-[#1f1f1f] p-6 rounded-sm flex flex-col mb-6 border ${borderClass} shadow-2xl relative overflow-hidden">
+                        <div class="absolute top-0 right-0 bg-[#000] px-2 py-1 text-[8px] font-bold text-gray-500 uppercase tracking-widest rounded-bl-sm">One-Time Use</div>
+                        <p class="text-[11px] text-gray-300 mb-8 leading-relaxed text-center font-medium">${info}<br><span class="text-white font-black uppercase tracking-widest block mt-3 border-t border-white/10 pt-3">Das Personal muss das Einlösen bestätigen!</span></p>
+                        <div onmousedown="window.startRedeemHold(${lvl}, '${tier}', event)" onmouseup="window.stopRedeemHold()" onmouseleave="window.stopRedeemHold()" ontouchstart="window.startRedeemHold(${lvl}, '${tier}', event)" ontouchend="window.stopRedeemHold()" class="relative w-full h-16 bg-black border border-white/20 rounded-sm overflow-hidden cursor-pointer flex items-center justify-center group">
+                            <div id="redeem-btn-fill" class="absolute left-0 top-0 bottom-0 w-0 ${bgClass} z-0" style="transition: none;"></div>
+                            <span id="redeem-btn-text" class="relative z-10 text-white font-black italic uppercase tracking-widest text-sm pointer-events-none drop-shadow-md">Hold to Redeem</span>
+                        </div>
+                    </div>`;
             } else if (type === 'shipping') {
                 const fieldsStr = reward[`${tier}_fields`] || 'Adresse oder Info...';
                 const fieldsArr = fieldsStr.split(',').map(s => s.trim()).filter(s => s);
@@ -941,48 +1191,106 @@
                     fieldsHtml = `<input id="shipping_field_0" type="text" placeholder="Adresse oder Info..." class="w-full p-3 bg-black border border-white/20 rounded-sm text-sm text-white outline-none focus:border-white mb-3 shipping-input-field" data-label="Eingabe">`;
                 }
 
-                contentHtml = `<div class="bg-[#1f1f1f] p-6 rounded-sm flex flex-col mb-6 border border-white/10 relative"><div class="absolute top-0 right-0 bg-[#000] px-2 py-1 text-[8px] font-bold text-gray-500 uppercase tracking-widest rounded-bl-sm">One-Time Request</div><p class="text-xs text-gray-400 mb-4 leading-relaxed">${info}</p><div class="w-full">${fieldsHtml}</div><button type="button" onclick="window.submitShipping(${lvl}, '${tier}')" class="w-full ${bgClass} text-white font-black py-3 px-4 rounded-sm text-xs uppercase tracking-widest hover:opacity-80 transition">Versand anfordern</button></div>`;
+                contentHtml = `
+                    <div class="bg-[#1f1f1f] p-6 rounded-sm flex flex-col mb-6 border border-white/10 relative">
+                        <div class="absolute top-0 right-0 bg-[#000] px-2 py-1 text-[8px] font-bold text-gray-500 uppercase tracking-widest rounded-bl-sm">One-Time Request</div>
+                        <p class="text-xs text-gray-400 mb-4 leading-relaxed">${info}</p>
+                        <div class="w-full">${fieldsHtml}</div>
+                        <button type="button" onclick="window.submitShipping(${lvl}, '${tier}')" class="w-full ${bgClass} text-white font-black py-3 px-4 rounded-sm text-xs uppercase tracking-widest hover:opacity-80 transition">Versand anfordern</button>
+                    </div>`;
             }
 
-            let innerHtml = `<p class="${textClass} text-[10px] font-black uppercase tracking-widest mb-1">Loot Stash</p><h3 class="text-2xl font-black italic uppercase tracking-tighter mb-6">${title}</h3>${contentHtml}<button type="button" onclick="window.closeModal()" class="w-full bg-[#111] text-gray-400 hover:bg-white hover:text-black font-black italic uppercase py-3 transition text-xs border border-white/5 rounded-sm">Schließen</button>`;
+            let innerHtml = `
+                <p class="${textClass} text-[10px] font-black uppercase tracking-widest mb-1">Loot Stash</p>
+                <h3 class="text-2xl font-black italic uppercase tracking-tighter mb-6">${title}</h3>
+                ${contentHtml}
+                <button type="button" onclick="window.closeModal()" class="w-full bg-[#111] text-gray-400 hover:bg-white hover:text-black font-black italic uppercase py-3 transition text-xs border border-white/5 rounded-sm">Schließen</button>
+            `;
             window.openModal(innerHtml);
         };
 
-        /* --- MODULE 9: AUTH & ROUTING --- */
+        // --- 12. ROUTING & AUTH ACTIONS ---
         window.setView = (view) => { 
             if (view === 'dashboard' && state.view !== 'dashboard') state.dashboardNeedsScroll = true;
             state.prevView = state.view; 
             state.view = view; 
             render(); 
         };
+        
         window.goBack = () => { state.view = state.prevView || 'dashboard'; render(); };
         window.handleLogout = () => { state.view = 'loading'; render(); signOut(auth); };
         
         window.sendSMS = async (e) => {
-            e.preventDefault(); const btn = document.getElementById('auth_submit_btn');
+            e.preventDefault(); 
+            const btn = document.getElementById('auth_submit_btn');
+            
             if (window.location.protocol === 'file:') return window.showToast("Bitte hosten (lokale Datei blockiert SMS).", "error");
+            
             const fullPhone = document.getElementById('auth_prefix').value + document.getElementById('auth_phone').value.trim().replace(/^0+/, '');
-            state.tempPhone = fullPhone; btn.disabled = true; btn.innerText = "Transmitting...";
-            const timeout = setTimeout(() => { if(btn.innerText === "Transmitting...") { btn.disabled = false; btn.innerText = "Enter The Drop"; window.showToast("Zeitüberschreitung.", "error"); } }, 10000);
+            state.tempPhone = fullPhone; 
+            btn.disabled = true; 
+            btn.innerText = "Transmitting...";
+            
+            const timeout = setTimeout(() => { 
+                if(btn.innerText === "Transmitting...") { 
+                    btn.disabled = false; 
+                    btn.innerText = "Enter The Drop"; 
+                    window.showToast("Zeitüberschreitung.", "error"); 
+                } 
+            }, 10000);
+            
             try {
                 if (!window.recaptchaVerifier) window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { size: 'invisible' }); 
                 window.confirmationResult = await signInWithPhoneNumber(auth, fullPhone, window.recaptchaVerifier);
-                clearTimeout(timeout); state.authStep = 'code'; window.showToast("Code gesendet.", "success"); render();
-            } catch (err) { clearTimeout(timeout); if(window.recaptchaVerifier) { window.recaptchaVerifier.clear(); window.recaptchaVerifier = null; } window.showToast(err.message, "error"); btn.disabled = false; btn.innerText = "Enter The Drop"; }
+                clearTimeout(timeout); 
+                state.authStep = 'code'; 
+                window.showToast("Code gesendet.", "success"); 
+                render();
+            } catch (err) { 
+                clearTimeout(timeout); 
+                if(window.recaptchaVerifier) { 
+                    window.recaptchaVerifier.clear(); 
+                    window.recaptchaVerifier = null; 
+                } 
+                window.showToast(err.message, "error"); 
+                btn.disabled = false; 
+                btn.innerText = "Enter The Drop"; 
+            }
         };
 
         window.verifyCode = async (e) => {
-            e.preventDefault(); const btn = document.getElementById('verify_submit_btn'); btn.disabled = true; btn.innerText = "Verifying...";
-            try { await window.confirmationResult.confirm(document.getElementById('auth_code').value); if (window.recaptchaVerifier) { window.recaptchaVerifier.clear(); window.recaptchaVerifier = null; } } 
-            catch (err) { window.showToast("Invalid sequence.", "error"); btn.disabled = false; btn.innerText = "Verify Access"; }
+            e.preventDefault(); 
+            const btn = document.getElementById('verify_submit_btn'); 
+            btn.disabled = true; 
+            btn.innerText = "Verifying...";
+            try { 
+                await window.confirmationResult.confirm(document.getElementById('auth_code').value); 
+                if (window.recaptchaVerifier) { 
+                    window.recaptchaVerifier.clear(); 
+                    window.recaptchaVerifier = null; 
+                } 
+            } catch (err) { 
+                window.showToast("Invalid sequence.", "error"); 
+                btn.disabled = false; 
+                btn.innerText = "Verify Access"; 
+            }
         };
 
         window.goBackToPhone = () => { state.authStep = 'phone'; render(); };
 
+        // --- 13. ONBOARDING & SHARE CARD ---
         window.playGrindIntro = () => {
-            const layer = document.createElement('div'); layer.id = 'intro-layer';
-            layer.innerHTML = `<div id="word1" class="word-flash text-gray-500">DROP IN.</div><div id="word2" class="word-flash text-white">CLEAR MISSIONS.</div><div id="word3" class="word-flash text-white">CLAIM LOOT.</div><div id="word4" class="word-flash grind-gradient" style="text-shadow: 0 0 40px rgba(255,77,0,0.5);">GRIND.</div>`;
-            document.body.appendChild(layer); const timing = 700;
+            const layer = document.createElement('div'); 
+            layer.id = 'intro-layer';
+            layer.innerHTML = `
+                <div id="word1" class="word-flash text-gray-500">DROP IN.</div>
+                <div id="word2" class="word-flash text-white">CLEAR MISSIONS.</div>
+                <div id="word3" class="word-flash text-white">CLAIM LOOT.</div>
+                <div id="word4" class="word-flash grind-gradient" style="text-shadow: 0 0 40px rgba(255,77,0,0.5);">GRIND.</div>
+            `;
+            document.body.appendChild(layer); 
+            const timing = 700;
+            
             setTimeout(() => { document.getElementById('word1').style.animation = `flashInOut ${timing}ms forwards`; }, 200);
             setTimeout(() => { document.getElementById('word2').style.animation = `flashInOut ${timing}ms forwards`; }, 200 + timing);
             setTimeout(() => { document.getElementById('word3').style.animation = `flashInOut ${timing}ms forwards`; }, 200 + (timing * 2));
@@ -992,43 +1300,116 @@
 
         window.submitOnboarding = async (e) => {
             e.preventDefault(); 
-            const nameInput = document.getElementById('onboard_name').value.trim(); const cityInput = document.getElementById('onboard_city').value;
-            if(!nameInput) return window.showToast("Bitte gib einen Namen ein.", "error"); if(!cityInput || cityInput === "locked") return window.showToast("Bitte wähle deine Base.", "error");
-            const btn = e.target.querySelector('button'); btn.disabled = true; btn.innerText = "Registering...";
+            const nameInput = document.getElementById('onboard_name').value.trim(); 
+            const cityInput = document.getElementById('onboard_city').value;
+            
+            if(!nameInput) return window.showToast("Bitte gib einen Namen ein.", "error"); 
+            if(!cityInput || cityInput === "locked") return window.showToast("Bitte wähle deine Base.", "error");
+            
+            const btn = e.target.querySelector('button'); 
+            btn.disabled = true; 
+            btn.innerText = "Registering...";
+            
             try {
                 const generatedCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-                state.profile = { xp: 0, lvl: 1, completed: [], redeemed: [], streaks: {}, friends: [], crewCode: generatedCode, alias: nameInput, city: cityInput, hasPremium: false };
+                state.profile = { 
+                    xp: 0, lvl: 1, completed: [], redeemed: [], streaks: {}, 
+                    friends: [], crewCode: generatedCode, alias: nameInput, 
+                    city: cityInput, hasPremium: false 
+                };
                 await setDoc(doc(db, 'plot_users', state.user.uid), state.profile);
-                window.playGrindIntro(); window.showToast(`Willkommen, ${nameInput}.`, "success"); state.view = 'dashboard'; state.dashboardNeedsScroll = true; render();
-            } catch (err) { window.showToast("Fehler bei der Registrierung.", "error"); btn.disabled = false; btn.innerText = "Confirm Identity"; }
+                
+                window.playGrindIntro(); 
+                window.showToast(`Willkommen, ${nameInput}.`, "success"); 
+                state.view = 'dashboard'; 
+                state.dashboardNeedsScroll = true; 
+                render();
+            } catch (err) { 
+                window.showToast("Fehler bei der Registrierung.", "error"); 
+                btn.disabled = false; 
+                btn.innerText = "Confirm Identity"; 
+            }
         };
 
         window.generateShareCard = async () => {
             if (!state.profile) return window.showToast("Profil nicht geladen.", "error"); 
             window.showToast("Generiere Stats Card...", "info");
-            const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
-            canvas.width = 1080; canvas.height = 1920; const centerY = canvas.height / 2;
             
-            ctx.fillStyle = '#050505'; ctx.fillRect(0, 0, canvas.width, canvas.height);
-            const glow = ctx.createRadialGradient(540, centerY, 0, 540, centerY, 900); glow.addColorStop(0, 'rgba(255, 77, 0, 0.15)'); glow.addColorStop(1, 'transparent'); ctx.fillStyle = glow; ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.globalAlpha = 0.03; for (let i = 0; i < 70000; i++) { ctx.fillStyle = Math.random() > 0.5 ? '#ffffff' : '#000000'; ctx.fillRect(Math.random() * canvas.width, Math.random() * canvas.height, 2, 2); } ctx.globalAlpha = 1.0; 
-
-            ctx.font = 'italic 900 130px "Inter", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-            const textGrind = 'GRIND'; const textDot = '.'; const wGrind = ctx.measureText(textGrind).width; const wDot = ctx.measureText(textDot).width;
-            ctx.fillStyle = '#ffffff'; ctx.fillText(textGrind, 540 - (wDot / 2), 280); ctx.fillStyle = '#ff4d00'; ctx.fillText(textDot, 540 + (wGrind / 2), 280);
-
-            const p = state.profile; const safeLvl = p.lvl || 1; const safeXp = p.xp || 0;
-            const rank = RANKS[Math.min(Math.floor((safeLvl - 1) / 5), RANKS.length - 1)].toUpperCase(); const alias = (p.alias || 'STRANGER').toUpperCase(); const opsCount = p.completed?.length || 0; const seasonNum = state.seasonConfig?.number || 1;
-
-            ctx.fillStyle = '#ffffff'; ctx.font = 'italic 900 110px "Inter", sans-serif'; ctx.fillText(alias, 540, centerY - 120);
-            ctx.fillStyle = '#ff4d00'; ctx.font = '900 65px "Inter", sans-serif'; if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "6px"; ctx.fillText(`LVL ${safeLvl} • ${rank}`, 540, centerY + 10); if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "0px";
-
-            const barW = 800; const barH = 8; const startX = 540 - (barW / 2); const barY = centerY + 160;
-            ctx.fillStyle = '#1f1f1f'; ctx.fillRect(startX, barY, barW, barH);
-            const progress = (safeXp % 1000) / 1000; ctx.fillStyle = '#ff4d00'; ctx.fillRect(startX, barY, barW * progress, barH);
-
-            ctx.fillStyle = '#777777'; ctx.font = '700 26px "Inter", sans-serif'; if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "4px"; ctx.fillText(`XP: ${safeXp} / ${safeLvl * 1000}   •   ${opsCount} OPERATIONS CLEARED`, 540, barY + 70); if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "0px";
+            const canvas = document.createElement('canvas'); 
+            const ctx = canvas.getContext('2d');
+            canvas.width = 1080; 
+            canvas.height = 1920; 
+            const centerY = canvas.height / 2;
             
+            // Background
+            ctx.fillStyle = '#050505'; 
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            const glow = ctx.createRadialGradient(540, centerY, 0, 540, centerY, 900); 
+            glow.addColorStop(0, 'rgba(255, 77, 0, 0.15)'); 
+            glow.addColorStop(1, 'transparent'); 
+            ctx.fillStyle = glow; 
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Noise effect
+            ctx.globalAlpha = 0.03; 
+            for (let i = 0; i < 70000; i++) { 
+                ctx.fillStyle = Math.random() > 0.5 ? '#ffffff' : '#000000'; 
+                ctx.fillRect(Math.random() * canvas.width, Math.random() * canvas.height, 2, 2); 
+            } 
+            ctx.globalAlpha = 1.0; 
+
+            // Brand Text
+            ctx.font = 'italic 900 130px "Inter", sans-serif'; 
+            ctx.textAlign = 'center'; 
+            ctx.textBaseline = 'middle';
+            const textGrind = 'GRIND'; 
+            const textDot = '.'; 
+            const wGrind = ctx.measureText(textGrind).width; 
+            const wDot = ctx.measureText(textDot).width;
+            ctx.fillStyle = '#ffffff'; 
+            ctx.fillText(textGrind, 540 - (wDot / 2), 280); 
+            ctx.fillStyle = '#ff4d00'; 
+            ctx.fillText(textDot, 540 + (wGrind / 2), 280);
+
+            // User Info
+            const p = state.profile; 
+            const safeLvl = p.lvl || 1; 
+            const safeXp = p.xp || 0;
+            const rank = RANKS[Math.min(Math.floor((safeLvl - 1) / 5), RANKS.length - 1)].toUpperCase(); 
+            const alias = (p.alias || 'STRANGER').toUpperCase(); 
+            const opsCount = p.completed?.length || 0; 
+            const seasonNum = state.seasonConfig?.number || 1;
+
+            ctx.fillStyle = '#ffffff'; 
+            ctx.font = 'italic 900 110px "Inter", sans-serif'; 
+            ctx.fillText(alias, 540, centerY - 120);
+            
+            ctx.fillStyle = '#ff4d00'; 
+            ctx.font = '900 65px "Inter", sans-serif'; 
+            if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "6px"; 
+            ctx.fillText(`LVL ${safeLvl} • ${rank}`, 540, centerY + 10); 
+            if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "0px";
+
+            // Progress Bar
+            const barW = 800; 
+            const barH = 8; 
+            const startX = 540 - (barW / 2); 
+            const barY = centerY + 160;
+            
+            ctx.fillStyle = '#1f1f1f'; 
+            ctx.fillRect(startX, barY, barW, barH);
+            
+            const progress = (safeXp % 1000) / 1000; 
+            ctx.fillStyle = '#ff4d00'; 
+            ctx.fillRect(startX, barY, barW * progress, barH);
+
+            ctx.fillStyle = '#777777'; 
+            ctx.font = '700 26px "Inter", sans-serif'; 
+            if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "4px"; 
+            ctx.fillText(`XP: ${safeXp} / ${safeLvl * 1000}   •   ${opsCount} OPERATIONS CLEARED`, 540, barY + 70); 
+            if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "0px";
+            
+            // Season Time Left
             let daysLeftText = `SEASON 0${seasonNum} • ACTIVE`;
             if (state.seasonConfig && state.seasonConfig.end) {
                 const endDate = new Date(state.seasonConfig.end);
@@ -1046,22 +1427,52 @@
                 }
             }
             
-            ctx.fillStyle = '#333333'; ctx.font = '700 24px "Inter", sans-serif'; if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "8px"; ctx.fillText(daysLeftText, 540, 1800); if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "0px";
+            ctx.fillStyle = '#333333'; 
+            ctx.font = '700 24px "Inter", sans-serif'; 
+            if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "8px"; 
+            ctx.fillText(daysLeftText, 540, 1800); 
+            if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "0px";
 
+            // Export logic
             let fileName = `GRIND_S0${seasonNum}_${(p.alias || 'Stranger').replace(/\s+/g, '')}.png`; 
             canvas.toBlob(async (blob) => {
-                if (!blob) return window.showToast("Fehler bei der Bildgenerierung.", "error"); const file = new File([blob], fileName, { type: 'image/png' });
-                const fallback = () => { const link = document.createElement('a'); link.download = fileName; link.href = canvas.toDataURL('image/png'); link.click(); window.showToast("Erfolgreich exportiert.", "success"); };
-                if (navigator.canShare && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: 'GRIND.', text: `Join the Hustle. My standing in Season ${seasonNum}: Level ${safeLvl}.` }); } catch (err) { if (err.name !== 'AbortError') fallback(); } } else fallback();
+                if (!blob) return window.showToast("Fehler bei der Bildgenerierung.", "error"); 
+                
+                const file = new File([blob], fileName, { type: 'image/png' });
+                const fallback = () => { 
+                    const link = document.createElement('a'); 
+                    link.download = fileName; 
+                    link.href = canvas.toDataURL('image/png'); 
+                    link.click(); 
+                    window.showToast("Erfolgreich exportiert.", "success"); 
+                };
+                
+                if (navigator.canShare && navigator.canShare({ files: [file] })) { 
+                    try { 
+                        await navigator.share({ 
+                            files: [file], 
+                            title: 'GRIND.', 
+                            text: `Join the Hustle. My standing in Season ${seasonNum}: Level ${safeLvl}.` 
+                        }); 
+                    } catch (err) { 
+                        if (err.name !== 'AbortError') fallback(); 
+                    } 
+                } else {
+                    fallback();
+                }
             }, 'image/png');
         };
 
         function animateValue(id, start, end, duration) {
-            const obj = document.getElementById(id); if (!obj) return; let startTimestamp = null;
+            const obj = document.getElementById(id); 
+            if (!obj) return; 
+            let startTimestamp = null;
             const step = (timestamp) => {
-                if (!startTimestamp) startTimestamp = timestamp; const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                if (!startTimestamp) startTimestamp = timestamp; 
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
                 obj.innerHTML = Math.floor(progress * (end - start) + start);
-                if (progress < 1) window.requestAnimationFrame(step); else obj.innerHTML = end;
+                if (progress < 1) window.requestAnimationFrame(step); 
+                else obj.innerHTML = end;
             };
             window.requestAnimationFrame(step);
         }
@@ -1079,28 +1490,38 @@
             </footer>
         `;
 
-        /* --- MODULE 10: MAIN RENDER ENGINE --- */
+        // --- 14. RENDER ENGINE ---
         function render() {
             const appDiv = document.getElementById('app');
 
-            if (state.view === 'loading') { appDiv.innerHTML = `<div class="flex-1 flex items-center justify-center min-h-[60vh]"><div class="w-16 h-16 border-t-4 border-l-4 border-[#ff4d00] rounded-full animate-spin"></div></div>`; return; }
+            if (state.view === 'loading') { 
+                appDiv.innerHTML = `<div class="flex-1 flex items-center justify-center min-h-[60vh]"><div class="w-16 h-16 border-t-4 border-l-4 border-[#ff4d00] rounded-full animate-spin"></div></div>`; 
+                return; 
+            }
 
-            // --- Season Status Intercept ---
+            // --- Season Status Screen ---
             if (state.view === 'dashboard' || state.view === 'paywall') {
                 const sStatus = getSeasonStatus();
                 if (sStatus.status !== 'active' && sStatus.status !== 'loading') {
                     const seasonNum = state.seasonConfig?.number || 1;
-                    let msg = "SYSTEM OFFLINE"; let submsg = "Die Season ist aktuell pausiert. Der Director bereitet das Network vor."; let countdownHtml = "";
+                    let msg = "SYSTEM OFFLINE"; 
+                    let submsg = "Die Season ist aktuell pausiert. Der Director bereitet das Network vor."; 
+                    let countdownHtml = "";
                     
                     if (sStatus.status === 'upcoming') {
-                        msg = `SEASON 0${seasonNum} INCOMING`; submsg = "Bereite dich vor. Der Drop startet in Kürze.";
+                        msg = `SEASON 0${seasonNum} INCOMING`; 
+                        submsg = "Bereite dich vor. Der Drop startet in Kürze.";
                         countdownHtml = `<div class="mt-10 text-3xl md:text-5xl font-mono font-black text-[#ff4d00] tracking-widest drop-shadow-[0_0_15px_rgba(255,77,0,0.5)]" id="season-countdown">CALCULATING...</div>`;
                         if(window.countdownInterval) clearInterval(window.countdownInterval);
-                        window.countdownInterval = setInterval(window.updateCountdown, 1000); setTimeout(window.updateCountdown, 0);
+                        window.countdownInterval = setInterval(window.updateCountdown, 1000); 
+                        setTimeout(window.updateCountdown, 0);
                     } else if (sStatus.status === 'ended') {
-                        msg = `SEASON 0${seasonNum} CONCLUDED`; submsg = "Die Season ist offiziell beendet. Die Ranks wurden gesichert. Stay tuned for the next drop.";
+                        msg = `SEASON 0${seasonNum} CONCLUDED`; 
+                        submsg = "Die Season ist offiziell beendet. Die Ranks wurden gesichert. Stay tuned for the next drop.";
                         if(window.countdownInterval) clearInterval(window.countdownInterval);
-                    } else { if(window.countdownInterval) clearInterval(window.countdownInterval); }
+                    } else { 
+                        if(window.countdownInterval) clearInterval(window.countdownInterval); 
+                    }
 
                     appDiv.innerHTML = `
                         <div class="flex-1 flex flex-col items-center justify-center p-6 text-center min-h-[90dvh] relative z-20 glitch-bg">
@@ -1120,9 +1541,10 @@
                 }
             }
 
-            // --- LEGAL VIEWS ---
+            // --- Legal Views ---
             if (state.view === 'impressum' || state.view === 'datenschutz' || state.view === 'agb') {
-                let content = ''; let title = '';
+                let content = ''; 
+                let title = '';
                 
                 if (state.view === 'impressum') {
                     title = 'Impressum';
@@ -1242,38 +1664,69 @@
                 return;
             }
 
+            // --- Paywall Screen ---
             if (state.view === 'paywall') {
                 const displayPrice = state.bundlePrice ? state.bundlePrice.replace('.', ',') : '19,00';
                 const checkoutPrice = state.bundlePrice || '19.00';
                 const seasonNum = state.seasonConfig?.number || 1;
                 
-                if (document.getElementById('paypal-button-container')) { const priceEl = document.getElementById('dynamic-price-display'); if (priceEl) priceEl.innerText = displayPrice + ' €'; return; }
+                if (document.getElementById('paypal-button-container')) { 
+                    const priceEl = document.getElementById('dynamic-price-display'); 
+                    if (priceEl) priceEl.innerText = displayPrice + ' €'; 
+                    return; 
+                }
 
                 appDiv.innerHTML = `
                     <div class="flex-1 flex flex-col items-center justify-center p-6 min-h-[80vh] text-center animate-fade-in relative z-20">
-                        <div class="w-16 h-16 border-2 border-[#a855f7] rounded-full flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(168,85,247,0.3)] bg-[#0a0a0a]"><svg class="w-8 h-8 text-[#a855f7]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg></div>
-                        <h2 class="text-4xl font-black italic tracking-tighter mb-2">GRIND. <span class="text-[#a855f7]">PRO</span></h2><p class="text-gray-400 font-bold uppercase tracking-widest text-[10px] mb-8 max-w-xs leading-relaxed">Schalte alle Premium-Rewards der Season 0${seasonNum} frei und maximiere deinen Progress.</p>
-                        <div class="bg-[#0a0a0a] border border-[#1f1f1f] p-8 rounded-sm mb-6 w-full max-w-sm shadow-2xl relative overflow-hidden group"><div class="absolute inset-0 bg-gradient-to-t from-[#a855f7]/10 to-transparent opacity-50"></div><div class="relative z-10"><div class="text-[10px] uppercase tracking-[0.2em] text-gray-500 font-bold mb-2">Season Pass</div><div id="dynamic-price-display" class="text-5xl font-black text-white italic tracking-tighter mb-8">${displayPrice} €</div><div id="paypal-button-container" class="w-full min-h-[150px] relative z-50 flex items-center justify-center"></div></div></div>
+                        <div class="w-16 h-16 border-2 border-[#a855f7] rounded-full flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(168,85,247,0.3)] bg-[#0a0a0a]">
+                            <svg class="w-8 h-8 text-[#a855f7]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        </div>
+                        <h2 class="text-4xl font-black italic tracking-tighter mb-2">GRIND. <span class="text-[#a855f7]">PRO</span></h2>
+                        <p class="text-gray-400 font-bold uppercase tracking-widest text-[10px] mb-8 max-w-xs leading-relaxed">Schalte alle Premium-Rewards der Season 0${seasonNum} frei und maximiere deinen Progress.</p>
+                        
+                        <div class="bg-[#0a0a0a] border border-[#1f1f1f] p-8 rounded-sm mb-6 w-full max-w-sm shadow-2xl relative overflow-hidden group">
+                            <div class="absolute inset-0 bg-gradient-to-t from-[#a855f7]/10 to-transparent opacity-50"></div>
+                            <div class="relative z-10">
+                                <div class="text-[10px] uppercase tracking-[0.2em] text-gray-500 font-bold mb-2">Season Pass</div>
+                                <div id="dynamic-price-display" class="text-5xl font-black text-white italic tracking-tighter mb-8">${displayPrice} €</div>
+                                <div id="paypal-button-container" class="w-full min-h-[150px] relative z-50 flex items-center justify-center"></div>
+                            </div>
+                        </div>
+                        
                         <p class="text-[9px] text-gray-600 uppercase tracking-widest mt-2 mb-6 max-w-xs mx-auto leading-relaxed">Mit dem Kauf stimmst du unseren <span class="text-white underline cursor-pointer hover:text-[#a855f7]" onclick="window.setView('agb')">AGB</span> zu und verzichtest auf das Widerrufsrecht für diesen digitalen Inhalt.</p>
                         <button type="button" onclick="window.setView('dashboard')" class="text-gray-600 hover:text-white text-[10px] uppercase tracking-[0.2em] font-bold transition">Zurück zum Grind.</button>
                     </div>
                     ${getFooterHTML()}
                 `;
+                
                 setTimeout(() => {
                     if (window.paypal && document.getElementById('paypal-button-container') && !document.getElementById('paypal-button-container').innerHTML) {
-                        paypal.Buttons({ createOrder: function(data, actions) { return actions.order.create({ purchase_units: [{ amount: { value: checkoutPrice, currency_code: 'EUR' }, custom_id: state.user.uid }] }); }, onApprove: function(data, actions) { return actions.order.capture().then(async function(details) { 
-                            window.showToast("Zahlung autorisiert! PRO Pass aktiviert.", "success"); 
-                            try { 
-                                await setDoc(doc(db, 'plot_users', state.user.uid), { hasPremium: true }, { merge: true }); 
-                                if(state.profile) state.profile.hasPremium = true;
-                                window.logActivity('PRO', `hat den <span class="font-bold">PRO Pass</span> freigeschaltet!`);
-                            } catch(e) { console.error(e); } 
-                            window.setView('dashboard'); 
-                        }); } }).render('#paypal-button-container');
-                    } else if (!window.paypal) { document.getElementById('paypal-button-container').innerHTML = '<div class="text-red-500 text-xs italic font-bold">Zahlungssystem blockiert. Bitte Seite neu laden.</div>'; }
-                }, 100); return;
+                        paypal.Buttons({ 
+                            createOrder: function(data, actions) { 
+                                return actions.order.create({ 
+                                    purchase_units: [{ amount: { value: checkoutPrice, currency_code: 'EUR' }, custom_id: state.user.uid }] 
+                                }); 
+                            }, 
+                            onApprove: function(data, actions) { 
+                                return actions.order.capture().then(async function(details) { 
+                                    window.showToast("Zahlung autorisiert! PRO Pass aktiviert.", "success"); 
+                                    try { 
+                                        await setDoc(doc(db, 'plot_users', state.user.uid), { hasPremium: true }, { merge: true }); 
+                                        if(state.profile) state.profile.hasPremium = true;
+                                        window.logActivity('PRO', `hat den <span class="font-bold">PRO Pass</span> freigeschaltet!`);
+                                    } catch(e) { console.error(e); } 
+                                    window.setView('dashboard'); 
+                                }); 
+                            } 
+                        }).render('#paypal-button-container');
+                    } else if (!window.paypal) { 
+                        document.getElementById('paypal-button-container').innerHTML = '<div class="text-red-500 text-xs italic font-bold">Zahlungssystem blockiert. Bitte Seite neu laden.</div>'; 
+                    }
+                }, 100); 
+                return;
             }
 
+            // --- Onboarding Screen ---
             if (state.view === 'onboarding') {
                 appDiv.innerHTML = `
                     <div class="flex-1 flex flex-col items-center justify-center p-6 min-h-[80vh] text-center">
@@ -1294,17 +1747,53 @@
                             <button type="submit" class="w-full btn-grind py-4 mt-2">Confirm Identity</button>
                         </form>
                     </div>
-                `; return;
+                `; 
+                return;
             }
 
+            // --- Auth Login Screen ---
             if (state.view === 'auth') {
                 const seasonNum = state.seasonConfig?.number || 1;
-                let authHtml = `<div class="flex-1 flex flex-col items-center justify-center p-6 min-h-[80vh] text-center"><h1 class="text-6xl md:text-8xl font-black italic tracking-tighter mb-2">GRIND<span class="text-[#ff4d00]">.</span></h1><p class="text-gray-500 font-bold uppercase tracking-widest text-xs mb-12 max-w-sm leading-relaxed">Season 0${seasonNum}</p><div class="w-full max-w-sm">`;
-                if (state.authStep === 'phone') { authHtml += `<form onsubmit="window.sendSMS(event)" class="space-y-4"><div class="flex gap-2"><select id="auth_prefix" class="w-24 p-4 bg-[#0f0f0f] border border-[#1f1f1f] rounded-sm outline-none focus:border-[#ff4d00] text-gray-400 text-center font-bold appearance-none cursor-pointer"><option value="+49">🇩🇪 +49</option><option value="+43">🇦🇹 +43</option><option value="+41">🇨🇭 +41</option></select><input id="auth_phone" type="tel" placeholder="170 1234567" required class="flex-1 p-4 bg-[#0f0f0f] border border-[#1f1f1f] rounded-sm outline-none focus:border-[#ff4d00] text-white transition text-center text-lg tracking-widest"></div><button id="auth_submit_btn" type="submit" class="w-full btn-grind py-4">Enter The Drop</button></form>`; } 
-                else { authHtml += `<form onsubmit="window.verifyCode(event)" class="space-y-4"><div class="text-center mb-6"><p class="text-gray-500 text-xs uppercase tracking-widest font-bold">Code gesendet an</p><p class="text-[#ff4d00] font-black tracking-widest mt-1 text-lg">${state.tempPhone}</p></div><input id="auth_code" type="text" placeholder="123456" required class="w-full p-4 bg-[#0f0f0f] border border-[#1f1f1f] rounded-sm outline-none focus:border-[#ff4d00] text-white transition text-center text-3xl font-mono tracking-[0.3em]"><button id="verify_submit_btn" type="submit" class="w-full btn-grind py-4">Verify Access</button><button type="button" onclick="window.goBackToPhone()" class="w-full text-center mt-4 text-xs text-gray-500 hover:text-white uppercase tracking-widest transition font-bold">Cancel</button></form>`; }
-                authHtml += `</div></div>`; appDiv.innerHTML = authHtml; return;
+                let authHtml = `
+                    <div class="flex-1 flex flex-col items-center justify-center p-6 min-h-[80vh] text-center">
+                        <h1 class="text-6xl md:text-8xl font-black italic tracking-tighter mb-2">GRIND<span class="text-[#ff4d00]">.</span></h1>
+                        <p class="text-gray-500 font-bold uppercase tracking-widest text-xs mb-12 max-w-sm leading-relaxed">Season 0${seasonNum}</p>
+                        <div class="w-full max-w-sm">
+                `;
+                
+                if (state.authStep === 'phone') { 
+                    authHtml += `
+                        <form onsubmit="window.sendSMS(event)" class="space-y-4">
+                            <div class="flex gap-2">
+                                <select id="auth_prefix" class="w-24 p-4 bg-[#0f0f0f] border border-[#1f1f1f] rounded-sm outline-none focus:border-[#ff4d00] text-gray-400 text-center font-bold appearance-none cursor-pointer">
+                                    <option value="+49">🇩🇪 +49</option>
+                                    <option value="+43">🇦🇹 +43</option>
+                                    <option value="+41">🇨🇭 +41</option>
+                                </select>
+                                <input id="auth_phone" type="tel" placeholder="170 1234567" required class="flex-1 p-4 bg-[#0f0f0f] border border-[#1f1f1f] rounded-sm outline-none focus:border-[#ff4d00] text-white transition text-center text-lg tracking-widest">
+                            </div>
+                            <button id="auth_submit_btn" type="submit" class="w-full btn-grind py-4">Enter The Drop</button>
+                        </form>
+                    `; 
+                } else { 
+                    authHtml += `
+                        <form onsubmit="window.verifyCode(event)" class="space-y-4">
+                            <div class="text-center mb-6">
+                                <p class="text-gray-500 text-xs uppercase tracking-widest font-bold">Code gesendet an</p>
+                                <p class="text-[#ff4d00] font-black tracking-widest mt-1 text-lg">${state.tempPhone}</p>
+                            </div>
+                            <input id="auth_code" type="text" placeholder="123456" required class="w-full p-4 bg-[#0f0f0f] border border-[#1f1f1f] rounded-sm outline-none focus:border-[#ff4d00] text-white transition text-center text-3xl font-mono tracking-[0.3em]">
+                            <button id="verify_submit_btn" type="submit" class="w-full btn-grind py-4">Verify Access</button>
+                            <button type="button" onclick="window.goBackToPhone()" class="w-full text-center mt-4 text-xs text-gray-500 hover:text-white uppercase tracking-widest transition font-bold">Cancel</button>
+                        </form>
+                    `; 
+                }
+                authHtml += `</div></div>`; 
+                appDiv.innerHTML = authHtml; 
+                return;
             }
 
+            // --- DASHBOARD (Main App) ---
             if (state.view === 'dashboard') {
                 const p = state.profile || { xp: 0, lvl: 1, completed: [], redeemed: [], streaks: {}, friends: [], crewCode: '', alias: 'Stranger', city: 'Köln', hasPremium: false };
                 const safeXp = p.xp || 0; 
@@ -1323,7 +1812,7 @@
                 const targetTrackProgress = Math.min(29, safeLvl - 1 + (safeXp % 1000) / 1000);
                 const oldTrackProgress = state.prevXp !== null ? Math.min(29, (state.prevLvl || 1) - 1 + (state.prevXp % 1000) / 1000) : targetTrackProgress;
 
-                // --- CALCULATE DAYS LEFT FOR SEASON ---
+                // --- Calculate Days Left for Season ---
                 let seasonDaysLeftText = `SEASON 0${seasonNum} | ACTIVE`;
                 let seasonEndDate = null;
                 if (state.seasonConfig && state.seasonConfig.end) {
@@ -1342,7 +1831,7 @@
                     }
                 }
 
-                // --- CALCULATE DAYS LEFT FOR WEEK ---
+                // --- Calculate Days Left for Week ---
                 let weekDaysLeftText = "";
                 const nowForWeek = new Date();
                 const daysUntilSunday = nowForWeek.getDay() === 0 ? 0 : 7 - nowForWeek.getDay();
@@ -1374,6 +1863,8 @@
                     </header>
 
                     <main class="max-w-6xl mx-auto px-6 w-full relative z-10 pb-10">
+                        
+                        <!-- Level Progress Card -->
                         <section class="mb-12 flex flex-col md:flex-row gap-8 items-center bg-[#0a0a0a] p-8 border border-[#1f1f1f] rounded-lg shadow-2xl relative overflow-hidden group">
                             <div class="absolute inset-0 bg-gradient-to-r from-[#ff4d00] to-transparent opacity-0 group-hover:opacity-5 transition duration-1000"></div>
                             <div class="flex-shrink-0 text-center md:text-left relative z-10">
@@ -1392,13 +1883,22 @@
                             </div>
                         </section>
 
+                        <!-- GRIND TRACK -->
                         <section class="mb-16">
                             <div class="flex justify-between items-center mb-6 px-2">
-                                <div><h3 class="text-2xl font-black italic uppercase tracking-tighter">Grind Track <span class="text-[#ff4d00]">S0${seasonNum}</span></h3><p class="text-gray-500 text-[10px] font-bold tracking-widest mt-1">${seasonDaysLeftText}</p></div>
-                                <div>${hasPremium ? '<span class="bg-[#a855f7]/10 text-[#a855f7] border border-[#a855f7]/30 px-3 py-1.5 rounded-sm text-[9px] font-black uppercase tracking-widest shadow-[0_0_10px_rgba(168,85,247,0.2)]">PRO ACTIVE</span>' : '<button type="button" onclick="window.setView(\'paywall\')" class="btn-pro">Get Pro Pass</button>'}</div>
+                                <div>
+                                    <h3 class="text-2xl font-black italic uppercase tracking-tighter">Grind Track <span class="text-[#ff4d00]">S0${seasonNum}</span></h3>
+                                    <p class="text-gray-500 text-[10px] font-bold tracking-widest mt-1">${seasonDaysLeftText}</p>
+                                </div>
+                                <div>
+                                    ${hasPremium 
+                                        ? '<span class="bg-[#a855f7]/10 text-[#a855f7] border border-[#a855f7]/30 px-3 py-1.5 rounded-sm text-[9px] font-black uppercase tracking-widest shadow-[0_0_10px_rgba(168,85,247,0.2)]">PRO ACTIVE</span>' 
+                                        : '<button type="button" onclick="window.setView(\'paywall\')" class="btn-pro">Get Pro Pass</button>'}
+                                </div>
                             </div>
 
-                            <div id="pass-viewport" class="no-scrollbar overflow-x-auto py-8 relative flex items-center min-h-[280px] border-y border-white/5 bg-black/40 shadow-inner">
+                            <!-- FIX: -mx-6 lässt die Trackbox auf mobilen Endgeräten den gesamten Bildschirmbereich (Full Bleed) nutzen. -->
+                            <div id="pass-viewport" class="no-scrollbar overflow-x-auto py-8 relative flex items-center min-h-[280px] border-y border-white/5 bg-black/40 shadow-inner -mx-6 md:-mx-0">
                                 <div class="flex items-center px-6 relative" style="min-width: max-content;">
                                     <div class="absolute top-1/2 left-[94px] right-[94px] h-[1px] bg-[#1f1f1f] z-0 -translate-y-1/2"></div>
                                     <div id="track-line" class="absolute top-1/2 left-[94px] h-[2px] bg-[#ff4d00] shadow-[0_0_10px_rgba(255,77,0,0.5)] z-0 transition-all duration-1000 ease-out -translate-y-1/2" style="width: calc(140px * ${oldTrackProgress}); display: ${safeXp > 0 || state.prevXp > 0 ? 'block' : 'none'};"></div>
@@ -1414,15 +1914,24 @@
 
                     html += `
                         <div id="level-node-${i}" class="level-node flex flex-col items-center relative z-10">
-                            <div ${isUnlocked && r?.free && !freeClaimed ? `onclick="window.openClaimModal(${i}, 'free')" class="reward-box mb-4 unlocked cursor-pointer hover:scale-105"` : (freeClaimed ? `onclick="window.openClaimModal(${i}, 'free')" class="reward-box mb-4 unlocked opacity-50 cursor-pointer"` : `class="reward-box mb-4 opacity-60 scale-95"`)}>
+                            <!-- Free Reward Box -->
+                            <div ${isUnlocked && r?.free && !freeClaimed 
+                                ? `onclick="window.openClaimModal(${i}, 'free')" class="reward-box mb-4 unlocked cursor-pointer hover:scale-105"` 
+                                : (freeClaimed ? `onclick="window.openClaimModal(${i}, 'free')" class="reward-box mb-4 unlocked opacity-50 cursor-pointer"` : `class="reward-box mb-4 opacity-60 scale-95"`)}>
+                                
                                 <span class="tag-free">FREE</span>
                                 ${freeClaimed && r?.free ? `<div class="absolute inset-0 bg-black/80 backdrop-blur-[2px] z-20 flex items-center justify-center rounded-[4px]"><span class="text-green-500 font-black text-xs uppercase italic transform -rotate-12"><svg class="w-6 h-6 drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></span></div>` : ''}
                                 <span class="text-[10px] font-bold uppercase text-center px-2 text-gray-200 mt-3 relative z-10">${r?.free || '-'}</span>
                             </div>
                             
+                            <!-- Level Number Circle -->
                             <div id="circle-node-${i}" class="relative w-10 h-10 rounded-full flex items-center justify-center font-black italic text-xs ${isUnlocked ? 'grind-gradient text-black scale-110 shadow-[0_0_15px_rgba(255,77,0,0.5)]' : 'bg-gray-800 text-gray-400 border border-white/20'}">${i}</div>
                             
-                            <div ${isProUnlocked && r?.pro && !proClaimed ? `onclick="window.openClaimModal(${i}, 'pro')" class="reward-box pro mt-5 unlocked scale-105 cursor-pointer"` : (proClaimed ? `onclick="window.openClaimModal(${i}, 'pro')" class="reward-box pro mt-5 unlocked opacity-50 cursor-pointer"` : `class="reward-box pro mt-5 opacity-70 scale-[0.98] hover:opacity-100"`)}>
+                            <!-- Pro Reward Box -->
+                            <div ${isProUnlocked && r?.pro && !proClaimed 
+                                ? `onclick="window.openClaimModal(${i}, 'pro')" class="reward-box pro mt-5 unlocked scale-105 cursor-pointer"` 
+                                : (proClaimed ? `onclick="window.openClaimModal(${i}, 'pro')" class="reward-box pro mt-5 unlocked opacity-50 cursor-pointer"` : `class="reward-box pro mt-5 opacity-70 scale-[0.98] hover:opacity-100"`)}>
+                                
                                 <span class="tag-pro italic">PRO</span>
                                 ${proClaimed && r?.pro ? `<div class="absolute inset-0 bg-black/80 backdrop-blur-[2px] z-20 flex items-center justify-center rounded-[4px]"><span class="text-[#a855f7] font-black text-xs uppercase italic transform -rotate-12"><svg class="w-6 h-6 drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></span></div>` : ''}
                                 <span class="text-[10px] font-bold uppercase text-center px-2 mt-4 relative z-10 ${isProUnlocked ? 'text-[#d8b4fe]' : 'text-purple-300'}">${r?.pro || '-'}</span>
@@ -1436,10 +1945,15 @@
                             </div>
                         </section>
 
+                        <!-- MISSIONS / OPERATIONS -->
                         <section class="max-w-3xl mx-auto mb-12">
                             <div class="flex flex-col gap-6 mb-10">
                                 <div class="flex justify-between items-end border-b border-white/10 pb-4">
-                                    <div><p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">Operations</p><h3 class="text-3xl font-black uppercase italic tracking-tighter">${(state.weeklyData[currentMonthWeek] || {title: 'Active Week'}).title}</h3><p class="text-gray-500 text-[10px] font-bold tracking-widest mt-1">${weekDaysLeftText}</p></div>
+                                    <div>
+                                        <p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">Operations</p>
+                                        <h3 class="text-3xl font-black uppercase italic tracking-tighter">${(state.weeklyData[currentMonthWeek] || {title: 'Active Week'}).title}</h3>
+                                        <p class="text-gray-500 text-[10px] font-bold tracking-widest mt-1">${weekDaysLeftText}</p>
+                                    </div>
                                     <span class="text-[10px] font-black bg-[#ff4d00] text-white px-3 py-1 italic shadow-[0_0_10px_rgba(255,77,0,0.4)]">LIVE</span>
                                 </div>
                                 <div class="flex flex-wrap gap-2">
@@ -1457,10 +1971,15 @@
                     html += `<button type="button" class="week-btn px-4 py-2 text-[10px] font-black uppercase transition rounded-sm ${extraClass}">W0${weekNum} ${badge}</button>`;
                 });
 
-                html += `</div></div><div class="space-y-4">`;
+                html += `       </div>
+                            </div>
+                            <div class="space-y-4">
+                `;
 
                 const currentMissions = state.weeklyData[currentMonthWeek]?.missions || [];
-                if (currentMissions.length === 0) html += `<div class="text-center p-8 text-gray-600 italic text-sm">Der Director bereitet die Operations vor. Stay focused.</div>`;
+                if (currentMissions.length === 0) {
+                    html += `<div class="text-center p-8 text-gray-600 italic text-sm">Der Director bereitet die Operations vor. Stay focused.</div>`;
+                }
 
                 currentMissions.forEach(m => {
                     const isCompleted = safeCompleted.includes(m.id);
@@ -1508,6 +2027,7 @@
                             </div>
                         </section>
                         
+                        <!-- HABITS -->
                         <section class="max-w-3xl mx-auto mb-12">
                             <div class="flex flex-col gap-6 mb-10">
                                 <div class="flex justify-between items-end border-b border-white/10 pb-4">
@@ -1553,6 +2073,7 @@
                     
                     const isExpired = habDaysLeftText === "ABGELAUFEN";
                     let cardClasses = 'card p-6 rounded-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4 group relative overflow-hidden ';
+                    
                     if (isDoneToday) cardClasses += 'is-completed border-[#ff4d00]/30 opacity-75';
                     else if (isPending) cardClasses += 'is-pending border-yellow-500/30';
                     else if (isExpired) cardClasses += 'opacity-50 cursor-not-allowed';
@@ -1563,7 +2084,9 @@
                     
                     let btnAction = '';
                     if (!isExpired) {
-                        btnAction = m.type === 'instant' ? `window.claimInstantMission('${m.id}', ${m.xp}, '${safeName}')` : `window.openVerifyModal('${m.id}', ${m.xp}, '${m.type}', '${safeName}', '${safeQrSolution}')`;
+                        btnAction = m.type === 'instant' 
+                            ? `window.claimInstantMission('${m.id}', ${m.xp}, '${safeName}')` 
+                            : `window.openVerifyModal('${m.id}', ${m.xp}, '${m.type}', '${safeName}', '${safeQrSolution}')`;
                     }
                     
                     let btnText = isDoneToday ? 'DONE FOR TODAY' : (isPending ? 'Wird überprüft ⏳' : 'Verify Habit');
@@ -1574,6 +2097,7 @@
                             <div class="absolute left-0 top-0 bottom-0 w-1 ${isPending ? 'bg-yellow-500' : (isDoneToday ? 'bg-[#ff4d00]' : 'bg-gray-600 group-hover:bg-[#ff4d00]')} transition"></div>
                             ${isDoneToday ? `<div class="completed-overlay"><span class="text-[#ff4d00] font-black italic uppercase tracking-widest flex items-center gap-2"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> DONE TODAY</span></div>` : ''}
                             ${isPending ? `<div class="pending-overlay"><span class="text-yellow-500 font-black italic uppercase tracking-widest flex items-center gap-2"><svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> Wird überprüft</span></div>` : ''}
+                            
                             <div class="pr-6 relative z-0 flex-1 w-full">
                                 <div class="flex justify-between items-start mb-1">
                                     <h4 class="font-black italic uppercase text-lg group-hover:text-[#ff4d00] transition tracking-tighter break-words max-w-[70%]">${m.name}</h4>
@@ -1585,6 +2109,7 @@
                                     ${m.streakBonus > 0 ? `<span class="border border-[#ff4d00]/30 bg-[#ff4d00]/10 text-[#ff4d00] px-2 py-0.5 text-[8px] font-bold uppercase tracking-widest shadow-[0_0_10px_rgba(255,77,0,0.2)]">🔥 Streak: ${activeStreak} (+${m.streakBonus} XP/Tag)</span>` : `<span class="border border-gray-700 bg-gray-900 text-gray-300 px-2 py-0.5 text-[8px] font-bold uppercase tracking-widest">🔥 Streak: ${activeStreak}</span>`}
                                 </div>
                             </div>
+                            
                             <div class="text-left md:text-right flex-shrink-0 relative z-0 flex flex-col items-start md:items-end w-full md:w-auto mt-4 md:mt-0">
                                 <span class="block text-[#ff4d00] font-black text-2xl italic tracking-tighter mb-2">+${totalXpDisplay}</span>
                                 <button type="button" onclick="${btnAction}" class="btn-grind w-full md:w-auto py-3 text-[10px] bg-white text-black hover:bg-[#ff4d00] hover:text-white transition" ${(isDoneToday || isPending || isExpired) ? 'disabled' : ''}>${btnText}</button>
@@ -1597,6 +2122,7 @@
                             </div>
                         </section>
 
+                        <!-- CREW ACTIVITY -->
                         <section class="max-w-3xl mx-auto mb-12">
                             <div class="flex flex-col gap-6 mb-8">
                                 <div class="flex justify-between items-end border-b border-white/10 pb-4">
@@ -1630,16 +2156,15 @@
                             </div>
                 `;
 
-                // Feed-Logik
+                // Feed-Logik: EIGENE AKTIVITÄTEN AUSBLENDEN!
                 const friendsList = p.friends || [];
                 const feedUsers = [...friendsList]; 
-                
                 const feedUsersLower = feedUsers.map(u => (u || '').toLowerCase());
 
                 const feedActivities = (state.activities || [])
                     .filter(act => act.alias && feedUsersLower.includes(act.alias.toLowerCase()))
                     .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
-                    .slice(0, 10);
+                    .slice(0, 10); // Top 10
 
                 if (feedActivities.length === 0) {
                     if (friendsList.length === 0) {
@@ -1653,7 +2178,7 @@
                     feedActivities.forEach(act => {
                         const isProUser = act.isPro === true;
                         
-                        let iconSvg = 'M5 13l4 4L19 7'; // Default Mission
+                        let iconSvg = 'M5 13l4 4L19 7'; 
                         let colorClass = isProUser ? 'text-[#a855f7]' : 'text-[#ff4d00]';
                         let borderClass = isProUser ? 'border-[#a855f7]/30' : 'border-[#ff4d00]/30';
                         let shadowClass = '';
@@ -1678,11 +2203,8 @@
                         
                         const nameColorClass = isProUser ? 'text-[#d8b4fe]' : 'text-[#ff4d00]';
                         const proBadge = isProUser ? `<span class="ml-2 align-middle bg-[#a855f7]/20 text-[#a855f7] border border-[#a855f7]/30 text-[8px] px-1.5 py-0.5 rounded-sm font-black shadow-[0_0_10px_rgba(168,85,247,0.2)]">PRO</span>` : '';
-                        const dynamicText = act.text.replace(/text-\[#[a-fA-F0-9]+\]/g, isProUser ? 'text-[#a855f7]' : 'text-[#ff4d00]');
                         
-                        // FLAME REACTION LOGIC IM FEED
-                        const flameCount = (act.flames || []).length;
-                        const hasReacted = state.user ? (act.flames || []).includes(state.user.uid) : false;
+                        const dynamicText = act.text.replace(/text-\[#[a-fA-F0-9]+\]/g, isProUser ? 'text-[#a855f7]' : 'text-[#ff4d00]');
 
                         html += `
                             <div class="flex gap-4 relative z-10">
@@ -1690,13 +2212,7 @@
                                     <svg class="w-4 h-4 ${colorClass}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${iconSvg}"></path></svg>
                                 </div>
                                 <div class="card p-4 rounded-sm flex-1">
-                                    <div class="flex justify-between items-start mb-2">
-                                        <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">${time}</p>
-                                        <button type="button" onclick="window.toggleFlame('${act.id}')" class="flex items-center gap-1.5 hover:scale-110 transition ${hasReacted ? 'opacity-100' : 'opacity-40 hover:opacity-100'}">
-                                            <span class="text-sm">🔥</span>
-                                            <span class="text-[10px] font-black ${flameCount > 0 ? 'text-[#ff4d00]' : 'text-gray-600'}">${flameCount}</span>
-                                        </button>
-                                    </div>
+                                    <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">${time}</p>
                                     <p class="text-sm font-medium text-gray-300"><span class="${nameColorClass} italic uppercase font-black">${displayName}</span>${proBadge} <span class="text-gray-400 text-xs">${dynamicText}</span></p>
                                 </div>
                             </div>
@@ -1730,27 +2246,41 @@
                     if (state.prevLvl !== null && safeLvl > state.prevLvl) {
                         if (topBar) {
                             topBar.style.transition = 'width 1000ms ease-out'; topBar.style.width = '100%';
-                            setTimeout(() => { topBar.style.transition = 'none'; topBar.style.width = '0%'; void topBar.offsetWidth; topBar.style.transition = 'width 1000ms ease-out'; topBar.style.width = `${targetXpProgress}%`; }, 1000); 
+                            setTimeout(() => { 
+                                topBar.style.transition = 'none'; 
+                                topBar.style.width = '0%'; 
+                                void topBar.offsetWidth; 
+                                topBar.style.transition = 'width 1000ms ease-out'; 
+                                topBar.style.width = `${targetXpProgress}%`; 
+                            }, 1000); 
                         }
                         if (passViewport && currentNode) {
                             const scrollLeft = currentNode.offsetLeft - (passViewport.offsetWidth / 2) + (currentNode.offsetWidth / 2);
                             passViewport.scrollTo({ left: scrollLeft, behavior: 'smooth' });
                         }
-                    } else if (topBar) { topBar.style.transition = 'width 1000ms ease-out'; topBar.style.width = `${targetXpProgress}%`; }
+                    } else if (topBar) { 
+                        topBar.style.transition = 'width 1000ms ease-out'; 
+                        topBar.style.width = `${targetXpProgress}%`; 
+                    }
 
                     if (state.prevXp !== null && state.prevXp < safeXp) {
-                        window.scrollTo({ top: 0, behavior: 'smooth' }); animateValue('xp-counter-num', state.prevXp, safeXp, 1000);
+                        window.scrollTo({ top: 0, behavior: 'smooth' }); 
+                        animateValue('xp-counter-num', state.prevXp, safeXp, 1000);
                         if (state.prevLvl !== null && safeLvl > state.prevLvl) {
-                            const lvlText = document.getElementById('main-lvl-text'); if (lvlText) lvlText.classList.add('animate-pop');
-                            const newCircle = document.getElementById(`circle-node-${safeLvl}`); if (newCircle) newCircle.classList.add('animate-pop');
+                            const lvlText = document.getElementById('main-lvl-text'); 
+                            if (lvlText) lvlText.classList.add('animate-pop');
+                            
+                            const newCircle = document.getElementById(`circle-node-${safeLvl}`); 
+                            if (newCircle) newCircle.classList.add('animate-pop');
                         }
                     }
-                    state.prevXp = safeXp; state.prevLvl = safeLvl;
+                    state.prevXp = safeXp; 
+                    state.prevLvl = safeLvl;
                 }, 50);
                 return;
             }
 
-            // --- 404 FALLBACK ---
+            // --- 404 Fallback ---
             appDiv.innerHTML = `
                 <div class="flex-1 flex flex-col items-center justify-center text-center p-6 min-h-[80vh] relative z-20">
                     <h1 class="text-8xl md:text-9xl font-black italic text-[#1f1f1f] tracking-tighter mb-4 select-none">404</h1>
@@ -1761,70 +2291,69 @@
             `;
         }
     </script>
-<!-- iOS INSTALL BANNER -->
-<div id="install-banner" class="hidden fixed bottom-6 left-4 right-4 bg-[#111] border border-[#ff4d00]/30 p-5 rounded-sm shadow-[0_0_30px_rgba(255,77,0,0.2)] z-[999999] flex flex-col gap-3">
-    <div class="flex justify-between items-start mb-1">
-        <p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest">App Installieren</p>
-        <button onclick="document.getElementById('install-banner').classList.add('hidden')" class="text-gray-500 hover:text-white transition">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-        </button>
-    </div>
-    
-    <p class="text-white text-xs font-bold leading-relaxed mb-1">Füge die App zum Home-Bildschirm hinzu, um deine Health Habits und Operations täglich zu tracken.</p>
-    
-    <div class="bg-black/50 border border-white/10 p-3 rounded-sm flex flex-col gap-3">
-        <div class="flex items-center gap-2 text-xs text-gray-300">
-            <span id="step1-text">1. Tippe auf</span>
-            <span class="text-blue-400 flex-shrink-0">
-                <!-- Apple Share Icon -->
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 15V3m0 0L8.5 6.5M12 3l3.5 3.5M6 10H4a2 2 0 00-2 2v8a2 2 0 002 2h16a2 2 0 002-2v-8a2 2 0 00-2-2h-2" />
-                </svg>
-            </span>
+
+    <!-- ========================================== -->
+    <!-- IOS INSTALL BANNER                         -->
+    <!-- ========================================== -->
+    <div id="install-banner" class="hidden fixed bottom-6 left-4 right-4 bg-[#111] border border-[#ff4d00]/30 p-5 rounded-sm shadow-[0_0_30px_rgba(255,77,0,0.2)] z-[999999] flex flex-col gap-3">
+        <div class="flex justify-between items-start mb-1">
+            <p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest">App Installieren</p>
+            <button onclick="document.getElementById('install-banner').classList.add('hidden')" class="text-gray-500 hover:text-white transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
         </div>
         
-        <div class="flex items-center gap-2 text-xs text-gray-300">
-            <span>2. Wähle</span>
-            <span class="text-white bg-[#2c2c2e] rounded shadow-sm border border-gray-600 p-0.5 flex-shrink-0">
-                <!-- Apple Plus Icon -->
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" class="w-4 h-4">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-                </svg>
-            </span>
-            <span class="font-bold text-white">Zum Home-Bildschirm</span>
+        <p class="text-white text-xs font-bold leading-relaxed mb-1">Füge die App zum Home-Bildschirm hinzu, um deine Health Habits und Operations täglich zu tracken.</p>
+        
+        <div class="bg-black/50 border border-white/10 p-3 rounded-sm flex flex-col gap-3">
+            <div class="flex items-center gap-2 text-xs text-gray-300">
+                <span id="step1-text">1. Tippe auf</span>
+                <span class="text-blue-400 flex-shrink-0">
+                    <!-- Apple Share Icon -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 15V3m0 0L8.5 6.5M12 3l3.5 3.5M6 10H4a2 2 0 00-2 2v8a2 2 0 002 2h16a2 2 0 002-2v-8a2 2 0 00-2-2h-2" />
+                    </svg>
+                </span>
+            </div>
+            
+            <div class="flex items-center gap-2 text-xs text-gray-300">
+                <span>2. Wähle</span>
+                <span class="text-white bg-[#2c2c2e] rounded shadow-sm border border-gray-600 p-0.5 flex-shrink-0">
+                    <!-- Apple Plus Icon -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" class="w-4 h-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                </span>
+                <span class="font-bold text-white">Zum Home-Bildschirm</span>
+            </div>
         </div>
     </div>
-</div>
 
-<script>
-    const ua = window.navigator.userAgent.toLowerCase();
-    const isIos = /iphone|ipad|ipod/.test(ua);
-    const isInStandaloneMode = () => ('standalone' in window.navigator) && window.navigator.standalone;
-    
-    // Browser-Erkennung
-    const isChrome = /crios/.test(ua);
-    const isSafari = !isChrome && /safari/.test(ua);
-
-    if (isIos && !isInStandaloneMode()) {
-        const step1 = document.getElementById('step1-text');
+    <script>
+        const ua = window.navigator.userAgent.toLowerCase();
+        const isIos = /iphone|ipad|ipod/.test(ua);
+        const isInStandaloneMode = () => ('standalone' in window.navigator) && window.navigator.standalone;
         
-        // Text dynamisch anpassen
-        if (isChrome) {
-            step1.innerText = '1. Tippe (meist oben rechts) auf';
-        } else if (isSafari) {
-            step1.innerText = '1. Tippe unten (oder oben) auf';
-        } else {
-            step1.innerText = '1. Öffne das Teilen-Menü';
+        // Browser-Erkennung
+        const isChrome = /crios/.test(ua);
+        const isSafari = !isChrome && /safari/.test(ua);
+
+        if (isIos && !isInStandaloneMode()) {
+            const step1 = document.getElementById('step1-text');
+            
+            // Text dynamisch anpassen
+            if (isChrome) {
+                step1.innerText = '1. Tippe (meist oben rechts) auf';
+            } else if (isSafari) {
+                step1.innerText = '1. Tippe unten (oder oben) auf';
+            } else {
+                step1.innerText = '1. Öffne das Teilen-Menü';
+            }
+
+            setTimeout(() => {
+                document.getElementById('install-banner').classList.remove('hidden');
+            }, 2000); 
         }
-
-        setTimeout(() => {
-            document.getElementById('install-banner').classList.remove('hidden');
-        }, 2000); 
-    }
-</script>
-
+    </script>
 </body>
 </html>
-
-
-```
