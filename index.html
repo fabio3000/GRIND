@@ -186,7 +186,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, updateDoc, arrayUnion, onSnapshot, collection, addDoc, query, where, getDocs, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, updateDoc, arrayUnion, onSnapshot, collection, addDoc, query, where, getDocs, orderBy, limit, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // --- 1. FIREBASE CONFIG & INITIALIZATION ---
         const firebaseConfig = {
@@ -593,7 +593,7 @@
                         <p class="text-gray-400 text-[11px] mb-6 leading-relaxed max-w-[200px] mx-auto">Möchtest du dich mit diesem Grinder verbinden? Beide erhalten Updates im Live-Feed voneinander.</p>
                         
                         <div class="bg-[#ff4d00]/10 border border-[#ff4d00]/30 py-2 px-4 rounded-sm inline-block mb-6 shadow-[0_0_10px_rgba(255,77,0,0.2)]">
-                            <p class="text-[#ff4d00] font-black italic uppercase tracking-widest text-sm">+${nextXpBounty} XP BOUNTY</p>
+                            <p class="text-[#ff4d00] font-black italic uppercase tracking-widest text-sm">+${nextXpBounty} XP BOUNTY (FÜR BEIDE!)</p>
                         </div>
                         
                         <button type="button" onclick="window.confirmFriend('${theirUid}', '${theirAlias}')" class="w-full btn-grind py-4 mb-3">Akzeptieren & Verbinden</button>
@@ -612,31 +612,50 @@
             if(btn) { btn.innerText = "Connecting..."; btn.disabled = true; }
             
             try {
+                // 1. MEIN XP & LEVEL BERECHNEN (Accepter)
                 const myFriends = state.profile.friends || [];
-                const nextXpBounty = (myFriends.length + 1) * 100;
+                const myNextXpBounty = (myFriends.length + 1) * 100;
                 
                 const oldLvl = state.profile.lvl || 1;
-                const newXp = (state.profile.xp || 0) + nextXpBounty;
+                const newXp = (state.profile.xp || 0) + myNextXpBounty;
                 const newLvl = Math.floor(newXp / 1000) + 1;
 
-                await updateDoc(doc(db, 'plot_users', theirUid), {
-                    friends: arrayUnion(state.profile.alias)
-                }).catch(e => console.warn("Mutual update gescheitert.", e));
+                // 2. IHR XP & LEVEL BERECHNEN UND UPDATEN (Inviter)
+                // -> Derjenige, dessen Link geteilt wurde, bekommt jetzt auch sofort die XP!
+                const theirDoc = await getDoc(doc(db, 'plot_users', theirUid));
+                if(theirDoc.exists()) {
+                    const theirData = theirDoc.data();
+                    const theirFriends = theirData.friends || [];
+                    
+                    // Sicherheitscheck: Verhindere Doppelvergabe falls es schon asynchron lief
+                    if(!theirFriends.some(f => f.toLowerCase() === state.profile.alias.toLowerCase())) {
+                        const theirNextBounty = (theirFriends.length + 1) * 100;
+                        const theirNewXp = (theirData.xp || 0) + theirNextBounty;
+                        const theirNewLvl = Math.floor(theirNewXp / 1000) + 1;
 
+                        await updateDoc(doc(db, 'plot_users', theirUid), {
+                            friends: arrayUnion(state.profile.alias),
+                            xp: theirNewXp,
+                            lvl: theirNewLvl
+                        }).catch(e => console.warn("Inviter update gescheitert.", e));
+                    }
+                }
+
+                // 3. MEIN UPDATE AUSFÜHREN
                 await updateDoc(doc(db, 'plot_users', state.user.uid), {
                     friends: arrayUnion(theirAlias),
                     xp: newXp,
                     lvl: newLvl
                 });
                 
-                window.logActivity('MISSION', `hat die Crew erweitert (+${nextXpBounty} XP).`);
+                window.logActivity('MISSION', `hat das Network erweitert (+${myNextXpBounty} XP Bounty).`);
                 
                 if(newLvl > oldLvl) {
                     window.logActivity('LEVEL_UP', `hat <span class="font-bold">Level ${newLvl}</span> erreicht!`);
                 }
 
                 window.closeModal();
-                window.showToast(`+${nextXpBounty} XP! Du bist jetzt mit ${theirAlias} in einer Crew!`, "success");
+                window.showToast(`+${myNextXpBounty} XP! Du bist jetzt mit ${theirAlias} in einer Crew!`, "success");
             } catch(e) {
                 console.error(e);
                 window.showToast("Fehler beim Verbinden.", "error");
@@ -1278,24 +1297,80 @@
 
         window.goBackToPhone = () => { state.authStep = 'phone'; render(); };
 
-        // --- 13. ONBOARDING & SHARE CARD ---
-        window.playGrindIntro = () => {
-            const layer = document.createElement('div'); 
-            layer.id = 'intro-layer';
-            layer.innerHTML = `
-                <div id="word1" class="word-flash text-gray-500">DROP IN.</div>
-                <div id="word2" class="word-flash text-white">CLEAR MISSIONS.</div>
-                <div id="word3" class="word-flash text-white">CLAIM LOOT.</div>
-                <div id="word4" class="word-flash grind-gradient" style="text-shadow: 0 0 40px rgba(255,77,0,0.5);">GRIND.</div>
-            `;
-            document.body.appendChild(layer); 
-            const timing = 700;
-            
-            setTimeout(() => { document.getElementById('word1').style.animation = `flashInOut ${timing}ms forwards`; }, 200);
-            setTimeout(() => { document.getElementById('word2').style.animation = `flashInOut ${timing}ms forwards`; }, 200 + timing);
-            setTimeout(() => { document.getElementById('word3').style.animation = `flashInOut ${timing}ms forwards`; }, 200 + (timing * 2));
-            setTimeout(() => { document.getElementById('word4').style.animation = `flashInOut ${timing * 1.5}ms forwards`; }, 200 + (timing * 3));
-            setTimeout(() => { layer.style.opacity = "0"; setTimeout(() => layer.remove(), 800); }, 200 + (timing * 4.2));
+        // --- 13. ONBOARDING, INTRO & TUTORIAL ---
+        
+        // Die Tutorial Funktion - Erklärt die App kurz und knackig
+        window.startTutorial = () => {
+            let step = 1;
+            const tutorialLayer = document.createElement('div');
+            tutorialLayer.id = 'tutorial-layer';
+            // Startet unsichtbar
+            tutorialLayer.className = 'fixed inset-0 z-[999990] bg-[#050505]/95 backdrop-blur-md flex items-center justify-center p-6 opacity-0 transition-opacity duration-500';
+
+            const updateTutorial = () => {
+                let content = '';
+                if(step === 1) {
+                    content = `
+                        <div class="animate-fade-in text-center flex flex-col items-center w-full max-w-sm">
+                            <div class="w-20 h-20 bg-[#1f1f1f] rounded-full flex items-center justify-center mb-8 border border-[#ff4d00]/30 shadow-[0_0_30px_rgba(255,77,0,0.2)]">
+                                <svg class="w-10 h-10 text-[#ff4d00]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                            </div>
+                            <h2 class="text-[#ff4d00] text-[10px] font-black uppercase tracking-[0.4em] mb-2">Step 01</h2>
+                            <h3 class="text-4xl font-black italic tracking-tighter mb-4 text-white uppercase">The Grind Track</h3>
+                            <p class="text-gray-400 text-sm font-medium leading-relaxed mb-10">Jede Aktion bringt dir XP. Fülle den Balken, steige im Level auf und schalte echte Rewards und physischen Loot frei.</p>
+                            <button onclick="document.getElementById('tutorial-layer').dataset.step = 2" class="w-full btn-grind py-4">Weiter</button>
+                        </div>
+                    `;
+                } else if(step === 2) {
+                    content = `
+                        <div class="animate-fade-in text-center flex flex-col items-center w-full max-w-sm">
+                            <div class="w-20 h-20 bg-[#1f1f1f] rounded-full flex items-center justify-center mb-8 border border-[#a855f7]/30 shadow-[0_0_30px_rgba(168,85,247,0.2)]">
+                                <svg class="w-10 h-10 text-[#a855f7]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                            </div>
+                            <h2 class="text-[#a855f7] text-[10px] font-black uppercase tracking-[0.4em] mb-2">Step 02</h2>
+                            <h3 class="text-4xl font-black italic tracking-tighter mb-4 text-white uppercase">Operations</h3>
+                            <p class="text-gray-400 text-sm font-medium leading-relaxed mb-10">Erfülle wöchentliche Missionen und tracke deine täglichen Habits. Scanne QR Codes vor Ort oder lade Beweisfotos hoch.</p>
+                            <button onclick="document.getElementById('tutorial-layer').dataset.step = 3" class="w-full btn-grind py-4">Weiter</button>
+                        </div>
+                    `;
+                } else if(step === 3) {
+                    content = `
+                        <div class="animate-fade-in text-center flex flex-col items-center w-full max-w-sm">
+                            <div class="w-20 h-20 bg-[#1f1f1f] rounded-full flex items-center justify-center mb-8 border border-blue-500/30 shadow-[0_0_30px_rgba(59,130,246,0.2)]">
+                                <svg class="w-10 h-10 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                            </div>
+                            <h2 class="text-blue-500 text-[10px] font-black uppercase tracking-[0.4em] mb-2">Step 03</h2>
+                            <h3 class="text-4xl font-black italic tracking-tighter mb-4 text-white uppercase">Crew Bounty</h3>
+                            <p class="text-gray-400 text-sm font-medium leading-relaxed mb-10">Grinden macht zusammen mehr Bock. Lade deine Freunde ein – jeder neue Member gibt dir und deinem Homie fette XP-Boosts.</p>
+                            <button onclick="document.getElementById('tutorial-layer').dataset.step = 'close'" class="w-full btn-grind py-4 bg-[#ff4d00] text-white border-[#ff4d00]">Start Grinding</button>
+                        </div>
+                    `;
+                }
+                tutorialLayer.innerHTML = content;
+            };
+
+            document.body.appendChild(tutorialLayer);
+            updateTutorial();
+
+            // Auf Button-Klicks über data-step reagieren
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.attributeName === 'data-step') {
+                        const newStep = tutorialLayer.dataset.step;
+                        if(newStep === 'close') {
+                            tutorialLayer.style.opacity = '0';
+                            setTimeout(() => tutorialLayer.remove(), 500);
+                        } else {
+                            step = parseInt(newStep);
+                            updateTutorial();
+                        }
+                    }
+                });
+            });
+            observer.observe(tutorialLayer, { attributes: true });
+
+            // Einblenden
+            setTimeout(() => { tutorialLayer.style.opacity = '1'; }, 10);
         };
 
         window.submitOnboarding = async (e) => {
@@ -1309,6 +1384,17 @@
             const btn = e.target.querySelector('button'); 
             btn.disabled = true; 
             btn.innerText = "Registering...";
+
+            // INTRO SOFORT STARTEN (Überdeckt die Ladezeit der Datenbank!)
+            const layer = document.createElement('div'); 
+            layer.id = 'intro-layer';
+            layer.innerHTML = `
+                <div id="word1" class="word-flash text-gray-500">DROP IN.</div>
+                <div id="word2" class="word-flash text-white">CLEAR MISSIONS.</div>
+                <div id="word3" class="word-flash text-white">CLAIM LOOT.</div>
+                <div id="word4" class="word-flash grind-gradient" style="text-shadow: 0 0 40px rgba(255,77,0,0.5);">GRIND.</div>
+            `;
+            document.body.appendChild(layer); 
             
             try {
                 const generatedCode = Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -1317,14 +1403,29 @@
                     friends: [], crewCode: generatedCode, alias: nameInput, 
                     city: cityInput, hasPremium: false 
                 };
+                
+                // Während das schwarze Intro-Overlay den Screen blockiert, speichert Firebase die Daten
                 await setDoc(doc(db, 'plot_users', state.user.uid), state.profile);
                 
-                window.playGrindIntro(); 
-                window.showToast(`Willkommen, ${nameInput}.`, "success"); 
+                // Firebase ist fertig -> Animations-Sequenz starten
+                const timing = 700;
+                document.getElementById('word1').style.animation = `flashInOut ${timing}ms forwards`;
+                setTimeout(() => { document.getElementById('word2').style.animation = `flashInOut ${timing}ms forwards`; }, timing);
+                setTimeout(() => { document.getElementById('word3').style.animation = `flashInOut ${timing}ms forwards`; }, timing * 2);
+                setTimeout(() => { document.getElementById('word4').style.animation = `flashInOut ${timing * 1.5}ms forwards`; }, timing * 3);
+                
+                // Intro ausblenden und Tutorial starten
+                setTimeout(() => { 
+                    layer.style.opacity = "0"; 
+                    setTimeout(() => layer.remove(), 800); 
+                    window.startTutorial(); // <-- TUTORIAL AUFRUF
+                }, timing * 4.2);
+
                 state.view = 'dashboard'; 
                 state.dashboardNeedsScroll = true; 
                 render();
             } catch (err) { 
+                layer.remove(); // Bei Fehler Intro abbrechen
                 window.showToast("Fehler bei der Registrierung.", "error"); 
                 btn.disabled = false; 
                 btn.innerText = "Confirm Identity"; 
@@ -2367,4 +2468,3 @@
     </script>
 </body>
 </html>
-
