@@ -262,12 +262,17 @@
             }, 4000);
         };
 
-        window.logActivity = async (type, text) => {
+        // Überarbeitetes LogActivity, das optional auch für andere Alias-Namen posten kann!
+        window.logActivity = async (type, text, customAlias = null, customIsPro = null) => {
             try {
                 if(!state.profile || !state.profile.alias) return;
+                
+                const aliasToUse = customAlias || state.profile.alias;
+                const isProToUse = customIsPro !== null ? customIsPro : !!state.profile.hasPremium;
+
                 const newAct = {
-                    alias: state.profile.alias,
-                    isPro: !!state.profile.hasPremium, 
+                    alias: aliasToUse,
+                    isPro: isProToUse, 
                     type: type, 
                     text: text,
                     timestamp: Date.now()
@@ -622,36 +627,53 @@
 
                 // 2. IHR XP & LEVEL BERECHNEN UND UPDATEN (Inviter)
                 // -> Derjenige, dessen Link geteilt wurde, bekommt jetzt auch sofort die XP!
-                const theirDoc = await getDoc(doc(db, 'plot_users', theirUid));
-                if(theirDoc.exists()) {
-                    const theirData = theirDoc.data();
-                    const theirFriends = theirData.friends || [];
-                    
-                    // Sicherheitscheck: Verhindere Doppelvergabe falls es schon asynchron lief
-                    if(!theirFriends.some(f => f.toLowerCase() === state.profile.alias.toLowerCase())) {
-                        const theirNextBounty = (theirFriends.length + 1) * 100;
-                        const theirNewXp = (theirData.xp || 0) + theirNextBounty;
-                        const theirNewLvl = Math.floor(theirNewXp / 1000) + 1;
+                try {
+                    const theirDocRef = doc(db, 'plot_users', theirUid);
+                    const theirDoc = await getDoc(theirDocRef);
+                    let theirHasPremium = false;
 
-                        await updateDoc(doc(db, 'plot_users', theirUid), {
-                            friends: arrayUnion(state.profile.alias),
-                            xp: theirNewXp,
-                            lvl: theirNewLvl
-                        }).catch(e => console.warn("Inviter update gescheitert.", e));
+                    if(theirDoc.exists()) {
+                        const theirData = theirDoc.data();
+                        const theirFriends = theirData.friends || [];
+                        theirHasPremium = !!theirData.hasPremium;
+                        
+                        // Sicherheitscheck: Verhindere Doppelvergabe falls es schon asynchron lief
+                        if(!theirFriends.some(f => f.toLowerCase() === state.profile.alias.toLowerCase())) {
+                            const theirNextBounty = (theirFriends.length + 1) * 100;
+                            const theirOldLvl = theirData.lvl || 1;
+                            const theirNewXp = (theirData.xp || 0) + theirNextBounty;
+                            const theirNewLvl = Math.floor(theirNewXp / 1000) + 1;
+
+                            // Update in Firebase für den Inviter schreiben
+                            await updateDoc(theirDocRef, {
+                                friends: arrayUnion(state.profile.alias),
+                                xp: theirNewXp,
+                                lvl: theirNewLvl
+                            });
+
+                            // Feed-Eintrag explizit für den Inviter erstellen (damit es bei allen angezeigt wird!)
+                            await window.logActivity('MISSION', `hat das Network erweitert (+${theirNextBounty} XP Bounty).`, theirAlias, theirHasPremium);
+                            
+                            if(theirNewLvl > theirOldLvl) {
+                                await window.logActivity('LEVEL_UP', `hat <span class="font-bold">Level ${theirNewLvl}</span> erreicht!`, theirAlias, theirHasPremium);
+                            }
+                        }
                     }
+                } catch(err) {
+                    console.warn("Konnte Daten des Inviters nicht updaten. Bitte prüfe deine Firebase Security Rules für 'plot_users'!", err);
                 }
 
-                // 3. MEIN UPDATE AUSFÜHREN
+                // 3. MEIN UPDATE AUSFÜHREN (Accepter)
                 await updateDoc(doc(db, 'plot_users', state.user.uid), {
                     friends: arrayUnion(theirAlias),
                     xp: newXp,
                     lvl: newLvl
                 });
                 
-                window.logActivity('MISSION', `hat das Network erweitert (+${myNextXpBounty} XP Bounty).`);
+                await window.logActivity('MISSION', `hat das Network erweitert (+${myNextXpBounty} XP Bounty).`);
                 
                 if(newLvl > oldLvl) {
-                    window.logActivity('LEVEL_UP', `hat <span class="font-bold">Level ${newLvl}</span> erreicht!`);
+                    await window.logActivity('LEVEL_UP', `hat <span class="font-bold">Level ${newLvl}</span> erreicht!`);
                 }
 
                 window.closeModal();
