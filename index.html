@@ -87,6 +87,25 @@
 </head>
 <body class="flex flex-col relative select-none">
     <div id="toast-container"></div>
+    <div id="xp-hud" class="fixed top-0 left-0 right-0 z-[999999] transform -translate-y-[150%] transition-transform duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] pointer-events-none flex justify-center pt-4 px-4 sm:px-6">
+        <div class="bg-[#0a0a0a]/95 border border-[#ff4d00]/50 shadow-[0_20px_50px_rgba(255,77,0,0.3)] rounded-lg p-5 w-full max-w-sm flex flex-col gap-3 relative overflow-hidden backdrop-blur-md">
+            <div class="absolute inset-0 bg-gradient-to-b from-[#ff4d00]/15 to-transparent"></div>
+            <div class="relative z-10 flex justify-between items-end">
+                <div>
+                    <p class="text-[#ff4d00] text-[9px] font-black uppercase tracking-[0.3em] mb-1 drop-shadow-md">XP Sync</p>
+                    <h4 class="text-white font-black italic text-2xl leading-none">LVL <span id="hud-lvl">1</span></h4>
+                </div>
+                <div class="text-right">
+                    <span class="text-gray-400 text-[10px] font-bold uppercase tracking-widest italic"><span id="hud-xp-num" class="text-white text-sm">0</span> / <span id="hud-xp-max">1000</span></span>
+                </div>
+            </div>
+            <div class="w-full bg-black h-2.5 rounded-full overflow-hidden border border-white/10 relative z-10 shadow-inner">
+                <div id="hud-xp-bar" class="grind-gradient h-full transition-all ease-out relative">
+                    <div class="absolute top-0 right-0 bottom-0 w-10 bg-gradient-to-r from-transparent to-white/50"></div>
+                </div>
+            </div>
+        </div>
+    </div>
     <div id="recaptcha-container"></div>
     <div id="app" class="flex-1 flex flex-col w-full z-10 relative pb-10">
         <div class="flex-1 flex items-center justify-center min-h-[60vh]">
@@ -780,7 +799,6 @@
                 else if (type === 'lvl') { newLvl += amount; newXp = (newLvl - 1) * 1000 + (newXp % 1000); }
                 const currentRedeemed = [...(p.redeemed || []), rewardId];
                 window.closeModal();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
                 await setDoc(doc(db, 'plot_users', state.user.uid), { xp: newXp, lvl: newLvl, redeemed: currentRedeemed }, { merge: true });
                 window.logActivity('REDEEM', `hat einen XP/Level Boost aktiviert.`);
                 if(newLvl > oldLvl) window.logActivity('LEVEL_UP', `hat <span class="font-bold">Level ${newLvl}</span> erreicht!`);
@@ -1208,7 +1226,7 @@
                             <div class="flex-grow w-full relative z-10">
                                 <div class="flex justify-between text-[10px] font-bold uppercase text-gray-500 mb-3 tracking-widest italic"><span>XP: <span class="text-white" id="xp-counter-num">${displayXp}</span> / ${(safeLvl) * 1000}</span></div>
                                 <div class="w-full bg-gray-900 h-3 rounded-full overflow-hidden border border-white/5 relative">
-                                    <div id="top-xp-bar" class="grind-gradient h-full transition-all duration-1000 ease-out xp-bar-glow" style="width: ${oldXpProgress}%"></div>
+                                    <div id="top-xp-bar" class="grind-gradient h-full transition-all ease-out xp-bar-glow" style="width: ${oldXpProgress}%; transition-duration: 2500ms;"></div>
                                 </div>
                             </div>
                         </section>
@@ -1439,6 +1457,7 @@
                 appDiv.innerHTML = html;
 
                 setTimeout(() => {
+                    const xpAnimDuration = 2500;
                     const currentNode = document.getElementById(`level-node-${safeLvl}`);
                     const passViewport = document.getElementById('pass-viewport');
                     if (passViewport && currentNode && (state.prevLvl === null || state.dashboardNeedsScroll)) {
@@ -1449,15 +1468,60 @@
                     if (trackLine) trackLine.style.width = `calc(140px * ${targetTrackProgress})`;
                     if (state.prevLvl !== null && safeLvl > state.prevLvl) {
                         if (topBar) {
-                            topBar.style.transition = 'width 1000ms ease-out'; topBar.style.width = '100%';
-                            setTimeout(() => { topBar.style.transition = 'none'; topBar.style.width = '0%'; void topBar.offsetWidth; topBar.style.transition = 'width 1000ms ease-out'; topBar.style.width = `${targetXpProgress}%`; }, 1000); 
+                            topBar.style.transition = `width ${xpAnimDuration/2}ms ease-in`; topBar.style.width = '100%';
+                            setTimeout(() => { topBar.style.transition = 'none'; topBar.style.width = '0%'; void topBar.offsetWidth; topBar.style.transition = `width ${xpAnimDuration/2}ms ease-out`; topBar.style.width = `${targetXpProgress}%`; }, xpAnimDuration/2); 
                         }
                         if (passViewport && currentNode) {
                             const scrollLeft = currentNode.offsetLeft - (passViewport.offsetWidth / 2) + (currentNode.offsetWidth / 2); passViewport.scrollTo({ left: scrollLeft, behavior: 'smooth' });
                         }
-                    } else if (topBar) { topBar.style.transition = 'width 1000ms ease-out'; topBar.style.width = `${targetXpProgress}%`; }
+                    } else if (topBar) { topBar.style.transition = `width ${xpAnimDuration}ms ease-out`; topBar.style.width = `${targetXpProgress}%`; }
+                    
                     if (state.prevXp !== null && state.prevXp < safeXp) {
-                        window.scrollTo({ top: 0, behavior: 'smooth' }); animateValue('xp-counter-num', state.prevXp, safeXp, 1000);
+                        const hud = document.getElementById('xp-hud');
+                        const hudLvl = document.getElementById('hud-lvl');
+                        const hudXpNum = document.getElementById('hud-xp-num');
+                        const hudXpMax = document.getElementById('hud-xp-max');
+                        const hudXpBar = document.getElementById('hud-xp-bar');
+
+                        if(hud) {
+                            hudLvl.innerText = state.prevLvl;
+                            hudXpNum.innerText = state.prevXp;
+                            hudXpMax.innerText = state.prevLvl * 1000;
+                            hudXpBar.style.transition = 'none';
+                            hudXpBar.style.width = `${oldXpProgress}%`;
+                            void hudXpBar.offsetWidth;
+
+                            hud.classList.remove('-translate-y-[150%]');
+                            hud.classList.add('translate-y-0');
+
+                            animateValue('hud-xp-num', state.prevXp, safeXp, xpAnimDuration);
+
+                            if (state.prevLvl !== null && safeLvl > state.prevLvl) {
+                                hudXpBar.style.transition = `width ${xpAnimDuration/2}ms ease-in`;
+                                hudXpBar.style.width = '100%';
+                                setTimeout(() => {
+                                    hudLvl.innerText = safeLvl;
+                                    hudLvl.classList.add('animate-pop');
+                                    hudXpMax.innerText = safeLvl * 1000;
+                                    hudXpBar.style.transition = 'none';
+                                    hudXpBar.style.width = '0%';
+                                    void hudXpBar.offsetWidth;
+                                    hudXpBar.style.transition = `width ${xpAnimDuration/2}ms ease-out`;
+                                    hudXpBar.style.width = `${targetXpProgress}%`;
+                                }, xpAnimDuration/2);
+                            } else {
+                                hudXpBar.style.transition = `width ${xpAnimDuration}ms ease-out`;
+                                hudXpBar.style.width = `${targetXpProgress}%`;
+                            }
+
+                            setTimeout(() => {
+                                hud.classList.remove('translate-y-0');
+                                hud.classList.add('-translate-y-[150%]');
+                                if(hudLvl) hudLvl.classList.remove('animate-pop');
+                            }, xpAnimDuration + 2500);
+                        }
+
+                        animateValue('xp-counter-num', state.prevXp, safeXp, xpAnimDuration);
                         if (state.prevLvl !== null && safeLvl > state.prevLvl) {
                             const lvlText = document.getElementById('main-lvl-text'); if (lvlText) lvlText.classList.add('animate-pop');
                             const newCircle = document.getElementById(`circle-node-${safeLvl}`); if (newCircle) newCircle.classList.add('animate-pop');
@@ -1516,3 +1580,4 @@
     </script>
 </body>
 </html>
+
