@@ -1,4 +1,4 @@
-
+`
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -87,6 +87,7 @@
 </head>
 <body class="flex flex-col relative select-none">
     <div id="toast-container"></div>
+    <div id="hud-overlay" class="fixed inset-0 z-[999998] bg-black/60 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)]"></div>
     <div id="xp-hud" class="fixed top-0 left-0 right-0 z-[999999] transform -translate-y-[150%] transition-transform duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] pointer-events-none flex justify-center pt-4 px-4 sm:px-6">
         <div class="bg-[#0a0a0a]/95 border border-[#ff4d00]/50 shadow-[0_20px_50px_rgba(255,77,0,0.3)] rounded-lg p-5 w-full max-w-sm flex flex-col gap-3 relative overflow-hidden backdrop-blur-md">
             <div class="absolute inset-0 bg-gradient-to-b from-[#ff4d00]/15 to-transparent"></div>
@@ -190,9 +191,9 @@
                 const isProToUse = customIsPro !== null ? customIsPro : !!state.profile.hasPremium;
                 const newAct = { alias: aliasToUse, isPro: isProToUse, type: type, text: text, timestamp: Date.now() };
                 await addDoc(collection(db, 'plot_activities'), newAct).catch(err => {
-                    console.error("Firebase Rules Error beim Feed:", err);
+                    console.error(err);
                 });
-            } catch(e) { console.error("Critical Activity Log Error:", e); }
+            } catch(e) {}
         };
 
         const getActiveWeek = () => {
@@ -297,7 +298,7 @@
                         state.activities = snap.docs.map(d => d.data());
                         if(state.view === 'dashboard') render();
                     }
-                }, (error) => { console.error("Activities Lade-Fehler! (Firebase Rules checken)", error); });
+                }, (error) => {});
 
                 setupSeasonData();
                 onSnapshot(doc(db, 'system', 'pricing'), (docSnap) => {
@@ -455,7 +456,7 @@
                     </div>
                 `;
                 window.openModal(innerHtml);
-            } catch(e) { console.error(e); window.showToast("Netzwerkfehler bei der Code-Prüfung.", "error"); }
+            } catch(e) { window.showToast("Netzwerkfehler bei der Code-Prüfung.", "error"); }
         };
 
         window.confirmFriend = async (theirUid, theirAlias) => {
@@ -485,13 +486,14 @@
                             if(theirNewLvl > theirOldLvl) await window.logActivity('LEVEL_UP', `hat <span class="font-bold">Level ${theirNewLvl}</span> erreicht!`, theirAlias, theirHasPremium);
                         }
                     }
-                } catch(err) { console.warn("Konnte Daten des Inviters nicht updaten. Bitte prüfe deine Firebase Security Rules für 'plot_users'!", err); }
+                } catch(err) {}
                 await updateDoc(doc(db, 'plot_users', state.user.uid), { friends: arrayUnion(theirAlias), xp: newXp, lvl: newLvl });
                 await window.logActivity('MISSION', `hat das Network erweitert (+${myNextXpBounty} XP Bounty).`);
                 if(newLvl > oldLvl) await window.logActivity('LEVEL_UP', `hat <span class="font-bold">Level ${newLvl}</span> erreicht!`);
                 window.closeModal();
-                window.showToast(`+${myNextXpBounty} XP! Du bist jetzt mit ${theirAlias} in einer Crew!`, "success");
-            } catch(e) { console.error(e); window.showToast("Fehler beim Verbinden.", "error"); }
+                const willShowHud = window.scrollY > 100;
+                if(!willShowHud) window.showToast(`+${myNextXpBounty} XP! Du bist jetzt mit ${theirAlias} in einer Crew!`, "success");
+            } catch(e) { window.showToast("Fehler beim Verbinden.", "error"); }
         };
 
         window.submitShipping = async (lvl, tier) => {
@@ -522,12 +524,12 @@
                 try {
                     let emailPayload = { _subject: "Neue Loot-Bestellung: " + itemName + " von " + (state.profile?.alias || 'Grinder'), _template: "table", Artikel: itemName, Alias: state.profile?.alias || 'Grinder', Level: String(lvl), Tier: tier.toUpperCase(), User_ID: state.user?.uid || 'Unknown' };
                     Object.assign(emailPayload, addressData);
-                    fetch("https://formsubmit.co/ajax/Fabio.maines@grind-app.de", { method: "POST", headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify(emailPayload) }).catch(e => console.log("Email error:", e));
-                } catch(mailErr) { console.log(mailErr); }
+                    fetch("https://formsubmit.co/ajax/Fabio.maines@grind-app.de", { method: "POST", headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify(emailPayload) }).catch(e => {});
+                } catch(mailErr) {}
                 window.logActivity('REDEEM', `hat physischen Loot ('<span class="font-bold">${itemName}</span>') angefordert.`);
                 window.showToast("Anfrage für physical Loot gesendet!", "success"); 
                 window.closeModal();
-            } catch(e) { console.error(e); window.showToast("Fehler: " + (e.message || "Netzwerkfehler"), "error"); if(btn) { btn.innerText = "Versand anfordern"; btn.disabled = false; } }
+            } catch(e) { window.showToast("Fehler: " + (e.message || "Netzwerkfehler"), "error"); if(btn) { btn.innerText = "Versand anfordern"; btn.disabled = false; } }
         };
 
         window.claimInstantMission = async (mid, xp, name) => {
@@ -541,6 +543,8 @@
                 let claimSuccess = false;
                 const oldLvl = state.profile.lvl || 1;
                 let newLvl = oldLvl;
+                const willShowHud = window.scrollY > 100;
+                
                 if (isRepeatable) {
                     const streakBonus = habit ? (parseInt(habit.streakBonus) || 0) : 0;
                     const streaks = state.profile.streaks || {};
@@ -559,7 +563,7 @@
                         newLvl = Math.floor(newTotalXp / 1000) + 1;
                         updatePayload = { xp: newTotalXp, lvl: newLvl, streaks: streaks };
                         claimSuccess = true;
-                        window.showToast(`+${finalXp} XP für ${name}! (Streak: ${newStreak}🔥)`, "success");
+                        if(!willShowHud) window.showToast(`+${finalXp} XP für ${name}! (Streak: ${newStreak}🔥)`, "success");
                     } else { window.showToast("Heute bereits erledigt!", "error"); }
                 } else if (!currentCompleted.includes(mid)) {
                     const newXp = (state.profile.xp || 0) + xp; 
@@ -567,7 +571,7 @@
                     newLvl = Math.floor(newXp / 1000) + 1;
                     updatePayload = { xp: newXp, lvl: newLvl, completed: newCompleted };
                     claimSuccess = true;
-                    window.showToast(`+${xp} XP für ${name}!`, "success");
+                    if(!willShowHud) window.showToast(`+${xp} XP für ${name}!`, "success");
                 }
                 if (claimSuccess) { 
                     await setDoc(doc(db, 'plot_users', state.user.uid), updatePayload, { merge: true }); 
@@ -672,6 +676,8 @@
                     let claimSuccess = false;
                     const oldLvl = state.profile.lvl || 1;
                     let newLvl = oldLvl;
+                    const willShowHud = window.scrollY > 100;
+
                     if (isRepeatable) {
                         const streakBonus = habit ? (parseInt(habit.streakBonus) || 0) : 0;
                         const streaks = state.profile.streaks || {};
@@ -690,7 +696,7 @@
                             newLvl = Math.floor(newTotalXp / 1000) + 1;
                             updatePayload = { xp: newTotalXp, lvl: newLvl, streaks: streaks };
                             claimSuccess = true;
-                            window.showToast(`+${finalXp} XP für ${name}! (Streak: ${newStreak}🔥)`, "success");
+                            if(!willShowHud) window.showToast(`+${finalXp} XP für ${name}! (Streak: ${newStreak}🔥)`, "success");
                         } else { window.showToast("Heute bereits erledigt!", "error"); }
                     } else if (!currentCompleted.includes(mid)) {
                         const newXp = (state.profile.xp || 0) + xp; 
@@ -698,7 +704,7 @@
                         newLvl = Math.floor(newXp / 1000) + 1;
                         updatePayload = { xp: newXp, lvl: newLvl, completed: newCompleted };
                         claimSuccess = true;
-                        window.showToast(`+${xp} XP für ${name}! Code verifiziert.`, "success");
+                        if(!willShowHud) window.showToast(`+${xp} XP für ${name}! Code verifiziert.`, "success");
                     }
                     if (claimSuccess) { 
                         await setDoc(doc(db, 'plot_users', state.user.uid), updatePayload, { merge: true }); 
@@ -795,6 +801,8 @@
                 const oldLvl = p.lvl || 1;
                 let newXp = p.xp || 0;
                 let newLvl = oldLvl;
+                const willShowHud = window.scrollY > 100;
+                
                 if (type === 'xp') { newXp += amount; newLvl = Math.floor(newXp / 1000) + 1; } 
                 else if (type === 'lvl') { newLvl += amount; newXp = (newLvl - 1) * 1000 + (newXp % 1000); }
                 const currentRedeemed = [...(p.redeemed || []), rewardId];
@@ -802,7 +810,7 @@
                 await setDoc(doc(db, 'plot_users', state.user.uid), { xp: newXp, lvl: newLvl, redeemed: currentRedeemed }, { merge: true });
                 window.logActivity('REDEEM', `hat einen XP/Level Boost aktiviert.`);
                 if(newLvl > oldLvl) window.logActivity('LEVEL_UP', `hat <span class="font-bold">Level ${newLvl}</span> erreicht!`);
-                window.showToast(`BOOST AKTIVIERT!`, "success");
+                if(!willShowHud) window.showToast(`BOOST AKTIVIERT!`, "success");
             } catch(e) { window.showToast("Fehler beim Einlösen.", "error"); if(btn) { btn.innerText = "BOOST AKTIVIEREN"; btn.disabled = false; } }
         };
 
@@ -1112,7 +1120,7 @@
                     if (window.paypal && document.getElementById('paypal-button-container') && !document.getElementById('paypal-button-container').innerHTML) {
                         paypal.Buttons({ 
                             createOrder: function(data, actions) { return actions.order.create({ purchase_units: [{ amount: { value: checkoutPrice, currency_code: 'EUR' }, custom_id: state.user.uid }] }); }, 
-                            onApprove: function(data, actions) { return actions.order.capture().then(async function(details) { window.showToast("Zahlung autorisiert! PRO Pass aktiviert.", "success"); try { await setDoc(doc(db, 'plot_users', state.user.uid), { hasPremium: true }, { merge: true }); if(state.profile) state.profile.hasPremium = true; window.logActivity('PRO', `hat den <span class="font-bold">PRO Pass</span> freigeschaltet!`); } catch(e) { console.error(e); } window.setView('dashboard'); }); } 
+                            onApprove: function(data, actions) { return actions.order.capture().then(async function(details) { window.showToast("Zahlung autorisiert! PRO Pass aktiviert.", "success"); try { await setDoc(doc(db, 'plot_users', state.user.uid), { hasPremium: true }, { merge: true }); if(state.profile) state.profile.hasPremium = true; window.logActivity('PRO', `hat den <span class="font-bold">PRO Pass</span> freigeschaltet!`); } catch(e) {} window.setView('dashboard'); }); } 
                         }).render('#paypal-button-container');
                     } else if (!window.paypal) { document.getElementById('paypal-button-container').innerHTML = '<div class="text-red-500 text-xs italic font-bold">Zahlungssystem blockiert. Bitte Seite neu laden.</div>'; }
                 }, 100); 
@@ -1478,12 +1486,14 @@
                     
                     if (state.prevXp !== null && state.prevXp < safeXp) {
                         const hud = document.getElementById('xp-hud');
+                        const overlay = document.getElementById('hud-overlay');
                         const hudLvl = document.getElementById('hud-lvl');
                         const hudXpNum = document.getElementById('hud-xp-num');
                         const hudXpMax = document.getElementById('hud-xp-max');
                         const hudXpBar = document.getElementById('hud-xp-bar');
+                        const isScrolledDown = window.scrollY > 100;
 
-                        if(hud) {
+                        if(isScrolledDown && hud && overlay) {
                             hudLvl.innerText = state.prevLvl;
                             hudXpNum.innerText = state.prevXp;
                             hudXpMax.innerText = state.prevLvl * 1000;
@@ -1493,6 +1503,8 @@
 
                             hud.classList.remove('-translate-y-[150%]');
                             hud.classList.add('translate-y-0');
+                            overlay.classList.remove('opacity-0');
+                            overlay.classList.add('opacity-100');
 
                             animateValue('hud-xp-num', state.prevXp, safeXp, xpAnimDuration);
 
@@ -1517,6 +1529,8 @@
                             setTimeout(() => {
                                 hud.classList.remove('translate-y-0');
                                 hud.classList.add('-translate-y-[150%]');
+                                overlay.classList.remove('opacity-100');
+                                overlay.classList.add('opacity-0');
                                 if(hudLvl) hudLvl.classList.remove('animate-pop');
                             }, xpAnimDuration + 2500);
                         }
