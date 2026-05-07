@@ -1256,13 +1256,13 @@
                         <div id="level-node-${i}" class="level-node flex flex-col items-center relative z-10">
                             <div ${isUnlocked && r?.free && !freeClaimed ? `onclick="window.openClaimModal(${i}, 'free')" class="reward-box mb-4 unlocked cursor-pointer hover:scale-105"` : (freeClaimed ? `onclick="window.openClaimModal(${i}, 'free')" class="reward-box mb-4 unlocked opacity-50 cursor-pointer"` : `class="reward-box mb-4 opacity-60 scale-95"`)}>
                                 <span class="tag-free">FREE</span>
-                                ${freeClaimed && r?.free ? `<div class="absolute inset-0 bg-black/80 backdrop-blur-[2px] z-20 flex items-center justify-center rounded-[4px]"><span class="text-green-500 font-black text-xs uppercase italic transform -rotate-12"><svg class="w-6 h-6 drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></span></div>` : ''}
+                                ${freeClaimed && r?.free ? `<div class="absolute inset-0 bg-black/40 backdrop-blur-[2px] z-20 flex items-center justify-center rounded-[4px]"><span class="text-green-500 font-black text-xs uppercase italic transform -rotate-12"><svg class="w-6 h-6 drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></span></div>` : ''}
                                 <span class="text-[10px] font-bold uppercase text-center px-2 text-gray-200 mt-3 relative z-10">${r?.free || '-'}</span>
                             </div>
                             <div id="circle-node-${i}" class="relative w-10 h-10 rounded-full flex items-center justify-center font-black italic text-xs ${isUnlocked ? 'grind-gradient text-black scale-110 shadow-[0_0_15px_rgba(255,77,0,0.5)]' : 'bg-gray-800 text-gray-400 border border-white/20'}">${i}</div>
                             <div ${isProUnlocked && r?.pro && !proClaimed ? `onclick="window.openClaimModal(${i}, 'pro')" class="reward-box pro mt-5 unlocked scale-105 cursor-pointer"` : (proClaimed ? `onclick="window.openClaimModal(${i}, 'pro')" class="reward-box pro mt-5 unlocked opacity-50 cursor-pointer"` : `class="reward-box pro mt-5 opacity-70 scale-[0.98] hover:opacity-100"`)}>
                                 <span class="tag-pro italic">PRO</span>
-                                ${proClaimed && r?.pro ? `<div class="absolute inset-0 bg-black/80 backdrop-blur-[2px] z-20 flex items-center justify-center rounded-[4px]"><span class="text-[#a855f7] font-black text-xs uppercase italic transform -rotate-12"><svg class="w-6 h-6 drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></span></div>` : ''}
+                                ${proClaimed && r?.pro ? `<div class="absolute inset-0 bg-black/40 backdrop-blur-[2px] z-20 flex items-center justify-center rounded-[4px]"><span class="text-green-500 font-black text-xs uppercase italic transform -rotate-12"><svg class="w-6 h-6 drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></span></div>` : ''}
                                 <span class="text-[10px] font-bold uppercase text-center px-2 mt-4 relative z-10 ${isProUnlocked ? 'text-[#d8b4fe]' : 'text-purple-300'}">${r?.pro || '-'}</span>
                             </div>
                         </div>
@@ -1587,4 +1587,3 @@
     </script>
 </body>
 </html>
-
