@@ -1,4 +1,4 @@
-`
+
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -87,9 +87,9 @@
 </head>
 <body class="flex flex-col relative select-none">
     <div id="toast-container"></div>
-    <div id="hud-overlay" class="fixed inset-0 z-[999998] bg-black/60 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)]"></div>
     <div id="xp-hud" class="fixed top-0 left-0 right-0 z-[999999] transform -translate-y-[150%] transition-transform duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] pointer-events-none flex justify-center pt-4 px-4 sm:px-6">
-        <div class="bg-[#0a0a0a]/95 border border-[#ff4d00]/50 shadow-[0_20px_50px_rgba(255,77,0,0.3)] rounded-lg p-5 w-full max-w-sm flex flex-col gap-3 relative overflow-hidden backdrop-blur-md">
+        <div class="absolute top-2 w-full max-w-md h-32 bg-black/60 blur-2xl rounded-full pointer-events-none z-0"></div>
+        <div class="bg-[#0a0a0a]/70 border border-[#ff4d00]/40 shadow-[0_20px_50px_rgba(0,0,0,0.7),_0_0_20px_rgba(255,77,0,0.15)] rounded-lg p-5 w-full max-w-sm flex flex-col gap-3 relative overflow-hidden backdrop-blur-2xl z-10">
             <div class="absolute inset-0 bg-gradient-to-b from-[#ff4d00]/15 to-transparent"></div>
             <div class="relative z-10 flex justify-between items-end">
                 <div>
@@ -190,9 +190,7 @@
                 const aliasToUse = customAlias || state.profile.alias;
                 const isProToUse = customIsPro !== null ? customIsPro : !!state.profile.hasPremium;
                 const newAct = { alias: aliasToUse, isPro: isProToUse, type: type, text: text, timestamp: Date.now() };
-                await addDoc(collection(db, 'plot_activities'), newAct).catch(err => {
-                    console.error(err);
-                });
+                await addDoc(collection(db, 'plot_activities'), newAct).catch(err => {});
             } catch(e) {}
         };
 
@@ -1486,14 +1484,13 @@
                     
                     if (state.prevXp !== null && state.prevXp < safeXp) {
                         const hud = document.getElementById('xp-hud');
-                        const overlay = document.getElementById('hud-overlay');
                         const hudLvl = document.getElementById('hud-lvl');
                         const hudXpNum = document.getElementById('hud-xp-num');
                         const hudXpMax = document.getElementById('hud-xp-max');
                         const hudXpBar = document.getElementById('hud-xp-bar');
                         const isScrolledDown = window.scrollY > 100;
 
-                        if(isScrolledDown && hud && overlay) {
+                        if(isScrolledDown && hud) {
                             hudLvl.innerText = state.prevLvl;
                             hudXpNum.innerText = state.prevXp;
                             hudXpMax.innerText = state.prevLvl * 1000;
@@ -1503,8 +1500,6 @@
 
                             hud.classList.remove('-translate-y-[150%]');
                             hud.classList.add('translate-y-0');
-                            overlay.classList.remove('opacity-0');
-                            overlay.classList.add('opacity-100');
 
                             animateValue('hud-xp-num', state.prevXp, safeXp, xpAnimDuration);
 
@@ -1529,8 +1524,6 @@
                             setTimeout(() => {
                                 hud.classList.remove('translate-y-0');
                                 hud.classList.add('-translate-y-[150%]');
-                                overlay.classList.remove('opacity-100');
-                                overlay.classList.add('opacity-0');
                                 if(hudLvl) hudLvl.classList.remove('animate-pop');
                             }, xpAnimDuration + 2500);
                         }
