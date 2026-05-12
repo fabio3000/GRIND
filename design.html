@@ -1,0 +1,574 @@
+```html
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+    <meta name="description" content="Verwandle deinen Alltag in ein Spiel. Sammle XP durch Fitness, Habits und Hustle. Schalte echte Rewards frei und miss dich mit deiner Crew. Join the GRIND Network.">
+    <meta name="keywords" content="Habit Tracker, Fitness App, Gamification, Motivation, Health, Eisbaden, Run Club, XP sammeln">
+    <title>GRIND. | Level up your life</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://grind-app.de/favicon.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://grind-app.de/favicon.png">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="apple-touch-icon" href="https://grind-app.de/logo.jpg">
+    <meta name="apple-mobile-web-app-title" content="GRIND.">
+    <link rel="icon" type="image/png" sizes="192x192" href="https://grind-app.de/logo.jpg">
+    
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <script src="https://www.paypal.com/sdk/js?client-id=AboxAT2qskA0lY5-23Kj2tu_qY3bOK57rq_LbhtE_cdVOBT37fSHGacBKjgl-zx1XcJM9AZql96OCwc8&currency=EUR"></script>
+    <style>
+        /* RAW & MATTE AESTHETIC - Kein Glow, keine Standard-Templates */
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #080808; 
+            color: #f0f0f0; 
+            overflow-x: hidden; 
+            min-height: 100vh; 
+            overscroll-behavior-y: none; 
+            /* Subtle Noise Overlay für den Raw-Look */
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+        }
+        
+        .grind-gradient { background: #ff4d00; } /* Solides Orange statt Gradient */
+        
+        /* HARTE KANTEN, HARTER SCHATTEN (Der Anti-Glow Look) */
+        .card { 
+            background: #111111; 
+            border: 2px solid #222222; 
+            transition: all 0.2s ease; 
+            border-radius: 4px;
+        }
+        .card:hover { 
+            border-color: #ff4d00; 
+            transform: translate(-2px, -2px);
+            /* Harter Offset-Schatten statt weichem Glow */
+            box-shadow: 4px 4px 0px rgba(255, 77, 0, 1); 
+        }
+        
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; scroll-behavior: smooth; }
+        
+        .level-node { min-width: 140px; position: relative; }
+        .reward-box { 
+            width: 100px; height: 85px; 
+            border: 2px solid #222; 
+            background: #0a0a0a; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            position: relative; z-index: 10; 
+            border-radius: 4px; 
+            transition: all 0.2s ease; 
+        }
+        .reward-box.unlocked { 
+            border-color: #ff4d00; 
+            background: #1a0a00; 
+            box-shadow: 3px 3px 0px rgba(255, 77, 0, 0.4); 
+        }
+        .reward-box.pro { 
+            border-color: #4c1d95; height: 95px; width: 110px; 
+        }
+        .reward-box.pro.unlocked { 
+            background: #1a0a2e; border-color: #9333ea; 
+            box-shadow: 3px 3px 0px rgba(147, 51, 234, 0.4); 
+        }
+        
+        /* Klare Tags */
+        .tag-free { background: #fff; color: #000; font-size: 8px; font-weight: 900; padding: 2px 8px; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); text-transform: uppercase; border-radius: 2px; z-index: 30; }
+        .tag-pro { background: #9333ea; color: white; font-size: 8px; font-weight: 900; padding: 2px 8px; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); text-transform: uppercase; border-radius: 2px; z-index: 30; }
+        
+        .week-btn { border: 2px solid #222; background: #0a0a0a; transition: all 0.2s; border-radius: 4px;}
+        .week-btn.active { background: #ff4d00; color: white; border-color: #ff4d00; font-weight: 900; box-shadow: 3px 3px 0px rgba(255, 77, 0, 0.3); }
+        
+        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 99999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+        .toast { pointer-events: auto; background: #111; border: 2px solid #333; color: white; padding: 16px 24px; border-radius: 4px; font-size: 14px; transform: translateX(120%); transition: transform 0.3s ease; display: flex; align-items: center; gap: 12px; }
+        .toast.show { transform: translateX(0); }
+        .toast.success { border-color: #ff4d00; }
+        .toast.error { border-color: #dc2626; }
+        
+        /* SOLID BUTTONS */
+        .btn-grind { 
+            background: #ffffff; color: #000000; 
+            font-weight: 900; font-style: italic; text-transform: uppercase; 
+            padding: 12px 24px; font-size: 13px; transition: all 0.2s; 
+            cursor: pointer; border-radius: 4px; border: 2px solid #ffffff; 
+        }
+        .btn-grind:hover { 
+            background: #ff4d00; border-color: #ff4d00; color: white; 
+            transform: translate(-2px, -2px);
+            box-shadow: 4px 4px 0px rgba(255, 255, 255, 0.2); 
+        }
+        .btn-grind:disabled { background: #222; color: #555; border-color: #222; cursor: not-allowed; transform: none; box-shadow: none; }
+        
+        .btn-pro { background: #1a0a2e; color: #a855f7; font-weight: 900; font-style: italic; text-transform: uppercase; padding: 12px 24px; font-size: 12px; transition: all 0.2s; cursor: pointer; border-radius: 4px; border: 2px solid #a855f7; }
+        .btn-pro:hover { background: #a855f7; color: white; transform: translate(-2px, -2px); box-shadow: 4px 4px 0px rgba(168,85,247,0.3); }
+        
+        .btn-bounty { background: #0a0a0a; color: white; border: 2px solid #ff4d00; cursor: pointer; transition: all 0.2s ease; border-radius: 4px;}
+        .btn-bounty:hover { background: #ff4d00; color: #000; transform: translate(-2px, -2px); box-shadow: 4px 4px 0px rgba(255, 77, 0, 0.3); }
+        
+        .completed-overlay { position: absolute; inset: 0; background: rgba(8,8,8,0.85); z-index: 10; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s; pointer-events: none; border: 2px solid #ff4d00; border-radius: 2px; }
+        .card.is-completed .completed-overlay { opacity: 1; pointer-events: auto; }
+        
+        .pending-overlay { position: absolute; inset: 0; background: rgba(8,8,8,0.85); z-index: 10; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s; pointer-events: none; border: 2px solid #eab308; border-radius: 2px;}
+        .card.is-pending .pending-overlay { opacity: 1; pointer-events: auto; }
+
+        .xp-bar-glow { position: relative; overflow: hidden; }
+        .xp-bar-glow::after { content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent); animation: shine 2.5s infinite; }
+        @keyframes shine { 100% { left: 200%; } }
+        
+        @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.1) translateY(-5px); color: #ff4d00; } 100% { transform: scale(1) translateY(0); } }
+        .animate-pop { animation: pop 0.4s ease-out forwards; }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="flex flex-col relative select-none">
+    <div id="toast-container"></div>
+    
+    <!-- XP HUD Matte Styling -->
+    <div id="xp-hud" class="fixed top-0 left-0 right-0 z-[999999] transform -translate-y-[150%] transition-transform duration-500 ease-out pointer-events-none flex justify-center pt-4 px-4 sm:px-6">
+        <div class="bg-[#111] border-2 border-[#ff4d00] rounded-sm p-4 w-full max-w-sm flex flex-col gap-2 relative shadow-[4px_4px_0px_rgba(255,77,0,1)] pointer-events-auto">
+            <div class="flex justify-between items-end">
+                <div>
+                    <p class="text-[#ff4d00] text-[9px] font-black uppercase tracking-[0.3em] mb-1">XP Sync</p>
+                    <h4 class="text-white font-black italic text-2xl leading-none">LVL <span id="hud-lvl">1</span></h4>
+                </div>
+                <div class="text-right">
+                    <span class="text-gray-400 text-[10px] font-bold uppercase tracking-widest italic"><span id="hud-xp-num" class="text-white text-sm">0</span> / <span id="hud-xp-max">1000</span></span>
+                </div>
+            </div>
+            <div class="w-full bg-[#050505] h-2.5 rounded-full overflow-hidden border border-[#333] relative">
+                <div id="hud-xp-bar" class="bg-[#ff4d00] h-full transition-all ease-out relative"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="recaptcha-container"></div>
+    <div id="app" class="flex-1 flex flex-col w-full z-10 relative pb-10">
+        <div class="flex-1 flex items-center justify-center min-h-[60vh]">
+            <div class="w-16 h-16 border-t-4 border-l-4 border-[#ff4d00] rounded-full animate-spin"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, updateDoc, arrayUnion, onSnapshot, collection, addDoc, query, where, getDocs, orderBy, limit, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDtwsvmYSONjFufhbJ5I8G_RAMffnh7re0",
+            authDomain: "theplot-app.firebaseapp.com",
+            projectId: "theplot-app",
+            storageBucket: "theplot-app.firebasestorage.app",
+            messagingSenderId: "550703275210",
+            appId: "1:550703275210:web:81bc0e5a373f87a3c92833"
+        };
+        
+        const appInit = initializeApp(firebaseConfig);
+        const auth = getAuth(appInit);
+        const db = getFirestore(appInit);
+
+        let state = {
+            user: null, profile: null, prevXp: null, prevLvl: null,
+            bundlePrice: '19.00', view: 'loading', prevView: 'dashboard',
+            currentWeekTab: 1, authStep: 'phone', tempPhone: '', tempUploadData: null,
+            weeklyData: { 1: { title: "Loading...", startOffset: 0, missions: [] } },
+            rewardData: [], habitData: [], pendingMissions: [], activities: [],
+            seasonConfig: null, dashboardNeedsScroll: true
+        };
+
+        const RANKS = ["Rookie", "Grinder", "Hustler", "Athlete", "Machine", "Legend"];
+        let holdTimer = null; let holdProgress = 0; let isRedeeming = false;
+        window.currentVerify = null; window.countdownInterval = null;
+
+        const getRelativeTime = (timestamp) => {
+            if(!timestamp) return "Gerade eben";
+            const diff = Math.floor((Date.now() - timestamp) / 1000);
+            if (diff < 60) return "Gerade eben";
+            if (diff < 3600) return `vor ${Math.floor(diff/60)} Min`;
+            if (diff < 86400) return `vor ${Math.floor(diff/3600)} Std`;
+            return `vor ${Math.floor(diff/86400)} Tagen`;
+        };
+
+        window.showToast = (msg, type = 'success') => {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div'); toast.className = `toast ${type}`;
+            const icon = type === 'error' ? `!` : `✓`;
+            toast.innerHTML = `<span class="font-black text-lg ${type==='error'?'text-[#dc2626]':'text-[#ff4d00]'}">${icon}</span> <div><div class="font-black text-[10px] uppercase tracking-widest text-gray-500 mb-0.5">System</div><div>${msg}</div></div>`;
+            container.appendChild(toast); 
+            setTimeout(() => toast.classList.add('show'), 10);
+            setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 3000);
+        };
+
+        window.logActivity = async (type, text, customAlias = null, customIsPro = null) => {
+            try {
+                if(!state.profile || !state.profile.alias) return;
+                const aliasToUse = customAlias || state.profile.alias;
+                const isProToUse = customIsPro !== null ? customIsPro : !!state.profile.hasPremium;
+                const newAct = { alias: aliasToUse, isPro: isProToUse, type: type, text: text, timestamp: Date.now() };
+                await addDoc(collection(db, 'plot_activities'), newAct).catch(err => {});
+            } catch(e) {}
+        };
+
+        const getActiveWeek = () => {
+            if(!state.seasonConfig || !state.seasonConfig.start) return 1;
+            const now = new Date(); const start = new Date(state.seasonConfig.start);
+            if(now < start) return 1;
+            let firstSunday = new Date(start.getFullYear(), start.getMonth(), 1);
+            while (firstSunday.getDay() !== 0) firstSunday.setDate(firstSunday.getDate() + 1);
+            firstSunday.setHours(23, 59, 59, 999);
+            if (now.getTime() <= firstSunday.getTime()) return 1;
+            const diffTime = now.getTime() - firstSunday.getTime();
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)); 
+            let week = 2 + Math.floor(diffDays / 7);
+            return Math.max(1, Math.min(week, 4));
+        };
+
+        const getSeasonStatus = () => {
+            if (!state.seasonConfig) return { status: 'loading' };
+            if (state.seasonConfig.active === false || state.seasonConfig.active === 'false') return { status: 'offline' };
+            const now = new Date(); const start = new Date(state.seasonConfig.start); const end = new Date(state.seasonConfig.end);
+            end.setHours(23, 59, 59, 999);
+            if (now < start) return { status: 'upcoming', date: start };
+            if (now > end) return { status: 'ended', date: end };
+            return { status: 'active' };
+        };
+
+        window.updateCountdown = () => {
+            const el = document.getElementById('season-countdown');
+            if(!el || !state.seasonConfig) return;
+            const start = new Date(state.seasonConfig.start).getTime();
+            const now = new Date().getTime();
+            const distance = start - now;
+            if (distance < 0) { el.innerHTML = "LAUNCHING..."; if(window.countdownInterval) clearInterval(window.countdownInterval); setTimeout(() => render(), 2000); return; }
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            el.innerHTML = `${days}D ${hours.toString().padStart(2, '0')}H ${minutes.toString().padStart(2, '0')}M ${seconds.toString().padStart(2, '0')}S`;
+        };
+
+        const setupSeasonData = () => {
+            onSnapshot(doc(db, 'system', 'grind_season'), (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    state.weeklyData = data.weeklyData || state.weeklyData;
+                    state.rewardData = data.rewardData || [];
+                    state.habitData = data.habitData || [];
+                    state.seasonConfig = data.seasonConfig || { number: 1, active: true, start: '', end: '' };
+                    state.currentWeekTab = getActiveWeek();
+                }
+                if(state.view === 'dashboard' || state.view === 'paywall') render();
+            });
+        };
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                state.user = user;
+                onSnapshot(doc(db, 'plot_users', user.uid), (docSnap) => {
+                    if (docSnap.exists()) {
+                        state.profile = docSnap.data();
+                        if (!state.profile.crewCode) {
+                            const generatedCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+                            setDoc(doc(db, 'plot_users', user.uid), { crewCode: generatedCode }, { merge: true });
+                        }
+                        if (['loading', 'auth', 'onboarding'].includes(state.view)) {
+                            state.view = 'dashboard'; state.dashboardNeedsScroll = true;
+                            const urlParams = new URLSearchParams(window.location.search); const crewCode = urlParams.get('crew');
+                            if (crewCode) { window.history.replaceState({}, document.title, window.location.pathname); setTimeout(() => window.resolveInvite(crewCode), 1000); }
+                        }
+                        render();
+                    } else { state.view = 'onboarding'; render(); }
+                });
+                
+                onSnapshot(collection(db, 'plot_pending_proofs'), (snap) => {
+                    if (snap && snap.docs) { state.pendingMissions = snap.docs.map(d => d.data()).filter(data => data.uid === state.user.uid); if(state.view === 'dashboard') render(); }
+                });
+
+                const activitiesQuery = query(collection(db, 'plot_activities'), orderBy('timestamp', 'desc'), limit(50));
+                onSnapshot(activitiesQuery, (snap) => {
+                    if(snap && snap.docs) { state.activities = snap.docs.map(d => d.data()); if(state.view === 'dashboard') render(); }
+                }, (error) => {});
+
+                setupSeasonData();
+                onSnapshot(doc(db, 'system', 'pricing'), (docSnap) => { if (docSnap.exists()) state.bundlePrice = docSnap.data().bundlePrice; if (state.view === 'paywall') render(); });
+            } else { state.user = null; state.profile = null; state.view = 'auth'; state.authStep = 'phone'; render(); }
+        });
+
+        // MODAL LOGIK RAW
+        window.closeModal = () => {
+            if(window.stopRedeemHold) window.stopRedeemHold(); 
+            const container = document.getElementById('modal-container');
+            if(container) { container.classList.remove('opacity-100'); container.classList.add('opacity-0', 'pointer-events-none'); setTimeout(() => container.innerHTML = '', 300); }
+            if(window.html5QrCode) { try { window.html5QrCode.stop().then(() => window.html5QrCode.clear()).catch(()=>{}); window.html5QrCode = null; } catch(e){} }
+        };
+
+        window.openModal = (contentHtml) => {
+            let container = document.getElementById('modal-container');
+            if(!container) { 
+                container = document.createElement('div'); container.id = 'modal-container'; 
+                container.className = 'fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-200 overflow-y-auto'; 
+                document.body.appendChild(container); 
+            }
+            container.innerHTML = `
+                <div class="bg-[#0a0a0a] border-2 border-[#222] p-8 rounded-sm max-w-md w-full shadow-[6px_6px_0px_rgba(255,255,255,0.05)] relative my-auto">
+                    <button type="button" onclick="window.closeModal()" class="absolute top-4 right-4 text-gray-500 hover:text-white z-50 text-xl font-bold">×</button>
+                    ${contentHtml}
+                </div>`;
+            setTimeout(() => { container.classList.remove('opacity-0', 'pointer-events-none'); container.classList.add('opacity-100'); }, 10);
+        };
+
+        window.openInviteModal = () => {
+            if(!state.profile) return;
+            const link = `${window.location.origin}/?crew=${state.profile.crewCode || ''}`;
+            const currentFriendsCount = (state.profile.friends || []).length;
+            const nextXpBounty = (currentFriendsCount + 1) * 100;
+            let innerHtml = `
+                <p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">Network</p>
+                <h3 class="text-2xl font-black italic uppercase tracking-tighter mb-6">Crew Erweitern</h3>
+                <div class="bg-[#111] p-5 rounded-sm mb-6 border-2 border-[#222]">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 border-2 border-[#ff4d00] flex items-center justify-center bg-[#0a0a0a]">
+                            <svg class="w-5 h-5 text-[#ff4d00]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        </div>
+                        <div>
+                            <p class="text-[#ff4d00] font-black italic uppercase tracking-widest text-sm">Bounty Active</p>
+                            <p class="text-gray-400 text-[10px] font-medium mt-1 leading-relaxed">Jeder Grinder, der joint, steigert dein Level. Nächster Invite bringt dir <span class="text-white font-bold">+${nextXpBounty} XP</span>.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-[#050505] p-5 rounded-sm mb-6 border border-[#222]">
+                    <p class="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-3">Option 1: Link teilen</p>
+                    <div class="flex gap-2">
+                        <input type="text" readonly value="${link}" class="flex-1 p-3 bg-black border border-[#333] rounded-sm text-xs text-gray-400 outline-none truncate">
+                        <button type="button" onclick="window.shareLink('${link}')" class="bg-[#222] text-white px-4 rounded-sm hover:bg-[#ff4d00] transition flex-shrink-0 font-bold uppercase text-xs">Copy</button>
+                    </div>
+                </div>
+                <div class="bg-[#050505] p-5 rounded-sm mb-6 border border-[#222]">
+                    <p class="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-3">Option 2: Code eingeben</p>
+                    <form onsubmit="window.submitManualCode(event)" class="flex gap-2">
+                        <input id="manual_crew_code" type="text" placeholder="CODE..." required class="flex-1 p-3 bg-black border border-[#333] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00] uppercase font-bold tracking-widest">
+                        <button type="submit" class="bg-white text-black font-black uppercase tracking-widest px-4 rounded-sm hover:bg-[#ff4d00] hover:text-white transition text-xs">Add</button>
+                    </form>
+                </div>
+            `;
+            window.openModal(innerHtml);
+        };
+
+        window.copyToClipboard = (text) => {
+            const textArea = document.createElement("textarea"); textArea.value = text; textArea.style.position = "fixed"; document.body.appendChild(textArea); textArea.focus(); textArea.select();
+            try { document.execCommand('copy'); window.showToast("Link in Zwischenablage kopiert!", "success"); } catch (err) { window.showToast("Kopieren fehlgeschlagen.", "error"); }
+            document.body.removeChild(textArea);
+        };
+
+        window.shareLink = async (link) => {
+            if (navigator.share) { try { await navigator.share({ title: 'GRIND.', text: 'Tritt meiner Crew bei:', url: link }); } catch (err) { if (err.name !== 'AbortError') window.copyToClipboard(link); } } 
+            else { window.copyToClipboard(link); }
+        };
+
+        window.submitManualCode = (e) => { e.preventDefault(); const code = document.getElementById('manual_crew_code').value.trim().toUpperCase(); if(code) window.resolveInvite(code); };
+
+        window.resolveInvite = async (code) => {
+            try {
+                code = code.toUpperCase(); if (code === state.profile.crewCode) return window.showToast("Das ist dein eigener Code.", "error");
+                const q = query(collection(db, 'plot_users'), where('crewCode', '==', code)); const snap = await getDocs(q);
+                if (snap.empty) return window.showToast("Code ist ungültig.", "error");
+                const theirData = snap.docs[0].data(); const theirUid = snap.docs[0].id; const theirAlias = theirData.alias || 'Grinder';
+                const myFriends = state.profile.friends || [];
+                if (myFriends.some(f => f.toLowerCase() === theirAlias.toLowerCase())) return window.showToast(`${theirAlias} ist bereits in deiner Crew.`, "info");
+                const nextXpBounty = (myFriends.length + 1) * 100;
+                let innerHtml = `
+                    <div class="text-center">
+                        <h3 class="text-3xl font-black italic uppercase tracking-tighter mb-2">${theirAlias}</h3>
+                        <p class="text-gray-400 text-[11px] mb-6 leading-relaxed">Möchtest du dich mit diesem Grinder verbinden?</p>
+                        <div class="bg-[#ff4d00]/10 border-2 border-[#ff4d00] py-2 px-4 inline-block mb-6 shadow-[4px_4px_0px_rgba(255,77,0,0.3)]">
+                            <p class="text-[#ff4d00] font-black italic uppercase tracking-widest text-sm">+${nextXpBounty} XP BOUNTY</p>
+                        </div>
+                        <button type="button" onclick="window.confirmFriend('${theirUid}', '${theirAlias}')" class="w-full btn-grind py-4 mb-3">Akzeptieren & Verbinden</button>
+                    </div>`;
+                window.openModal(innerHtml);
+            } catch(e) { window.showToast("Netzwerkfehler.", "error"); }
+        };
+
+        window.confirmFriend = async (theirUid, theirAlias) => {
+            try {
+                const myFriends = state.profile.friends || []; const myNextXpBounty = (myFriends.length + 1) * 100;
+                const oldLvl = state.profile.lvl || 1; const newXp = (state.profile.xp || 0) + myNextXpBounty; const newLvl = Math.floor(newXp / 1000) + 1;
+                try {
+                    const theirDocRef = doc(db, 'plot_users', theirUid); const theirDoc = await getDoc(theirDocRef);
+                    if(theirDoc.exists()) {
+                        const theirData = theirDoc.data(); const theirFriends = theirData.friends || [];
+                        if(!theirFriends.some(f => f.toLowerCase() === state.profile.alias.toLowerCase())) {
+                            const theirNextBounty = (theirFriends.length + 1) * 100; const theirNewXp = (theirData.xp || 0) + theirNextBounty; const theirNewLvl = Math.floor(theirNewXp / 1000) + 1;
+                            await updateDoc(theirDocRef, { friends: arrayUnion(state.profile.alias), xp: theirNewXp, lvl: theirNewLvl });
+                        }
+                    }
+                } catch(err) {}
+                await updateDoc(doc(db, 'plot_users', state.user.uid), { friends: arrayUnion(theirAlias), xp: newXp, lvl: newLvl });
+                window.logActivity('MISSION', `hat das Network erweitert (+${myNextXpBounty} XP).`);
+                window.closeModal(); window.showToast(`+${myNextXpBounty} XP! Verbunden mit ${theirAlias}.`, "success");
+            } catch(e) { window.showToast("Fehler beim Verbinden.", "error"); }
+        };
+
+        window.claimInstantMission = async (mid, xp, name) => {
+            try {
+                const currentCompleted = state.profile.completed || []; const habit = state.habitData.find(h => h.id === mid);
+                if (!habit && !currentCompleted.includes(mid)) {
+                    const newXp = (state.profile.xp || 0) + xp; const newLvl = Math.floor(newXp / 1000) + 1;
+                    await setDoc(doc(db, 'plot_users', state.user.uid), { xp: newXp, lvl: newLvl, completed: [...currentCompleted, mid] }, { merge: true }); 
+                    window.logActivity('MISSION', `hat die Operation '<span class="font-bold text-white">${name}</span>' absolviert.`);
+                    window.showToast(`+${xp} XP für ${name}!`, "success");
+                }
+            } catch(e) {}
+        };
+        
+        window.openVerifyModal = (mid, xp, type, name, qrSolution = '') => {
+            window.currentVerify = { mid, xp, name, type, qrSolution };
+            let innerHtml = `<p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">Verify Operation</p><h3 class="text-2xl font-black italic uppercase tracking-tighter mb-6">${name}</h3>`;
+            innerHtml += `<input id="verify_code_input" type="text" placeholder="Code eingeben" class="w-full p-4 bg-[#050505] border-2 border-[#222] rounded-sm outline-none focus:border-[#ff4d00] text-white text-center text-sm font-bold tracking-widest uppercase mb-6">`;
+            innerHtml += `<button type="button" onclick="window.checkCode()" class="w-full btn-grind py-4">Senden zur Prüfung</button>`;
+            window.openModal(innerHtml);
+        };
+
+        window.checkCode = async () => {
+            const val = document.getElementById('verify_code_input').value.trim();
+            if(!window.currentVerify || !val) return; 
+            if (val.toLowerCase() === window.currentVerify.qrSolution.toLowerCase()) {
+                await window.claimInstantMission(window.currentVerify.mid, window.currentVerify.xp, window.currentVerify.name);
+                window.closeModal();
+            } else { window.showToast("Falscher Code.", "error"); }
+        };
+
+        window.setView = (view) => { state.prevView = state.view; state.view = view; render(); };
+        window.goBack = () => { state.view = state.prevView || 'dashboard'; render(); };
+        window.handleLogout = () => { state.view = 'loading'; render(); signOut(auth); };
+        
+        // --- DAS CORE RENDER MIT DEM "RAW & MATTE" STYLE ---
+        function render() {
+            const appDiv = document.getElementById('app');
+
+            if (state.view === 'loading') { 
+                appDiv.innerHTML = `<div class="flex-1 flex items-center justify-center min-h-[60vh]"><div class="w-12 h-12 border-t-4 border-l-4 border-[#ff4d00] rounded-full animate-spin"></div></div>`; return; 
+            }
+
+            if (state.view === 'onboarding') {
+                appDiv.innerHTML = `
+                    <div class="flex-1 flex flex-col items-center justify-center p-6 min-h-[80vh] text-center">
+                        <h1 class="text-4xl md:text-5xl font-black italic tracking-tighter mb-2">IDENTIFICATION<span class="text-[#ff4d00]">.</span></h1>
+                        <p class="text-gray-500 font-bold uppercase tracking-widest text-[10px] mb-12 max-w-sm leading-relaxed">Wähle deine Base und finde deinen Health Tribe.</p>
+                        <form onsubmit="event.preventDefault(); window.submitOnboarding(event)" class="w-full max-w-sm space-y-4">
+                            <input id="onboard_name" type="text" placeholder="Dein Name" required class="w-full p-4 bg-[#0a0a0a] border-2 border-[#222] rounded-sm outline-none focus:border-[#ff4d00] text-white text-center text-xl tracking-widest uppercase font-black italic shadow-[4px_4px_0px_rgba(255,255,255,0.05)]">
+                            <select id="onboard_city" required class="w-full p-4 bg-[#0a0a0a] border-2 border-[#222] rounded-sm outline-none focus:border-[#ff4d00] text-gray-400 text-center text-lg tracking-widest uppercase font-bold appearance-none shadow-[4px_4px_0px_rgba(255,255,255,0.05)]">
+                                <option value="Köln">Base: Köln</option>
+                            </select>
+                            <button type="submit" class="w-full btn-grind py-4 mt-2" onclick="window.submitOnboarding = async (e) => { e.preventDefault(); const n = document.getElementById('onboard_name').value; if(n){ state.profile = { alias: n, xp: 0, lvl: 1, friends: [], completed: [] }; await setDoc(doc(db, 'plot_users', state.user.uid), state.profile); state.view = 'dashboard'; render();} }">Confirm Identity</button>
+                        </form>
+                    </div>
+                `; return;
+            }
+
+            if (state.view === 'auth') {
+                appDiv.innerHTML = `
+                    <div class="flex-1 flex flex-col items-center justify-center p-6 min-h-[80vh] text-center">
+                        <h1 class="text-6xl md:text-8xl font-black italic tracking-tighter mb-2">GRIND<span class="text-[#ff4d00]">.</span></h1>
+                        <p class="text-gray-500 font-bold uppercase tracking-widest text-xs mb-12 max-w-sm">Season 01</p>
+                        <div class="w-full max-w-sm">
+                            <form onsubmit="window.sendSMS(event)" class="space-y-4">
+                                <div class="flex gap-2">
+                                    <select id="auth_prefix" class="w-24 p-4 bg-[#0a0a0a] border-2 border-[#222] rounded-sm text-gray-400 font-bold text-center"><option value="+49">+49</option></select>
+                                    <input id="auth_phone" type="tel" placeholder="170 1234567" required class="flex-1 p-4 bg-[#0a0a0a] border-2 border-[#222] rounded-sm text-white text-center font-bold outline-none focus:border-[#ff4d00]">
+                                </div>
+                                <button id="auth_submit_btn" type="submit" class="w-full btn-grind py-4">Enter The Drop</button>
+                            </form>
+                        </div>
+                    </div>`; return;
+            }
+
+            if (state.view === 'dashboard') {
+                const p = state.profile || { xp: 0, lvl: 1, completed: [], alias: 'Grinder', city: 'Köln' };
+                const safeXp = p.xp || 0; const safeLvl = p.lvl || 1; 
+                const currentRank = RANKS[Math.min(Math.floor((safeLvl - 1) / 5), RANKS.length - 1)];
+                const currentMissions = state.weeklyData[state.currentWeekTab]?.missions || [];
+
+                let html = `
+                    <header class="p-6 max-w-6xl mx-auto flex justify-between items-center w-full border-b-2 border-[#111]">
+                        <h1 class="text-3xl font-black italic tracking-tighter">GRIND<span class="text-[#ff4d00]">.</span></h1>
+                        <button onclick="window.handleLogout()" class="text-[10px] uppercase font-bold text-gray-500 hover:text-white border-2 border-[#222] px-3 py-1 bg-[#0a0a0a] rounded-sm transition">Exit</button>
+                    </header>
+                    
+                    <main class="max-w-4xl mx-auto px-6 w-full pt-10 pb-16">
+                        <!-- STATS SECTION (Matte & Solid Look) -->
+                        <section class="mb-16 border-2 border-[#222] bg-[#0a0a0a] p-8 relative rounded-sm shadow-[6px_6px_0px_rgba(255,255,255,0.03)]">
+                            <div class="absolute top-[-2px] right-[-2px] bg-[#ff4d00] text-black px-3 py-1 text-[10px] font-black italic uppercase">ACTIVE</div>
+                            <div class="flex flex-col md:flex-row gap-8 items-end">
+                                <div>
+                                    <p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-[0.4em] mb-2">Standing</p>
+                                    <h2 class="text-6xl font-black italic tracking-tighter mb-1">LVL ${safeLvl}</h2>
+                                    <p class="text-gray-400 font-bold text-xs uppercase tracking-widest">${currentRank} // ${p.alias}</p>
+                                </div>
+                                <div class="flex-grow w-full">
+                                    <div class="flex justify-between text-[10px] font-bold uppercase text-gray-500 mb-2 tracking-widest italic"><span>XP: <span class="text-white">${safeXp}</span></span> <span>TARGET: ${safeLvl * 1000}</span></div>
+                                    <div class="w-full bg-[#111] h-2 rounded-full border border-[#333] relative overflow-hidden">
+                                        <div class="bg-[#ff4d00] h-full" style="width: ${(safeXp % 1000)/10}%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- DIRECTIVES SECTION -->
+                        <section class="mb-12">
+                            <h3 class="text-2xl font-black italic uppercase tracking-tighter mb-6 border-b-2 border-[#222] pb-2">Operations</h3>
+                            <div class="space-y-4">
+                `;
+
+                if (currentMissions.length === 0) html += `<div class="p-6 text-gray-600 font-bold text-xs border-2 border-[#222] text-center bg-[#050505]">Noch keine Operations live. Stay focused.</div>`;
+
+                currentMissions.forEach(m => {
+                    const isCompleted = (p.completed || []).includes(m.id);
+                    let btnAction = `window.openVerifyModal('${m.id}', ${m.xp}, '${m.type}', '${m.name.replace(/'/g, "\\'")}', '${m.qr_solution||''}')`;
+                    
+                    html += `
+                        <div class="card p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 ${isCompleted ? 'opacity-50 border-[#ff4d00]' : ''}">
+                            <div class="flex-1">
+                                <h4 class="font-black italic uppercase text-lg tracking-tight mb-1">${m.name}</h4>
+                                <p class="text-gray-400 text-xs font-medium">${m.desc}</p>
+                            </div>
+                            <div class="text-right flex-shrink-0 flex items-center gap-6">
+                                <span class="text-[#ff4d00] font-black italic text-2xl tracking-tighter">+${m.xp}</span>
+                                <button onclick="${btnAction}" class="btn-grind text-[10px]" ${isCompleted?'disabled':''}>${isCompleted ? 'Verified' : 'Verify'}</button>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += `
+                            </div>
+                        </section>
+                        
+                        <!-- CREW SECTION -->
+                        <section>
+                            <h3 class="text-2xl font-black italic uppercase tracking-tighter mb-6 border-b-2 border-[#222] pb-2">The Network</h3>
+                            <div class="card p-6 flex flex-col md:flex-row items-center justify-between gap-6 border-[#ff4d00] shadow-[4px_4px_0px_rgba(255,77,0,0.2)]">
+                                <div class="text-center md:text-left">
+                                    <p class="text-[#ff4d00] font-black italic uppercase tracking-widest text-[10px] mb-2">Crew Bounty</p>
+                                    <p class="text-sm text-gray-300 font-bold">Lade Freunde ein und kassiere sofortige XP-Boosts.</p>
+                                </div>
+                                <button onclick="window.openInviteModal()" class="btn-bounty px-8 py-3 text-xs font-black italic uppercase tracking-widest">Crew Erweitern</button>
+                            </div>
+                        </section>
+                    </main>
+                    
+                    <footer class="border-t-2 border-[#111] py-8 text-center">
+                        <p class="text-[#444] text-[10px] font-black uppercase tracking-widest">© 2026 GRIND. NETWORK. ALL RIGHTS RESERVED.</p>
+                    </footer>
+                `;
+                appDiv.innerHTML = html;
+            }
+        }
+    </script>
+</body>
+</html>
+
+
+```
