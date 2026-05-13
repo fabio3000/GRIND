@@ -1,4 +1,4 @@
-```html
+
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -6,32 +6,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>GRIND. | Creator Studio</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&display=swap" rel="stylesheet">
-    <!-- html2canvas für den Bild-Export -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- Font vorladen für den Canvas -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,700;0,900;1,400;1,700;1,900&display=swap" rel="stylesheet">
     
     <style>
         body { 
             font-family: 'Inter', sans-serif; 
             background-color: #050505; 
             color: #ffffff; 
-            overflow: hidden; /* Verhindert Scrollen im Hauptfenster */
+            overflow: hidden; 
         }
 
-        /* Das Design für den fertigen Post */
-        .grind-canvas-bg {
-            background-color: #050505;
-            background-image: radial-gradient(circle at 50% 50%, #120600 0%, #050505 100%);
-        }
-
-        /* Scrollbar für die Sidebar anpassen */
         .sidebar-scroll::-webkit-scrollbar { width: 6px; }
         .sidebar-scroll::-webkit-scrollbar-track { background: #0a0a0a; }
         .sidebar-scroll::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
         .sidebar-scroll::-webkit-scrollbar-thumb:hover { background: #ff4d00; }
-
-        /* Erhält Zeilenumbrüche im Text */
-        .pre-wrap { white-space: pre-wrap; }
 
         .btn-primary { 
             background: #ffffff; color: #000000; font-weight: 900; text-transform: uppercase; 
@@ -40,241 +29,292 @@
             border: none;
         }
         .btn-primary:hover { background: #ff4d00; color: #ffffff; transform: translateY(-2px); box-shadow: 0 5px 20px rgba(255,77,0,0.4); }
-
-        /* Das Raster-Overlay für den Canvas (subtil) */
-        .grid-overlay {
-            background-size: 100px 100px;
-            background-image: linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-                              linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-        }
     </style>
 </head>
 <body class="h-screen w-screen flex flex-col md:flex-row antialiased">
 
     <!-- LINKE SEITE: Controls / Editor -->
-    <div class="w-full md:w-[400px] bg-[#0a0a0a] border-r border-[#1f1f1f] flex flex-col h-1/2 md:h-full z-20 shadow-2xl">
+    <div class="w-full md:w-[400px] bg-[#0a0a0a] border-r border-[#1f1f1f] flex flex-col h-[45%] md:h-full z-20 shadow-2xl">
         
-        <!-- Header -->
-        <div class="p-6 border-b border-[#1f1f1f] bg-[#050505]">
-            <h1 class="text-2xl font-black italic tracking-tighter">GRIND<span class="text-[#ff4d00]">.</span> <span class="text-gray-500 text-sm tracking-widest uppercase ml-2 not-italic">Creator</span></h1>
+        <div class="p-5 border-b border-[#1f1f1f] bg-[#050505] flex justify-between items-center">
+            <h1 class="text-xl font-black italic tracking-tighter">GRIND<span class="text-[#ff4d00]">.</span> <span class="text-gray-500 text-xs tracking-widest uppercase ml-2 not-italic">Creator</span></h1>
         </div>
 
-        <!-- Inputs -->
         <div class="flex-1 overflow-y-auto sidebar-scroll p-6 flex flex-col gap-6">
             
-            <!-- Tagline -->
             <div>
-                <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Tagline (Rot)</label>
-                <input type="text" id="input-tag" value="SYSTEM UPDATE" class="w-full bg-[#111] border border-[#333] rounded px-4 py-3 text-sm text-white focus:outline-none focus:border-[#ff4d00] uppercase tracking-widest font-bold">
+                <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Tagline (Orange)</label>
+                <input type="text" id="input-tag" value="SYSTEM UPDATE" oninput="drawCanvas()" class="w-full bg-[#111] border border-[#333] rounded px-4 py-3 text-sm text-white focus:outline-none focus:border-[#ff4d00] uppercase tracking-widest font-bold">
             </div>
 
-            <!-- Headline -->
             <div>
                 <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Headline</label>
-                <textarea id="input-headline" rows="3" class="w-full bg-[#111] border border-[#333] rounded px-4 py-3 text-sm text-white focus:outline-none focus:border-[#ff4d00] font-black italic tracking-tighter uppercase resize-none">NO EXCUSES.
+                <textarea id="input-headline" rows="3" oninput="drawCanvas()" class="w-full bg-[#111] border border-[#333] rounded px-4 py-3 text-sm text-white focus:outline-none focus:border-[#ff4d00] font-black italic tracking-tighter uppercase resize-none">NO EXCUSES.
 JUST EXECUTION.</textarea>
             </div>
 
-            <!-- Fließtext -->
             <div>
-                <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Fließtext (Optional)</label>
-                <textarea id="input-body" rows="4" class="w-full bg-[#111] border border-[#333] rounded px-4 py-3 text-sm text-gray-300 focus:outline-none focus:border-[#ff4d00] resize-none leading-relaxed">Wenn der Wecker klingelt, hast du zwei Optionen: Weiterschlafen und träumen, oder aufstehen und deine Ziele jagen. Das Network belohnt die, die den Grind durchziehen.</textarea>
+                <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Body Text</label>
+                <textarea id="input-body" rows="4" oninput="drawCanvas()" class="w-full bg-[#111] border border-[#333] rounded px-4 py-3 text-sm text-gray-300 focus:outline-none focus:border-[#ff4d00] resize-none leading-relaxed">Wenn der Wecker klingelt, hast du zwei Optionen: Weiterschlafen und träumen, oder aufstehen und deine Ziele jagen. Das Network belohnt die, die den Grind durchziehen.</textarea>
             </div>
 
-            <!-- Layout Toggles -->
             <div>
-                <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Design</label>
+                <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Layout Option</label>
                 <div class="flex gap-2">
                     <button onclick="setLayout('left')" id="btn-layout-left" class="flex-1 py-2 bg-[#1f1f1f] border border-[#ff4d00] text-[#ff4d00] text-xs font-bold uppercase rounded transition">Links</button>
                     <button onclick="setLayout('center')" id="btn-layout-center" class="flex-1 py-2 bg-[#111] border border-[#333] text-gray-400 text-xs font-bold uppercase rounded hover:bg-[#1f1f1f] transition">Zentriert</button>
                 </div>
             </div>
-
         </div>
 
-        <!-- Export Action -->
-        <div class="p-6 border-t border-[#1f1f1f] bg-[#050505]">
-            <button onclick="exportPost()" id="export-btn" class="btn-primary w-full flex items-center justify-center gap-2">
+        <div class="p-5 border-t border-[#1f1f1f] bg-[#050505]">
+            <button onclick="exportPost()" class="btn-primary w-full flex items-center justify-center gap-2">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                Für Instagram exportieren
+                Post Teilen / Speichern
             </button>
-            <p class="text-center text-gray-600 text-[9px] mt-3 uppercase tracking-widest font-bold">Format: 1080 x 1350 px (Portrait)</p>
         </div>
 
     </div>
 
-    <!-- RECHTE SEITE: Live Vorschau -->
-    <div class="flex-1 bg-[#1a1a1a] relative flex items-center justify-center p-8 overflow-hidden h-1/2 md:h-full bg-[radial-gradient(#333_1px,transparent_1px)] [background-size:20px_20px]">
-        
-        <!-- Scaler Container (passt die Ansicht an den Bildschirm an) -->
-        <div id="scale-wrapper" class="relative shadow-2xl transition-transform duration-200">
-            
-            <!-- DER EIGENTLICHE CANVAS (Immer genau 1080x1350) -->
-            <div id="export-canvas" class="w-[1080px] h-[1350px] grind-canvas-bg relative flex flex-col p-[120px] overflow-hidden">
-                
-                <!-- Subtiles Grid im Hintergrund -->
-                <div class="absolute inset-0 grid-overlay opacity-50 z-0"></div>
-                
-                <!-- Dekorativer oranger Glow in der Mitte -->
-                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#ff4d00]/20 blur-[120px] rounded-full z-0 pointer-events-none"></div>
-
-                <!-- Text-Inhalt Container -->
-                <div id="canvas-content" class="relative z-10 flex flex-col justify-center h-full text-left">
-                    
-                    <!-- Tagline -->
-                    <p id="canvas-tag" class="text-[#ff4d00] text-[24px] font-black uppercase tracking-[0.4em] mb-8 leading-none">
-                        SYSTEM UPDATE
-                    </p>
-                    
-                    <!-- Headline -->
-                    <h2 id="canvas-headline" class="text-white text-[110px] font-black italic uppercase tracking-tighter leading-[0.85] mb-12 pre-wrap drop-shadow-2xl">NO EXCUSES.
-JUST EXECUTION.</h2>
-                    
-                    <!-- Body Text -->
-                    <p id="canvas-body" class="text-gray-300 text-[36px] font-medium leading-[1.6] max-w-[900px] pre-wrap tracking-wide">Wenn der Wecker klingelt, hast du zwei Optionen: Weiterschlafen und träumen, oder aufstehen und deine Ziele jagen. Das Network belohnt die, die den Grind durchziehen.</p>
-                </div>
-
-                <!-- Footer (Immer unten) -->
-                <div class="absolute bottom-[80px] left-[120px] right-[120px] flex justify-between items-end z-10">
-                    <div>
-                        <p class="text-gray-500 font-bold uppercase tracking-[0.3em] text-[20px] mb-2">Level up your life</p>
-                        <h1 class="text-[40px] font-black italic tracking-tighter text-white">GRIND<span class="text-[#ff4d00]">.</span></h1>
-                    </div>
-                    <div class="w-16 h-16 border-4 border-[#ff4d00] rounded-full flex items-center justify-center opacity-80">
-                        <!-- Icon (z.B. Pfeil oder Checkmark) -->
-                        <svg class="w-8 h-8 text-[#ff4d00]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </div>
-
-    <!-- Overlay beim Exportieren -->
-    <div id="loading-overlay" class="fixed inset-0 bg-black/90 z-50 hidden flex-col items-center justify-center backdrop-blur-sm">
-        <div class="w-16 h-16 border-t-4 border-[#ff4d00] border-solid rounded-full animate-spin mb-6"></div>
-        <h2 class="text-2xl font-black italic tracking-tighter text-white uppercase">Generiere Bild...</h2>
+    <!-- RECHTE SEITE: Live Canvas Vorschau -->
+    <div class="flex-1 bg-[#1a1a1a] relative flex items-center justify-center p-4 md:p-8 h-[55%] md:h-full bg-[radial-gradient(#333_1px,transparent_1px)] [background-size:20px_20px]">
+        <!-- Das Canvas-Element, responsive skaliert per CSS -->
+        <canvas id="creator-canvas" width="1080" height="1350" class="max-w-full max-h-full object-contain shadow-2xl rounded border border-[#1f1f1f]"></canvas>
     </div>
 
     <script>
-        // --- Live Text Update Logic ---
-        const inputs = {
-            tag: document.getElementById('input-tag'),
-            head: document.getElementById('input-headline'),
-            body: document.getElementById('input-body')
-        };
+        const canvas = document.getElementById('creator-canvas');
+        const ctx = canvas.getContext('2d');
+        let currentLayout = 'left';
 
-        const canvasEls = {
-            tag: document.getElementById('canvas-tag'),
-            head: document.getElementById('canvas-headline'),
-            body: document.getElementById('canvas-body'),
-            content: document.getElementById('canvas-content')
-        };
+        // Stellt sicher, dass der Font geladen ist, bevor gezeichnet wird
+        document.fonts.ready.then(() => {
+            drawCanvas();
+        });
 
-        function updateCanvas() {
-            canvasEls.tag.innerText = inputs.tag.value;
-            canvasEls.head.innerText = inputs.head.value;
-            canvasEls.body.innerText = inputs.body.value;
-            
-            // Blendet leere Elemente aus, damit die Abstände stimmen
-            canvasEls.tag.style.display = inputs.tag.value.trim() ? 'block' : 'none';
-            canvasEls.body.style.display = inputs.body.value.trim() ? 'block' : 'none';
-        }
-
-        // Event Listener an alle Inputs binden
-        inputs.tag.addEventListener('input', updateCanvas);
-        inputs.head.addEventListener('input', updateCanvas);
-        inputs.body.addEventListener('input', updateCanvas);
-
-        // --- Layout Logic (Links vs Zentriert) ---
         function setLayout(style) {
+            currentLayout = style;
             const btnLeft = document.getElementById('btn-layout-left');
             const btnCenter = document.getElementById('btn-layout-center');
 
             if (style === 'center') {
-                canvasEls.content.classList.remove('text-left', 'items-start');
-                canvasEls.content.classList.add('text-center', 'items-center');
-                
-                // Button Styling anpassen
                 btnCenter.className = "flex-1 py-2 bg-[#1f1f1f] border border-[#ff4d00] text-[#ff4d00] text-xs font-bold uppercase rounded transition";
                 btnLeft.className = "flex-1 py-2 bg-[#111] border border-[#333] text-gray-400 text-xs font-bold uppercase rounded hover:bg-[#1f1f1f] transition";
             } else {
-                canvasEls.content.classList.remove('text-center', 'items-center');
-                canvasEls.content.classList.add('text-left', 'items-start');
-                
-                // Button Styling anpassen
                 btnLeft.className = "flex-1 py-2 bg-[#1f1f1f] border border-[#ff4d00] text-[#ff4d00] text-xs font-bold uppercase rounded transition";
                 btnCenter.className = "flex-1 py-2 bg-[#111] border border-[#333] text-gray-400 text-xs font-bold uppercase rounded hover:bg-[#1f1f1f] transition";
             }
+            drawCanvas();
         }
 
-        // --- Viewport Scaling Logic ---
-        // Das Bild ist immer 1080x1350px. Wir skalieren es per CSS, damit es in den Bildschirm (rechts) passt.
-        function resizePreview() {
-            const wrapper = document.getElementById('scale-wrapper');
-            const parent = wrapper.parentElement;
-            
-            // Padding abziehen (damit es nicht am Rand klebt)
-            const availableWidth = parent.clientWidth - 60;
-            const availableHeight = parent.clientHeight - 60;
-            
-            // Ziel-Auflösung
-            const targetWidth = 1080;
-            const targetHeight = 1350;
-            
-            // Finde den passenden Skalierungsfaktor (damit es komplett reinpasst)
-            const scaleX = availableWidth / targetWidth;
-            const scaleY = availableHeight / targetHeight;
-            const scale = Math.min(scaleX, scaleY);
-            
-            wrapper.style.transform = `scale(${scale})`;
-            
-            // Damit der Wrapper den Platz richtig einnimmt, obwohl er herunterskaliert wird
-            wrapper.style.width = `${targetWidth}px`;
-            wrapper.style.height = `${targetHeight}px`;
-        }
-
-        window.addEventListener('resize', resizePreview);
-        // Initialer Aufruf
-        resizePreview();
-
-
-        // --- Bild Export Logic (html2canvas) ---
-        async function exportPost() {
-            const overlay = document.getElementById('loading-overlay');
-            const exportNode = document.getElementById('export-canvas');
-            
-            overlay.classList.remove('hidden');
-            overlay.classList.add('flex');
-
-            // Wir warten einen winzigen Moment, damit der Overlay sicher gerendert ist
-            setTimeout(async () => {
-                try {
-                    // html2canvas macht einen "Screenshot" des DOM Elements
-                    const canvas = await html2canvas(exportNode, {
-                        scale: 1, // 1 reicht, da das Element intern bereits 1080x1350px groß ist
-                        backgroundColor: '#050505',
-                        useCORS: true,
-                        logging: false
-                    });
-
-                    // In eine PNG Datei konvertieren und herunterladen
-                    const link = document.createElement('a');
-                    link.download = `GRIND_Post_${Date.now()}.png`;
-                    link.href = canvas.toDataURL('image/png');
-                    link.click();
-
-                } catch (err) {
-                    console.error("Export Fehler: ", err);
-                    alert("Es gab ein Problem beim Exportieren. Bitte versuche es erneut.");
-                } finally {
-                    overlay.classList.add('hidden');
-                    overlay.classList.remove('flex');
+        // Hilfsfunktion: Berechnet die Höhe des Textes mit Zeilenumbrüchen
+        function measureWrappedTextHeight(text, maxWidth, lineHeight, font) {
+            if (!text) return 0;
+            ctx.font = font;
+            const paragraphs = text.split('\n');
+            let height = 0;
+            for(let p = 0; p < paragraphs.length; p++) {
+                const words = paragraphs[p].split(' ');
+                let line = '';
+                for(let n = 0; n < words.length; n++) {
+                    const testLine = line + words[n] + ' ';
+                    const metrics = ctx.measureText(testLine);
+                    if (metrics.width > maxWidth && n > 0) {
+                        height += lineHeight;
+                        line = words[n] + ' ';
+                    } else {
+                        line = testLine;
+                    }
                 }
-            }, 100);
+                height += lineHeight;
+            }
+            return height;
+        }
+
+        // Hilfsfunktion: Zeichnet Text mit automatischen Zeilenumbrüchen
+        function drawWrappedText(text, x, y, maxWidth, lineHeight) {
+            if (!text) return y;
+            const paragraphs = text.split('\n');
+            let currentY = y;
+            for(let p = 0; p < paragraphs.length; p++) {
+                const words = paragraphs[p].split(' ');
+                let line = '';
+                for(let n = 0; n < words.length; n++) {
+                    const testLine = line + words[n] + ' ';
+                    const metrics = ctx.measureText(testLine);
+                    if (metrics.width > maxWidth && n > 0) {
+                        ctx.fillText(line.trim(), x, currentY);
+                        line = words[n] + ' ';
+                        currentY += lineHeight;
+                    } else {
+                        line = testLine;
+                    }
+                }
+                ctx.fillText(line.trim(), x, currentY);
+                currentY += lineHeight;
+            }
+            return currentY;
+        }
+
+        function drawCanvas() {
+            // 1. Hintergrund zeichnen
+            ctx.fillStyle = '#050505';
+            ctx.fillRect(0, 0, 1080, 1350);
+
+            // Radialer Verlauf (Wie in deiner App)
+            const bgGradient = ctx.createRadialGradient(540, 675, 0, 540, 675, 1000);
+            bgGradient.addColorStop(0, '#120600');
+            bgGradient.addColorStop(1, '#050505');
+            ctx.fillStyle = bgGradient;
+            ctx.fillRect(0, 0, 1080, 1350);
+
+            // Subtiles Raster / Noise
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.02)';
+            ctx.lineWidth = 1;
+            for(let i = 0; i <= 1080; i += 100) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 1350); ctx.stroke(); }
+            for(let i = 0; i <= 1350; i += 100) { ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(1080, i); ctx.stroke(); }
+
+            // Mittlerer Oranger Glow
+            const glow = ctx.createRadialGradient(540, 675, 0, 540, 675, 500);
+            glow.addColorStop(0, 'rgba(255, 77, 0, 0.1)');
+            glow.addColorStop(1, 'transparent');
+            ctx.fillStyle = glow;
+            ctx.fillRect(0, 0, 1080, 1350);
+
+            // 2. Eingaben auslesen
+            const tag = document.getElementById('input-tag').value.trim().toUpperCase();
+            const head = document.getElementById('input-headline').value.trim().toUpperCase();
+            const body = document.getElementById('input-body').value.trim();
+
+            const isCenter = currentLayout === 'center';
+            const startX = isCenter ? 540 : 120;
+            const maxWidth = 840; // 1080 - 240 margin
+
+            // 3. Totale Texthöhe berechnen (Für perfekte vertikale Zentrierung)
+            let totalHeight = 0;
+            const tagFont = '900 24px "Inter"';
+            const headFont = 'italic 900 110px "Inter"';
+            const bodyFont = '500 36px "Inter"';
+
+            if (tag) totalHeight += 24 + 30; // 24px höhe + 30px gap
+            if (head) totalHeight += measureWrappedTextHeight(head, maxWidth, 100, headFont) + 50; // gap 50
+            if (body) totalHeight += measureWrappedTextHeight(body, maxWidth, 56, bodyFont);
+
+            // Startpunkt Y berechnen (Gesamthöhe - Footer(150))
+            let currentY = ((1350 - 150) / 2) - (totalHeight / 2);
+
+            // 4. Text Zeichnen
+            ctx.textAlign = isCenter ? 'center' : 'left';
+            ctx.textBaseline = 'top';
+
+            // Tagline
+            if (tag) {
+                ctx.font = tagFont;
+                ctx.fillStyle = '#ff4d00';
+                if (ctx.letterSpacing !== undefined) ctx.letterSpacing = '8px';
+                ctx.fillText(tag, startX, currentY);
+                if (ctx.letterSpacing !== undefined) ctx.letterSpacing = '0px';
+                currentY += 54; 
+            }
+
+            // Headline
+            if (head) {
+                ctx.font = headFont;
+                ctx.fillStyle = '#ffffff';
+                if (ctx.letterSpacing !== undefined) ctx.letterSpacing = '-2px';
+                // Schatten für Tiefe
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+                ctx.shadowBlur = 40;
+                ctx.shadowOffsetY = 10;
+                
+                currentY = drawWrappedText(head, startX, currentY, maxWidth, 100);
+                
+                ctx.shadowColor = 'transparent'; // Reset Shadow
+                if (ctx.letterSpacing !== undefined) ctx.letterSpacing = '0px';
+                currentY += 50;
+            }
+
+            // Body
+            if (body) {
+                ctx.font = bodyFont;
+                ctx.fillStyle = '#cccccc';
+                drawWrappedText(body, startX, currentY, maxWidth, 56);
+            }
+
+            // 5. Footer Zeichnen (Fixiert unten)
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'bottom';
+            
+            // "Join the Network" Subtitle
+            ctx.font = '700 18px "Inter"';
+            ctx.fillStyle = '#666666';
+            if (ctx.letterSpacing !== undefined) ctx.letterSpacing = '6px';
+            ctx.fillText('Level up you life', 120, 1220);
+            if (ctx.letterSpacing !== undefined) ctx.letterSpacing = '0px';
+
+            // "GRIND." Logo
+            ctx.font = 'italic 900 46px "Inter"';
+            const textGrind = 'GRIND';
+            const textDot = '.';
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText(textGrind, 120, 1270);
+            const wGrind = ctx.measureText(textGrind).width;
+            ctx.fillStyle = '#ff4d00';
+            ctx.fillText(textDot, 120 + wGrind, 1270);
+
+            // Icon rechts unten (Kreis mit Pfeil)
+            const cx = 960 - 32;
+            const cy = 1270 - 24;
+            
+            ctx.strokeStyle = '#ff4d00';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.arc(cx, cy, 32, 0, Math.PI * 2);
+            ctx.stroke();
+
+            ctx.lineWidth = 3;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.beginPath();
+            // Pfeil zeichnen
+            ctx.moveTo(cx - 8, cy + 8);
+            ctx.lineTo(cx + 8, cy - 8);
+            ctx.moveTo(cx - 2, cy - 8);
+            ctx.lineTo(cx + 8, cy - 8);
+            ctx.lineTo(cx + 8, cy + 2);
+            ctx.stroke();
+        }
+
+        // --- Export / Share Logik (Exakt wie in deiner App) ---
+        function exportPost() {
+            canvas.toBlob(async (blob) => {
+                if (!blob) return alert("Fehler bei der Bildgenerierung."); 
+                
+                const fileName = `GRIND_POST_${Date.now()}.png`;
+                const file = new File([blob], fileName, { type: 'image/png' });
+                
+                const fallbackDownload = () => { 
+                    const link = document.createElement('a'); 
+                    link.download = fileName; 
+                    link.href = canvas.toDataURL('image/png'); 
+                    link.click(); 
+                };
+                
+                if (navigator.canShare && navigator.canShare({ files: [file] })) { 
+                    try { 
+                        await navigator.share({ 
+                            files: [file], 
+                            title: 'GRIND.', 
+                            text: 'Join the Hustle.' 
+                        }); 
+                    } catch (err) { 
+                        if (err.name !== 'AbortError') fallbackDownload(); 
+                    } 
+                } else { 
+                    fallbackDownload(); 
+                }
+            }, 'image/png');
         }
     </script>
 </body>
-</html>
-
-```
+</
