@@ -34,7 +34,7 @@
 <body class="h-screen w-screen flex flex-col md:flex-row antialiased">
 
     <!-- LINKE SEITE: Controls / Editor -->
-    <div class="w-full md:w-[400px] bg-[#0a0a0a] border-r border-[#1f1f1f] flex flex-col h-[45%] md:h-full z-20 shadow-2xl">
+    <div class="w-full md:w-[400px] bg-[#0a0a0a] border-r border-[#1f1f1f] flex flex-col h-[50%] md:h-full z-20 shadow-2xl">
         
         <div class="p-5 border-b border-[#1f1f1f] bg-[#050505] flex justify-between items-center">
             <h1 class="text-xl font-black italic tracking-tighter">GRIND<span class="text-[#ff4d00]">.</span> <span class="text-gray-500 text-xs tracking-widest uppercase ml-2 not-italic">Creator</span></h1>
@@ -42,6 +42,24 @@
 
         <div class="flex-1 overflow-y-auto sidebar-scroll p-6 flex flex-col gap-6">
             
+            <!-- Format Auswahl (NEU) -->
+            <div>
+                <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Instagram Format</label>
+                <div class="flex gap-2">
+                    <button onclick="setFormat('square')" id="btn-format-square" class="flex-1 py-2 bg-[#1f1f1f] border border-[#ff4d00] text-[#ff4d00] text-[11px] font-bold uppercase rounded transition">1:1 (Quadrat)</button>
+                    <button onclick="setFormat('portrait')" id="btn-format-portrait" class="flex-1 py-2 bg-[#111] border border-[#333] text-gray-400 text-[11px] font-bold uppercase rounded hover:bg-[#1f1f1f] transition">4:5 (Portrait)</button>
+                </div>
+            </div>
+
+            <!-- Text Ausrichtung -->
+            <div>
+                <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Text Ausrichtung</label>
+                <div class="flex gap-2">
+                    <button onclick="setLayout('left')" id="btn-layout-left" class="flex-1 py-2 bg-[#1f1f1f] border border-[#ff4d00] text-[#ff4d00] text-[11px] font-bold uppercase rounded transition">Links</button>
+                    <button onclick="setLayout('center')" id="btn-layout-center" class="flex-1 py-2 bg-[#111] border border-[#333] text-gray-400 text-[11px] font-bold uppercase rounded hover:bg-[#1f1f1f] transition">Zentriert</button>
+                </div>
+            </div>
+
             <div>
                 <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Tagline (Orange)</label>
                 <input type="text" id="input-tag" value="SYSTEM UPDATE" oninput="drawCanvas()" class="w-full bg-[#111] border border-[#333] rounded px-4 py-3 text-sm text-white focus:outline-none focus:border-[#ff4d00] uppercase tracking-widest font-bold">
@@ -58,39 +76,50 @@ JUST EXECUTION.</textarea>
                 <textarea id="input-body" rows="4" oninput="drawCanvas()" class="w-full bg-[#111] border border-[#333] rounded px-4 py-3 text-sm text-gray-300 focus:outline-none focus:border-[#ff4d00] resize-none leading-relaxed">Wenn der Wecker klingelt, hast du zwei Optionen: Weiterschlafen und träumen, oder aufstehen und deine Ziele jagen. Das Network belohnt die, die den Grind durchziehen.</textarea>
             </div>
 
-            <div>
-                <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Layout Option</label>
-                <div class="flex gap-2">
-                    <button onclick="setLayout('left')" id="btn-layout-left" class="flex-1 py-2 bg-[#1f1f1f] border border-[#ff4d00] text-[#ff4d00] text-xs font-bold uppercase rounded transition">Links</button>
-                    <button onclick="setLayout('center')" id="btn-layout-center" class="flex-1 py-2 bg-[#111] border border-[#333] text-gray-400 text-xs font-bold uppercase rounded hover:bg-[#1f1f1f] transition">Zentriert</button>
-                </div>
-            </div>
         </div>
 
         <div class="p-5 border-t border-[#1f1f1f] bg-[#050505]">
             <button onclick="exportPost()" class="btn-primary w-full flex items-center justify-center gap-2">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                Post Teilen / Speichern
+                Post Exportieren
             </button>
         </div>
 
     </div>
 
     <!-- RECHTE SEITE: Live Canvas Vorschau -->
-    <div class="flex-1 bg-[#1a1a1a] relative flex items-center justify-center p-4 md:p-8 h-[55%] md:h-full bg-[radial-gradient(#333_1px,transparent_1px)] [background-size:20px_20px]">
+    <div class="flex-1 bg-[#1a1a1a] relative flex items-center justify-center p-4 md:p-8 h-[50%] md:h-full bg-[radial-gradient(#333_1px,transparent_1px)] [background-size:20px_20px]">
         <!-- Das Canvas-Element, responsive skaliert per CSS -->
-        <canvas id="creator-canvas" width="1080" height="1350" class="max-w-full max-h-full object-contain shadow-2xl rounded border border-[#1f1f1f]"></canvas>
+        <canvas id="creator-canvas" width="1080" height="1080" class="max-w-full max-h-full object-contain shadow-[0_0_50px_rgba(0,0,0,0.8)] rounded-sm border border-[#333]"></canvas>
     </div>
 
     <script>
         const canvas = document.getElementById('creator-canvas');
         const ctx = canvas.getContext('2d');
         let currentLayout = 'left';
+        let currentFormat = 'square'; // 'square' (1:1) oder 'portrait' (4:5)
 
         // Stellt sicher, dass der Font geladen ist, bevor gezeichnet wird
         document.fonts.ready.then(() => {
-            drawCanvas();
+            setTimeout(drawCanvas, 100); // Kurzer Delay stellt sicher, dass die Font-Engine 100% bereit ist
         });
+
+        function setFormat(format) {
+            currentFormat = format;
+            const btnSquare = document.getElementById('btn-format-square');
+            const btnPortrait = document.getElementById('btn-format-portrait');
+
+            if (format === 'portrait') {
+                canvas.height = 1350; // 4:5 Instagram Format
+                btnPortrait.className = "flex-1 py-2 bg-[#1f1f1f] border border-[#ff4d00] text-[#ff4d00] text-[11px] font-bold uppercase rounded transition";
+                btnSquare.className = "flex-1 py-2 bg-[#111] border border-[#333] text-gray-400 text-[11px] font-bold uppercase rounded hover:bg-[#1f1f1f] transition";
+            } else {
+                canvas.height = 1080; // 1:1 Instagram Quadrat
+                btnSquare.className = "flex-1 py-2 bg-[#1f1f1f] border border-[#ff4d00] text-[#ff4d00] text-[11px] font-bold uppercase rounded transition";
+                btnPortrait.className = "flex-1 py-2 bg-[#111] border border-[#333] text-gray-400 text-[11px] font-bold uppercase rounded hover:bg-[#1f1f1f] transition";
+            }
+            drawCanvas();
+        }
 
         function setLayout(style) {
             currentLayout = style;
@@ -98,11 +127,11 @@ JUST EXECUTION.</textarea>
             const btnCenter = document.getElementById('btn-layout-center');
 
             if (style === 'center') {
-                btnCenter.className = "flex-1 py-2 bg-[#1f1f1f] border border-[#ff4d00] text-[#ff4d00] text-xs font-bold uppercase rounded transition";
-                btnLeft.className = "flex-1 py-2 bg-[#111] border border-[#333] text-gray-400 text-xs font-bold uppercase rounded hover:bg-[#1f1f1f] transition";
+                btnCenter.className = "flex-1 py-2 bg-[#1f1f1f] border border-[#ff4d00] text-[#ff4d00] text-[11px] font-bold uppercase rounded transition";
+                btnLeft.className = "flex-1 py-2 bg-[#111] border border-[#333] text-gray-400 text-[11px] font-bold uppercase rounded hover:bg-[#1f1f1f] transition";
             } else {
-                btnLeft.className = "flex-1 py-2 bg-[#1f1f1f] border border-[#ff4d00] text-[#ff4d00] text-xs font-bold uppercase rounded transition";
-                btnCenter.className = "flex-1 py-2 bg-[#111] border border-[#333] text-gray-400 text-xs font-bold uppercase rounded hover:bg-[#1f1f1f] transition";
+                btnLeft.className = "flex-1 py-2 bg-[#1f1f1f] border border-[#ff4d00] text-[#ff4d00] text-[11px] font-bold uppercase rounded transition";
+                btnCenter.className = "flex-1 py-2 bg-[#111] border border-[#333] text-gray-400 text-[11px] font-bold uppercase rounded hover:bg-[#1f1f1f] transition";
             }
             drawCanvas();
         }
@@ -157,29 +186,32 @@ JUST EXECUTION.</textarea>
         }
 
         function drawCanvas() {
+            const W = canvas.width;
+            const H = canvas.height;
+
             // 1. Hintergrund zeichnen
             ctx.fillStyle = '#050505';
-            ctx.fillRect(0, 0, 1080, 1350);
+            ctx.fillRect(0, 0, W, H);
 
-            // Radialer Verlauf (Wie in deiner App)
-            const bgGradient = ctx.createRadialGradient(540, 675, 0, 540, 675, 1000);
+            // Radialer Verlauf
+            const bgGradient = ctx.createRadialGradient(W/2, H/2, 0, W/2, H/2, W * 0.8);
             bgGradient.addColorStop(0, '#120600');
             bgGradient.addColorStop(1, '#050505');
             ctx.fillStyle = bgGradient;
-            ctx.fillRect(0, 0, 1080, 1350);
+            ctx.fillRect(0, 0, W, H);
 
             // Subtiles Raster / Noise
             ctx.strokeStyle = 'rgba(255, 255, 255, 0.02)';
             ctx.lineWidth = 1;
-            for(let i = 0; i <= 1080; i += 100) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 1350); ctx.stroke(); }
-            for(let i = 0; i <= 1350; i += 100) { ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(1080, i); ctx.stroke(); }
+            for(let i = 0; i <= W; i += 100) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, H); ctx.stroke(); }
+            for(let i = 0; i <= H; i += 100) { ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(W, i); ctx.stroke(); }
 
             // Mittlerer Oranger Glow
-            const glow = ctx.createRadialGradient(540, 675, 0, 540, 675, 500);
-            glow.addColorStop(0, 'rgba(255, 77, 0, 0.1)');
+            const glow = ctx.createRadialGradient(W/2, H/2, 0, W/2, H/2, W * 0.5);
+            glow.addColorStop(0, 'rgba(255, 77, 0, 0.15)');
             glow.addColorStop(1, 'transparent');
             ctx.fillStyle = glow;
-            ctx.fillRect(0, 0, 1080, 1350);
+            ctx.fillRect(0, 0, W, H);
 
             // 2. Eingaben auslesen
             const tag = document.getElementById('input-tag').value.trim().toUpperCase();
@@ -187,8 +219,8 @@ JUST EXECUTION.</textarea>
             const body = document.getElementById('input-body').value.trim();
 
             const isCenter = currentLayout === 'center';
-            const startX = isCenter ? 540 : 120;
-            const maxWidth = 840; // 1080 - 240 margin
+            const startX = isCenter ? W / 2 : 120;
+            const maxWidth = W - 240; // 120px Abstand links und rechts
 
             // 3. Totale Texthöhe berechnen (Für perfekte vertikale Zentrierung)
             let totalHeight = 0;
@@ -200,8 +232,8 @@ JUST EXECUTION.</textarea>
             if (head) totalHeight += measureWrappedTextHeight(head, maxWidth, 100, headFont) + 50; // gap 50
             if (body) totalHeight += measureWrappedTextHeight(body, maxWidth, 56, bodyFont);
 
-            // Startpunkt Y berechnen (Gesamthöhe - Footer(150))
-            let currentY = ((1350 - 150) / 2) - (totalHeight / 2);
+            // Startpunkt Y berechnen: Gesamthöhe - Footer(180) zentriert
+            let currentY = ((H - 180) / 2) - (totalHeight / 2);
 
             // 4. Text Zeichnen
             ctx.textAlign = isCenter ? 'center' : 'left';
@@ -222,6 +254,7 @@ JUST EXECUTION.</textarea>
                 ctx.font = headFont;
                 ctx.fillStyle = '#ffffff';
                 if (ctx.letterSpacing !== undefined) ctx.letterSpacing = '-2px';
+                
                 // Schatten für Tiefe
                 ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
                 ctx.shadowBlur = 40;
@@ -245,11 +278,11 @@ JUST EXECUTION.</textarea>
             ctx.textAlign = 'left';
             ctx.textBaseline = 'bottom';
             
-            // "Join the Network" Subtitle
+            // "LEVEL UP YOUR LIFE" Subtitle
             ctx.font = '700 18px "Inter"';
             ctx.fillStyle = '#666666';
             if (ctx.letterSpacing !== undefined) ctx.letterSpacing = '6px';
-            ctx.fillText('Level up you life', 120, 1220);
+            ctx.fillText('LEVEL UP YOUR LIFE', 120, H - 130);
             if (ctx.letterSpacing !== undefined) ctx.letterSpacing = '0px';
 
             // "GRIND." Logo
@@ -257,14 +290,14 @@ JUST EXECUTION.</textarea>
             const textGrind = 'GRIND';
             const textDot = '.';
             ctx.fillStyle = '#ffffff';
-            ctx.fillText(textGrind, 120, 1270);
+            ctx.fillText(textGrind, 120, H - 80);
             const wGrind = ctx.measureText(textGrind).width;
             ctx.fillStyle = '#ff4d00';
-            ctx.fillText(textDot, 120 + wGrind, 1270);
+            ctx.fillText(textDot, 120 + wGrind, H - 80);
 
             // Icon rechts unten (Kreis mit Pfeil)
-            const cx = 960 - 32;
-            const cy = 1270 - 24;
+            const cx = W - 120 - 32; // X Zentrum (Rechter Rand - Margin - Radius)
+            const cy = H - 80 - 24;  // Y Zentrum
             
             ctx.strokeStyle = '#ff4d00';
             ctx.lineWidth = 4;
@@ -285,12 +318,12 @@ JUST EXECUTION.</textarea>
             ctx.stroke();
         }
 
-        // --- Export / Share Logik (Exakt wie in deiner App) ---
+        // --- Export / Share Logik ---
         function exportPost() {
             canvas.toBlob(async (blob) => {
                 if (!blob) return alert("Fehler bei der Bildgenerierung."); 
                 
-                const fileName = `GRIND_POST_${Date.now()}.png`;
+                const fileName = `GRIND_POST_${currentFormat}_${Date.now()}.png`;
                 const file = new File([blob], fileName, { type: 'image/png' });
                 
                 const fallbackDownload = () => { 
@@ -317,4 +350,5 @@ JUST EXECUTION.</textarea>
         }
     </script>
 </body>
-</
+</html>
+
