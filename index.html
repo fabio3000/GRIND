@@ -17,12 +17,12 @@
     
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #030303; color: #ffffff; overflow-x: hidden; scroll-behavior: smooth; background-image: radial-gradient(circle at top, #0b0b0b 0%, #030303 70%); min-height: 100vh; overscroll-behavior-y: none; }
-        .grid-overlay { position: fixed; inset: 0; opacity: 0.08; background-size: 60px 60px; background-image: linear-gradient(to right, rgba(255,255,255,0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.08) 1px, transparent 1px); transform: perspective(500px) rotateX(60deg); pointer-events: none; z-index: 0; }
+        
+        .grid-overlay { position: fixed; inset: 0; opacity: 0.08; background-size: 60px 60px; background-image: linear-gradient(to right, rgba(255,255,255,0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.08) 1px, transparent 1px); transform: perspective(500px) rotateX(60deg) translateZ(0); pointer-events: none; z-index: 0; }
+        
         .grind-gradient { background: linear-gradient(90deg, #ff4d00, #ff8800); }
         .text-brand { color: #ff4d00; } 
         .bg-brand { background: #ff4d00; }
-        .radial-glow-orange { background: radial-gradient(circle, rgba(255,77,0,0.15) 0%, transparent 60%); }
-        .radial-glow-purple { background: radial-gradient(circle, rgba(168,85,247,0.15) 0%, transparent 60%); }
         
         .card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; transition: all 0.3s ease; position: relative; z-index: 10; backdrop-filter: blur(10px); }
         .card:hover { border-color: rgba(255, 77, 0, 0.4); box-shadow: 0 10px 30px rgba(255, 77, 0, 0.1); transform: translateY(-2px); }
@@ -94,15 +94,20 @@
 <body class="flex flex-col relative select-none">
     <div class="grid-overlay"></div>
     
-    <!-- Smart Live Notification Badge -->
-    <div id="live-notification-badge" class="fixed top-4 left-1/2 transform -translate-x-1/2 -translate-y-[150%] opacity-0 z-[99999] transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] pointer-events-none w-full max-w-sm px-4">
-        <div class="bg-black/95 backdrop-blur-xl border border-[#ff4d00]/40 shadow-[0_10px_40px_rgba(255,77,0,0.3)] rounded-full py-3 px-5 flex items-center justify-center">
-            <span id="live-notification-text" class="text-white text-[10px] font-bold uppercase tracking-widest text-center truncate"></span>
+    <!-- Smart Live Notification Badge (Ersetzt den Ticker) -->
+    <div id="live-notification-badge" class="fixed top-6 left-1/2 transform -translate-x-1/2 -translate-y-32 opacity-0 z-[99999] transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] pointer-events-none w-[90%] max-w-sm">
+        <div class="bg-black/90 backdrop-blur-md border border-[#ff4d00]/30 shadow-[0_10px_40px_rgba(255,77,0,0.3)] rounded-full py-3 px-5 flex items-center gap-3">
+            <span class="relative flex h-3 w-3 flex-shrink-0">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#ff4d00] opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-3 w-3 bg-[#ff4d00]"></span>
+            </span>
+            <span id="live-notification-text" class="text-white text-[11px] font-bold uppercase tracking-widest truncate w-full"></span>
         </div>
     </div>
 
     <div id="toast-container"></div>
     
+    <!-- XP Dropdown HUD -->
     <div id="xp-hud" class="fixed top-0 left-0 right-0 z-[999998] transform -translate-y-[150%] transition-transform duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] pointer-events-none flex justify-center pt-4 px-4 sm:px-6">
         <div class="absolute inset-0 bg-[#0a0a0a]/80 backdrop-blur-2xl rounded-xl border border-[#ff4d00]/40 shadow-[0_20px_50px_rgba(0,0,0,0.7)] p-5 w-full max-w-sm mx-auto flex flex-col gap-3 relative overflow-hidden pointer-events-auto">
             <div class="absolute inset-0 bg-gradient-to-b from-[#ff4d00]/10 to-transparent"></div>
@@ -165,6 +170,7 @@
         let holdTimer = null, holdProgress = 0, isRedeeming = false;
         window.currentVerify = null; window.countdownInterval = null;
 
+        // Render Debouncer gegen Stottern
         let renderTimeout = null;
         window.scheduleRender = () => {
             if (renderTimeout) clearTimeout(renderTimeout);
@@ -180,6 +186,7 @@
             return `vor ${Math.floor(diff/86400)} Tagen`;
         };
 
+        // Robuste Date Helper die keine NaN Fehler werfen
         const getYesterdayStr = () => { const d = new Date(); d.setDate(d.getDate() - 1); return d.toISOString().split('T')[0]; };
         const getWeekYear = (d) => { const date = new Date(d.getTime()); date.setUTCDate(date.getDate() + 4 - (date.getDay()||7)); const yearStart = new Date(Date.UTC(date.getUTCFullYear(),0,1)); return `${date.getUTCFullYear()}-W${Math.ceil(( ( (date - yearStart) / 86400000) + 1)/7)}`; };
         const getPreviousWeekStr = () => { const d = new Date(); d.setDate(d.getDate() - 7); return getWeekYear(d); };
@@ -237,43 +244,44 @@
             });
         };
 
-        // --- SMART NOTIFICATION SYSTEM (Replaces old ticker) ---
+        // --- SMART ANIMATED NOTIFICATION BADGE ---
         let notificationQueue = [];
         let isShowingNotification = false;
         let lastNotifiedTimestamp = Date.now(); 
+
+        window.showLiveNotification = (text) => {
+            const notif = document.getElementById('live-notification-badge');
+            const textEl = document.getElementById('live-notification-text');
+            if(!notif || !textEl) return;
+            
+            textEl.innerText = text;
+            notif.classList.remove('-translate-y-32', 'opacity-0');
+            notif.classList.add('translate-y-0', 'opacity-100');
+            
+            setTimeout(() => {
+                notif.classList.remove('translate-y-0', 'opacity-100');
+                notif.classList.add('-translate-y-32', 'opacity-0');
+            }, 4000);
+        };
 
         const processNotificationQueue = () => {
             if (isShowingNotification || notificationQueue.length === 0) return;
             isShowingNotification = true;
             
             const act = notificationQueue.shift();
-            const badge = document.getElementById('live-notification-badge');
-            const badgeText = document.getElementById('live-notification-text');
+            const t = act.text.replace(/<[^>]*>?/gm, ''); 
+            window.showLiveNotification(`⚡ Jemand ${t}`);
             
-            if (badge && badgeText) {
-                const t = act.text.replace(/<[^>]*>?/gm, ''); 
-                badgeText.innerText = `⚡ Jemand ${t}`;
-                
-                badge.classList.remove('-translate-y-[150%]', 'opacity-0');
-                badge.classList.add('translate-y-0', 'opacity-100');
-                
-                setTimeout(() => {
-                    badge.classList.remove('translate-y-0', 'opacity-100');
-                    badge.classList.add('-translate-y-[150%]', 'opacity-0');
-                    setTimeout(() => {
-                        isShowingNotification = false;
-                        processNotificationQueue();
-                    }, 500); 
-                }, 4000); 
-            } else {
+            setTimeout(() => {
                 isShowingNotification = false;
-            }
+                processNotificationQueue();
+            }, 4500); 
         };
 
         window.updateLiveUI = () => {
             const feedContainer = document.getElementById('live-feed-content');
             
-            // 1. Process Crew Feed immediately
+            // 1. Crew Feed Update
             if (feedContainer && state.activities) {
                 const p = state.profile || {}; const friendsList = p.friends || []; const feedUsersLower = friendsList.map(u => (u || '').toLowerCase());
                 const feedActivities = state.activities.filter(act => act.alias && feedUsersLower.includes(act.alias.toLowerCase())).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0)).slice(0, 10);
@@ -294,7 +302,7 @@
                 }
             }
 
-            // 2. Process Notifications queue
+            // 2. Process Smart Notification Queue (nur Events < 60 Sek)
             if (state.activities) {
                 const now = Date.now();
                 const newActs = state.activities.filter(a => a.timestamp > lastNotifiedTimestamp && (now - a.timestamp) < 60000);
@@ -333,6 +341,24 @@
                 onSnapshot(doc(db, 'system', 'pricing'), (docSnap) => { if (docSnap.exists()) state.bundlePrice = docSnap.data().bundlePrice; if (state.view === 'paywall') window.scheduleRender(); });
             } else { state.user = null; state.profile = null; state.view = 'auth'; state.authStep = 'phone'; window.scheduleRender(); }
         });
+
+        // HILFSFUNKTION FÜR MISSION/HABIT CLAIM (Sichere Argument-Übergabe ohne Quote-Fehler)
+        window.claimItemById = (mid) => {
+            let item = state.habitData.find(h => h.id === mid);
+            if (!item) {
+                for (let w in state.weeklyData) {
+                    let m = state.weeklyData[w].missions?.find(x => x.id === mid);
+                    if (m) { item = m; break; }
+                }
+            }
+            if (!item) return;
+            
+            if (item.type === 'instant') {
+                window.claimInstantMission(item.id, Number(item.xp), item.name);
+            } else {
+                window.openVerifyModal(item.id, Number(item.xp), item.type, item.name, item.qr_solution || '');
+            }
+        };
 
         window.closeModal = () => {
             if(window.stopRedeemHold) window.stopRedeemHold(); 
@@ -408,7 +434,7 @@
                 await updateDoc(doc(db, 'plot_users', state.user.uid), { friends: arrayUnion(theirAlias), xp: newXp, lvl: newLvl });
                 await window.logActivity('MISSION', `hat das Network erweitert (+${myNextXpBounty} XP Bounty).`);
                 if(newLvl > oldLvl) await window.logActivity('LEVEL_UP', `hat <span class="font-bold">Level ${newLvl}</span> erreicht!`);
-                window.closeModal(); if(window.scrollY <= 100) window.showToast(`+${myNextXpBounty} XP! Du bist jetzt mit ${theirAlias} verbunden!`, "success");
+                window.closeModal(); window.showToast(`+${myNextXpBounty} XP! Du bist jetzt mit ${theirAlias} verbunden!`, "success");
             } catch(e) { window.showToast("Fehler.", "error"); }
         };
 
@@ -435,46 +461,29 @@
             try {
                 const habit = state.habitData.find(h => h.id === mid); const isRepeatable = !!habit; const oldLvl = state.profile.lvl || 1; let newLvl = oldLvl; let updatePayload = {}; let claimSuccess = false;
                 if (isRepeatable) {
-                    const freq = habit.frequency || 'daily'; const isWeekly = freq === 'weekly' || freq === 'weekly_streak'; const timeKey = todayStr = new Date().toISOString().split('T')[0];
+                    const freq = habit.frequency || 'daily'; const isWeekly = freq === 'weekly' || freq === 'weekly_streak'; const isDailyStreak = freq === 'daily_streak';
+                    const timeKey = new Date().toISOString().split('T')[0]; const currentWeekStr = getWeekYear(new Date());
                     const streaks = state.profile.streaks || {}; const habitStreak = streaks[mid] || { streak: 0, lastDate: '', lastWeek: '' };
                     
                     if (habitStreak.lastDate !== timeKey) {
-                        let activeStreak = habitStreak.streak || 0;
-                        let earnedBonus = 0;
-                        const currentWeekStr = getWeekYear(new Date());
-
+                        let activeStreak = habitStreak.streak || 0; let earnedBonus = 0;
                         if (isWeekly) {
-                            if (habitStreak.lastWeek && habitStreak.lastWeek !== currentWeekStr && habitStreak.lastWeek !== getPreviousWeekStr()) {
-                                activeStreak = 0;
-                            }
-                            if (habitStreak.lastWeek !== currentWeekStr) {
-                                activeStreak++;
-                                const streakBonus = parseInt(habit.streakBonus) || 0;
-                                earnedBonus = (activeStreak > 1) ? (activeStreak - 1) * streakBonus : 0;
-                            }
-                        } else if (freq === 'daily_streak') {
-                            if (habitStreak.lastDate && habitStreak.lastDate !== getYesterdayStr()) {
-                                activeStreak = 0;
-                            }
-                            activeStreak++;
-                            const streakBonus = parseInt(habit.streakBonus) || 0;
-                            earnedBonus = (activeStreak > 1) ? (activeStreak - 1) * streakBonus : 0;
-                        } else {
-                            activeStreak = 0;
-                        }
-
-                        const finalXp = xp + earnedBonus;
-                        const newTotalXp = (state.profile.xp || 0) + finalXp; 
+                            if (habitStreak.lastWeek && habitStreak.lastWeek !== currentWeekStr && habitStreak.lastWeek !== getPreviousWeekStr()) { activeStreak = 0; }
+                            if (habitStreak.lastWeek !== currentWeekStr) { activeStreak++; const streakBonus = parseInt(habit.streakBonus) || 0; earnedBonus = (activeStreak > 1) ? (activeStreak - 1) * streakBonus : 0; }
+                        } else if (isDailyStreak) {
+                            if (habitStreak.lastDate && habitStreak.lastDate !== getYesterdayStr()) { activeStreak = 0; }
+                            activeStreak++; const streakBonus = parseInt(habit.streakBonus) || 0; earnedBonus = (activeStreak > 1) ? (activeStreak - 1) * streakBonus : 0;
+                        } else { activeStreak = 0; }
                         
-                        streaks[mid] = { streak: activeStreak, lastDate: timeKey, lastWeek: currentWeekStr }; 
-                        newLvl = Math.floor(newTotalXp / 1000) + 1;
-                        updatePayload = { xp: newTotalXp, lvl: newLvl, streaks: streaks }; claimSuccess = true;
-                        if(window.scrollY <= 100) window.showToast(`+${finalXp} XP für ${name}!${earnedBonus>0 ? ' 🔥 Bonus' : ''}`, "success");
+                        const finalXp = xp + earnedBonus; const newTotalXp = (state.profile.xp || 0) + finalXp; 
+                        streaks[mid] = { streak: activeStreak, lastDate: timeKey, lastWeek: isWeekly ? currentWeekStr : habitStreak.lastWeek }; 
+                        newLvl = Math.floor(newTotalXp / 1000) + 1; updatePayload = { xp: newTotalXp, lvl: newLvl, streaks: streaks }; claimSuccess = true;
+                        window.showToast(`+${finalXp} XP für ${name}!${earnedBonus>0 ? ' 🔥 Bonus' : ''}`, "success");
                     } else { window.showToast("Heute bereits erledigt!", "error"); }
                 } else if (!(state.profile.completed || []).includes(mid)) {
                     const newXp = (state.profile.xp || 0) + xp; newLvl = Math.floor(newXp / 1000) + 1;
                     updatePayload = { xp: newXp, lvl: newLvl, completed: [...(state.profile.completed || []), mid] }; claimSuccess = true;
-                    if(window.scrollY <= 100) window.showToast(`+${xp} XP für ${name}!`, "success");
+                    window.showToast(`+${xp} XP für ${name}!`, "success");
                 }
                 if (claimSuccess) { 
                     await setDoc(doc(db, 'plot_users', state.user.uid), updatePayload, { merge: true }); 
@@ -518,7 +527,7 @@
             } else {
                 html += `<input type="file" id="proof_file_input" accept="image/*" class="hidden" onchange="window.handleFileSelect(event)"><div onclick="window.triggerFileInput()" class="border border-dashed border-white/20 min-h-[150px] p-2 mb-6 flex flex-col items-center justify-center bg-black/50 rounded-lg hover:border-[#ff4d00] transition cursor-pointer overflow-hidden relative"><div id="upload-placeholder" class="text-center"><svg class="w-12 h-12 text-[#ff4d00] mb-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg><p class="text-xs text-white font-bold uppercase tracking-widest">Beweisfoto hochladen</p></div><img id="upload-preview" class="hidden absolute inset-0 w-full h-full object-cover"></div>`;
             }
-            if (type === 'qr' && qrSolution) { html += `<button type="button" onclick="window.checkCode()" class="w-full btn-grind py-4">Code Prüfen</button>`; } else { html += `<button type="button" onclick="window.submitVerification('${mid}', ${xp}, '${type}', '${name.replace(/'/g, "\\'")}')" class="w-full btn-grind py-4">Senden zur Prüfung</button>`; }
+            if (type === 'qr' && qrSolution) { html += `<button type="button" onclick="window.checkCode()" class="w-full btn-grind py-4">Code Prüfen</button>`; } else { html += `<button type="button" onclick="window.submitVerification()" class="w-full btn-grind py-4">Senden zur Prüfung</button>`; }
             window.openModal(html);
         };
 
@@ -530,46 +539,26 @@
                 try {
                     const habit = state.habitData.find(h => h.id === mid); const oldLvl = state.profile.lvl || 1; let newLvl = oldLvl; let updatePayload = {}; let claimSuccess = false;
                     if (habit) {
-                        const freq = habit.frequency || 'daily'; const isWeekly = freq === 'weekly' || freq === 'weekly_streak'; const timeKey = new Date().toISOString().split('T')[0];
+                        const freq = habit.frequency || 'daily'; const isWeekly = freq === 'weekly' || freq === 'weekly_streak'; const isDailyStreak = freq === 'daily_streak'; const timeKey = new Date().toISOString().split('T')[0];
                         const streaks = state.profile.streaks || {}; const habitStreak = streaks[mid] || { streak: 0, lastDate: '', lastWeek: '' };
-                        
                         if (habitStreak.lastDate !== timeKey) {
-                            let activeStreak = habitStreak.streak || 0;
-                            let earnedBonus = 0;
-                            const currentWeekStr = getWeekYear(new Date());
-
+                            let activeStreak = habitStreak.streak || 0; let earnedBonus = 0; const currentWeekStr = getWeekYear(new Date());
                             if (isWeekly) {
-                                if (habitStreak.lastWeek && habitStreak.lastWeek !== currentWeekStr && habitStreak.lastWeek !== getPreviousWeekStr()) {
-                                    activeStreak = 0;
-                                }
-                                if (habitStreak.lastWeek !== currentWeekStr) {
-                                    activeStreak++;
-                                    const streakBonus = parseInt(habit.streakBonus) || 0;
-                                    earnedBonus = (activeStreak > 1) ? (activeStreak - 1) * streakBonus : 0;
-                                }
-                            } else if (freq === 'daily_streak') {
-                                if (habitStreak.lastDate && habitStreak.lastDate !== getYesterdayStr()) {
-                                    activeStreak = 0;
-                                }
-                                activeStreak++;
-                                const streakBonus = parseInt(habit.streakBonus) || 0;
-                                earnedBonus = (activeStreak > 1) ? (activeStreak - 1) * streakBonus : 0;
-                            } else {
-                                activeStreak = 0;
-                            }
-
-                            const finalXp = xp + earnedBonus;
-                            const newTotalXp = (state.profile.xp || 0) + finalXp; 
-                            
-                            streaks[mid] = { streak: activeStreak, lastDate: timeKey, lastWeek: currentWeekStr }; 
-                            newLvl = Math.floor(newTotalXp / 1000) + 1;
-                            updatePayload = { xp: newTotalXp, lvl: newLvl, streaks: streaks }; claimSuccess = true;
-                            if(window.scrollY <= 100) window.showToast(`+${finalXp} XP für ${name}!${earnedBonus>0 ? ' 🔥 Bonus' : ''}`, "success");
+                                if (habitStreak.lastWeek && habitStreak.lastWeek !== currentWeekStr && habitStreak.lastWeek !== getPreviousWeekStr()) { activeStreak = 0; }
+                                if (habitStreak.lastWeek !== currentWeekStr) { activeStreak++; const streakBonus = parseInt(habit.streakBonus) || 0; earnedBonus = (activeStreak > 1) ? (activeStreak - 1) * streakBonus : 0; }
+                            } else if (isDailyStreak) {
+                                if (habitStreak.lastDate && habitStreak.lastDate !== getYesterdayStr()) { activeStreak = 0; }
+                                activeStreak++; const streakBonus = parseInt(habit.streakBonus) || 0; earnedBonus = (activeStreak > 1) ? (activeStreak - 1) * streakBonus : 0;
+                            } else { activeStreak = 0; }
+                            const finalXp = xp + earnedBonus; const newTotalXp = (state.profile.xp || 0) + finalXp; 
+                            streaks[mid] = { streak: activeStreak, lastDate: timeKey, lastWeek: isWeekly ? currentWeekStr : habitStreak.lastWeek }; 
+                            newLvl = Math.floor(newTotalXp / 1000) + 1; updatePayload = { xp: newTotalXp, lvl: newLvl, streaks: streaks }; claimSuccess = true;
+                            window.showToast(`+${finalXp} XP für ${name}!${earnedBonus>0 ? ' 🔥 Bonus' : ''}`, "success");
                         } else { window.showToast("Heute bereits erledigt!", "error"); }
                     } else if (!(state.profile.completed || []).includes(mid)) {
                         const newXp = (state.profile.xp || 0) + xp; newLvl = Math.floor(newXp / 1000) + 1;
                         updatePayload = { xp: newXp, lvl: newLvl, completed: [...(state.profile.completed || []), mid] }; claimSuccess = true;
-                        if(window.scrollY <= 100) window.showToast(`+${xp} XP für ${name}!`, "success");
+                        window.showToast(`+${xp} XP für ${name}!`, "success");
                     }
                     if (claimSuccess) { 
                         await setDoc(doc(db, 'plot_users', state.user.uid), updatePayload, { merge: true }); 
@@ -581,7 +570,9 @@
             } else { window.showToast("Falscher Code.", "error"); }
         };
 
-        window.submitVerification = async (mid, xp, type, name) => {
+        window.submitVerification = async () => {
+            if(!window.currentVerify) return;
+            const { mid, xp, type, name } = window.currentVerify;
             let data = type === 'qr' ? document.getElementById('verify_code_input').value.trim() : state.tempUploadData;
             if(!data) return window.showToast(type === 'qr' ? "Code eingeben." : "Foto hochladen.", "error"); 
             const btn = document.querySelector('#modal-container button.btn-grind'); if(btn) { btn.innerText = "Transmitting..."; btn.disabled = true; }
@@ -621,7 +612,7 @@
                 if (type === 'xp') { newXp += amount; newLvl = Math.floor(newXp / 1000) + 1; } else if (type === 'lvl') { newLvl += amount; newXp = (newLvl - 1) * 1000 + (newXp % 1000); }
                 window.closeModal(); await setDoc(doc(db, 'plot_users', state.user.uid), { xp: newXp, lvl: newLvl, redeemed: [...(p.redeemed || []), `lvl${rewardLvl}_${tier}`] }, { merge: true });
                 window.logActivity('REDEEM', `hat einen XP/Level Boost aktiviert.`); if(newLvl > oldLvl) window.logActivity('LEVEL_UP', `hat <span class="font-bold">Level ${newLvl}</span> erreicht!`);
-                if(window.scrollY <= 100) window.showToast(`BOOST AKTIVIERT!`, "success");
+                window.showToast(`BOOST AKTIVIERT!`, "success");
             } catch(e) { window.showToast("Fehler.", "error"); if(btn) { btn.innerText = "BOOST AKTIVIEREN"; btn.disabled = false; } }
         };
 
@@ -780,6 +771,7 @@
                         </div>
                         <h2 class="text-4xl font-black italic tracking-tighter mb-2 relative z-10">GRIND. <span class="text-[#a855f7]">PRO</span></h2>
                         <p class="text-gray-400 font-bold uppercase tracking-widest text-[10px] mb-8 max-w-xs leading-relaxed relative z-10">Unlock exclusive rewards, access limited partner drops and enter the PRO Network.</p>
+                        
                         <div class="bg-[#0a0a0a] border border-[#1f1f1f] p-8 rounded-xl mb-6 w-full max-w-sm shadow-2xl relative overflow-hidden group">
                             <div class="absolute inset-0 bg-gradient-to-t from-[#a855f7]/10 to-transparent opacity-50"></div>
                             <div class="relative z-10">
@@ -788,18 +780,24 @@
                                 <div id="paypal-button-container" class="w-full min-h-[150px] relative z-50 flex items-center justify-center"></div>
                             </div>
                         </div>
+                        
                         <p class="text-[9px] text-gray-600 uppercase tracking-widest mt-2 mb-6 max-w-xs mx-auto leading-relaxed relative z-10">Mit dem Kauf stimmst du unseren <span class="text-white underline cursor-pointer hover:text-[#a855f7]" onclick="window.setView('agb')">AGB</span> zu und verzichtest auf das Widerrufsrecht für diesen digitalen Inhalt.</p>
                         <button type="button" onclick="window.setView('dashboard')" class="text-gray-600 hover:text-white text-[10px] uppercase tracking-[0.2em] font-bold transition relative z-10">Zurück zum Network</button>
                     </div>
                     ${getFooterHTML()}
                 `;
+                
                 setTimeout(() => { 
                     if (window.paypal && !document.getElementById('paypal-button-container').innerHTML) { 
                         paypal.Buttons({ 
                             createOrder: (data, actions) => actions.order.create({ purchase_units: [{ amount: { value: checkoutPrice, currency_code: 'EUR' }, custom_id: state.user.uid }] }), 
                             onApprove: (data, actions) => actions.order.capture().then(async () => { 
                                 window.showToast("PRO Pass aktiviert.", "success"); 
-                                try { await setDoc(doc(db, 'plot_users', state.user.uid), { hasPremium: true }, { merge: true }); if(state.profile) state.profile.hasPremium = true; window.logActivity('PRO', `hat den <span class="font-bold">PRO Pass</span> freigeschaltet!`); } catch(e) {} 
+                                try { 
+                                    await setDoc(doc(db, 'plot_users', state.user.uid), { hasPremium: true }, { merge: true }); 
+                                    if(state.profile) state.profile.hasPremium = true; 
+                                    window.logActivity('PRO', `hat den <span class="font-bold">PRO Pass</span> freigeschaltet!`); 
+                                } catch(e) {} 
                                 window.setView('dashboard'); 
                             }) 
                         }).render('#paypal-button-container'); 
@@ -807,7 +805,7 @@
                 }, 100); 
                 return;
             }
-
+            
             if (state.view === 'onboarding') {
                 appDiv.innerHTML = `
                     <div class="flex-1 flex flex-col items-center justify-center p-6 min-h-[80vh] text-center relative z-20">
@@ -831,7 +829,7 @@
                 `; 
                 return;
             }
-
+            
             if (state.view === 'auth') {
                 let authHtml = `
                     <div class="flex-1 flex flex-col items-center justify-center p-6 min-h-[80vh] text-center relative z-20">
@@ -840,6 +838,7 @@
                         <p class="text-gray-500 font-bold uppercase tracking-widest text-xs mb-12 max-w-sm leading-relaxed relative z-10">The Real-World Lifestyle Game</p>
                         <div class="w-full max-w-sm relative z-10">
                 `;
+                
                 if (state.authStep === 'phone') { 
                     authHtml += `
                         <form onsubmit="window.sendSMS(event)" class="space-y-4">
@@ -867,12 +866,27 @@
                         </form>
                     `; 
                 }
-                authHtml += `</div></div>`; appDiv.innerHTML = authHtml; return;
+                authHtml += `</div></div>`; 
+                appDiv.innerHTML = authHtml; 
+                return;
             }
 
             if (state.view === 'dashboard') {
-                const p = state.profile || {}; const safeXp = p.xp || 0; const safeLvl = p.lvl || 1; const safeCompleted = p.completed || []; const safeRedeemed = p.redeemed || []; const hasPremium = p.hasPremium || false; const currentRank = RANKS[Math.min(Math.floor((safeLvl - 1) / 5), RANKS.length - 1)]; const seasonNum = state.seasonConfig?.number || 1; const currentMonthWeek = state.currentWeekTab;
-                const displayXp = state.prevXp !== null ? state.prevXp : safeXp; const targetXpProgress = (safeXp % 1000) / 10; const oldXpProgress = state.prevXp !== null ? (state.prevXp % 1000) / 10 : targetXpProgress; const targetTrackProgress = Math.min(29, safeLvl - 1 + (safeXp % 1000) / 1000); const oldTrackProgress = state.prevXp !== null ? Math.min(29, (state.prevLvl || 1) - 1 + (state.prevXp % 1000) / 1000) : targetTrackProgress;
+                const p = state.profile || {}; 
+                const safeXp = p.xp || 0; 
+                const safeLvl = p.lvl || 1; 
+                const safeCompleted = p.completed || []; 
+                const safeRedeemed = p.redeemed || []; 
+                const hasPremium = p.hasPremium || false; 
+                const currentRank = RANKS[Math.min(Math.floor((safeLvl - 1) / 5), RANKS.length - 1)]; 
+                const seasonNum = state.seasonConfig?.number || 1; 
+                const currentMonthWeek = state.currentWeekTab;
+                
+                const displayXp = state.prevXp !== null ? state.prevXp : safeXp; 
+                const targetXpProgress = (safeXp % 1000) / 10; 
+                const oldXpProgress = state.prevXp !== null ? (state.prevXp % 1000) / 10 : targetXpProgress; 
+                const targetTrackProgress = Math.min(29, safeLvl - 1 + (safeXp % 1000) / 1000); 
+                const oldTrackProgress = state.prevXp !== null ? Math.min(29, (state.prevLvl || 1) - 1 + (state.prevXp % 1000) / 1000) : targetTrackProgress;
 
                 let html = `
                     <header class="p-6 max-w-6xl mx-auto flex justify-between items-center w-full relative z-20">
@@ -922,7 +936,12 @@
                 `;
                 
                 for (let i = 1; i <= 30; i++) {
-                    const r = state.rewardData.find(x => x.lvl === i); const isUnlocked = i <= safeLvl; const isProUnlocked = isUnlocked && hasPremium; const freeClaimed = safeRedeemed.includes(`lvl${i}_free`); const proClaimed = safeRedeemed.includes(`lvl${i}_pro`);
+                    const r = state.rewardData.find(x => x.lvl === i); 
+                    const isUnlocked = i <= safeLvl; 
+                    const isProUnlocked = isUnlocked && hasPremium; 
+                    const freeClaimed = safeRedeemed.includes(`lvl${i}_free`); 
+                    const proClaimed = safeRedeemed.includes(`lvl${i}_pro`);
+                    
                     html += `
                         <div id="level-node-${i}" class="level-node flex flex-col items-center relative z-10">
                             <div ${isUnlocked && r?.free && !freeClaimed ? `onclick="window.openClaimModal(${i}, 'free')" class="reward-box mb-4 unlocked cursor-pointer hover:scale-105"` : (freeClaimed ? `onclick="window.openClaimModal(${i}, 'free')" class="reward-box mb-4 unlocked opacity-50 cursor-pointer"` : `class="reward-box mb-4 opacity-60 scale-95"`)}>
@@ -972,7 +991,9 @@
                             </div>
                         `; 
                     });
-                } else { html += `<div class="col-span-3 text-center p-8 text-gray-600 italic text-sm">Keine Active Spots verfügbar.</div>`; }
+                } else {
+                    html += `<div class="col-span-3 text-center p-8 text-gray-600 italic text-sm">Keine Active Spots verfügbar.</div>`;
+                }
                 
                 html += `</div></section>`;
 
@@ -990,19 +1011,25 @@
                 `;
                 
                 [1, 2, 3, 4].forEach(w => { 
-                    const isCurrent = w === currentMonthWeek, isMissed = w < currentMonthWeek, isFuture = w > currentMonthWeek; 
+                    const isCurrent = w === currentMonthWeek;
+                    const isMissed = w < currentMonthWeek;
+                    const isFuture = w > currentMonthWeek; 
                     html += `<button type="button" class="week-btn px-4 py-2 text-[10px] font-black uppercase transition ${isCurrent ? 'active' : 'opacity-30 cursor-not-allowed border-dashed'}">W0${w} ${isMissed ? '<span class="text-red-500 ml-1 opacity-70">MISSED</span>' : (isFuture ? '<span class="text-gray-500 ml-1 opacity-70">LOCKED</span>' : '')}</button>`; 
                 });
                 
                 html += `</div></div><div class="space-y-4">`;
                 
                 const currentMissions = state.weeklyData[currentMonthWeek]?.missions || [];
-                if (currentMissions.length === 0) html += `<div class="text-center p-8 text-gray-600 italic text-sm">Keine Drops verfügbar.</div>`;
+                if (currentMissions.length === 0) {
+                    html += `<div class="text-center p-8 text-gray-600 italic text-sm">Keine Drops verfügbar.</div>`;
+                }
                 
                 currentMissions.forEach(m => {
-                    const isCompleted = safeCompleted.includes(m.id); const isPending = state.pendingMissions.some(p => p.mid === m.id) && !isCompleted;
+                    const isCompleted = safeCompleted.includes(m.id); 
+                    const isPending = state.pendingMissions.some(p => p.mid === m.id) && !isCompleted;
                     const badgeText = m.type === 'qr' ? '📍 Check-in' : (m.type === 'upload' ? '📷 Photo Upload' : '⚡ Action');
                     const btnText = isCompleted ? 'Verified' : (isPending ? 'Wird überprüft ⏳' : (m.type === 'instant' ? 'Claim XP' : 'Verify Action'));
+                    
                     let cardClasses = `mockup p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 group transition ${isCompleted ? 'is-completed border-[#ff4d00]/30 opacity-75' : (isPending ? 'is-pending border-yellow-500/30' : 'hover:border-[#ff4d00]/30')}`;
                     
                     html += `
@@ -1017,7 +1044,7 @@
                             </div>
                             <div class="text-left md:text-right flex-shrink-0 relative z-10 flex flex-col items-start md:items-end w-full md:w-auto mt-4 md:mt-0">
                                 <span class="block text-[#ff4d00] font-black text-2xl italic tracking-tighter mb-3">+${m.xp}</span>
-                                <button type="button" id="btn-${m.id}" onclick="${m.type === 'instant' ? `window.claimInstantMission('${m.id}', ${m.xp}, '${m.name.replace(/'/g, "\\'")}')` : `window.openVerifyModal('${m.id}', ${m.xp}, '${m.type}', '${m.name.replace(/'/g, "\\'")}', '${m.qr_solution ? m.qr_solution.replace(/'/g, "\\'") : ''}')`}" class="btn-grind w-full md:w-auto text-[10px]" ${(isCompleted || isPending) ? 'disabled' : ''}>${btnText}</button>
+                                <button type="button" id="btn-${m.id}" onclick="window.claimItemById('${m.id}')" class="btn-grind w-full md:w-auto text-[10px]" ${(isCompleted || isPending) ? 'disabled' : ''}>${btnText}</button>
                             </div>
                         </div>
                     `;
@@ -1039,7 +1066,9 @@
                         <div class="space-y-4">
                 `;
                 
-                if ((state.habitData || []).length === 0) html += `<div class="text-center p-8 text-gray-600 italic text-sm border border-white/5 rounded-xl">Keine Routinen aktiv.</div>`;
+                if ((state.habitData || []).length === 0) {
+                    html += `<div class="text-center p-8 text-gray-600 italic text-sm border border-white/5 rounded-xl">Keine Routinen aktiv.</div>`;
+                }
                 
                 (state.habitData || []).forEach(m => {
                     const freq = m.frequency || 'daily'; 
@@ -1094,7 +1123,7 @@
                             <div class="pr-6 relative z-10 flex-1 w-full">
                                 <div class="flex justify-between items-start mb-1">
                                     <h4 class="font-bold text-lg group-hover:text-white transition tracking-tight break-words max-w-[70%]">${m.name}</h4>
-                                    <span class="text-[9px] font-bold text-gray-500 tracking-widest uppercase bg-black px-2 py-1 rounded-sm border border-[#111]">DAILY</span>
+                                    <span class="text-[9px] font-bold text-gray-500 tracking-widest uppercase bg-black px-2 py-1 rounded-sm border border-[#111]">${isWeekly ? 'WEEKLY' : 'DAILY'}</span>
                                 </div>
                                 <p class="text-gray-400 text-xs mt-1 font-medium leading-relaxed">${m.desc}</p>
                                 <div class="flex flex-wrap items-center gap-2 mt-4">
@@ -1104,7 +1133,7 @@
                             </div>
                             <div class="text-left md:text-right flex-shrink-0 relative z-10 flex flex-col items-start md:items-end w-full md:w-auto mt-4 md:mt-0">
                                 <span class="block text-white font-black text-2xl italic tracking-tighter mb-3">+${totalXpDisplay}</span>
-                                <button type="button" onclick="${m.type === 'instant' ? `window.claimInstantMission('${m.id}', ${m.xp}, '${m.name.replace(/'/g, "\\'")}')` : `window.openVerifyModal('${m.id}', ${m.xp}, '${m.type}', '${m.name.replace(/'/g, "\\'")}', '${m.qr_solution ? m.qr_solution.replace(/'/g, "\\'") : ''}')`}" class="btn-grind w-full md:w-auto text-[10px] bg-white text-black hover:bg-[#ff4d00] hover:text-white transition" ${(isDoneToday || isPending) ? 'disabled' : ''}>${btnText}</button>
+                                <button type="button" onclick="window.claimItemById('${m.id}')" class="btn-grind w-full md:w-auto text-[10px] bg-white text-black hover:bg-[#ff4d00] hover:text-white transition" ${(isDoneToday || isPending) ? 'disabled' : ''}>${btnText}</button>
                             </div>
                         </div>
                     `;
@@ -1144,15 +1173,18 @@
                     </div>
                 `;
                 
+                // Hier wird dynamisch via window.updateLiveUI befüllt
                 html += `<div id="live-feed-content"></div>`;
 
                 html += `</section></main>${getFooterHTML()}`;
                 
                 appDiv.innerHTML = html;
 
-                if (syncViewport && !state.dashboardNeedsScroll) syncViewport.scrollLeft = savedScrollPosition;
+                if (syncViewport && !state.dashboardNeedsScroll) {
+                    syncViewport.scrollLeft = savedScrollPosition;
+                }
                 
-                // Initialize Live UI straight away so feed isn't empty initially
+                // Setzt den Feed beim Render sofort (verhindert Delay!)
                 window.updateLiveUI();
 
                 if (window.xpAnimTimeout) clearTimeout(window.xpAnimTimeout);
@@ -1170,28 +1202,70 @@
                             topBar.style.transition = `width 1250ms ease-in`; topBar.style.width = '100%'; 
                             setTimeout(() => { topBar.style.transition = 'none'; topBar.style.width = '0%'; void topBar.offsetWidth; topBar.style.transition = `width 1250ms ease-out`; topBar.style.width = `${targetXpProgress}%`; }, 1250); 
                         }
-                        if (passViewport && currentNode) passViewport.scrollTo({ left: currentNode.offsetLeft - (passViewport.offsetWidth / 2) + (currentNode.offsetWidth / 2), behavior: 'smooth' });
-                    } else if (topBar) { topBar.style.transition = `width 2500ms ease-out`; topBar.style.width = `${targetXpProgress}%`; }
+                        if (passViewport && currentNode) {
+                            passViewport.scrollTo({ left: currentNode.offsetLeft - (passViewport.offsetWidth / 2) + (currentNode.offsetWidth / 2), behavior: 'smooth' });
+                        }
+                    } else if (topBar) { 
+                        topBar.style.transition = `width 2500ms ease-out`; topBar.style.width = `${targetXpProgress}%`; 
+                    }
                     
                     if (state.prevXp !== null && state.prevXp < safeXp) {
-                        const hud = document.getElementById('xp-hud'), hudLvl = document.getElementById('hud-lvl'), hudXpNum = document.getElementById('hud-xp-num'), hudXpMax = document.getElementById('hud-xp-max'), hudXpBar = document.getElementById('hud-xp-bar');
-                        if(window.scrollY > 100 && hud) {
-                            hudLvl.innerText = state.prevLvl; hudXpNum.innerText = state.prevXp; hudXpMax.innerText = state.prevLvl * 1000; hudXpBar.style.transition = 'none'; hudXpBar.style.width = `${oldXpProgress}%`; void hudXpBar.offsetWidth; 
-                            hud.classList.remove('-translate-y-[150%]'); hud.classList.add('translate-y-0'); animateValue('hud-xp-num', state.prevXp, safeXp, 2500);
+                        const hud = document.getElementById('xp-hud');
+                        const hudLvl = document.getElementById('hud-lvl');
+                        const hudXpNum = document.getElementById('hud-xp-num');
+                        const hudXpMax = document.getElementById('hud-xp-max');
+                        const hudXpBar = document.getElementById('hud-xp-bar');
+                        
+                        if(hud) {
+                            hudLvl.innerText = state.prevLvl; 
+                            hudXpNum.innerText = state.prevXp; 
+                            hudXpMax.innerText = state.prevLvl * 1000; 
+                            hudXpBar.style.transition = 'none'; 
+                            hudXpBar.style.width = `${oldXpProgress}%`; 
+                            void hudXpBar.offsetWidth; 
+                            
+                            // XP Fenster kommt RUNTER
+                            hud.classList.remove('-translate-y-[150%]'); 
+                            hud.classList.add('translate-y-0'); 
+                            animateValue('hud-xp-num', state.prevXp, safeXp, 2500);
                             
                             if (state.prevLvl !== null && safeLvl > state.prevLvl) { 
-                                hudXpBar.style.transition = `width 1250ms ease-in`; hudXpBar.style.width = '100%'; 
-                                setTimeout(() => { hudLvl.innerText = safeLvl; hudLvl.classList.add('animate-pop'); hudXpMax.innerText = safeLvl * 1000; hudXpBar.style.transition = 'none'; hudXpBar.style.width = '0%'; void hudXpBar.offsetWidth; hudXpBar.style.transition = `width 1250ms ease-out`; hudXpBar.style.width = `${targetXpProgress}%`; }, 1250); 
-                            } else { hudXpBar.style.transition = `width 2500ms ease-out`; hudXpBar.style.width = `${targetXpProgress}%`; }
+                                hudXpBar.style.transition = `width 1250ms ease-in`; 
+                                hudXpBar.style.width = '100%'; 
+                                setTimeout(() => { 
+                                    hudLvl.innerText = safeLvl; 
+                                    hudLvl.classList.add('animate-pop'); 
+                                    hudXpMax.innerText = safeLvl * 1000; 
+                                    hudXpBar.style.transition = 'none'; 
+                                    hudXpBar.style.width = '0%'; 
+                                    void hudXpBar.offsetWidth; 
+                                    hudXpBar.style.transition = `width 1250ms ease-out`; 
+                                    hudXpBar.style.width = `${targetXpProgress}%`; 
+                                }, 1250); 
+                            } else { 
+                                hudXpBar.style.transition = `width 2500ms ease-out`; 
+                                hudXpBar.style.width = `${targetXpProgress}%`; 
+                            }
                             
                             if (window.hudCloseTimeout) clearTimeout(window.hudCloseTimeout);
-                            window.hudCloseTimeout = setTimeout(() => { hud.classList.remove('translate-y-0'); hud.classList.add('-translate-y-[150%]'); if(hudLvl) hudLvl.classList.remove('animate-pop'); }, 5000);
+                            window.hudCloseTimeout = setTimeout(() => { 
+                                hud.classList.remove('translate-y-0'); 
+                                hud.classList.add('-translate-y-[150%]'); 
+                                if(hudLvl) hudLvl.classList.remove('animate-pop'); 
+                            }, 5000);
                         }
                         
                         animateValue('xp-counter-num', state.prevXp, safeXp, 2500);
-                        if (state.prevLvl !== null && safeLvl > state.prevLvl) { const lvlText = document.getElementById('main-lvl-text'); if (lvlText) lvlText.classList.add('animate-pop'); const newCircle = document.getElementById(`circle-node-${safeLvl}`); if (newCircle) newCircle.classList.add('animate-pop'); }
+                        
+                        if (state.prevLvl !== null && safeLvl > state.prevLvl) { 
+                            const lvlText = document.getElementById('main-lvl-text'); 
+                            if (lvlText) lvlText.classList.add('animate-pop'); 
+                            const newCircle = document.getElementById(`circle-node-${safeLvl}`); 
+                            if (newCircle) newCircle.classList.add('animate-pop'); 
+                        }
                     }
-                    state.prevXp = safeXp; state.prevLvl = safeLvl;
+                    state.prevXp = safeXp; 
+                    state.prevLvl = safeLvl;
                 }, 50); 
                 return;
             }
