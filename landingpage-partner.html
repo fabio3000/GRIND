@@ -2,278 +2,520 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GRIND. | Partner werden</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
-    
-    <style>
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background-color: #050505; 
-            color: #ffffff; 
-            overflow-x: hidden; 
-            background-image: radial-gradient(circle at 50% 50%, #120600 0%, #050505 100%);
-            background-attachment: fixed; 
-            min-height: 100vh; 
-            overscroll-behavior-y: none;
-            scroll-behavior: smooth;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>GRIND. | Routinen & Community in Köln</title>
 
-        /* Cleanes Design, dezente Akzente */
-        .text-brand { color: #ff4d00; }
-        .bg-brand { background-color: #ff4d00; }
-        
-        .btn-primary { 
-            background: #ffffff; color: #000000; font-weight: 700; text-transform: uppercase; 
-            padding: 14px 28px; font-size: 14px; transition: all 0.2s ease; 
-            border-radius: 6px; letter-spacing: 0.05em; display: inline-block; text-decoration: none;
-        }
-        .btn-primary:hover { background: #ff4d00; color: #ffffff; transform: translateY(-2px); }
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&display=swap" rel="stylesheet">
 
-        /* Elegante, reduzierte Karten */
-        .feature-card { 
-            background: #111111; border: 1px solid #222222; border-radius: 12px; 
-            transition: all 0.3s ease;
-        }
-        .feature-card:hover { border-color: #ff4d00; }
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #030303;
+      color: white;
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+      background-image: radial-gradient(circle at top, #0b0b0b 0%, #030303 70%);
+    }
 
-        .ui-mockup {
-            background: #151515; border: 1px solid #2a2a2a; border-radius: 12px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
+    .text-brand { color: #ff4d00; }
+    .bg-brand { background: #ff4d00; }
 
-        /* Sanftes Einblenden beim Scrollen (ohne wilde Animationen) */
-        .reveal { opacity: 0; transform: translateY(20px); transition: all 0.6s ease-out; }
-        .reveal.active { opacity: 1; transform: translateY(0); }
-    </style>
+    .btn-primary {
+      background: white;
+      color: black;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      padding: 16px 28px;
+      border-radius: 6px;
+      transition: .25s ease;
+      font-size: 13px;
+      display: inline-block;
+      text-align: center;
+    }
+
+    .btn-primary:hover {
+      background: #ff4d00;
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(255,77,0,.25);
+    }
+
+    .card {
+      background: rgba(255,255,255,.02);
+      border: 1px solid rgba(255,255,255,.06);
+      border-radius: 12px;
+      transition: .3s ease;
+    }
+
+    .card:hover {
+      background: rgba(255,255,255,.04);
+      border-color: rgba(255,255,255,.12);
+      transform: translateY(-4px);
+    }
+
+    .mockup {
+      background: #080808;
+      border: 1px solid #181818;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 20px 50px rgba(0,0,0,.7);
+      position: relative;
+    }
+
+    .ticker-container {
+      overflow: hidden;
+      white-space: nowrap;
+      border-top: 1px solid rgba(255,255,255,.05);
+      border-bottom: 1px solid rgba(255,255,255,.05);
+      background: #050505;
+    }
+
+    .ticker-content {
+      display: inline-block;
+      animation: ticker 35s linear infinite;
+    }
+
+    @keyframes ticker {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    .ticker-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 30px;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: #8a8a8a;
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all .8s cubic-bezier(.2,.8,.2,1);
+    }
+
+    .reveal.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .pill {
+      padding: 10px 18px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.02);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: #8f8f8f;
+    }
+
+    .grid-overlay {
+      position: absolute;
+      inset: 0;
+      opacity: .12;
+      background-size: 60px 60px;
+      background-image:
+        linear-gradient(to right, rgba(255,255,255,.08) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255,255,255,.08) 1px, transparent 1px);
+      transform: perspective(500px) rotateX(60deg);
+      pointer-events: none;
+    }
+  </style>
 </head>
-<body class="antialiased">
 
-    <!-- Navbar -->
-    <nav class="fixed top-0 left-0 right-0 z-50 p-6 flex justify-between items-center bg-[#050505]/90 backdrop-blur-md border-b border-white/5">
-        <div class="text-xl md:text-2xl font-black tracking-tighter italic">GRIND<span class="text-brand">.</span></div>
-        <div class="text-xs font-semibold text-gray-400 flex items-center gap-2">
-            <span class="w-2 h-2 rounded-full bg-brand"></span> Partner in Köln
-        </div>
-    </nav>
+<body class="antialiased pb-24 md:pb-0">
 
-    <!-- Hero Section -->
-    <section class="relative min-h-[80vh] flex flex-col items-center justify-center pt-24 px-6 text-center">
-        <p class="text-brand text-xs font-bold uppercase tracking-widest mb-4 reveal">Lokales Konzept für Köln</p>
-        
-        <h1 class="text-4xl md:text-6xl font-black tracking-tight mb-6 reveal max-w-4xl leading-tight">
-            Mache dein Business zum Teil eines aktiven Lifestyles.
-        </h1>
+  <!-- NAV -->
+  <nav class="fixed top-0 left-0 right-0 z-50 px-6 py-5 bg-[#030303]/85 backdrop-blur-xl border-b border-white/5 flex justify-between items-center">
+    <div class="text-2xl font-black italic tracking-tight">
+      GRIND<span class="text-brand">.</span>
+    </div>
 
-        <p class="text-gray-400 font-medium text-base md:text-lg max-w-2xl leading-relaxed mb-10 reveal">
-            GRIND. belohnt Menschen für Sport und gesunde Routinen. Werde Partner und biete deinen Kunden einen spielerischen Anreiz, immer wieder zu dir zu kommen – ganz ohne technischen Aufwand für dein Team.
-        </p>
+    <div class="text-[10px] uppercase tracking-[0.2em] font-bold text-gray-500 flex items-center gap-2">
+      <span class="w-1.5 h-1.5 rounded-full bg-brand animate-pulse"></span>
+      Köln
+    </div>
+  </nav>
 
-        <a href="#konzept" class="btn-primary reveal">So funktioniert's</a>
-    </section>
+  <!-- HERO -->
+  <section class="relative min-h-screen flex items-center justify-center text-center px-6 overflow-hidden">
+    <div class="grid-overlay"></div>
 
-    <!-- Wie es funktioniert -->
-    <section id="konzept" class="py-20 px-6 max-w-6xl mx-auto border-t border-white/5">
-        <div class="text-center mb-16 reveal">
-            <h2 class="text-3xl md:text-4xl font-bold tracking-tight mb-4">Ein simples System für mehr Kundenbindung.</h2>
-            <p class="text-gray-400 max-w-2xl mx-auto">Du stellst lediglich einen kleinen QR-Aufsteller auf. Alles andere passiert direkt auf dem Smartphone deiner Kunden. 100 % Autopilot für dich.</p>
-        </div>
+    <div class="absolute w-[700px] h-[700px] bg-brand/5 blur-[140px] rounded-full pointer-events-none"></div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- Schritt 1 -->
-            <div class="feature-card p-8 flex flex-col items-center text-center reveal">
-                <div class="w-12 h-12 rounded-full bg-[#1a1a1a] flex items-center justify-center text-xl mb-6">📍</div>
-                <h3 class="font-bold text-lg mb-3">1. Vorbeikommen</h3>
-                <p class="text-gray-400 text-sm leading-relaxed">Der Kunde besucht dein Studio, Event oder Café. Sein Alltag wird in der App zur Motivation.</p>
-            </div>
-            
-            <!-- Schritt 2 -->
-            <div class="feature-card p-8 flex flex-col items-center text-center reveal border-t-2 border-t-brand">
-                <div class="w-12 h-12 rounded-full bg-[#ff4d00]/10 text-brand flex items-center justify-center mb-6">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
-                </div>
-                <h3 class="font-bold text-lg mb-3">2. Scannen</h3>
-                <p class="text-gray-400 text-sm leading-relaxed">Ein kleiner Code am Empfang oder der Kasse reicht. Der Nutzer scannt ihn mit der App.</p>
-            </div>
+    <div class="relative z-10 max-w-5xl mx-auto pt-28">
 
-            <!-- Schritt 3 -->
-            <div class="feature-card p-8 flex flex-col items-center text-center reveal">
-                <div class="w-12 h-12 rounded-full bg-[#1a1a1a] flex items-center justify-center text-xl mb-6">🏆</div>
-                <h3 class="font-bold text-lg mb-3">3. Punkte sammeln</h3>
-                <p class="text-gray-400 text-sm leading-relaxed">Der Nutzer erhält Erfahrungspunkte (XP) für seinen Besuch. Das motiviert ihn, wiederzukommen.</p>
-            </div>
-        </div>
-    </section>
+      <div class="inline-flex items-center gap-3 border border-white/10 bg-white/[0.03] px-4 py-2 rounded-full mb-10 reveal">
+        <span class="text-brand text-[9px] font-black uppercase tracking-[0.2em]">Season 01</span>
+        <span class="w-1 h-1 rounded-full bg-white/20"></span>
+        <span class="text-gray-500 text-[9px] font-bold uppercase tracking-[0.2em]">
+          Aufbau in Köln
+        </span>
+      </div>
 
-    <!-- Use Cases (Deutlich lesbarer und konkreter) -->
-    <section class="py-20 px-6 max-w-6xl mx-auto flex flex-col gap-24 border-t border-white/5">
-        
-        <!-- Bereich 1: Sport & Fitness -->
-        <div class="flex flex-col md:flex-row items-center gap-12 reveal">
-            <div class="md:w-1/2 order-2 md:order-1">
-                <div class="ui-mockup p-6">
-                    <div class="flex justify-between items-center mb-4">
-                        <div>
-                            <h4 class="font-bold text-lg text-white">Boutique Rowing Session</h4>
-                            <p class="text-xs text-gray-500 mt-1">Achter.Club Köln</p>
-                        </div>
-                        <span class="text-brand font-bold text-xl">+500 XP</span>
-                    </div>
-                    <div class="bg-[#1a1a1a] rounded-lg p-4 flex items-center gap-3">
-                        <div class="bg-green-500/10 p-2 rounded-full text-green-500">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
-                        </div>
-                        <div>
-                            <p class="text-sm font-semibold text-white">Erfolgreich teilgenommen</p>
-                            <p class="text-xs text-gray-500">Serie ausgebaut: 3 Wochen in Folge</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="md:w-1/2 order-1 md:order-2">
-                <span class="text-xs font-bold uppercase tracking-widest text-brand mb-2 block">Sport, Gyms & Run Clubs</span>
-                <h2 class="text-3xl font-bold mb-4">Mehr Motivation für deine Mitglieder.</h2>
-                <p class="text-gray-400 text-base leading-relaxed mb-6">
-                    Ein hartes Workout kostet Überwindung. Belohne deine Teilnehmer direkt nach der Session mit digitalen Punkten. Ob Bootcamp, Pilates oder Lauftreff – wer Punkte sammelt, bleibt motiviert und kommt regelmäßiger zu dir.
-                </p>
-                <ul class="space-y-3 text-sm text-gray-300">
-                    <li class="flex items-start"><span class="text-brand mr-2 mt-0.5">✔</span> Digitale Belohnung für jede Teilnahme</li>
-                    <li class="flex items-start"><span class="text-brand mr-2 mt-0.5">✔</span> Höhere Motivation durch den "Serien-Effekt"</li>
-                    <li class="flex items-start"><span class="text-brand mr-2 mt-0.5">✔</span> Deine Location wird für eine aktive Zielgruppe sichtbar</li>
-                </ul>
-            </div>
-        </div>
+      <h1 class="text-5xl md:text-7xl lg:text-8xl font-black tracking-tight leading-[1.02] mb-8 reveal">
+        Die Routinen<br>
+        der Stadt<span class="text-brand">.</span>
+      </h1>
 
-        <!-- Bereich 2: Food & Gastronomie -->
-        <div class="flex flex-col md:flex-row items-center gap-12 reveal">
-            <div class="md:w-1/2">
-                <span class="text-xs font-bold uppercase tracking-widest text-brand mb-2 block">Cafés & Healthy Food</span>
-                <h2 class="text-3xl font-bold mb-4">Gesunde Routinen belohnen.</h2>
-                <p class="text-gray-400 text-base leading-relaxed mb-6">
-                    Ein aktiver Lifestyle hört beim Sport nicht auf. Mach dein Café zur festen Anlaufstelle nach dem Training. Wer bei dir einen gesunden Snack holt oder einfach eine gute Zeit hat, sammelt Punkte für seine Tagesziele.
-                </p>
-                <ul class="space-y-3 text-sm text-gray-300">
-                    <li class="flex items-start"><span class="text-brand mr-2 mt-0.5">✔</span> Dein Café als Teil der täglichen Routine</li>
-                    <li class="flex items-start"><span class="text-brand mr-2 mt-0.5">✔</span> Biete deine Produkte als kleine Belohnung für fleißige App-Nutzer an</li>
-                    <li class="flex items-start"><span class="text-brand mr-2 mt-0.5">✔</span> Neue Kunden durch gezielte Empfehlungen in der App</li>
-                </ul>
-            </div>
-            <div class="md:w-1/2">
-                <div class="ui-mockup p-6">
-                    <div class="flex justify-between items-center mb-4">
-                        <div>
-                            <h4 class="font-bold text-lg text-white">Post-Workout Snack</h4>
-                            <p class="text-xs text-gray-500 mt-1">GuMo Café</p>
-                        </div>
-                        <span class="text-brand font-bold text-xl">+200 XP</span>
-                    </div>
-                    <div class="bg-[#1a1a1a] rounded-lg p-4 flex items-center justify-center gap-2 text-sm text-gray-300">
-                        <span>☕️</span> Besuch erfolgreich bestätigt
-                    </div>
-                </div>
-            </div>
-        </div>
+      <p class="max-w-3xl mx-auto text-lg md:text-2xl text-gray-200 font-semibold leading-relaxed mb-5 reveal">
+        GRIND verbindet Cafés, Fitness und Community über echte Gewohnheiten.
+      </p>
 
-        <!-- Bereich 3: Events -->
-        <div class="flex flex-col md:flex-row items-center gap-12 reveal">
-            <div class="md:w-1/2 order-2 md:order-1">
-                <div class="ui-mockup p-6 relative overflow-hidden">
-                    <div class="absolute top-0 right-0 bg-[#222] px-3 py-1 text-xs font-bold text-gray-400 rounded-bl-lg">Versteckte Punkte</div>
-                    <div class="flex justify-between items-center mb-4 mt-4">
-                        <div>
-                            <h4 class="font-bold text-lg text-white">PopUp Beach Besuch</h4>
-                            <p class="text-xs text-gray-500 mt-1">Rausgegangen Event</p>
-                        </div>
-                        <span class="text-brand font-bold text-xl">+800 XP</span>
-                    </div>
-                    <div class="bg-brand/10 border border-brand/30 rounded-lg p-4 text-center">
-                        <p class="text-brand font-bold text-sm">🎉 Event-Bonuspunkte gesammelt!</p>
-                    </div>
-                </div>
-            </div>
-            <div class="md:w-1/2 order-1 md:order-2">
-                <span class="text-xs font-bold uppercase tracking-widest text-brand mb-2 block">Events & Kultur</span>
-                <h2 class="text-3xl font-bold mb-4">Mache dein Event interaktiv.</h2>
-                <p class="text-gray-400 text-base leading-relaxed mb-6">
-                    Bringe die Community auf deine Veranstaltungen. Verstecke kleine QR-Codes auf Festivals oder Pop-Up Events. So können Besucher spielerisch Punkte für ihre Work-Life-Balance sammeln.
-                </p>
-                <ul class="space-y-3 text-sm text-gray-300">
-                    <li class="flex items-start"><span class="text-brand mr-2 mt-0.5">✔</span> Spielerischer Anreiz für Besucher, dein Event zu besuchen</li>
-                    <li class="flex items-start"><span class="text-brand mr-2 mt-0.5">✔</span> Eine kleine digitale Schatzsuche auf dem Gelände</li>
-                    <li class="flex items-start"><span class="text-brand mr-2 mt-0.5">✔</span> Verbinde Sport, Lifestyle und Kölner Kultur</li>
-                </ul>
-            </div>
-        </div>
+      <p class="max-w-2xl mx-auto text-sm md:text-base text-gray-500 leading-relaxed mb-12 reveal">
+        Menschen gehen sowieso nach dem Training noch Kaffee trinken, treffen Freunde oder checken bei ihren Lieblingsspots ein. GRIND macht diese Routinen sichtbar.
+      </p>
 
-        <!-- Bereich 4: Brands & Premium -->
-        <div class="flex flex-col md:flex-row items-center gap-12 reveal">
-            <div class="md:w-1/2">
-                <span class="text-xs font-bold uppercase tracking-widest text-brand mb-2 block">Marken & Regeneration</span>
-                <h2 class="text-3xl font-bold mb-4">Werde zur exklusiven Belohnung.</h2>
-                <p class="text-gray-400 text-base leading-relaxed mb-6">
-                    Für unsere aktivsten Nutzer suchen wir besondere Ziele. Biete einen Rabatt auf Kältetherapie, Supplements oder Sportkleidung an, sobald ein Nutzer ein hohes Level erreicht. Das perfekte Marketing, direkt an deine Zielgruppe.
-                </p>
-                <ul class="space-y-3 text-sm text-gray-300">
-                    <li class="flex items-start"><span class="text-brand mr-2 mt-0.5">✔</span> Platziere deine Marke als erstrebenswertes Ziel</li>
-                    <li class="flex items-start"><span class="text-brand mr-2 mt-0.5">✔</span> Erreiche genau die Menschen, die extrem sportaffin sind</li>
-                    <li class="flex items-start"><span class="text-brand mr-2 mt-0.5">✔</span> Stärke dein Image als Marke, die echten Einsatz belohnt</li>
-                </ul>
-            </div>
-            <div class="md:w-1/2">
-                <div class="ui-mockup p-6 text-center relative overflow-hidden">
-                    <div class="absolute -right-8 -top-8 opacity-10 rotate-12 text-9xl font-black italic text-white select-none pointer-events-none">50</div>
-                    <div class="relative z-10">
-                        <p class="text-gray-500 text-xs font-bold uppercase tracking-widest mb-2">Freigeschaltet ab Level 50</p>
-                        <h4 class="font-bold text-xl text-white mb-1">Eisbox Session</h4>
-                        <p class="text-sm text-gray-400 mb-6">Cryopoint Köln</p>
-                        <button class="w-full bg-[#222] py-3 rounded-lg text-white font-bold text-sm hover:bg-white hover:text-black transition">
-                            Gutschein einlösen
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
+      <div class="flex flex-wrap justify-center gap-3 mb-12 reveal">
+        <div class="pill">Boutique Fitness</div>
+        <div class="pill">Run Clubs</div>
+        <div class="pill">Cafés</div>
+        <div class="pill">Recovery</div>
+        <div class="pill">Community</div>
+      </div>
 
-    </section>
+      <a href="#partner" class="btn-primary reveal hidden md:inline-block">
+        Founding Partner werden
+      </a>
+    </div>
+  </section>
 
-    <!-- Call to Action -->
-    <section class="py-24 px-6 text-center border-t border-white/5">
-        <h2 class="text-3xl md:text-5xl font-bold tracking-tight mb-6 reveal">
-            Lass uns zusammenarbeiten. :)
+  <!-- TICKER -->
+  <div class="ticker-container">
+    <div class="ticker-content">
+      <div class="ticker-item"><span class="text-brand">☕ GuMo</span><span>Post-Workout Check-in</span></div>
+      <div class="ticker-item"><span class="text-white">🔥 4 Week Streak</span><span>Rocycle</span></div>
+      <div class="ticker-item"><span class="text-brand">+250 XP</span><span>Morning Run am Rhein</span></div>
+      <div class="ticker-item"><span class="text-white">🎁 Reward</span><span>Free Oat Flat White</span></div>
+      <div class="ticker-item"><span class="text-brand">📍 Ehrenfeld</span><span>Neue Routine gespeichert</span></div>
+      <!-- duplicate -->
+      <div class="ticker-item"><span class="text-brand">☕ GuMo</span><span>Post-Workout Check-in</span></div>
+      <div class="ticker-item"><span class="text-white">🔥 4 Week Streak</span><span>Rocycle</span></div>
+      <div class="ticker-item"><span class="text-brand">+250 XP</span><span>Morning Run am Rhein</span></div>
+      <div class="ticker-item"><span class="text-white">🎁 Reward</span><span>Free Oat Flat White</span></div>
+      <div class="ticker-item"><span class="text-brand">📍 Ehrenfeld</span><span>Neue Routine gespeichert</span></div>
+    </div>
+  </div>
+
+  <!-- PARTNER SOCIAL PROOF -->
+  <section class="py-24 px-6 border-b border-white/5 bg-black">
+    <div class="max-w-5xl mx-auto text-center reveal">
+      <p class="text-[10px] uppercase tracking-[0.25em] font-bold text-gray-500 mb-7">
+        Erste Gespräche mit lokalen Spots in Köln
+      </p>
+      <div class="flex flex-wrap justify-center gap-x-12 gap-y-5 text-xl md:text-3xl italic font-black text-white/60 tracking-tight">
+        <span>Rocycle</span>
+        <span>GuMo</span>
+        <span>Achter.Club</span>
+        <span>Emmi’s</span>
+        <span>Cryopoint</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- DAS KONZEPT (LIVE TIMELINE) -->
+  <section class="py-32 px-6 max-w-6xl mx-auto">
+    <div class="grid md:grid-cols-2 gap-16 items-center">
+      <div class="reveal">
+        <h2 class="text-3xl md:text-5xl font-black tracking-tight mb-6 leading-tight">
+          Nach dem Training<br>
+          beginnt oft die eigentliche Community.
         </h2>
-        <p class="text-gray-400 text-base max-w-xl mx-auto leading-relaxed mb-10 reveal">
-            Wir starten das Projekt in Köln und suchen erste, lokale Partner, die Lust haben, dabei zu sein. Es gibt kein finanzielles Risiko und keine versteckten Technik-Kosten für dich.
+        <p class="text-gray-400 text-lg leading-relaxed mb-8">
+          Viele Routinen in Köln enden nicht im Studio. Leute holen danach Kaffee, treffen Freunde oder sitzen noch zusammen. Genau diese Orte werden Teil der täglichen Gewohnheiten.
         </p>
+        <div class="space-y-4">
+          <div class="card p-5">
+            <h3 class="font-bold text-lg mb-2">Mehr Wiederkehr</h3>
+            <p class="text-sm text-gray-400 leading-relaxed">
+              Streaks und Rewards geben Menschen einen Grund, regelmäßig zurückzukommen.
+            </p>
+          </div>
+          <div class="card p-5">
+            <h3 class="font-bold text-lg mb-2">Neue Erstbesuche</h3>
+            <p class="text-sm text-gray-400 leading-relaxed">
+              Nutzer entdecken neue Spots über Freunde, Routinen und lokale Check-ins.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- MOCKUP -->
+      <div class="mockup p-8 reveal">
+        <div class="flex justify-between items-start mb-8">
+          <div>
+            <p class="text-[10px] uppercase tracking-[0.2em] text-brand font-black mb-2">Heute</p>
+            <h3 class="text-2xl font-black italic tracking-tight">Morning Routine</h3>
+          </div>
+          <div class="text-right">
+            <p class="text-xs text-gray-500 uppercase tracking-widest font-bold">Ehrenfeld</p>
+          </div>
+        </div>
+        <div class="space-y-4">
+          <div class="bg-[#111] border border-white/5 rounded-xl p-4 flex items-center gap-4">
+            <div class="text-2xl">🏃</div>
+            <div>
+              <p class="font-bold text-white">Morning Run</p>
+              <p class="text-xs text-gray-500">+250 XP gesammelt</p>
+            </div>
+          </div>
+          <div class="bg-[#111] border border-brand/20 rounded-xl p-4 flex items-center gap-4 shadow-[0_0_15px_rgba(255,77,0,0.1)]">
+            <div class="text-2xl">🔥</div>
+            <div>
+              <p class="font-bold text-white">Rocycle Session</p>
+              <p class="text-xs text-brand">4 Week Streak aktiv</p>
+            </div>
+          </div>
+          <div class="bg-[#111] border border-white/5 rounded-xl p-4 flex items-center gap-4">
+            <div class="text-2xl">☕</div>
+            <div>
+              <p class="font-bold text-white">GuMo Café</p>
+              <p class="text-xs text-gray-500">Reward freigeschaltet</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- USE CASES (DIE 4 KATEGORIEN) -->
+  <section class="py-24 px-6 max-w-6xl mx-auto flex flex-col gap-24 border-t border-white/5">
         
-        <a href="mailto:Fabio.maines@grind-app.de?subject=GRIND.%20Partnerschaft" class="btn-primary reveal">
-            Jetzt Kontakt aufnehmen
-        </a>
-    </section>
+    <!-- Bereich 1: Sport & Fitness -->
+    <div class="flex flex-col md:flex-row items-center gap-12 reveal">
+        <div class="md:w-1/2 order-2 md:order-1">
+            <div class="mockup p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h4 class="font-bold text-lg text-white">Boutique Rowing Session</h4>
+                        <p class="text-xs text-gray-500 mt-1">Achter.Club Köln</p>
+                    </div>
+                    <span class="text-brand font-bold text-xl">+500 XP</span>
+                </div>
+                <div class="bg-[#1a1a1a] rounded-lg p-4 flex items-center gap-3 border border-white/5">
+                    <div class="bg-green-500/10 p-2 rounded-full text-green-500">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold text-white">Erfolgreich teilgenommen</p>
+                        <p class="text-xs text-gray-500">Serie ausgebaut: 3 Wochen in Folge</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="md:w-1/2 order-1 md:order-2">
+            <span class="text-xs font-bold uppercase tracking-widest text-brand mb-2 block">Sport, Gyms & Run Clubs</span>
+            <h2 class="text-3xl font-bold mb-4 tracking-tight">Mach das Workout zur Gewohnheit.</h2>
+            <p class="text-gray-400 text-base leading-relaxed mb-6">
+                Ein hartes Workout kostet Überwindung. Belohne deine Teilnehmer direkt nach der Session für ihre Konstanz. Ob Bootcamp, Pilates oder Lauftreff – wer bei dir Routinen aufbaut, bleibt motiviert und kommt regelmäßiger zu dir.
+            </p>
+            <ul class="space-y-3 text-sm text-gray-300">
+                <li class="flex items-start"><span class="text-brand mr-2 mt-0.5">✔</span> Belohnung für jede Teilnahme</li>
+                <li class="flex items-start"><span class="text-brand mr-2 mt-0.5">✔</span> Bindung durch den "Serien-Effekt"</li>
+                <li class="flex items-start"><span class="text-brand mr-2 mt-0.5">✔</span> Sichtbarkeit für eine aktive Zielgruppe</li>
+            </ul>
+        </div>
+    </div>
 
-    <!-- Footer -->
-    <footer class="py-8 text-center border-t border-white/5">
-        <p class="text-gray-600 text-xs font-semibold tracking-wide">© 2026 GRIND. KÖLN</p>
-    </footer>
+    <!-- Bereich 2: Food & Gastronomie -->
+    <div class="flex flex-col md:flex-row items-center gap-12 reveal">
+        <div class="md:w-1/2">
+            <span class="text-xs font-bold uppercase tracking-widest text-[#3b82f6] mb-2 block">Cafés & Healthy Food</span>
+            <h2 class="text-3xl font-bold mb-4 tracking-tight">Die feste Post-Workout Routine.</h2>
+            <p class="text-gray-400 text-base leading-relaxed mb-6">
+                Ein aktiver Lifestyle hört beim Sport nicht auf. Mach dein Café zur Base. Wenn deine Bowls oder der Kaffee Teil der sichtbaren Check-in-Routine werden, gehst du in der Auswahl der Stadt nicht mehr unter.
+            </p>
+            <ul class="space-y-3 text-sm text-gray-300">
+                <li class="flex items-start"><span class="text-[#3b82f6] mr-2 mt-0.5">✔</span> Dein Café als Teil der täglichen Routine</li>
+                <li class="flex items-start"><span class="text-[#3b82f6] mr-2 mt-0.5">✔</span> Produkte als echte Belohnung anbieten</li>
+                <li class="flex items-start"><span class="text-[#3b82f6] mr-2 mt-0.5">✔</span> Stammkunden organisch aufbauen</li>
+            </ul>
+        </div>
+        <div class="md:w-1/2">
+            <div class="mockup p-6 border border-[#3b82f6]/20">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h4 class="font-bold text-lg text-white">Post-Workout Snack</h4>
+                        <p class="text-xs text-gray-500 mt-1">GuMo Café</p>
+                    </div>
+                    <span class="text-[#3b82f6] font-bold text-xl">+200 XP</span>
+                </div>
+                <div class="bg-[#1a1a1a] rounded-lg p-4 flex items-center justify-center gap-2 text-sm text-white font-bold border border-white/5">
+                    <span>☕️</span> Besuch erfolgreich bestätigt
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <script>
-        // Simples, sauberes Einblenden der Elemente beim Scrollen
-        document.addEventListener('DOMContentLoaded', function() {
-            const reveals = document.querySelectorAll('.reveal');
-            const revealOnScroll = () => {
-                const windowHeight = window.innerHeight;
-                const elementVisible = 100;
-                reveals.forEach(reveal => {
-                    const elementTop = reveal.getBoundingClientRect().top;
-                    if (elementTop < windowHeight - elementVisible) {
-                        reveal.classList.add('active');
-                    }
-                });
-            };
-            window.addEventListener('scroll', revealOnScroll);
-            revealOnScroll(); // Einmal direkt beim Laden ausführen
+    <!-- Bereich 3: Events -->
+    <div class="flex flex-col md:flex-row items-center gap-12 reveal">
+        <div class="md:w-1/2 order-2 md:order-1">
+            <div class="mockup p-6 relative overflow-hidden border border-[#a855f7]/20">
+                <div class="absolute top-0 right-0 bg-[#222] px-3 py-1 text-xs font-bold text-gray-400 rounded-bl-lg">Versteckter Check-in</div>
+                <div class="flex justify-between items-center mb-4 mt-4">
+                    <div>
+                        <h4 class="font-bold text-lg text-white">PopUp Beach Besuch</h4>
+                        <p class="text-xs text-gray-500 mt-1">Rausgegangen Event</p>
+                    </div>
+                    <span class="text-[#a855f7] font-bold text-xl">+800 XP</span>
+                </div>
+                <div class="bg-[#a855f7]/10 border border-[#a855f7]/30 rounded-lg p-4 text-center">
+                    <p class="text-[#a855f7] font-bold text-sm">🎉 Event-Bonuspunkte gesammelt!</p>
+                </div>
+            </div>
+        </div>
+        <div class="md:w-1/2 order-1 md:order-2">
+            <span class="text-xs font-bold uppercase tracking-widest text-[#a855f7] mb-2 block">Events & Kultur</span>
+            <h2 class="text-3xl font-bold mb-4 tracking-tight">Events als Teil der aktiven Szene.</h2>
+            <p class="text-gray-400 text-base leading-relaxed mb-6">
+                Bringe die Community auf deine Veranstaltungen. Verstecke kleine QR-Codes auf Festivals oder Pop-Up Events. So können Besucher ihre Work-Life-Balance und Anwesenheit spielerisch festhalten.
+            </p>
+            <ul class="space-y-3 text-sm text-gray-300">
+                <li class="flex items-start"><span class="text-[#a855f7] mr-2 mt-0.5">✔</span> Einzigartiger Anreiz, dein Event zu besuchen</li>
+                <li class="flex items-start"><span class="text-[#a855f7] mr-2 mt-0.5">✔</span> Eine kleine digitale Entdeckungstour auf dem Gelände</li>
+                <li class="flex items-start"><span class="text-[#a855f7] mr-2 mt-0.5">✔</span> Verbinde Sport, Lifestyle und Kölner Kultur</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Bereich 4: Brands & Premium -->
+    <div class="flex flex-col md:flex-row items-center gap-12 reveal">
+        <div class="md:w-1/2">
+            <span class="text-xs font-bold uppercase tracking-widest text-brand mb-2 block">Marken & Regeneration</span>
+            <h2 class="text-3xl font-bold mb-4 tracking-tight">Werde zum exklusiven Ritual-Reward.</h2>
+            <p class="text-gray-400 text-base leading-relaxed mb-6">
+                Für unsere diszipliniertesten Nutzer suchen wir besondere Ziele. Biete einen Rabatt auf Kältetherapie, Supplements oder Sportkleidung an, sobald ein Nutzer ein hohes Level erreicht. Das perfekte Marketing, direkt an deine Zielgruppe.
+            </p>
+            <ul class="space-y-3 text-sm text-gray-300">
+                <li class="flex items-start"><span class="text-brand mr-2 mt-0.5">✔</span> Platziere deine Marke als erstrebenswertes Ziel</li>
+                <li class="flex items-start"><span class="text-brand mr-2 mt-0.5">✔</span> Erreiche genau die Menschen, die extrem sportaffin sind</li>
+                <li class="flex items-start"><span class="text-brand mr-2 mt-0.5">✔</span> Stärke dein Image als Brand, die Einsatz belohnt</li>
+            </ul>
+        </div>
+        <div class="md:w-1/2">
+            <div class="mockup p-6 text-center relative overflow-hidden border-t-2 border-t-brand">
+                <!-- Die große angeschnittene 50 -->
+                <div class="absolute -right-8 -top-8 opacity-10 rotate-12 text-9xl font-black italic text-white select-none pointer-events-none">50</div>
+                <div class="relative z-10">
+                    <p class="text-gray-500 text-xs font-bold uppercase tracking-widest mb-2">Freigeschaltet ab Level 50</p>
+                    <h4 class="font-bold text-xl text-white mb-1">Eisbox Session</h4>
+                    <p class="text-sm text-gray-400 mb-6">Cryopoint Köln</p>
+                    <button class="w-full bg-[#222] border border-[#333] py-3 rounded-lg text-white font-bold text-sm hover:bg-white hover:text-black transition">
+                        Gutschein einlösen
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+  </section>
+
+  <!-- ZERO FRICTION -->
+  <section class="py-24 px-6 border-y border-white/5 bg-[#080808]">
+    <div class="max-w-3xl mx-auto text-center reveal">
+      <h2 class="text-3xl md:text-5xl font-black tracking-tight mb-6">
+        Kein IT-Projekt.
+      </h2>
+      <p class="text-lg text-gray-400 leading-relaxed">
+        Keine Kassen-Integration. Keine Tablets am Eingang. Kein kompliziertes Setup. Ein kleiner, edler Acryl-Aufsteller am Empfang reicht völlig aus. Deine Gäste verifizieren ihre Routinen selbst über ihr eigenes Smartphone.
+      </p>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section id="partner" class="py-32 px-6 relative overflow-hidden">
+
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[300px] bg-brand/10 blur-[120px] rounded-full"></div>
+
+    <div class="max-w-2xl mx-auto text-center relative z-10">
+
+      <div class="inline-flex items-center gap-2 bg-brand/10 border border-brand/20 px-4 py-2 rounded-md mb-8 reveal">
+        <span class="text-brand text-[10px] uppercase tracking-[0.2em] font-black">
+          Founding Partner • Köln
+        </span>
+      </div>
+
+      <h2 class="text-4xl md:text-6xl font-black tracking-tight mb-6 reveal">
+        Erste Partner<br>
+        in Köln.
+      </h2>
+
+      <p class="text-lg md:text-xl text-gray-300 leading-relaxed mb-10 reveal">
+        Aktuell baut GRIND das erste Netzwerk aus lokalen Cafés, Studios und Community-Spots in Köln auf.
+      </p>
+
+      <div class="space-y-4 max-w-md mx-auto text-left mb-12 reveal">
+
+        <div class="flex items-center gap-3 text-gray-400">
+          <span class="text-brand">✔</span>
+          Kostenlos in der Aufbauphase
+        </div>
+
+        <div class="flex items-center gap-3 text-gray-400">
+          <span class="text-brand">✔</span>
+          Sichtbarkeit bei aktiven lokalen Nutzern
+        </div>
+
+        <div class="flex items-center gap-3 text-gray-400">
+          <span class="text-brand">✔</span>
+          Kein technischer Aufwand
+        </div>
+
+      </div>
+
+      <a
+        href="mailto:Fabio.maines@grind-app.de?subject=GRIND.%20Founding%20Partner"
+        class="btn-primary reveal"
+      >
+        Founding Partner werden
+      </a>
+
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="py-12 border-t border-white/5 text-center">
+    <div class="text-xl font-black italic tracking-tight mb-3">
+      GRIND<span class="text-brand">.</span>
+    </div>
+    <p class="text-[10px] uppercase tracking-[0.2em] text-gray-600 font-bold">
+      Built in Cologne · 2026
+    </p>
+  </footer>
+
+  <!-- MOBILE CTA -->
+  <div id="mobile-cta" class="fixed bottom-0 left-0 right-0 p-4 bg-[#030303]/90 backdrop-blur-xl border-t border-white/10 md:hidden z-50">
+    <a href="#partner" class="btn-primary w-full text-center">
+      Founding Partner werden
+    </a>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const reveals = document.querySelectorAll('.reveal');
+      const revealOnScroll = () => {
+        const windowHeight = window.innerHeight;
+        reveals.forEach((el) => {
+          const top = el.getBoundingClientRect().top;
+          if (top < windowHeight - 100) {
+            el.classList.add('active');
+          }
         });
-    </script>
+      };
+      window.addEventListener('scroll', revealOnScroll);
+      revealOnScroll();
+    });
+  </script>
+
 </body>
 </html>
+
