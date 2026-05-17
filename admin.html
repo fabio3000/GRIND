@@ -306,14 +306,15 @@
 
         window.addManualHabit = async (e) => {
             const type = document.getElementById('new_hab_type').value;
+            const freq = document.getElementById('new_hab_freq').value;
             const newHabit = { 
                 id: 'rep_' + Date.now(), 
                 name: document.getElementById('new_hab_name').value, 
                 desc: document.getElementById('new_hab_desc').value, 
                 xp: parseInt(document.getElementById('new_hab_xp').value), 
-                streakBonus: parseInt(document.getElementById('new_hab_streak').value) || 0,
+                streakBonus: freq === 'weekly' ? (parseInt(document.getElementById('new_hab_streak').value) || 0) : 0,
                 endDate: document.getElementById('new_hab_end').value,
-                frequency: document.getElementById('new_hab_freq').value,
+                frequency: freq,
                 type: type,
                 qr_solution: type === 'qr' ? document.getElementById('new_hab_qr').value.trim() : ''
             };
@@ -324,6 +325,8 @@
                 await setDoc(doc(db, 'system', 'grind_season'), { habitData: updatedHabits }, { merge: true });
                 window.showToast("Core Routine live geschaltet.", "success");
                 e.target.reset(); document.getElementById('new_hab_qr').style.display = 'none';
+                document.getElementById('streak_wrapper').style.display = 'none';
+                document.getElementById('xp_wrapper').className = 'w-full transition-all';
             } catch(err) { window.showToast("Fehler beim Speichern.", "error"); }
         };
 
@@ -449,7 +452,7 @@
                     <div class="bg-black/50 p-3 mb-2 border border-white/5 rounded-sm">
                         <div class="flex justify-between items-start mb-1">
                             <span class="font-bold text-sm italic uppercase text-white">${hab.name}</span>
-                            <span class="text-blue-500 text-[10px] font-bold">+${hab.xp} XP (+${hab.streakBonus}/Rhythmus) | ${hab.type}</span>
+                            <span class="text-blue-500 text-[10px] font-bold">+${hab.xp} XP ${hab.streakBonus > 0 ? `(+${hab.streakBonus}/Woche)` : ''} | ${hab.type}</span>
                         </div>
                         <p class="text-xs text-gray-400 mb-3">${hab.desc}</p>
                         <button onclick="window.acceptAiItem('habits', ${i})" class="w-full bg-blue-500/10 hover:bg-blue-500 text-blue-500 hover:text-white border border-blue-500/30 py-2 rounded-sm text-[10px] font-black uppercase tracking-widest transition">Add to System</button>
@@ -490,7 +493,8 @@
                 } else if (category === 'habits') {
                     item.id = 'ai_hab_' + Date.now();
                     if(!item.qr_solution) item.qr_solution = '';
-                    item.frequency = 'daily'; // Default for AI imports
+                    item.frequency = item.streakBonus > 0 ? 'weekly' : 'daily'; // Smart Fallback
+                    if(item.frequency === 'daily') item.streakBonus = 0; // Daily = Kein Streak
                     item.endDate = new Date(Date.now() + 60*86400000).toISOString().split('T')[0]; // Default 60 days
                     const updatedHabits = JSON.parse(JSON.stringify(state.habitData));
                     updatedHabits.push(item);
@@ -806,7 +810,9 @@
                                                     <div class="font-black italic uppercase text-sm flex items-center gap-2">
                                                         ${h.name} <span class="bg-black border border-[#1f1f1f] text-gray-500 px-1 py-0.5 rounded-sm text-[8px] tracking-widest">${h.frequency === 'weekly' ? 'WEEKLY' : 'DAILY'}</span>
                                                     </div>
-                                                    <div class="text-[9px] text-[#3b82f6] font-bold uppercase tracking-widest mt-1">${h.xp} Base XP | 🔥 +${h.streakBonus} XP / Rhythmus</div>
+                                                    <div class="text-[9px] text-[#3b82f6] font-bold uppercase tracking-widest mt-1">
+                                                        ${h.xp} Base XP ${h.frequency === 'weekly' && h.streakBonus > 0 ? `| 🔥 +${h.streakBonus} XP / Woche` : ''}
+                                                    </div>
                                                 </div>
                                                 <button type="button" onclick="window.deleteHabit('${h.id}')" class="text-gray-600 hover:text-red-500 transition ml-4"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
                                             </div>
@@ -817,13 +823,17 @@
                                         <form onsubmit="event.preventDefault(); window.addManualHabit(event);" class="space-y-3">
                                             <input id="new_hab_name" required placeholder="Titel (z.B. Eisbaden)" class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#3b82f6]">
                                             <input id="new_hab_desc" required placeholder="Beschreibung" class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#3b82f6]">
-                                            <select id="new_hab_freq" class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white appearance-none outline-none focus:border-[#3b82f6] cursor-pointer">
-                                                <option value="daily">Rhythmus: Daily (Täglich)</option>
-                                                <option value="weekly">Rhythmus: Weekly (Wöchentlich)</option>
+                                            <select id="new_hab_freq" onchange="document.getElementById('streak_wrapper').style.display = this.value === 'weekly' ? 'block' : 'none'; document.getElementById('xp_wrapper').className = this.value === 'weekly' ? 'w-1/2 transition-all' : 'w-full transition-all';" class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white appearance-none outline-none focus:border-[#3b82f6] cursor-pointer">
+                                                <option value="daily" selected>Rhythmus: Daily (Täglich) - Ohne Streak</option>
+                                                <option value="weekly">Rhythmus: Weekly (Wöchentlich) - Mit Streak-Bonus</option>
                                             </select>
                                             <div class="flex gap-3">
-                                                <input id="new_hab_xp" type="number" required placeholder="Base XP" class="w-1/2 p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#3b82f6]">
-                                                <input id="new_hab_streak" type="number" required placeholder="Streak Bonus / Rhythmus" class="w-1/2 p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#3b82f6]">
+                                                <div id="xp_wrapper" class="w-full transition-all">
+                                                    <input id="new_hab_xp" type="number" required placeholder="Base XP" class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#3b82f6]">
+                                                </div>
+                                                <div id="streak_wrapper" class="w-1/2" style="display: none;">
+                                                    <input id="new_hab_streak" type="number" placeholder="Streak Bonus / Woche" class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#3b82f6]">
+                                                </div>
                                             </div>
                                             <div>
                                                 <label class="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1 block">Gültig bis (Enddatum)</label>
