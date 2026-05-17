@@ -587,78 +587,23 @@
             } catch(e) { window.showToast("Fehler.", "error"); }
         };
 
-       window.submitShipping = async (lvl, tier) => {
-    let addressString = "", addressData = {}, allValid = true;
-    document.querySelectorAll('.shipping-input-field').forEach(input => {
-        const val = input.value.trim(); if(!val) allValid = false; 
-        const label = input.getAttribute('data-label'); 
-        addressData[label] = val; addressString += `${label}: ${val} | `;
-    });
-
-    if(!allValid) return window.showToast("Bitte alle Felder ausfüllen.", "error");
-    const btn = document.querySelector('#modal-container button.bg-\\[\\#ff4d00\\], #modal-container button.bg-\\[\\#a855f7\\]'); 
-    if(btn) { btn.innerText = "Senden..."; btn.disabled = true; }
-
-    // Notaus-Schalter (Sicherheits-Timeout von 8 Sekunden)
-    const timeout = setTimeout(() => {
-        if(btn && btn.innerText === "Senden...") {
-            btn.disabled = false;
-            btn.innerText = "Versand anfordern";
-            window.showToast("Timeout. Bitte Konsole prüfen.", "error");
-        }
-    }, 8000);
-
-    const rewardId = `lvl${lvl}_${tier}`; 
-    const reward = state.rewardData.find(r => r.lvl === lvl); 
-    const itemName = reward ? reward[tier] : 'Unbekanntes Item';
-
-    try {
-        // 1. Firebase Eintrag (Das ist das Wichtigste, muss klappen!)
-        await addDoc(collection(db, 'plot_shipping_requests'), { 
-            uid: state.user.uid, 
-            alias: state.profile?.alias || 'Grinder', 
-            lvl: lvl, tier: tier, itemName: itemName, 
-            address: addressString, timestamp: new Date(), status: 'pending' 
-        });
-
-        // 2. Profile Update
-        const currentRedeemed = state.profile?.redeemed || [];
-        if(!currentRedeemed.includes(rewardId)) { 
-            currentRedeemed.push(rewardId); 
-            await setDoc(doc(db, 'plot_users', state.user.uid), { redeemed: currentRedeemed }, { merge: true }); 
-        }
-
-        // 3. E-Mail "Fire and Forget" (App wartet nicht mehr auf Antwort!)
-        fetch("https://formsubmit.co/ajax/Fabio.maines@grind-app.de", {
-            method: "POST",
-            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-            body: JSON.stringify({
-                _subject: "Loot Request: " + itemName,
-                _template: "table",
-                _captcha: "false",
-                Artikel: itemName,
-                Alias: state.profile?.alias || 'Grinder',
-                Level: String(lvl),
-                ...addressData
-            })
-        }).then(res => res.json())
-          .then(data => console.log("Mail-Server Antwort:", data))
-          .catch(e => console.error("Mail-Server Fehler (Ignoriert):", e));
-
-        // Erfolgreich beenden (wird sofort ausgeführt, nachdem Firebase fertig ist)
-        clearTimeout(timeout);
-        window.logActivity('REDEEM', `hat physischen Reward ('<span class="font-bold">${itemName}</span>') angefordert.`);
-        window.showToast("Anfrage gesendet!", "success"); 
-        window.closeModal();
-
-    } catch(e) {
-        // Falls Firebase selbst einen Fehler wirft
-        clearTimeout(timeout);
-        console.error("Firebase/Shipping Error:", e);
-        window.showToast("Fehler in der Datenbank.", "error"); 
-        if(btn) { btn.innerText = "Versand anfordern"; btn.disabled = false; } 
-    }
-};
+        window.submitShipping = async (lvl, tier) => {
+            let addressString = "", addressData = {}, allValid = true;
+            document.querySelectorAll('.shipping-input-field').forEach(input => {
+                const val = input.value.trim(); if(!val) allValid = false; const label = input.getAttribute('data-label'); addressData[label] = val; addressString += `${label}: ${val} | `;
+            });
+            if(!allValid) return window.showToast("Bitte alle Felder ausfüllen.", "error");
+            const btn = document.querySelector('#modal-container button.bg-\\[\\#ff4d00\\], #modal-container button.bg-\\[\\#a855f7\\]'); if(btn) { btn.innerText = "Senden..."; btn.disabled = true; }
+            const rewardId = `lvl${lvl}_${tier}`; const reward = state.rewardData.find(r => r.lvl === lvl); const itemName = reward ? reward[tier] : 'Unbekanntes Item';
+            try {
+                await addDoc(collection(db, 'plot_shipping_requests'), { uid: state.user.uid, alias: state.profile?.alias || 'Grinder', lvl: lvl, tier: tier, itemName: itemName, address: addressString, timestamp: new Date(), status: 'pending' });
+                const currentRedeemed = state.profile?.redeemed || [];
+                if(!currentRedeemed.includes(rewardId)) { currentRedeemed.push(rewardId); await setDoc(doc(db, 'plot_users', state.user.uid), { redeemed: currentRedeemed }, { merge: true }); }
+                try { fetch("https://formsubmit.co/ajax/Fabio.maines@gmx.de", { method: "POST", headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify({ _subject: "Loot: " + itemName, _template: "table", Artikel: itemName, Alias: state.profile?.alias || 'Grinder', Level: String(lvl), Tier: tier.toUpperCase(), ...addressData }) }).catch(e => {}); } catch(mailErr) {}
+                window.logActivity('REDEEM', `hat physischen Reward ('<span class="font-bold">${itemName}</span>') angefordert.`);
+                window.showToast("Anfrage gesendet!", "success"); window.closeModal();
+            } catch(e) { window.showToast("Fehler.", "error"); if(btn) { btn.innerText = "Versand anfordern"; btn.disabled = false; } }
+        };
 
         window.claimInstantMission = async (mid, xp, name) => {
             const btn = document.getElementById(`btn-${mid}`); if(btn) { btn.innerText = "Claiming..."; btn.disabled = true; }
