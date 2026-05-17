@@ -9,7 +9,7 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&display=swap" rel="stylesheet">
-    <link rel="icon" type="image/png" sizes="32x32" href="https://grind-app.de/favicon.png">
+    <link class="rounded-full" rel="icon" type="image/png" sizes="32x32" href="https://grind-app.de/favicon.png">
     <link rel="apple-touch-icon" href="https://grind-app.de/logo.jpg">
     
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
@@ -25,17 +25,6 @@
         .bg-brand { background: #ff4d00; }
         
         /* 100% ZUVERLÄSSIGE ANIMATIONS-KLASSEN (Hardware-Beschleunigt) */
-        .hud-wrapper {
-            transform: translateY(-150%);
-            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-            pointer-events: none;
-            will-change: transform; /* Erzwingt Hardware-Beschleunigung für flüssige Animation */
-        }
-        .hud-wrapper.show {
-            transform: translateY(0);
-            pointer-events: auto;
-        }
-        
         .notif-wrapper {
             transform: translate(-50%, -8rem);
             opacity: 0;
@@ -143,22 +132,22 @@
 
     <div id="toast-container"></div>
     
-    <!-- Smart XP Dropdown HUD -->
-    <div id="xp-hud" class="hud-wrapper fixed top-0 left-0 right-0 z-[999998] flex justify-center pt-4 px-4 sm:px-6">
+    <!-- Smart XP Dropdown HUD (Hardware-beschleunigtes Dropdown über Inline-Styles) -->
+    <div id="xp-hud" class="fixed top-0 left-0 right-0 z-[999998] flex justify-center pt-4 px-4 sm:px-6" style="transform: translateY(-150%); transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none; will-change: transform;">
         <div class="absolute top-2 w-full max-w-md h-32 bg-black/60 blur-2xl rounded-full pointer-events-none z-0 gpu-blur"></div>
-        <div class="bg-[#0a0a0a]/80 border border-[#ff4d00]/40 shadow-[0_20px_50px_rgba(0,0,0,0.7),_0_0_20px_rgba(255,77,0,0.15)] rounded-xl p-5 w-full max-w-sm flex flex-col gap-3 relative overflow-hidden backdrop-blur-2xl z-10 pointer-events-auto">
+        <div class="bg-[#0a0a0a]/95 border border-[#ff4d00]/50 shadow-[0_20px_50px_rgba(0,0,0,0.9),_0_0_30px_rgba(255,77,0,0.3)] rounded-xl p-5 w-full max-w-sm flex flex-col gap-3 relative overflow-hidden backdrop-blur-2xl z-10 pointer-events-auto">
             <div class="absolute inset-0 bg-gradient-to-b from-[#ff4d00]/15 to-transparent"></div>
             <div class="relative z-10 flex justify-between items-end">
                 <div>
                     <p class="text-[#ff4d00] text-[9px] font-black uppercase tracking-[0.3em] mb-1 drop-shadow-md">Network Sync</p>
-                    <h4 class="text-white font-black italic text-2xl leading-none">LVL <span id="hud-lvl" class="inline-block transition-transform duration-300">1</span></h4>
+                    <h4 class="text-white font-black italic text-2xl leading-none">LVL <span id="hud-lvl" class="inline-block">1</span></h4>
                 </div>
                 <div class="text-right">
                     <span class="text-gray-400 text-[10px] font-bold uppercase tracking-widest italic"><span id="hud-xp-num" class="text-white text-sm">0</span> / <span id="hud-xp-max">1000</span></span>
                 </div>
             </div>
             <div class="w-full bg-black h-2.5 rounded-full overflow-hidden border border-white/10 relative z-10 shadow-inner">
-                <div id="hud-xp-bar" class="grind-gradient h-full transition-all ease-out relative w-0">
+                <div id="hud-xp-bar" class="grind-gradient h-full transition-all ease-out relative w-0" style="transition-duration: 1500ms;">
                     <div class="absolute top-0 right-0 bottom-0 w-10 bg-gradient-to-r from-transparent to-white/50"></div>
                 </div>
             </div>
@@ -291,6 +280,76 @@
             el.innerHTML = `${Math.floor(distance / 86400000)}D ${Math.floor((distance % 86400000) / 3600000).toString().padStart(2, '0')}H ${Math.floor((distance % 3600000) / 60000).toString().padStart(2, '0')}M ${Math.floor((distance % 60000) / 1000).toString().padStart(2, '0')}S`;
         };
 
+        // 100% ZUVERLÄSSIGER XP DROPDOWN TRIGGER (Entkoppelt vom reaktiven App-Rendern)
+        window.triggerXpHud = (gainedXp, oldXp, newXp, oldLvl, newLvl) => {
+            const hud = document.getElementById('xp-hud');
+            const hudLvl = document.getElementById('hud-lvl');
+            const hudXpNum = document.getElementById('hud-xp-num');
+            const hudXpMax = document.getElementById('hud-xp-max');
+            const hudXpBar = document.getElementById('hud-xp-bar');
+            
+            if (!hud || !hudLvl || !hudXpNum || !hudXpMax || !hudXpBar) return;
+            
+            if (window.hudCloseTimeout) clearTimeout(window.hudCloseTimeout);
+            
+            const startXpInLvl = oldXp % 1000;
+            const targetXpInLvl = newXp % 1000;
+            
+            // Setze initiale Werte vor dem Runterfahren
+            hudLvl.innerText = oldLvl;
+            hudXpNum.innerText = startXpInLvl;
+            hudXpMax.innerText = oldLvl * 1000;
+            
+            hudXpBar.style.transition = 'none';
+            hudXpBar.style.width = `${startXpInLvl / 10}%`;
+            void hudXpBar.offsetWidth; // Force Reflow
+            
+            // 1. HUD runterfahren
+            hud.style.transform = 'translateY(0)';
+            hud.style.pointerEvents = 'auto';
+            
+            // 2. XP Zuwachs animieren nach sanfter Verzögerung
+            setTimeout(() => {
+                animateValue('hud-xp-num', startXpInLvl, newLvl > oldLvl ? 1000 : targetXpInLvl, 1500);
+                
+                if (newLvl > oldLvl) {
+                    // Balken füllt sich komplett
+                    hudXpBar.style.transition = 'width 1000ms ease-in';
+                    hudXpBar.style.width = '100%';
+                    
+                    setTimeout(() => {
+                        // Level Up Flash-Effekt
+                        hudLvl.innerText = newLvl;
+                        hudLvl.classList.remove('animate-level-up');
+                        void hudLvl.offsetWidth;
+                        hudLvl.classList.add('animate-level-up');
+                        hudXpMax.innerText = newLvl * 1000;
+                        
+                        // Setze Balken auf 0 zurück und fülle auf Zielwert
+                        hudXpBar.style.transition = 'none';
+                        hudXpBar.style.width = '0%';
+                        void hudXpBar.offsetWidth;
+                        
+                        animateValue('hud-xp-num', 0, targetXpInLvl, 800);
+                        hudXpBar.style.transition = 'width 800ms ease-out';
+                        hudXpBar.style.width = `${targetXpInLvl / 10}%`;
+                    }, 1000);
+                } else {
+                    hudXpBar.style.transition = 'width 1500ms ease-out';
+                    hudXpBar.style.width = `${targetXpInLvl / 10}%`;
+                }
+            }, 300);
+            
+            // 3. HUD nach 5,5 Sekunden automatisch wieder hochfahren
+            window.hudCloseTimeout = setTimeout(() => {
+                hud.style.transform = 'translateY(-150%)';
+                hud.style.pointerEvents = 'none';
+                setTimeout(() => {
+                    hudLvl.classList.remove('animate-level-up');
+                }, 600);
+            }, 5500);
+        };
+
         const setupSeasonData = () => {
             onSnapshot(doc(db, 'system', 'grind_season'), (docSnap) => {
                 if (docSnap.exists()) {
@@ -354,7 +413,21 @@
                 state.user = user;
                 onSnapshot(doc(db, 'plot_users', user.uid), (docSnap) => {
                     if (docSnap.exists()) {
-                        state.profile = docSnap.data();
+                        const newData = docSnap.data();
+                        
+                        // HIER WIRD JEDER ENTSCHEIDENDE XP-ZUWACHS DETEKTIERT & ANIMIERT (100% Sicher!)
+                        if (state.profile) {
+                            const oldXp = state.profile.xp || 0;
+                            const newXp = newData.xp || 0;
+                            const oldLvl = state.profile.lvl || 1;
+                            const newLvl = newData.lvl || 1;
+                            
+                            if (newXp > oldXp) {
+                                window.triggerXpHud(newXp - oldXp, oldXp, newXp, oldLvl, newLvl);
+                            }
+                        }
+                        
+                        state.profile = newData;
                         if (!state.profile.crewCode) { const c = Math.random().toString(36).substring(2, 8).toUpperCase(); state.profile.crewCode = c; setDoc(doc(db, 'plot_users', user.uid), { crewCode: c }, { merge: true }); }
                         if (['loading', 'auth', 'onboarding'].includes(state.view)) {
                             state.view = 'dashboard'; state.dashboardNeedsScroll = true;
@@ -981,7 +1054,7 @@
                     const r = state.rewardData.find(x => x.lvl === i); 
                     const isUnlocked = i <= safeLvl; 
                     const isProUnlocked = isUnlocked && hasPremium; 
-                    const freeClaimed = safeRedeemed.includes(`lvl${i}_free`); 
+                    const freeClaimed = safeRedeemed.includes class="rounded-full"(`lvl${i}_free`); 
                     const proClaimed = safeRedeemed.includes(`lvl${i}_pro`);
                     
                     html += `
@@ -1266,7 +1339,6 @@
                 }
 
                 if (window.xpAnimTimeout) clearTimeout(window.xpAnimTimeout);
-                // WICHTIG: Erhöht auf 100ms, damit der Browser auf jeden Fall mit dem DOM-Repaint fertig ist
                 window.xpAnimTimeout = setTimeout(() => {
                     const passViewport = document.getElementById('pass-viewport');
                     const currentNode = document.getElementById(`level-node-${safeLvl}`);
@@ -1307,58 +1379,8 @@
                         }
                     }
                     
+                    // Wir animieren die Dashboard-Statistiken weiterhin hierüber
                     if (state.prevXp !== null && state.prevXp < safeXp) {
-                        const hud = document.getElementById('xp-hud');
-                        const hudLvl = document.getElementById('hud-lvl');
-                        const hudXpNum = document.getElementById('hud-xp-num');
-                        const hudXpMax = document.getElementById('hud-xp-max');
-                        const hudXpBar = document.getElementById('hud-xp-bar');
-                        
-                        // Das XP-Fenster Dropdown (Hardware-Beschleunigt durch .show CSS Klasse)
-                        if(hud) {
-                            hud.classList.remove('show');
-                            void hud.offsetWidth; // Erzwingt Reflow für sofortigen Reset
-                            
-                            hudLvl.innerText = state.prevLvl; 
-                            hudXpNum.innerText = state.prevXp; 
-                            hudXpMax.innerText = state.prevLvl * 1000; 
-                            hudXpBar.style.transition = 'none'; 
-                            hudXpBar.style.width = `${oldXpProgress}%`; 
-                            void hudXpBar.offsetWidth; 
-                            
-                            // Jetzt sicher anzeigen
-                            hud.classList.add('show');
-                            
-                            animateValue('hud-xp-num', state.prevXp, safeXp, 2500);
-                            
-                            if (state.prevLvl !== null && safeLvl > state.prevLvl) { 
-                                hudXpBar.style.transition = `width 1250ms ease-in`; 
-                                hudXpBar.style.width = '100%'; 
-                                setTimeout(() => { 
-                                    hudLvl.innerText = safeLvl; 
-                                    hudLvl.classList.remove('animate-level-up');
-                                    void hudLvl.offsetWidth;
-                                    hudLvl.classList.add('animate-level-up'); 
-                                    
-                                    hudXpMax.innerText = safeLvl * 1000; 
-                                    hudXpBar.style.transition = 'none'; 
-                                    hudXpBar.style.width = '0%'; 
-                                    void hudXpBar.offsetWidth; 
-                                    hudXpBar.style.transition = `width 1250ms ease-out`; 
-                                    hudXpBar.style.width = `${targetXpProgress}%`; 
-                                }, 1250); 
-                            } else { 
-                                hudXpBar.style.transition = `width 2500ms ease-out`; 
-                                hudXpBar.style.width = `${targetXpProgress}%`; 
-                            }
-                            
-                            if (window.hudCloseTimeout) clearTimeout(window.hudCloseTimeout);
-                            window.hudCloseTimeout = setTimeout(() => { 
-                                hud.classList.remove('show');
-                                if(hudLvl) hudLvl.classList.remove('animate-level-up'); 
-                            }, 5000);
-                        }
-                        
                         animateValue('xp-counter-num', state.prevXp, safeXp, 2500);
                         
                         if (state.prevLvl !== null && safeLvl > state.prevLvl) { 
