@@ -26,13 +26,8 @@
         
         .card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; transition: all 0.3s ease; position: relative; z-index: 10; backdrop-filter: blur(10px); }
         .card:hover { border-color: rgba(255, 77, 0, 0.4); box-shadow: 0 10px 30px rgba(255, 77, 0, 0.1); transform: translateY(-2px); }
-        .mockup { background: #080808; border: 1px solid #181818; border-radius: 14px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.7); position: relative; }
-        
-        .ticker-container { overflow: hidden; white-space: nowrap; background: #ff4d00; color: white; position: relative; z-index: 50; width: 100vw; margin-left: -24px; padding-left: 24px; }
-        @media (min-width: 1152px) { .ticker-container { margin-left: calc(-50vw + 50%); padding-left: calc(50vw - 50%); } }
-        .ticker-content { display: inline-block; animation: ticker 20s linear infinite; }
-        @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-        .ticker-item { display: inline-flex; align-items: center; gap: 12px; padding: 8px 30px; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: .1em; }
+        .mockup { background: #080808; border: 1px solid #181818; border-radius: 14px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.7); position: relative; transition: all 0.3s ease; }
+        .mockup:hover { border-color: rgba(255, 77, 0, 0.3); transform: translateY(-2px); }
         
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; scroll-behavior: smooth; }
@@ -98,9 +93,17 @@
 </head>
 <body class="flex flex-col relative select-none">
     <div class="grid-overlay"></div>
+    
+    <!-- Smart Live Notification Badge -->
+    <div id="live-notification-badge" class="fixed top-4 left-1/2 transform -translate-x-1/2 -translate-y-[150%] opacity-0 z-[99999] transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] pointer-events-none w-full max-w-sm px-4">
+        <div class="bg-black/95 backdrop-blur-xl border border-[#ff4d00]/40 shadow-[0_10px_40px_rgba(255,77,0,0.3)] rounded-full py-3 px-5 flex items-center justify-center">
+            <span id="live-notification-text" class="text-white text-[10px] font-bold uppercase tracking-widest text-center truncate"></span>
+        </div>
+    </div>
+
     <div id="toast-container"></div>
     
-    <div id="xp-hud" class="fixed top-0 left-0 right-0 z-[999999] transform -translate-y-[150%] transition-transform duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] pointer-events-none flex justify-center pt-4 px-4 sm:px-6">
+    <div id="xp-hud" class="fixed top-0 left-0 right-0 z-[999998] transform -translate-y-[150%] transition-transform duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] pointer-events-none flex justify-center pt-4 px-4 sm:px-6">
         <div class="absolute inset-0 bg-[#0a0a0a]/80 backdrop-blur-2xl rounded-xl border border-[#ff4d00]/40 shadow-[0_20px_50px_rgba(0,0,0,0.7)] p-5 w-full max-w-sm mx-auto flex flex-col gap-3 relative overflow-hidden pointer-events-auto">
             <div class="absolute inset-0 bg-gradient-to-b from-[#ff4d00]/10 to-transparent"></div>
             <div class="relative z-10 flex justify-between items-end">
@@ -121,6 +124,7 @@
     </div>
     
     <div id="recaptcha-container"></div>
+    
     <div id="app" class="flex-1 flex flex-col w-full z-10 relative pb-10">
         <div class="flex-1 flex items-center justify-center min-h-[60vh]">
             <div class="w-16 h-16 border-t-4 border-l-4 border-[#ff4d00] rounded-full animate-spin"></div>
@@ -233,38 +237,44 @@
             });
         };
 
-        let lastTickerHash = '';
+        // --- SMART NOTIFICATION SYSTEM (Replaces old ticker) ---
+        let notificationQueue = [];
+        let isShowingNotification = false;
+        let lastNotifiedTimestamp = Date.now(); 
+
+        const processNotificationQueue = () => {
+            if (isShowingNotification || notificationQueue.length === 0) return;
+            isShowingNotification = true;
+            
+            const act = notificationQueue.shift();
+            const badge = document.getElementById('live-notification-badge');
+            const badgeText = document.getElementById('live-notification-text');
+            
+            if (badge && badgeText) {
+                const t = act.text.replace(/<[^>]*>?/gm, ''); 
+                badgeText.innerText = `⚡ Jemand ${t}`;
+                
+                badge.classList.remove('-translate-y-[150%]', 'opacity-0');
+                badge.classList.add('translate-y-0', 'opacity-100');
+                
+                setTimeout(() => {
+                    badge.classList.remove('translate-y-0', 'opacity-100');
+                    badge.classList.add('-translate-y-[150%]', 'opacity-0');
+                    setTimeout(() => {
+                        isShowingNotification = false;
+                        processNotificationQueue();
+                    }, 500); 
+                }, 4000); 
+            } else {
+                isShowingNotification = false;
+            }
+        };
+
         window.updateLiveUI = () => {
             const feedContainer = document.getElementById('live-feed-content');
-            const tickerContainer = document.getElementById('live-ticker-content');
-            const tickerWrapper = document.getElementById('ticker-wrapper');
             
-            if (!state.activities || state.activities.length === 0) {
-                if (tickerWrapper) tickerWrapper.style.display = 'none';
-                if (feedContainer) feedContainer.innerHTML = `<div class="text-center p-8 text-gray-600 italic text-sm border border-white/5 rounded-xl bg-[#080808]">Noch keine Aktivität im Network. Time to grind!</div>`;
-                return;
-            }
-
-            const now = Date.now();
-            const recentActivities = state.activities.filter(act => (now - act.timestamp) < 60000);
-
-            if (recentActivities.length > 0) {
-                if (tickerWrapper) tickerWrapper.style.display = 'block';
-                const currentHash = recentActivities[0]?.timestamp?.toString() || '';
-                if (currentHash !== lastTickerHash && tickerContainer) {
-                    lastTickerHash = currentHash;
-                    let html = '';
-                    recentActivities.slice(0, 5).forEach(act => {
-                        const t = act.text.replace(/<[^>]*>?/gm, ''); 
-                        html += `<div class="ticker-item"><span>⚡ NEW ACTION</span> <span>${t}</span></div>`;
-                    });
-                    tickerContainer.innerHTML = html + html; 
-                }
-            } else {
-                if (tickerWrapper) tickerWrapper.style.display = 'none';
-            }
-
-            if (feedContainer) {
+            // 1. Process Crew Feed immediately
+            if (feedContainer && state.activities) {
                 const p = state.profile || {}; const friendsList = p.friends || []; const feedUsersLower = friendsList.map(u => (u || '').toLowerCase());
                 const feedActivities = state.activities.filter(act => act.alias && feedUsersLower.includes(act.alias.toLowerCase())).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0)).slice(0, 10);
                 if (feedActivities.length === 0) {
@@ -283,9 +293,22 @@
                     feedContainer.innerHTML = html + `</div>`;
                 }
             }
-        };
 
-        setInterval(() => { if (state.view === 'dashboard') window.updateLiveUI(); }, 10000);
+            // 2. Process Notifications queue
+            if (state.activities) {
+                const now = Date.now();
+                const newActs = state.activities.filter(a => a.timestamp > lastNotifiedTimestamp && (now - a.timestamp) < 60000);
+                if (newActs.length > 0) {
+                    newActs.sort((a, b) => a.timestamp - b.timestamp).forEach(a => {
+                        if (a.alias && state.profile && a.alias.toLowerCase() !== state.profile.alias.toLowerCase()) {
+                            notificationQueue.push(a);
+                        }
+                    });
+                    lastNotifiedTimestamp = Math.max(...newActs.map(a => a.timestamp));
+                    processNotificationQueue();
+                }
+            }
+        };
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
@@ -412,19 +435,42 @@
             try {
                 const habit = state.habitData.find(h => h.id === mid); const isRepeatable = !!habit; const oldLvl = state.profile.lvl || 1; let newLvl = oldLvl; let updatePayload = {}; let claimSuccess = false;
                 if (isRepeatable) {
-                    const freq = habit.frequency || 'daily'; const isWeekly = freq === 'weekly'; const timeKey = isWeekly ? getWeekYear(new Date()) : new Date().toISOString().split('T')[0];
-                    const streaks = state.profile.streaks || {}; const habitStreak = streaks[mid] || { streak: 0, lastDate: '', lastTimestamp: 0 };
+                    const freq = habit.frequency || 'daily'; const isWeekly = freq === 'weekly' || freq === 'weekly_streak'; const timeKey = todayStr = new Date().toISOString().split('T')[0];
+                    const streaks = state.profile.streaks || {}; const habitStreak = streaks[mid] || { streak: 0, lastDate: '', lastWeek: '' };
+                    
                     if (habitStreak.lastDate !== timeKey) {
-                        let activeStreak = habitStreak.streak;
-                        if (habitStreak.lastTimestamp) {
-                            const diffDays = Math.round(Math.abs((Date.now() - habitStreak.lastTimestamp) / 86400000));
-                            if (isWeekly && diffDays > 14) activeStreak = 0; else if (!isWeekly && diffDays > 1) activeStreak = 0;
+                        let activeStreak = habitStreak.streak || 0;
+                        let earnedBonus = 0;
+                        const currentWeekStr = getWeekYear(new Date());
+
+                        if (isWeekly) {
+                            if (habitStreak.lastWeek && habitStreak.lastWeek !== currentWeekStr && habitStreak.lastWeek !== getPreviousWeekStr()) {
+                                activeStreak = 0;
+                            }
+                            if (habitStreak.lastWeek !== currentWeekStr) {
+                                activeStreak++;
+                                const streakBonus = parseInt(habit.streakBonus) || 0;
+                                earnedBonus = (activeStreak > 1) ? (activeStreak - 1) * streakBonus : 0;
+                            }
+                        } else if (freq === 'daily_streak') {
+                            if (habitStreak.lastDate && habitStreak.lastDate !== getYesterdayStr()) {
+                                activeStreak = 0;
+                            }
+                            activeStreak++;
+                            const streakBonus = parseInt(habit.streakBonus) || 0;
+                            earnedBonus = (activeStreak > 1) ? (activeStreak - 1) * streakBonus : 0;
+                        } else {
+                            activeStreak = 0;
                         }
-                        const newStreak = activeStreak + 1; const streakBonus = parseInt(habit.streakBonus) || 0; const finalXp = xp + (newStreak > 1 ? (newStreak - 1) * streakBonus : 0);
-                        const newTotalXp = (state.profile.xp || 0) + finalXp; streaks[mid] = { streak: newStreak, lastDate: timeKey, lastTimestamp: Date.now() }; newLvl = Math.floor(newTotalXp / 1000) + 1;
+
+                        const finalXp = xp + earnedBonus;
+                        const newTotalXp = (state.profile.xp || 0) + finalXp; 
+                        
+                        streaks[mid] = { streak: activeStreak, lastDate: timeKey, lastWeek: currentWeekStr }; 
+                        newLvl = Math.floor(newTotalXp / 1000) + 1;
                         updatePayload = { xp: newTotalXp, lvl: newLvl, streaks: streaks }; claimSuccess = true;
-                        if(window.scrollY <= 100) window.showToast(`+${finalXp} XP für ${name}! (Streak: ${newStreak}🔥)`, "success");
-                    } else { window.showToast(isWeekly ? "Diese Woche bereits erledigt!" : "Heute bereits erledigt!", "error"); }
+                        if(window.scrollY <= 100) window.showToast(`+${finalXp} XP für ${name}!${earnedBonus>0 ? ' 🔥 Bonus' : ''}`, "success");
+                    } else { window.showToast("Heute bereits erledigt!", "error"); }
                 } else if (!(state.profile.completed || []).includes(mid)) {
                     const newXp = (state.profile.xp || 0) + xp; newLvl = Math.floor(newXp / 1000) + 1;
                     updatePayload = { xp: newXp, lvl: newLvl, completed: [...(state.profile.completed || []), mid] }; claimSuccess = true;
@@ -484,19 +530,42 @@
                 try {
                     const habit = state.habitData.find(h => h.id === mid); const oldLvl = state.profile.lvl || 1; let newLvl = oldLvl; let updatePayload = {}; let claimSuccess = false;
                     if (habit) {
-                        const freq = habit.frequency || 'daily'; const isWeekly = freq === 'weekly'; const timeKey = isWeekly ? getWeekYear(new Date()) : new Date().toISOString().split('T')[0];
-                        const streaks = state.profile.streaks || {}; const habitStreak = streaks[mid] || { streak: 0, lastDate: '', lastTimestamp: 0 };
+                        const freq = habit.frequency || 'daily'; const isWeekly = freq === 'weekly' || freq === 'weekly_streak'; const timeKey = new Date().toISOString().split('T')[0];
+                        const streaks = state.profile.streaks || {}; const habitStreak = streaks[mid] || { streak: 0, lastDate: '', lastWeek: '' };
+                        
                         if (habitStreak.lastDate !== timeKey) {
-                            let activeStreak = habitStreak.streak;
-                            if (habitStreak.lastTimestamp) {
-                                const diffDays = Math.round(Math.abs((Date.now() - habitStreak.lastTimestamp) / 86400000));
-                                if (isWeekly && diffDays > 14) activeStreak = 0; else if (!isWeekly && diffDays > 1) activeStreak = 0;
+                            let activeStreak = habitStreak.streak || 0;
+                            let earnedBonus = 0;
+                            const currentWeekStr = getWeekYear(new Date());
+
+                            if (isWeekly) {
+                                if (habitStreak.lastWeek && habitStreak.lastWeek !== currentWeekStr && habitStreak.lastWeek !== getPreviousWeekStr()) {
+                                    activeStreak = 0;
+                                }
+                                if (habitStreak.lastWeek !== currentWeekStr) {
+                                    activeStreak++;
+                                    const streakBonus = parseInt(habit.streakBonus) || 0;
+                                    earnedBonus = (activeStreak > 1) ? (activeStreak - 1) * streakBonus : 0;
+                                }
+                            } else if (freq === 'daily_streak') {
+                                if (habitStreak.lastDate && habitStreak.lastDate !== getYesterdayStr()) {
+                                    activeStreak = 0;
+                                }
+                                activeStreak++;
+                                const streakBonus = parseInt(habit.streakBonus) || 0;
+                                earnedBonus = (activeStreak > 1) ? (activeStreak - 1) * streakBonus : 0;
+                            } else {
+                                activeStreak = 0;
                             }
-                            const newStreak = activeStreak + 1; const streakBonus = parseInt(habit.streakBonus) || 0; const finalXp = xp + (newStreak > 1 ? (newStreak - 1) * streakBonus : 0);
-                            const newTotalXp = (state.profile.xp || 0) + finalXp; streaks[mid] = { streak: newStreak, lastDate: timeKey, lastTimestamp: Date.now() }; newLvl = Math.floor(newTotalXp / 1000) + 1;
+
+                            const finalXp = xp + earnedBonus;
+                            const newTotalXp = (state.profile.xp || 0) + finalXp; 
+                            
+                            streaks[mid] = { streak: activeStreak, lastDate: timeKey, lastWeek: currentWeekStr }; 
+                            newLvl = Math.floor(newTotalXp / 1000) + 1;
                             updatePayload = { xp: newTotalXp, lvl: newLvl, streaks: streaks }; claimSuccess = true;
-                            if(window.scrollY <= 100) window.showToast(`+${finalXp} XP für ${name}! (Streak: ${newStreak}🔥)`, "success");
-                        } else { window.showToast(isWeekly ? "Diese Woche bereits erledigt!" : "Heute bereits erledigt!", "error"); }
+                            if(window.scrollY <= 100) window.showToast(`+${finalXp} XP für ${name}!${earnedBonus>0 ? ' 🔥 Bonus' : ''}`, "success");
+                        } else { window.showToast("Heute bereits erledigt!", "error"); }
                     } else if (!(state.profile.completed || []).includes(mid)) {
                         const newXp = (state.profile.xp || 0) + xp; newLvl = Math.floor(newXp / 1000) + 1;
                         updatePayload = { xp: newXp, lvl: newLvl, completed: [...(state.profile.completed || []), mid] }; claimSuccess = true;
@@ -814,8 +883,6 @@
                         </div>
                     </header>
                 `;
-                
-                html += `<div id="ticker-wrapper" style="display:none;"><div class="ticker-container mb-10"><div class="ticker-content" id="live-ticker-content"></div></div></div>`;
 
                 html += `
                     <main class="max-w-6xl mx-auto px-6 w-full relative z-10 pb-10">
@@ -975,36 +1042,59 @@
                 if ((state.habitData || []).length === 0) html += `<div class="text-center p-8 text-gray-600 italic text-sm border border-white/5 rounded-xl">Keine Routinen aktiv.</div>`;
                 
                 (state.habitData || []).forEach(m => {
-                    const freq = m.frequency || 'daily'; const isWeekly = freq === 'weekly'; 
-                    const timeKey = isWeekly ? getWeekYear(new Date()) : new Date().toISOString().split('T')[0];
-                    const isPending = state.pendingMissions.some(p => p.mid === m.id && p.submissionDate === new Date().toISOString().split('T')[0]);
+                    const freq = m.frequency || 'daily'; 
+                    const isWeekly = freq === 'weekly' || freq === 'weekly_streak'; 
+                    const isDailyStreak = freq === 'daily_streak';
                     
-                    const habitStreak = p.streaks?.[m.id] || { streak: 0, lastDate: '', lastTimestamp: 0 }; 
-                    const isDone = habitStreak.lastDate === timeKey;
+                    const timeKey = new Date().toISOString().split('T')[0];
+                    const currentWeekStr = getWeekYear(new Date());
+                    const isPending = state.pendingMissions.some(p => p.mid === m.id && p.submissionDate === timeKey);
                     
-                    let activeStreak = habitStreak.streak;
-                    if (habitStreak.lastTimestamp && !isDone) {
-                        const diffDays = Math.round(Math.abs((Date.now() - habitStreak.lastTimestamp) / 86400000));
-                        if (isWeekly && diffDays > 14) activeStreak = 0; else if (!isWeekly && diffDays > 1) activeStreak = 0;
+                    const habitStreak = p.streaks?.[m.id] || { streak: 0, lastDate: '', lastWeek: '' }; 
+                    const isDoneToday = habitStreak.lastDate === timeKey;
+                    
+                    let activeStreak = habitStreak.streak || 0;
+                    
+                    if (isWeekly) {
+                        if (habitStreak.lastWeek && habitStreak.lastWeek !== currentWeekStr && habitStreak.lastWeek !== getPreviousWeekStr()) {
+                            activeStreak = 0;
+                        }
+                    } else if (isDailyStreak) {
+                        if (!isDoneToday && habitStreak.lastDate && habitStreak.lastDate !== getYesterdayStr()) {
+                            activeStreak = 0;
+                        }
+                    } else {
+                        activeStreak = 0;
                     }
                     
-                    const nextStreak = isDone ? activeStreak : activeStreak + 1; 
-                    const currentBonus = (nextStreak > 1 ? (nextStreak - 1) * (parseInt(m.streakBonus) || 0) : 0); 
-                    const totalXpDisplay = isDone ? m.xp : m.xp + currentBonus;
+                    let currentBonus = 0;
+                    if (!isDoneToday) {
+                        if (isWeekly) {
+                            if (habitStreak.lastWeek !== currentWeekStr) {
+                                const nextStreak = activeStreak + 1;
+                                currentBonus = (nextStreak > 1) ? (nextStreak - 1) * (parseInt(m.streakBonus) || 0) : 0;
+                            }
+                        } else if (isDailyStreak) {
+                            const nextStreak = activeStreak + 1;
+                            currentBonus = (nextStreak > 1) ? (nextStreak - 1) * (parseInt(m.streakBonus) || 0) : 0;
+                        }
+                    }
+                    
+                    const totalXpDisplay = isDoneToday ? m.xp : m.xp + currentBonus;
 
-                    let cardClasses = `mockup p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 group transition ${isDone ? 'is-completed border-[#ff4d00]/30 opacity-75' : (isPending ? 'is-pending border-yellow-500/30' : 'hover:border-[#ff4d00]/30')}`;
+                    let cardClasses = `mockup p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 group transition ${isDoneToday ? 'is-completed border-[#ff4d00]/30 opacity-75' : (isPending ? 'is-pending border-yellow-500/30' : 'hover:border-[#ff4d00]/30')}`;
                     let badgeText = m.type === 'qr' ? '📍 Check-in' : (m.type === 'upload' ? '📷 Photo Upload' : '⚡ Action');
-                    let btnText = isDone ? 'VERIFIED' : (isPending ? 'Wird überprüft ⏳' : 'Verify Routine');
+                    let btnText = isDoneToday ? 'VERIFIED' : (isPending ? 'Wird überprüft ⏳' : 'Verify Routine');
 
                     html += `
                         <div class="${cardClasses}">
                             <div class="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition pointer-events-none"></div>
-                            ${isDone ? `<div class="completed-overlay"><span class="text-[#ff4d00] font-black italic uppercase tracking-widest flex items-center gap-2"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> VERIFIED</span></div>` : ''}
+                            ${isDoneToday ? `<div class="completed-overlay"><span class="text-[#ff4d00] font-black italic uppercase tracking-widest flex items-center gap-2"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> VERIFIED</span></div>` : ''}
                             ${isPending ? `<div class="pending-overlay"><span class="text-yellow-500 font-black italic uppercase tracking-widest flex items-center gap-2">Wird überprüft</span></div>` : ''}
                             <div class="pr-6 relative z-10 flex-1 w-full">
                                 <div class="flex justify-between items-start mb-1">
                                     <h4 class="font-bold text-lg group-hover:text-white transition tracking-tight break-words max-w-[70%]">${m.name}</h4>
-                                    <span class="text-[9px] font-bold text-gray-500 tracking-widest uppercase bg-black px-2 py-1 rounded-sm border border-[#111]">${isWeekly ? 'WEEKLY' : 'DAILY'}</span>
+                                    <span class="text-[9px] font-bold text-gray-500 tracking-widest uppercase bg-black px-2 py-1 rounded-sm border border-[#111]">DAILY</span>
                                 </div>
                                 <p class="text-gray-400 text-xs mt-1 font-medium leading-relaxed">${m.desc}</p>
                                 <div class="flex flex-wrap items-center gap-2 mt-4">
@@ -1014,7 +1104,7 @@
                             </div>
                             <div class="text-left md:text-right flex-shrink-0 relative z-10 flex flex-col items-start md:items-end w-full md:w-auto mt-4 md:mt-0">
                                 <span class="block text-white font-black text-2xl italic tracking-tighter mb-3">+${totalXpDisplay}</span>
-                                <button type="button" onclick="${m.type === 'instant' ? `window.claimInstantMission('${m.id}', ${m.xp}, '${m.name.replace(/'/g, "\\'")}')` : `window.openVerifyModal('${m.id}', ${m.xp}, '${m.type}', '${m.name.replace(/'/g, "\\'")}', '${m.qr_solution ? m.qr_solution.replace(/'/g, "\\'") : ''}')`}" class="btn-grind w-full md:w-auto text-[10px] bg-white text-black hover:bg-[#ff4d00] hover:text-white transition" ${(isDone || isPending) ? 'disabled' : ''}>${btnText}</button>
+                                <button type="button" onclick="${m.type === 'instant' ? `window.claimInstantMission('${m.id}', ${m.xp}, '${m.name.replace(/'/g, "\\'")}')` : `window.openVerifyModal('${m.id}', ${m.xp}, '${m.type}', '${m.name.replace(/'/g, "\\'")}', '${m.qr_solution ? m.qr_solution.replace(/'/g, "\\'") : ''}')`}" class="btn-grind w-full md:w-auto text-[10px] bg-white text-black hover:bg-[#ff4d00] hover:text-white transition" ${(isDoneToday || isPending) ? 'disabled' : ''}>${btnText}</button>
                             </div>
                         </div>
                     `;
@@ -1061,6 +1151,8 @@
                 appDiv.innerHTML = html;
 
                 if (syncViewport && !state.dashboardNeedsScroll) syncViewport.scrollLeft = savedScrollPosition;
+                
+                // Initialize Live UI straight away so feed isn't empty initially
                 window.updateLiveUI();
 
                 if (window.xpAnimTimeout) clearTimeout(window.xpAnimTimeout);
