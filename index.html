@@ -30,7 +30,7 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; scroll-behavior: smooth; }
         
-        .level-node { min-width: 140px; position: relative; }
+        .level-node { min-width: 140px; width: 140px; position: relative; }
         .reward-box { width: 100px; height: 85px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.5); display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; z-index: 10; border-radius: 8px; transition: all 0.3s ease; backdrop-filter: blur(5px); }
         .reward-box.unlocked { border-color: #ff4d00; background: rgba(255,77,0,0.05); box-shadow: 0 0 15px rgba(255, 77, 0, 0.15); }
         .reward-box.pro { border-color: rgba(168,85,247,0.3); height: 95px; width: 110px; }
@@ -40,6 +40,13 @@
         
         .week-btn { border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.02); transition: all 0.2s; border-radius: 6px; }
         .week-btn.active { background: #ff4d00; color: white; border-color: #ff4d00; font-weight: 900; box-shadow: 0 0 15px rgba(255, 77, 0, 0.2); }
+        
+        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 99999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+        .toast { pointer-events: auto; background: #0a0a0a; border: 1px solid #1f1f1f; color: white; padding: 16px 24px; border-radius: 8px; font-size: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.8); transform: translateX(120%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: flex; align-items: center; gap: 12px; }
+        .toast.show { transform: translateX(0); } 
+        .toast.success { border-left: 4px solid #ff4d00; } 
+        .toast.error { border-left: 4px solid #dc2626; } 
+        .toast.info { border-left: 4px solid #3b82f6; }
         
         .btn-grind { background: white; color: black; font-weight: 900; text-transform: uppercase; letter-spacing: 0.08em; padding: 14px 28px; font-size: 12px; transition: 0.25s ease; box-shadow: 0 4px 15px rgba(255,255,255,0.05); cursor: pointer; border-radius: 6px; border: none; }
         .btn-grind:hover:not(:disabled) { background: #ff4d00; color: white; transform: translateY(-2px); box-shadow: 0 10px 30px rgba(255,77,0,0.25); }
@@ -52,8 +59,22 @@
         .btn-bounty { animation: subtle-pulse 3s infinite ease-in-out; background: rgba(255,255,255,0.02); color: white; border: 1px solid rgba(255, 77, 0, 0.3); cursor: pointer; transition: all 0.3s ease; border-radius: 6px; }
         .btn-bounty:hover { background: rgba(255,77,0,0.1); border-color: #ff4d00; box-shadow: 0 0 25px rgba(255, 77, 0, 0.5); transform: translateY(-2px); }
         
+        .completed-overlay { position: absolute; inset: 0; background: rgba(5,5,5,0.8); z-index: 10; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px); opacity: 0; transition: opacity 0.3s; pointer-events: none; border-radius: 12px; }
+        .card.is-completed .completed-overlay, .mockup.is-completed .completed-overlay { opacity: 1; pointer-events: auto; }
+        .pending-overlay { position: absolute; inset: 0; background: rgba(5,5,5,0.8); z-index: 10; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px); opacity: 0; transition: opacity 0.3s; pointer-events: none; border-radius: 12px; }
+        .card.is-pending .pending-overlay, .mockup.is-pending .pending-overlay { opacity: 1; pointer-events: auto; }
+        
         @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.1) translateY(-5px); text-shadow: 0 0 20px rgba(255,77,0,0.8); color: #ff4d00; } 100% { transform: scale(1) translateY(0); } }
         .animate-pop { animation: pop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        
+        @keyframes levelUpFlash {
+            0% { transform: scale(1); color: white; text-shadow: none; }
+            30% { transform: scale(1.4); color: #ff4d00; text-shadow: 0 0 30px #ff4d00; }
+            70% { transform: scale(1.2); color: #ff4d00; text-shadow: 0 0 20px #ff4d00; }
+            100% { transform: scale(1); color: white; text-shadow: 0 0 10px rgba(255,255,255,0.5); }
+        }
+        .animate-level-up { animation: levelUpFlash 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+
         @keyframes shine { 100% { left: 200%; } }
         .xp-bar-glow { position: relative; overflow: hidden; }
         .xp-bar-glow::after { content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent); animation: shine 2.5s infinite; }
@@ -95,23 +116,26 @@
         </div>
     </div>
 
-    <!-- Das originale große XP HUD aus dem alten Code! -->
-    <div id="xp-hud" class="fixed top-0 left-0 right-0 z-[999998] transform -translate-y-[150%] transition-transform duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] pointer-events-none flex justify-center pt-4 px-4 sm:px-6">
-        <div class="absolute top-2 w-full max-w-md h-32 bg-black/60 blur-2xl rounded-full pointer-events-none z-0"></div>
-        <div class="bg-[#0a0a0a]/70 border border-[#ff4d00]/40 shadow-[0_20px_50px_rgba(0,0,0,0.7),_0_0_20px_rgba(255,77,0,0.15)] rounded-lg p-5 w-full max-w-sm flex flex-col gap-3 relative overflow-hidden backdrop-blur-2xl z-10">
-            <div class="absolute inset-0 bg-gradient-to-b from-[#ff4d00]/15 to-transparent"></div>
-            <div class="relative z-10 flex justify-between items-end">
-                <div>
-                    <p class="text-[#ff4d00] text-[9px] font-black uppercase tracking-[0.3em] mb-1 drop-shadow-md">XP Sync</p>
-                    <h4 class="text-white font-black italic text-2xl leading-none">LVL <span id="hud-lvl">1</span></h4>
-                </div>
-                <div class="text-right">
-                    <span class="text-gray-400 text-[10px] font-bold uppercase tracking-widest italic"><span id="hud-xp-num" class="text-white text-sm">0</span> / <span id="hud-xp-max">1000</span></span>
-                </div>
+    <div id="toast-container"></div>
+    
+    <!-- Großes, kinoreifes XP Dropdown HUD -->
+    <div id="xp-hud" class="fixed inset-0 z-[999998] flex items-center justify-center p-4 pointer-events-none opacity-0 scale-90 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-md"></div>
+        <div class="bg-[#0a0a0a] border-2 border-[#ff4d00]/40 shadow-[0_0_80px_rgba(255,77,0,0.25)] rounded-2xl p-8 w-full max-w-md flex flex-col items-center gap-6 relative overflow-hidden z-10 text-center">
+            <div class="absolute inset-0 bg-gradient-to-b from-[#ff4d00]/20 to-transparent pointer-events-none"></div>
+            <div class="relative z-10 w-full flex flex-col items-center">
+                <p class="text-[#ff4d00] text-xs font-black uppercase tracking-[0.4em] mb-2 drop-shadow-md">XP Gained</p>
+                <h4 class="text-white font-black italic text-7xl leading-none mb-2">LVL <span id="hud-lvl" class="inline-block transition-transform duration-300">1</span></h4>
             </div>
-            <div class="w-full bg-black h-2.5 rounded-full overflow-hidden border border-white/10 relative z-10 shadow-inner">
-                <div id="hud-xp-bar" class="grind-gradient h-full transition-all ease-out relative">
-                    <div class="absolute top-0 right-0 bottom-0 w-10 bg-gradient-to-r from-transparent to-white/50"></div>
+            <div class="relative z-10 w-full mt-4">
+                <div class="flex justify-between text-[11px] font-bold uppercase tracking-widest italic text-gray-400 mb-3 px-1">
+                    <span>XP Progress</span>
+                    <span><span id="hud-xp-num" class="text-white">0</span> / <span id="hud-xp-max">1000</span></span>
+                </div>
+                <div class="w-full bg-black h-4 rounded-full overflow-hidden border border-white/10 shadow-inner">
+                    <div id="hud-xp-bar" class="grind-gradient h-full transition-all ease-out relative w-0">
+                        <div class="absolute top-0 right-0 bottom-0 w-10 bg-gradient-to-r from-transparent to-white/50"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -159,7 +183,6 @@
         let holdTimer = null, holdProgress = 0, isRedeeming = false;
         window.currentVerify = null; window.countdownInterval = null;
 
-        // Render Debouncer gegen Stottern
         let renderTimeout = null;
         window.scheduleRender = () => {
             if (renderTimeout) clearTimeout(renderTimeout);
@@ -179,7 +202,6 @@
         const getWeekYear = (d) => { const date = new Date(d.getTime()); date.setUTCDate(date.getDate() + 4 - (date.getDay()||7)); const yearStart = new Date(Date.UTC(date.getUTCFullYear(),0,1)); return `${date.getUTCFullYear()}-W${Math.ceil(( ( (date - yearStart) / 86400000) + 1)/7)}`; };
         const getPreviousWeekStr = () => { const d = new Date(); d.setDate(d.getDate() - 7); return getWeekYear(d); };
 
-        // Unified Notification System (Replaces Toast & Ticker)
         window.showLiveNotification = (text, type = 'success', showPing = false) => {
             const notif = document.getElementById('live-notification-badge');
             const box = document.getElementById('live-notification-box');
@@ -188,7 +210,6 @@
             if(!notif || !textEl || !box) return;
             
             textEl.innerHTML = text; 
-            
             if (type === 'error') {
                 box.className = "bg-black/95 backdrop-blur-md border border-red-500 shadow-[0_10px_40px_rgba(239,68,68,0.3)] rounded-full py-3 px-6 flex items-center gap-3";
                 textEl.className = "text-red-400 text-[11px] font-bold uppercase tracking-widest text-center whitespace-normal break-words leading-snug";
@@ -461,12 +482,10 @@
             try {
                 const habit = state.habitData.find(h => h.id === mid); const isRepeatable = !!habit; const oldLvl = state.profile.lvl || 1; let newLvl = oldLvl; let updatePayload = {}; let claimSuccess = false;
                 if (isRepeatable) {
-                    const freq = habit.frequency || 'daily'; const isWeekly = freq === 'weekly' || freq === 'weekly_streak'; const isDailyStreak = freq === 'daily_streak';
-                    const timeKey = new Date().toISOString().split('T')[0]; const currentWeekStr = getWeekYear(new Date());
+                    const freq = habit.frequency || 'daily'; const isWeekly = freq === 'weekly' || freq === 'weekly_streak'; const isDailyStreak = freq === 'daily_streak'; const timeKey = new Date().toISOString().split('T')[0];
                     const streaks = state.profile.streaks || {}; const habitStreak = streaks[mid] || { streak: 0, lastDate: '', lastWeek: '' };
-                    
                     if (habitStreak.lastDate !== timeKey) {
-                        let activeStreak = habitStreak.streak || 0; let earnedBonus = 0;
+                        let activeStreak = habitStreak.streak || 0; let earnedBonus = 0; const currentWeekStr = getWeekYear(new Date());
                         if (isWeekly) {
                             if (habitStreak.lastWeek && habitStreak.lastWeek !== currentWeekStr && habitStreak.lastWeek !== getPreviousWeekStr()) { activeStreak = 0; }
                             if (habitStreak.lastWeek !== currentWeekStr) { activeStreak++; const streakBonus = parseInt(habit.streakBonus) || 0; earnedBonus = (activeStreak > 1) ? (activeStreak - 1) * streakBonus : 0; }
@@ -474,12 +493,11 @@
                             if (habitStreak.lastDate && habitStreak.lastDate !== getYesterdayStr()) { activeStreak = 0; }
                             activeStreak++; const streakBonus = parseInt(habit.streakBonus) || 0; earnedBonus = (activeStreak > 1) ? (activeStreak - 1) * streakBonus : 0;
                         } else { activeStreak = 0; }
-                        
                         const finalXp = xp + earnedBonus; const newTotalXp = (state.profile.xp || 0) + finalXp; 
                         streaks[mid] = { streak: activeStreak, lastDate: timeKey, lastWeek: isWeekly ? currentWeekStr : habitStreak.lastWeek }; 
                         newLvl = Math.floor(newTotalXp / 1000) + 1; updatePayload = { xp: newTotalXp, lvl: newLvl, streaks: streaks }; claimSuccess = true;
                         window.showToast(`+${finalXp} XP für ${name}!${earnedBonus>0 ? ' 🔥 Bonus' : ''}`, "success");
-                    } else { window.showToast(isWeekly ? "Diese Woche bereits erledigt!" : "Heute bereits erledigt!", "error"); }
+                    } else { window.showToast("Heute bereits erledigt!", "error"); }
                 } else if (!(state.profile.completed || []).includes(mid)) {
                     const newXp = (state.profile.xp || 0) + xp; newLvl = Math.floor(newXp / 1000) + 1;
                     updatePayload = { xp: newXp, lvl: newLvl, completed: [...(state.profile.completed || []), mid] }; claimSuccess = true;
@@ -491,83 +509,6 @@
                     if(newLvl > oldLvl) window.logActivity('LEVEL_UP', `hat <span class="font-bold">Level ${newLvl}</span> erreicht!`);
                 } else if (btn) { btn.innerText = "Claim XP"; btn.disabled = false; }
             } catch(e) { window.showToast("Fehler.", "error"); if(btn) { btn.innerText = "Claim XP"; btn.disabled = false; } }
-        };
-
-        window.startQRScanner = () => {
-            document.getElementById('qr-placeholder').classList.add('hidden'); document.getElementById('qr-reader').classList.remove('hidden');
-            try {
-                window.html5QrCode = new Html5Qrcode("qr-reader");
-                window.html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 } }, (decodedText) => {
-                    document.getElementById('verify_code_input').value = decodedText;
-                    if (window.currentVerify && window.currentVerify.qrSolution) { window.checkCode(decodedText); } else { window.showToast("Code erfasst!", "success"); }
-                    try { if(window.html5QrCode) { const stopScan = () => { document.getElementById('qr-reader').classList.add('hidden'); document.getElementById('qr-placeholder').classList.remove('hidden'); window.html5QrCode = null; }; window.html5QrCode.stop().then(() => { try { window.html5QrCode.clear(); } catch(e){} stopScan(); }).catch(stopScan); } } catch(e) {}
-                }, () => {}).catch(err => { window.showToast("Kamera Zugriff verweigert.", "error"); document.getElementById('qr-reader').classList.add('hidden'); document.getElementById('qr-placeholder').classList.remove('hidden'); });
-            } catch (e) { window.showToast("Scanner Error.", "error"); }
-        };
-
-        window.triggerFileInput = () => document.getElementById('proof_file_input').click();
-        window.handleFileSelect = (e) => {
-            const file = e.target.files[0]; if(!file) return; const reader = new FileReader();
-            reader.onload = (ev) => { 
-                const img = new Image(); img.onload = () => { 
-                    const canvas = document.createElement('canvas'); let w = img.width, h = img.height; 
-                    if (w > h && w > 800) { h *= 800 / w; w = 800; } else if (h > 800) { w *= 800 / h; h = 800; } 
-                    canvas.width = w; canvas.height = h; canvas.getContext('2d').drawImage(img, 0, 0, w, h); 
-                    state.tempUploadData = canvas.toDataURL('image/jpeg', 0.7); 
-                    document.getElementById('upload-preview').src = state.tempUploadData; document.getElementById('upload-preview').classList.remove('hidden'); document.getElementById('upload-placeholder').classList.add('hidden'); 
-                }; img.src = ev.target.result; 
-            }; reader.readAsDataURL(file);
-        };
-
-        window.openVerifyModal = (mid, xp, type, name, qrSolution = '') => {
-            state.tempUploadData = null; window.currentVerify = { mid, xp, name, type, qrSolution };
-            let html = `<p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">Verify Action</p><h3 class="text-2xl font-black italic uppercase tracking-tighter mb-6">${name}</h3>`;
-            if(type === 'qr') {
-                html += `<div id="qr-placeholder" onclick="window.startQRScanner()" class="border border-dashed border-white/20 p-8 mb-4 flex flex-col items-center justify-center bg-black/50 rounded-lg hover:border-[#ff4d00] cursor-pointer transition"><svg class="w-12 h-12 text-[#ff4d00] mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg><p class="text-xs text-white font-bold uppercase tracking-widest text-center">Kamera aktivieren</p></div><div id="qr-reader" class="hidden w-full mb-4 rounded-lg overflow-hidden border border-[#1f1f1f]"></div><input id="verify_code_input" type="text" placeholder="Oder Code manuell eingeben" class="w-full p-4 bg-[#0f0f0f] border border-[#1f1f1f] rounded-lg outline-none focus:border-[#ff4d00] text-white text-center text-sm tracking-widest uppercase mb-6">`;
-            } else {
-                html += `<input type="file" id="proof_file_input" accept="image/*" class="hidden" onchange="window.handleFileSelect(event)"><div onclick="window.triggerFileInput()" class="border border-dashed border-white/20 min-h-[150px] p-2 mb-6 flex flex-col items-center justify-center bg-black/50 rounded-lg hover:border-[#ff4d00] transition cursor-pointer overflow-hidden relative"><div id="upload-placeholder" class="text-center"><svg class="w-12 h-12 text-[#ff4d00] mb-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg><p class="text-xs text-white font-bold uppercase tracking-widest">Beweisfoto hochladen</p></div><img id="upload-preview" class="hidden absolute inset-0 w-full h-full object-cover"></div>`;
-            }
-            if (type === 'qr' && qrSolution) { html += `<button type="button" onclick="window.checkCode()" class="w-full btn-grind py-4">Code Prüfen</button>`; } else { html += `<button type="button" onclick="window.submitVerification()" class="w-full btn-grind py-4">Senden zur Prüfung</button>`; }
-            window.openModal(html);
-        };
-
-        window.checkCode = async (scannedValue = null) => {
-            const val = scannedValue || document.getElementById('verify_code_input').value.trim(); if(!window.currentVerify) return; 
-            const { mid, xp, name, qrSolution } = window.currentVerify; if(!val) return window.showToast("Code eingeben.", "error");
-            if (val.toLowerCase() === qrSolution.toLowerCase()) {
-                const btn = document.querySelector('#modal-container button.btn-grind'); if(btn) { btn.innerText = "Verifying..."; btn.disabled = true; }
-                try {
-                    const habit = state.habitData.find(h => h.id === mid); const oldLvl = state.profile.lvl || 1; let newLvl = oldLvl; let updatePayload = {}; let claimSuccess = false;
-                    if (habit) {
-                        const freq = habit.frequency || 'daily'; const isWeekly = freq === 'weekly' || freq === 'weekly_streak'; const isDailyStreak = freq === 'daily_streak'; const timeKey = new Date().toISOString().split('T')[0];
-                        const streaks = state.profile.streaks || {}; const habitStreak = streaks[mid] || { streak: 0, lastDate: '', lastWeek: '' };
-                        if (habitStreak.lastDate !== timeKey) {
-                            let activeStreak = habitStreak.streak || 0; let earnedBonus = 0; const currentWeekStr = getWeekYear(new Date());
-                            if (isWeekly) {
-                                if (habitStreak.lastWeek && habitStreak.lastWeek !== currentWeekStr && habitStreak.lastWeek !== getPreviousWeekStr()) { activeStreak = 0; }
-                                if (habitStreak.lastWeek !== currentWeekStr) { activeStreak++; const streakBonus = parseInt(habit.streakBonus) || 0; earnedBonus = (activeStreak > 1) ? (activeStreak - 1) * streakBonus : 0; }
-                            } else if (isDailyStreak) {
-                                if (habitStreak.lastDate && habitStreak.lastDate !== getYesterdayStr()) { activeStreak = 0; }
-                                activeStreak++; const streakBonus = parseInt(habit.streakBonus) || 0; earnedBonus = (activeStreak > 1) ? (activeStreak - 1) * streakBonus : 0;
-                            } else { activeStreak = 0; }
-                            const finalXp = xp + earnedBonus; const newTotalXp = (state.profile.xp || 0) + finalXp; 
-                            streaks[mid] = { streak: activeStreak, lastDate: timeKey, lastWeek: isWeekly ? currentWeekStr : habitStreak.lastWeek }; 
-                            newLvl = Math.floor(newTotalXp / 1000) + 1; updatePayload = { xp: newTotalXp, lvl: newLvl, streaks: streaks }; claimSuccess = true;
-                            window.showToast(`+${finalXp} XP für ${name}!${earnedBonus>0 ? ' 🔥 Bonus' : ''}`, "success");
-                        } else { window.showToast("Heute bereits erledigt!", "error"); }
-                    } else if (!(state.profile.completed || []).includes(mid)) {
-                        const newXp = (state.profile.xp || 0) + xp; newLvl = Math.floor(newXp / 1000) + 1;
-                        updatePayload = { xp: newXp, lvl: newLvl, completed: [...(state.profile.completed || []), mid] }; claimSuccess = true;
-                        window.showToast(`+${xp} XP für ${name}!`, "success");
-                    }
-                    if (claimSuccess) { 
-                        await setDoc(doc(db, 'plot_users', state.user.uid), updatePayload, { merge: true }); 
-                        window.logActivity('MISSION', `hat '<span class="font-bold text-white">${name}</span>' absolviert.`);
-                        if(newLvl > oldLvl) window.logActivity('LEVEL_UP', `hat <span class="font-bold">Level ${newLvl}</span> erreicht!`);
-                    }
-                    window.closeModal();
-                } catch(e) { window.showToast("Fehler.", "error"); if(btn) { btn.innerText = "Code Prüfen"; btn.disabled = false; } }
-            } else { window.showToast("Falscher Code.", "error"); }
         };
 
         window.submitVerification = async () => {
@@ -931,8 +872,10 @@
                         </div>
                         <div id="pass-viewport" class="w-full no-scrollbar overflow-x-auto py-8 relative flex items-center min-h-[280px] border-y border-white/5 bg-black/40 shadow-inner">
                             <div class="flex items-center px-6 relative" style="min-width: max-content;">
-                                <div class="absolute top-1/2 left-[94px] right-[94px] h-[1px] bg-[#1f1f1f] z-0 -translate-y-1/2"></div>
-                                <div id="track-line" class="absolute top-1/2 left-[94px] h-[2px] bg-[#ff4d00] shadow-[0_0_10px_rgba(255,77,0,0.5)] z-0 transition-all duration-1000 ease-out -translate-y-1/2" style="width: calc(140px * ${oldTrackProgress}); display: ${safeXp > 0 || state.prevXp > 0 ? 'block' : 'none'};"></div>
+                                <!-- Voll durchgängige Track Background Line -->
+                                <div class="absolute top-1/2 left-0 right-0 h-[2px] bg-[#1f1f1f] z-0 -translate-y-1/2"></div>
+                                <!-- Progress Track Line geht von ganz links bis zum aktuellen Node (94px ist Mitte vom Node 1) -->
+                                <div id="track-line" class="absolute top-1/2 left-0 h-[2px] bg-[#ff4d00] shadow-[0_0_15px_rgba(255,77,0,0.6)] z-0 transition-all duration-1000 ease-out -translate-y-1/2" style="width: calc(94px + (140px * ${oldTrackProgress}));"></div>
                 `;
                 
                 for (let i = 1; i <= 30; i++) {
@@ -1188,7 +1131,7 @@
                     </div>
                 `;
                 
-                // Sofortiges Ausgeben des Crew-Feeds ohne Verzögerung
+                // Sofortiges Ausgeben des Crew-Feeds beim Start (Keine Wartezeit)
                 const friendsList = p.friends || []; 
                 const feedUsersLower = friendsList.map(u => (u || '').toLowerCase());
                 const feedActivities = (state.activities || []).filter(act => act.alias && feedUsersLower.includes(act.alias.toLowerCase())).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0)).slice(0, 10);
@@ -1223,22 +1166,41 @@
                 window.xpAnimTimeout = setTimeout(() => {
                     const passViewport = document.getElementById('pass-viewport');
                     const currentNode = document.getElementById(`level-node-${safeLvl}`);
+                    
                     if (passViewport && state.dashboardNeedsScroll && currentNode) { 
                         passViewport.scrollTo({ left: currentNode.offsetLeft - (passViewport.offsetWidth / 2) + (currentNode.offsetWidth / 2), behavior: 'smooth' }); 
                         state.dashboardNeedsScroll = false; 
                     }
                     
                     const topBar = document.getElementById('top-xp-bar');
+                    const trackLine = document.getElementById('track-line');
+                    
                     if (state.prevLvl !== null && safeLvl > state.prevLvl) {
                         if (topBar) { 
-                            topBar.style.transition = `width 1250ms ease-in`; topBar.style.width = '100%'; 
-                            setTimeout(() => { topBar.style.transition = 'none'; topBar.style.width = '0%'; void topBar.offsetWidth; topBar.style.transition = `width 1250ms ease-out`; topBar.style.width = `${targetXpProgress}%`; }, 1250); 
+                            topBar.style.transition = `width 1250ms ease-in`; 
+                            topBar.style.width = '100%'; 
+                            setTimeout(() => { 
+                                topBar.style.transition = 'none'; 
+                                topBar.style.width = '0%'; 
+                                void topBar.offsetWidth; 
+                                topBar.style.transition = `width 1250ms ease-out`; 
+                                topBar.style.width = `${targetXpProgress}%`; 
+                            }, 1250); 
+                        }
+                        if (trackLine) {
+                            trackLine.style.width = `calc(94px + (140px * ${targetTrackProgress}))`;
                         }
                         if (passViewport && currentNode) {
                             passViewport.scrollTo({ left: currentNode.offsetLeft - (passViewport.offsetWidth / 2) + (currentNode.offsetWidth / 2), behavior: 'smooth' });
                         }
-                    } else if (topBar) { 
-                        topBar.style.transition = `width 2500ms ease-out`; topBar.style.width = `${targetXpProgress}%`; 
+                    } else {
+                        if (topBar) { 
+                            topBar.style.transition = `width 2500ms ease-out`; 
+                            topBar.style.width = `${targetXpProgress}%`; 
+                        }
+                        if (trackLine) {
+                            trackLine.style.width = `calc(94px + (140px * ${targetTrackProgress}))`;
+                        }
                     }
                     
                     if (state.prevXp !== null && state.prevXp < safeXp) {
@@ -1248,7 +1210,7 @@
                         const hudXpMax = document.getElementById('hud-xp-max');
                         const hudXpBar = document.getElementById('hud-xp-bar');
                         
-                        // Das XP-Fenster erscheint IMMER beim Sammeln von XP
+                        // Das XP-Fenster erscheint IMMER beim Sammeln von XP (kein scroll-check mehr)
                         if(hud) {
                             hudLvl.innerText = state.prevLvl; 
                             hudXpNum.innerText = state.prevXp; 
@@ -1257,9 +1219,9 @@
                             hudXpBar.style.width = `${oldXpProgress}%`; 
                             void hudXpBar.offsetWidth; 
                             
-                            // XP Fenster kommt RUNTER
-                            hud.classList.remove('-translate-y-[150%]'); 
-                            hud.classList.add('translate-y-0'); 
+                            // Pop the overlay IN
+                            hud.classList.remove('opacity-0', 'scale-90', 'pointer-events-none'); 
+                            hud.classList.add('opacity-100', 'scale-100', 'pointer-events-auto'); 
                             animateValue('hud-xp-num', state.prevXp, safeXp, 2500);
                             
                             if (state.prevLvl !== null && safeLvl > state.prevLvl) { 
@@ -1267,7 +1229,10 @@
                                 hudXpBar.style.width = '100%'; 
                                 setTimeout(() => { 
                                     hudLvl.innerText = safeLvl; 
-                                    hudLvl.classList.add('animate-pop'); 
+                                    hudLvl.classList.remove('animate-level-up');
+                                    void hudLvl.offsetWidth;
+                                    hudLvl.classList.add('animate-level-up'); 
+                                    
                                     hudXpMax.innerText = safeLvl * 1000; 
                                     hudXpBar.style.transition = 'none'; 
                                     hudXpBar.style.width = '0%'; 
@@ -1282,9 +1247,9 @@
                             
                             if (window.hudCloseTimeout) clearTimeout(window.hudCloseTimeout);
                             window.hudCloseTimeout = setTimeout(() => { 
-                                hud.classList.remove('translate-y-0'); 
-                                hud.classList.add('-translate-y-[150%]'); 
-                                if(hudLvl) hudLvl.classList.remove('animate-pop'); 
+                                hud.classList.remove('opacity-100', 'scale-100', 'pointer-events-auto'); 
+                                hud.classList.add('opacity-0', 'scale-90', 'pointer-events-none'); 
+                                if(hudLvl) hudLvl.classList.remove('animate-level-up'); 
                             }, 5000);
                         }
                         
