@@ -599,12 +599,21 @@
     const btn = document.querySelector('#modal-container button.bg-\\[\\#ff4d00\\], #modal-container button.bg-\\[\\#a855f7\\]'); 
     if(btn) { btn.innerText = "Senden..."; btn.disabled = true; }
 
+    // Notaus-Schalter (Sicherheits-Timeout von 8 Sekunden)
+    const timeout = setTimeout(() => {
+        if(btn && btn.innerText === "Senden...") {
+            btn.disabled = false;
+            btn.innerText = "Versand anfordern";
+            window.showToast("Timeout. Bitte Konsole prüfen.", "error");
+        }
+    }, 8000);
+
     const rewardId = `lvl${lvl}_${tier}`; 
     const reward = state.rewardData.find(r => r.lvl === lvl); 
     const itemName = reward ? reward[tier] : 'Unbekanntes Item';
 
     try {
-        // 1. Firebase Eintrag
+        // 1. Firebase Eintrag (Das ist das Wichtigste, muss klappen!)
         await addDoc(collection(db, 'plot_shipping_requests'), { 
             uid: state.user.uid, 
             alias: state.profile?.alias || 'Grinder', 
@@ -619,34 +628,34 @@
             await setDoc(doc(db, 'plot_users', state.user.uid), { redeemed: currentRedeemed }, { merge: true }); 
         }
 
-        // 3. E-Mail Versand mit Fehler-Log
-        const response = await fetch("https://formsubmit.co/ajax/Fabio.maines@grind-app.de", {
+        // 3. E-Mail "Fire and Forget" (App wartet nicht mehr auf Antwort!)
+        fetch("https://formsubmit.co/ajax/Fabio.maines@grind-app.de", {
             method: "POST",
             headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
             body: JSON.stringify({
                 _subject: "Loot Request: " + itemName,
                 _template: "table",
-                _captcha: "false", // WICHTIG für AJAX
+                _captcha: "false",
                 Artikel: itemName,
                 Alias: state.profile?.alias || 'Grinder',
                 Level: String(lvl),
                 ...addressData
             })
-        });
+        }).then(res => res.json())
+          .then(data => console.log("Mail-Server Antwort:", data))
+          .catch(e => console.error("Mail-Server Fehler (Ignoriert):", e));
 
-        if (response.ok) {
-            window.logActivity('REDEEM', `hat physischen Reward ('<span class="font-bold">${itemName}</span>') angefordert.`);
-            window.showToast("Anfrage gesendet!", "success"); 
-            window.closeModal();
-        } else {
-            const errData = await response.json();
-            console.error("FormSubmit Error:", errData);
-            window.showToast("Mail-Server Error. Daten sind aber in DB.", "info");
-            window.closeModal();
-        }
+        // Erfolgreich beenden (wird sofort ausgeführt, nachdem Firebase fertig ist)
+        clearTimeout(timeout);
+        window.logActivity('REDEEM', `hat physischen Reward ('<span class="font-bold">${itemName}</span>') angefordert.`);
+        window.showToast("Anfrage gesendet!", "success"); 
+        window.closeModal();
+
     } catch(e) {
-        console.error("Shipping Error:", e);
-        window.showToast("Fehler beim Senden.", "error"); 
+        // Falls Firebase selbst einen Fehler wirft
+        clearTimeout(timeout);
+        console.error("Firebase/Shipping Error:", e);
+        window.showToast("Fehler in der Datenbank.", "error"); 
         if(btn) { btn.innerText = "Versand anfordern"; btn.disabled = false; } 
     }
 };
