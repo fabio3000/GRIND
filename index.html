@@ -55,6 +55,15 @@
         .btn-pro { background: rgba(168,85,247,0.1); color: #a855f7; font-weight: 900; text-transform: uppercase; letter-spacing: 0.08em; padding: 12px 24px; font-size: 11px; transition: 0.25s ease; cursor: pointer; border-radius: 6px; border: 1px solid rgba(168,85,247,0.3); }
         .btn-pro:hover { background: #a855f7; color: white; box-shadow: 0 10px 30px rgba(168,85,247,0.25); border-color: #a855f7; transform: translateY(-2px); }
         
+        @keyframes subtle-pulse { 0%, 100% { opacity: 1; box-shadow: 0 0 10px rgba(255, 77, 0, 0.1); border-color: rgba(255, 77, 0, 0.3); } 50% { opacity: 0.95; box-shadow: 0 0 20px rgba(255, 77, 0, 0.4); border-color: rgba(255, 77, 0, 0.6); } }
+        .btn-bounty { animation: subtle-pulse 3s infinite ease-in-out; background: rgba(255,255,255,0.02); color: white; border: 1px solid rgba(255, 77, 0, 0.3); cursor: pointer; transition: all 0.3s ease; border-radius: 6px; }
+        .btn-bounty:hover { background: rgba(255,77,0,0.1); border-color: #ff4d00; box-shadow: 0 0 25px rgba(255, 77, 0, 0.5); transform: translateY(-2px); }
+        
+        .completed-overlay { position: absolute; inset: 0; background: rgba(5,5,5,0.8); z-index: 10; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px); opacity: 0; transition: opacity 0.3s; pointer-events: none; border-radius: 12px; }
+        .card.is-completed .completed-overlay, .mockup.is-completed .completed-overlay { opacity: 1; pointer-events: auto; }
+        .pending-overlay { position: absolute; inset: 0; background: rgba(5,5,5,0.8); z-index: 10; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px); opacity: 0; transition: opacity 0.3s; pointer-events: none; border-radius: 12px; }
+        .card.is-pending .pending-overlay, .mockup.is-pending .pending-overlay { opacity: 1; pointer-events: auto; }
+        
         @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.1) translateY(-5px); text-shadow: 0 0 20px rgba(255,77,0,0.8); color: #ff4d00; } 100% { transform: scale(1) translateY(0); } }
         .animate-pop { animation: pop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         
@@ -96,8 +105,9 @@
 <body class="flex flex-col relative select-none">
     <div class="grid-overlay"></div>
     
-    <div id="live-notification-badge" class="fixed top-6 left-1/2 transform -translate-x-1/2 -translate-y-32 opacity-0 z-[99999] transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] pointer-events-none w-max max-w-[90vw]">
-        <div id="live-notification-box" class="bg-black/90 backdrop-blur-md border border-[#ff4d00]/50 shadow-[0_10px_40px_rgba(255,77,0,0.3)] rounded-full py-3 px-6 flex items-center justify-center gap-3">
+    <!-- Smart Live Notification Badge -->
+    <div id="live-notification-badge" class="fixed top-6 left-1/2 transform -translate-x-1/2 -translate-y-32 opacity-0 z-[99999] transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] pointer-events-none w-[90%] max-w-sm">
+        <div id="live-notification-box" class="bg-black/90 backdrop-blur-md border border-[#ff4d00]/50 shadow-[0_10px_40px_rgba(255,77,0,0.3)] rounded-full py-3 px-5 flex items-center gap-3">
             <span id="live-notification-ping" class="relative flex h-3 w-3 flex-shrink-0 hidden">
                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#ff4d00] opacity-75"></span>
                 <span class="relative inline-flex rounded-full h-3 w-3 bg-[#ff4d00]"></span>
@@ -108,6 +118,7 @@
 
     <div id="toast-container"></div>
     
+    <!-- Original XP Dropdown HUD -->
     <div id="xp-hud" class="fixed top-0 left-0 right-0 z-[999998] transform -translate-y-[150%] transition-transform duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] pointer-events-none flex justify-center pt-4 px-4 sm:px-6">
         <div class="absolute top-2 w-full max-w-md h-32 bg-black/60 blur-2xl rounded-full pointer-events-none z-0 gpu-blur"></div>
         <div class="bg-[#0a0a0a]/80 border border-[#ff4d00]/40 shadow-[0_20px_50px_rgba(0,0,0,0.7),_0_0_20px_rgba(255,77,0,0.15)] rounded-xl p-5 w-full max-w-sm flex flex-col gap-3 relative overflow-hidden backdrop-blur-2xl z-10">
@@ -925,17 +936,20 @@
                 `;
 
                 html += `
+                    </main> <!-- Break out for the full-width Grind Track -->
                     <section class="w-full relative z-10 mb-16">
-                        <div class="max-w-6xl mx-auto flex justify-between items-center mb-6">
+                        <div class="max-w-6xl mx-auto px-6 flex justify-between items-center mb-6">
                             <div><h3 class="text-2xl font-black italic uppercase tracking-tighter">Grind Track <span class="text-[#ff4d00]">S0${seasonNum}</span></h3></div>
                             <div>${hasPremium ? '<span class="bg-[#a855f7]/10 text-[#a855f7] border border-[#a855f7]/30 px-3 py-1.5 rounded-md text-[9px] font-black uppercase tracking-widest shadow-[0_0_10px_rgba(168,85,247,0.2)]">PRO ACTIVE</span>' : '<button type="button" onclick="window.setView(\'paywall\')" class="btn-pro">Get Pro Pass</button>'}</div>
                         </div>
                         <div id="pass-viewport" class="w-full no-scrollbar overflow-x-auto py-8 relative flex items-center min-h-[280px] border-y border-white/5 bg-black/40 shadow-inner">
-                            <div class="flex items-center px-6 relative w-max" style="min-width: max-content;">
+                            <div class="flex items-center relative w-max" style="min-width: max-content;">
                                 <!-- Voll durchgängige Track Background Line -->
-                                <div class="absolute top-1/2 h-[2px] bg-[#1f1f1f] z-0 -translate-y-1/2" style="left: -100vw; right: -100vw;"></div>
-                                <!-- Progress Track Line geht von ganz links bis zum aktuellen Node -->
-                                <div id="track-line" class="absolute top-1/2 h-[2px] bg-[#ff4d00] shadow-[0_0_15px_rgba(255,77,0,0.6)] z-0 transition-all duration-1000 ease-out -translate-y-1/2" style="left: -100vw; width: calc(100vw + 94px + (140px * ${oldTrackProgress})); display: ${safeXp > 0 || state.prevXp > 0 ? 'block' : 'none'};"></div>
+                                <div class="absolute top-1/2 left-0 right-0 h-[2px] bg-[#1f1f1f] z-0 -translate-y-1/2 pointer-events-none"></div>
+                                <!-- Progress Track Line -->
+                                <div id="track-line" class="absolute top-1/2 left-0 h-[2px] bg-[#ff4d00] shadow-[0_0_15px_rgba(255,77,0,0.6)] z-0 transition-all duration-1000 ease-out -translate-y-1/2 pointer-events-none" style="width: calc(max(1.5rem, calc((100vw - 72rem) / 2 + 1.5rem)) + 70px + (140px * ${oldTrackProgress}));"></div>
+                                
+                                <div class="w-[max(1.5rem,calc((100vw-72rem)/2+1.5rem))] flex-shrink-0"></div> <!-- Dynamischer Left-Spacer -->
                 `;
                 
                 for (let i = 1; i <= 30; i++) {
@@ -962,7 +976,13 @@
                     `;
                 }
                 
-                html += `</div></div></section>`;
+                html += `
+                                <div class="w-[max(1.5rem,calc((100vw-72rem)/2+1.5rem))] flex-shrink-0"></div> <!-- Dynamischer Right-Spacer -->
+                            </div>
+                        </div>
+                    </section>
+                    <main class="max-w-6xl mx-auto px-6 w-full relative z-10 pb-10"> <!-- Reopen container for the rest -->
+                `;
 
                 html += `
                     <section class="max-w-3xl mx-auto mb-16">
@@ -1063,7 +1083,7 @@
                 html += `</div></section>`;
 
                 html += `
-                    <section class="max-w-3xl mx-auto mb-10">
+                    <section class="max-w-3xl mx-auto mb-16">
                         <div class="flex flex-col gap-6 mb-10">
                             <div class="flex justify-between items-end border-b border-white/10 pb-4">
                                 <div>
@@ -1160,7 +1180,7 @@
                 
                 html += `
                     <section class="max-w-3xl mx-auto mb-12">
-                        <div class="flex flex-col gap-6 mb-8 mt-6">
+                        <div class="flex flex-col gap-6 mb-8">
                             <div class="flex justify-between items-end border-b border-white/10 pb-4">
                                 <div>
                                     <p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">The Network</p>
@@ -1247,7 +1267,7 @@
                             }, 1250); 
                         }
                         if (trackLine) {
-                            trackLine.style.width = `calc(100vw + 94px + (140px * ${targetTrackProgress}))`;
+                            trackLine.style.width = `calc(max(1.5rem, calc((100vw - 72rem) / 2 + 1.5rem)) + 70px + (140px * ${targetTrackProgress}))`;
                         }
                         if (passViewport && currentNode) {
                             passViewport.scrollTo({ left: currentNode.offsetLeft - (passViewport.offsetWidth / 2) + (currentNode.offsetWidth / 2), behavior: 'smooth' });
@@ -1258,7 +1278,7 @@
                             topBar.style.width = `${targetXpProgress}%`; 
                         }
                         if (trackLine) {
-                            trackLine.style.width = `calc(100vw + 94px + (140px * ${targetTrackProgress}))`;
+                            trackLine.style.width = `calc(max(1.5rem, calc((100vw - 72rem) / 2 + 1.5rem)) + 70px + (140px * ${targetTrackProgress}))`;
                         }
                     }
                     
@@ -1269,6 +1289,7 @@
                         const hudXpMax = document.getElementById('hud-xp-max');
                         const hudXpBar = document.getElementById('hud-xp-bar');
                         
+                        // Das XP-Fenster erscheint IMMER
                         if(hud) {
                             hudLvl.innerText = state.prevLvl; 
                             hudXpNum.innerText = state.prevXp; 
@@ -1277,9 +1298,9 @@
                             hudXpBar.style.width = `${oldXpProgress}%`; 
                             void hudXpBar.offsetWidth; 
                             
-                            // Fenster Drop-down
-                            hud.classList.remove('-translate-y-[150%]'); 
-                            hud.classList.add('translate-y-0'); 
+                            // Fenster Dropdown
+                            hud.classList.remove('-translate-y-[150%]', 'pointer-events-none'); 
+                            hud.classList.add('translate-y-0', 'pointer-events-auto'); 
                             
                             animateValue('hud-xp-num', state.prevXp, safeXp, 2500);
                             
@@ -1306,21 +1327,17 @@
                             
                             if (window.hudCloseTimeout) clearTimeout(window.hudCloseTimeout);
                             window.hudCloseTimeout = setTimeout(() => { 
-                                hud.classList.remove('translate-y-0'); 
-                                hud.classList.add('-translate-y-[150%]'); 
+                                hud.classList.remove('translate-y-0', 'pointer-events-auto'); 
+                                hud.classList.add('-translate-y-[150%]', 'pointer-events-none'); 
                                 if(hudLvl) hudLvl.classList.remove('animate-level-up'); 
-                            }, 5500);
+                            }, 5000);
                         }
                         
                         animateValue('xp-counter-num', state.prevXp, safeXp, 2500);
                         
                         if (state.prevLvl !== null && safeLvl > state.prevLvl) { 
                             const lvlText = document.getElementById('main-lvl-text'); 
-                            if (lvlText) {
-                                lvlText.classList.remove('animate-level-up');
-                                void lvlText.offsetWidth;
-                                lvlText.classList.add('animate-level-up'); 
-                            }
+                            if (lvlText) lvlText.classList.add('animate-pop'); 
                             const newCircle = document.getElementById(`circle-node-${safeLvl}`); 
                             if (newCircle) newCircle.classList.add('animate-pop'); 
                         }
