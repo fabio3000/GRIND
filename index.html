@@ -26,41 +26,59 @@
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script src="https://www.paypal.com/sdk/js?client-id=AboxAT2qskA0lY5-23Kj2tu_qY3bOK57rq_LbhtE_cdVOBT37fSHGacBKjgl-zx1XcJM9AZql96OCwc8&currency=EUR"></script>
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #050505; color: #ffffff; overflow-x: hidden; background-image: radial-gradient(circle at 50% 0%, #1a0a00 0%, #050505 60%); min-height: 100vh; overscroll-behavior-y: none; }
+        body { font-family: 'Inter', sans-serif; background-color: #030303; color: #ffffff; overflow-x: hidden; scroll-behavior: smooth; background-image: radial-gradient(circle at top, #0b0b0b 0%, #030303 70%); min-height: 100vh; overscroll-behavior-y: none; }
+        
+        /* Grid Overlay from Partner Site */
+        .grid-overlay { position: fixed; inset: 0; opacity: 0.08; background-size: 60px 60px; background-image: linear-gradient(to right, rgba(255,255,255,0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.08) 1px, transparent 1px); transform: perspective(500px) rotateX(60deg); pointer-events: none; z-index: 0; }
+        
         .grind-gradient { background: linear-gradient(90deg, #ff4d00, #ff8800); }
-        .card { background: #0f0f0f; border: 1px solid #1f1f1f; transition: all 0.3s ease; }
-        .card:hover { border-color: #ff4d00; box-shadow: 0 0 20px rgba(255, 77, 0, 0.1); }
+        .text-brand { color: #ff4d00; }
+        .bg-brand { background: #ff4d00; }
+
+        .card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; transition: all 0.3s ease; position: relative; z-index: 10; backdrop-filter: blur(10px); }
+        .card:hover { border-color: rgba(255, 77, 0, 0.4); box-shadow: 0 10px 30px rgba(255, 77, 0, 0.1); transform: translateY(-2px); }
+        
+        .mockup { background: #080808; border: 1px solid #181818; border-radius: 14px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.7); position: relative; }
+        
+        /* Ticker Styles */
+        .ticker-container { overflow: hidden; white-space: nowrap; border-top: 1px solid rgba(255,255,255,.05); border-bottom: 1px solid rgba(255,255,255,.05); background: rgba(5,5,5,0.8); backdrop-filter: blur(5px); position: relative; z-index: 20; width: 100vw; margin-left: -24px; /* offset px-6 */ padding-left: 24px; }
+        @media (min-width: 1152px) { .ticker-container { margin-left: calc(-50vw + 50%); padding-left: calc(50vw - 50%); } }
+        
+        .ticker-content { display: inline-block; animation: ticker 35s linear infinite; }
+        @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        .ticker-item { display: inline-flex; align-items: center; gap: 10px; padding: 10px 30px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; color: #8a8a8a; }
+
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; scroll-behavior: smooth; }
         .level-node { min-width: 140px; position: relative; }
-        .reward-box { width: 100px; height: 85px; border: 1px solid #1f1f1f; background: #0a0a0a; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; z-index: 10; border-radius: 4px; transition: all 0.3s ease; }
-        .reward-box.unlocked { border-color: #ff4d00; background: #140a00; box-shadow: 0 0 15px rgba(255, 77, 0, 0.15); }
-        .reward-box.pro { border-color: #6d28d9; height: 95px; width: 110px; box-shadow: 0 0 10px rgba(109, 40, 217, 0.05); }
-        .reward-box.pro.unlocked { background: #1a0a2e; border-color: #a855f7; box-shadow: 0 0 20px rgba(168, 85, 247, 0.25); }
-        .tag-free { background: #333; color: white; font-size: 7px; font-weight: 900; padding: 2px 6px; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); text-transform: uppercase; border-radius: 2px; z-index: 30; }
-        .tag-pro { background: linear-gradient(90deg, #7c3aed, #9333ea); color: white; font-size: 8px; font-weight: 900; padding: 2px 8px; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); text-transform: uppercase; border-radius: 3px; box-shadow: 0 2px 8px rgba(124,58,237,0.4); z-index: 30; }
-        .week-btn { border: 1px solid #1f1f1f; background: #0a0a0a; transition: all 0.2s; }
+        .reward-box { width: 100px; height: 85px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.5); display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; z-index: 10; border-radius: 8px; transition: all 0.3s ease; backdrop-filter: blur(5px); }
+        .reward-box.unlocked { border-color: #ff4d00; background: rgba(255,77,0,0.05); box-shadow: 0 0 15px rgba(255, 77, 0, 0.15); }
+        .reward-box.pro { border-color: rgba(168,85,247,0.3); height: 95px; width: 110px; }
+        .reward-box.pro.unlocked { background: rgba(168,85,247,0.05); border-color: #a855f7; box-shadow: 0 0 20px rgba(168, 85, 247, 0.25); }
+        .tag-free { background: #333; color: white; font-size: 7px; font-weight: 900; padding: 3px 8px; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); text-transform: uppercase; border-radius: 4px; z-index: 30; }
+        .tag-pro { background: linear-gradient(90deg, #7c3aed, #9333ea); color: white; font-size: 8px; font-weight: 900; padding: 3px 10px; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); text-transform: uppercase; border-radius: 4px; box-shadow: 0 2px 8px rgba(124,58,237,0.4); z-index: 30; }
+        .week-btn { border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.02); transition: all 0.2s; border-radius: 6px; }
         .week-btn.active { background: #ff4d00; color: white; border-color: #ff4d00; font-weight: 900; box-shadow: 0 0 15px rgba(255, 77, 0, 0.2); }
         #toast-container { position: fixed; top: 20px; right: 20px; z-index: 99999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
-        .toast { pointer-events: auto; background: #0a0a0a; border: 1px solid #1f1f1f; color: white; padding: 16px 24px; border-radius: 4px; font-size: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.8); transform: translateX(120%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: flex; align-items: center; gap: 12px; }
+        .toast { pointer-events: auto; background: #0a0a0a; border: 1px solid #1f1f1f; color: white; padding: 16px 24px; border-radius: 8px; font-size: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.8); transform: translateX(120%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: flex; align-items: center; gap: 12px; }
         .toast.show { transform: translateX(0); }
         .toast.success { border-left: 4px solid #ff4d00; }
         .toast.error { border-left: 4px solid #dc2626; }
         .toast.info { border-left: 4px solid #3b82f6; }
-        .btn-grind { background: white; color: black; font-weight: 900; font-style: italic; text-transform: uppercase; padding: 12px 24px; font-size: 12px; transition: all 0.2s; box-shadow: 0 4px 15px rgba(255,255,255,0.1); cursor: pointer; border-radius: 4px; border: none; }
-        .btn-grind:hover { background: #ff4d00; color: white; box-shadow: 0 4px 20px rgba(255, 77, 0, 0.4); }
-        .btn-grind:disabled { background: #1f1f1f; color: #555; cursor: not-allowed; box-shadow: none; border-color: #1f1f1f; }
-        .btn-pro { background: #1a0a2e; color: #a855f7; font-weight: 900; font-style: italic; text-transform: uppercase; padding: 12px 24px; font-size: 12px; transition: all 0.2s; box-shadow: 0 4px 15px rgba(168,85,247,0.1); cursor: pointer; border-radius: 4px; border: 1px solid rgba(168,85,247,0.3); }
-        .btn-pro:hover { background: #a855f7; color: white; box-shadow: 0 4px 20px rgba(168,85,247,0.4); border-color: #a855f7; }
+        .btn-grind { background: white; color: black; font-weight: 900; text-transform: uppercase; letter-spacing: 0.08em; padding: 14px 28px; font-size: 12px; transition: 0.25s ease; box-shadow: 0 4px 15px rgba(255,255,255,0.05); cursor: pointer; border-radius: 6px; border: none; }
+        .btn-grind:hover { background: #ff4d00; color: white; transform: translateY(-2px); box-shadow: 0 10px 30px rgba(255,77,0,0.25); }
+        .btn-grind:disabled { background: #1f1f1f; color: #555; cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn-pro { background: rgba(168,85,247,0.1); color: #a855f7; font-weight: 900; text-transform: uppercase; letter-spacing: 0.08em; padding: 12px 24px; font-size: 11px; transition: 0.25s ease; cursor: pointer; border-radius: 6px; border: 1px solid rgba(168,85,247,0.3); }
+        .btn-pro:hover { background: #a855f7; color: white; box-shadow: 0 10px 30px rgba(168,85,247,0.25); border-color: #a855f7; transform: translateY(-2px); }
         @keyframes subtle-pulse { 0%, 100% { opacity: 1; box-shadow: 0 0 10px rgba(255, 77, 0, 0.1); border-color: rgba(255, 77, 0, 0.3); } 50% { opacity: 0.95; box-shadow: 0 0 20px rgba(255, 77, 0, 0.4); border-color: rgba(255, 77, 0, 0.6); } }
-        .btn-bounty { animation: subtle-pulse 3s infinite ease-in-out; background: #0a0a0a; color: white; border: 1px solid rgba(255, 77, 0, 0.3); cursor: pointer; transition: all 0.3s ease; }
-        .btn-bounty:hover { background: #111; border-color: #ff4d00; box-shadow: 0 0 25px rgba(255, 77, 0, 0.5); transform: translateY(-2px); }
-        .completed-overlay { position: absolute; inset: 0; background: rgba(5,5,5,0.8); z-index: 10; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px); opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+        .btn-bounty { animation: subtle-pulse 3s infinite ease-in-out; background: rgba(255,255,255,0.02); color: white; border: 1px solid rgba(255, 77, 0, 0.3); cursor: pointer; transition: all 0.3s ease; border-radius: 6px; }
+        .btn-bounty:hover { background: rgba(255,77,0,0.1); border-color: #ff4d00; box-shadow: 0 0 25px rgba(255, 77, 0, 0.5); transform: translateY(-2px); }
+        .completed-overlay { position: absolute; inset: 0; background: rgba(5,5,5,0.8); z-index: 10; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px); opacity: 0; transition: opacity 0.3s; pointer-events: none; border-radius: 12px; }
         .card.is-completed .completed-overlay { opacity: 1; pointer-events: auto; }
-        .pending-overlay { position: absolute; inset: 0; background: rgba(5,5,5,0.8); z-index: 10; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px); opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+        .pending-overlay { position: absolute; inset: 0; background: rgba(5,5,5,0.8); z-index: 10; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px); opacity: 0; transition: opacity 0.3s; pointer-events: none; border-radius: 12px; }
         .card.is-pending .pending-overlay { opacity: 1; pointer-events: auto; }
-        @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.3) translateY(-10px); text-shadow: 0 0 30px #ff4d00; color: #ff4d00; } 100% { transform: scale(1) translateY(0); text-shadow: 0 0 10px rgba(255,77,0,0.5); } }
-        .animate-pop { animation: pop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.1) translateY(-5px); text-shadow: 0 0 20px rgba(255,77,0,0.8); color: #ff4d00; } 100% { transform: scale(1) translateY(0); } }
+        .animate-pop { animation: pop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         @keyframes shine { 100% { left: 200%; } }
         .xp-bar-glow { position: relative; overflow: hidden; }
         .xp-bar-glow::after { content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent); animation: shine 2.5s infinite; }
@@ -68,13 +86,13 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes pulse-slow { 0%, 100% { opacity: 0.3; transform: scale(0.95); } 50% { opacity: 1; transform: scale(1.05); } }
         .animate-pulse-slow { animation: pulse-slow 4s ease-in-out infinite; }
-        .glitch-bg { background-image: radial-gradient(circle at 50% 50%, #1a0a00 0%, #050505 80%); }
-        .grecaptcha-badge { filter: invert(1) grayscale(0.2) opacity(0.3); transition: all 0.5s ease !important; bottom: 20px !important; }
+        .grecaptcha-badge { filter: invert(1) grayscale(0.2) opacity(0.3); transition: all 0.5s ease !important; bottom: 20px !important; z-index: 100; }
         .grecaptcha-badge:hover { filter: invert(1) grayscale(0) opacity(0.8); }
-        #intro-layer { position: fixed; inset: 0; z-index: 999999; background-color: #050505; display: flex; align-items: center; justify-content: center; transition: opacity 0.8s ease; }
-        .word-flash { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 10vw; font-weight: 900; font-style: italic; text-transform: uppercase; white-space: nowrap; opacity: 0; letter-spacing: -0.05em; text-align: center; }
-        @media (min-width: 768px) { .word-flash { font-size: 6vw; } }
-        @keyframes flashInOut { 0% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); filter: blur(4px); } 10% { opacity: 1; transform: translate(-50%, -50%) scale(1); filter: blur(0px); } 90% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); filter: blur(0px); } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.1); filter: blur(4px); } }
+        #intro-layer { position: fixed; inset: 0; z-index: 999999; background-color: #030303; display: flex; align-items: center; justify-content: center; transition: opacity 0.8s ease; }
+        .word-flash { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 8vw; font-weight: 900; font-style: italic; text-transform: uppercase; white-space: nowrap; opacity: 0; letter-spacing: -0.02em; text-align: center; }
+        @media (min-width: 768px) { .word-flash { font-size: 5vw; } }
+        @keyframes flashInOut { 0% { opacity: 0; transform: translate(-50%, -50%) scale(0.95); filter: blur(4px); } 10% { opacity: 1; transform: translate(-50%, -50%) scale(1); filter: blur(0px); } 90% { opacity: 1; transform: translate(-50%, -50%) scale(1.02); filter: blur(0px); } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.05); filter: blur(4px); } }
+        
         .legal-content h2 { color: white; font-weight: 900; font-style: italic; text-transform: uppercase; margin-top: 2.5rem; margin-bottom: 0.75rem; letter-spacing: 0.05em; font-size: 1.25rem; }
         .legal-content h3 { color: #d4d4d4; font-weight: 700; margin-top: 1.5rem; margin-bottom: 0.5rem; }
         .legal-content p { margin-bottom: 1rem; color: #a3a3a3; font-size: 0.875rem; line-height: 1.6; }
@@ -86,14 +104,16 @@
     </style>
 </head>
 <body class="flex flex-col relative select-none">
+    <div class="grid-overlay"></div> <!-- Global Pattern Overlay -->
+    
     <div id="toast-container"></div>
     <div id="xp-hud" class="fixed top-0 left-0 right-0 z-[999999] transform -translate-y-[150%] transition-transform duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] pointer-events-none flex justify-center pt-4 px-4 sm:px-6">
         <div class="absolute top-2 w-full max-w-md h-32 bg-black/60 blur-2xl rounded-full pointer-events-none z-0"></div>
-        <div class="bg-[#0a0a0a]/70 border border-[#ff4d00]/40 shadow-[0_20px_50px_rgba(0,0,0,0.7),_0_0_20px_rgba(255,77,0,0.15)] rounded-lg p-5 w-full max-w-sm flex flex-col gap-3 relative overflow-hidden backdrop-blur-2xl z-10">
-            <div class="absolute inset-0 bg-gradient-to-b from-[#ff4d00]/15 to-transparent"></div>
+        <div class="bg-[#0a0a0a]/80 border border-[#ff4d00]/40 shadow-[0_20px_50px_rgba(0,0,0,0.7),_0_0_20px_rgba(255,77,0,0.15)] rounded-xl p-5 w-full max-w-sm flex flex-col gap-3 relative overflow-hidden backdrop-blur-2xl z-10">
+            <div class="absolute inset-0 bg-gradient-to-b from-[#ff4d00]/10 to-transparent"></div>
             <div class="relative z-10 flex justify-between items-end">
                 <div>
-                    <p class="text-[#ff4d00] text-[9px] font-black uppercase tracking-[0.3em] mb-1 drop-shadow-md">XP Sync</p>
+                    <p class="text-[#ff4d00] text-[9px] font-black uppercase tracking-[0.3em] mb-1 drop-shadow-md">Network Sync</p>
                     <h4 class="text-white font-black italic text-2xl leading-none">LVL <span id="hud-lvl">1</span></h4>
                 </div>
                 <div class="text-right">
@@ -342,11 +362,12 @@
                 document.body.appendChild(container); 
             }
             container.innerHTML = `
-                <div class="bg-[#0a0a0a] border border-[#1f1f1f] p-8 rounded-sm max-w-md w-full shadow-[0_0_40px_rgba(255,77,0,0.1)] transform scale-95 transition-transform duration-300 relative my-auto">
+                <div class="bg-[#0a0a0a] border border-white/10 p-8 rounded-xl max-w-md w-full shadow-[0_20px_50px_rgba(0,0,0,0.7)] transform scale-95 transition-transform duration-300 relative my-auto overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-50 pointer-events-none"></div>
                     <button type="button" onclick="window.closeModal()" class="absolute top-4 right-4 text-gray-500 hover:text-white z-50">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
-                    ${contentHtml}
+                    <div class="relative z-10">${contentHtml}</div>
                 </div>`;
             setTimeout(() => { 
                 container.classList.remove('opacity-0', 'pointer-events-none'); 
@@ -364,7 +385,7 @@
             let innerHtml = `
                 <p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">Network</p>
                 <h3 class="text-2xl font-black italic uppercase tracking-tighter mb-6">Crew Erweitern</h3>
-                <div class="bg-[#1f1f1f] p-5 rounded-sm mb-6 border border-white/10 relative overflow-hidden group">
+                <div class="bg-[#1f1f1f] p-5 rounded-lg mb-6 border border-white/10 relative overflow-hidden group">
                     <div class="absolute inset-0 bg-gradient-to-r from-[#ff4d00]/10 to-transparent"></div>
                     <div class="relative z-10 flex items-center gap-4">
                         <div class="w-10 h-10 rounded-full border border-[#ff4d00]/30 flex items-center justify-center bg-[#0a0a0a]">
@@ -376,24 +397,24 @@
                         </div>
                     </div>
                 </div>
-                <div class="bg-[#111] p-5 rounded-sm mb-6 border border-white/5">
+                <div class="bg-[#111] p-5 rounded-lg mb-6 border border-white/5">
                     <p class="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-3">Option 1: Link teilen</p>
                     <div class="flex gap-2">
-                        <input type="text" readonly value="${link}" class="flex-1 p-3 bg-black border border-[#333] rounded-sm text-xs text-gray-400 outline-none truncate selection:bg-[#ff4d00] selection:text-white">
-<button type="button" onclick="window.shareLink('${link}')" class="bg-[#1f1f1f] border border-gray-700 text-white px-4 rounded-sm hover:bg-[#ff4d00] hover:border-[#ff4d00] transition flex-shrink-0" title="Teilen">
+                        <input type="text" readonly value="${link}" class="flex-1 p-3 bg-black border border-[#333] rounded-md text-xs text-gray-400 outline-none truncate selection:bg-[#ff4d00] selection:text-white">
+<button type="button" onclick="window.shareLink('${link}')" class="bg-[#1f1f1f] border border-gray-700 text-white px-4 rounded-md hover:bg-[#ff4d00] hover:border-[#ff4d00] transition flex-shrink-0" title="Teilen">
     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
 </button>
 
                     </div>
                 </div>
-                <div class="bg-[#111] p-5 rounded-sm mb-6 border border-white/5">
+                <div class="bg-[#111] p-5 rounded-lg mb-6 border border-white/5">
                     <p class="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-3">Option 2: Code eingeben</p>
                     <form onsubmit="window.submitManualCode(event)" class="flex gap-2">
-                        <input id="manual_crew_code" type="text" placeholder="CODE..." required class="flex-1 p-3 bg-black border border-[#333] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00] uppercase font-bold tracking-widest">
-                        <button type="submit" class="bg-white text-black font-black uppercase tracking-widest px-4 rounded-sm hover:bg-[#ff4d00] hover:text-white transition text-xs">Add</button>
+                        <input id="manual_crew_code" type="text" placeholder="CODE..." required class="flex-1 p-3 bg-black border border-[#333] rounded-md text-sm text-white outline-none focus:border-[#ff4d00] uppercase font-bold tracking-widest">
+                        <button type="submit" class="bg-white text-black font-black uppercase tracking-widest px-4 rounded-md hover:bg-[#ff4d00] hover:text-white transition text-xs">Add</button>
                     </form>
                 </div>
-                <button type="button" onclick="window.closeModal()" class="w-full bg-[#111] text-gray-400 hover:bg-white hover:text-black font-black italic uppercase py-3 transition text-xs border border-white/5 rounded-sm">Schließen</button>
+                <button type="button" onclick="window.closeModal()" class="w-full bg-[#111] text-gray-400 hover:bg-white hover:text-black font-black italic uppercase py-3 transition text-xs border border-white/5 rounded-lg">Schließen</button>
             `;
             window.openModal(innerHtml);
         };
@@ -414,29 +435,16 @@
             document.body.removeChild(textArea);
         };
 
-window.shareLink = async (link) => {
-    const shareData = {
-        title: 'GRIND.',
-        text: 'Lass uns zusammen an unserer Health & Fitness arbeiten! Tritt meiner Crew bei:',
-        url: link
-    };
-
-    if (navigator.share) {
-        try {
-            await navigator.share(shareData);
-        } catch (err) {
-
-
-            if (err.name !== 'AbortError') {
-                window.copyToClipboard(link);
-            }
-        }
-    } else {
-
-        window.copyToClipboard(link); 
-    }
-};
-
+        window.shareLink = async (link) => {
+            const shareData = {
+                title: 'GRIND.',
+                text: 'Lass uns zusammen an unserer Health & Fitness arbeiten! Tritt meiner Crew bei:',
+                url: link
+            };
+            if (navigator.share) {
+                try { await navigator.share(shareData); } catch (err) { if (err.name !== 'AbortError') window.copyToClipboard(link); }
+            } else { window.copyToClipboard(link); }
+        };
 
         window.submitManualCode = (e) => {
             e.preventDefault();
@@ -471,7 +479,7 @@ window.shareLink = async (link) => {
                         </div>
                         <h3 class="text-3xl font-black italic uppercase tracking-tighter mb-2">${theirAlias}</h3>
                         <p class="text-gray-400 text-[11px] mb-6 leading-relaxed max-w-[200px] mx-auto">Möchtest du dich mit diesem Grinder verbinden? Beide erhalten Updates im Live-Feed voneinander.</p>
-                        <div class="bg-[#ff4d00]/10 border border-[#ff4d00]/30 py-2 px-4 rounded-sm inline-block mb-6 shadow-[0_0_10px_rgba(255,77,0,0.2)]">
+                        <div class="bg-[#ff4d00]/10 border border-[#ff4d00]/30 py-2 px-4 rounded-md inline-block mb-6 shadow-[0_0_10px_rgba(255,77,0,0.2)]">
                             <p class="text-[#ff4d00] font-black italic uppercase tracking-widest text-sm">+${nextXpBounty} XP BOUNTY (FÜR BEIDE!)</p>
                         </div>
                         <button type="button" onclick="window.confirmFriend('${theirUid}', '${theirAlias}')" class="w-full btn-grind py-4 mb-3">Akzeptieren & Verbinden</button>
@@ -659,17 +667,17 @@ window.shareLink = async (link) => {
             let innerHtml = `<p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">Verify Action</p><h3 class="text-2xl font-black italic uppercase tracking-tighter mb-6">${name}</h3>`;
             if(type === 'qr') {
                 innerHtml += `
-                    <div id="qr-placeholder" onclick="window.startQRScanner()" class="border-2 border-dashed border-[#1f1f1f] p-8 mb-4 flex flex-col items-center justify-center bg-black/50 rounded-sm hover:border-[#ff4d00] cursor-pointer transition">
+                    <div id="qr-placeholder" onclick="window.startQRScanner()" class="border border-dashed border-white/20 p-8 mb-4 flex flex-col items-center justify-center bg-black/50 rounded-lg hover:border-[#ff4d00] cursor-pointer transition">
                         <svg class="w-12 h-12 text-[#ff4d00] mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
                         <p class="text-xs text-white font-bold uppercase tracking-widest text-center">Kamera aktivieren</p>
                     </div>
-                    <div id="qr-reader" class="hidden w-full mb-4 rounded-sm overflow-hidden border border-[#1f1f1f]"></div>
-                    <input id="verify_code_input" type="text" placeholder="Oder Code manuell eingeben" class="w-full p-4 bg-[#0f0f0f] border border-[#1f1f1f] rounded-sm outline-none focus:border-[#ff4d00] text-white text-center text-sm tracking-widest uppercase mb-6">
+                    <div id="qr-reader" class="hidden w-full mb-4 rounded-lg overflow-hidden border border-[#1f1f1f]"></div>
+                    <input id="verify_code_input" type="text" placeholder="Oder Code manuell eingeben" class="w-full p-4 bg-[#0f0f0f] border border-[#1f1f1f] rounded-lg outline-none focus:border-[#ff4d00] text-white text-center text-sm tracking-widest uppercase mb-6">
                 `;
             } else {
                 innerHtml += `
                     <input type="file" id="proof_file_input" accept="image/*" class="hidden" onchange="window.handleFileSelect(event)">
-                    <div onclick="window.triggerFileInput()" class="border-2 border-dashed border-[#1f1f1f] min-h-[150px] p-2 mb-6 flex flex-col items-center justify-center bg-black/50 rounded-sm hover:border-[#ff4d00] transition cursor-pointer overflow-hidden relative">
+                    <div onclick="window.triggerFileInput()" class="border border-dashed border-white/20 min-h-[150px] p-2 mb-6 flex flex-col items-center justify-center bg-black/50 rounded-lg hover:border-[#ff4d00] transition cursor-pointer overflow-hidden relative">
                         <div id="upload-placeholder" class="text-center">
                             <svg class="w-12 h-12 text-[#ff4d00] mb-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
                             <p class="text-xs text-white font-bold uppercase tracking-widest">Beweisfoto hochladen</p>
@@ -852,27 +860,27 @@ window.shareLink = async (link) => {
             const isAlreadyRedeemed = (state.profile.redeemed || []).includes(rewardId);
             let contentHtml = '';
             if (isAlreadyRedeemed && (type === 'qr' || type === 'shipping' || type === 'xp' || type === 'lvl')) {
-                contentHtml = `<div class="bg-[#111] p-8 rounded-sm flex flex-col items-center justify-center mb-6 border border-white/5 shadow-inner"><div class="w-12 h-12 rounded-full border-2 border-gray-600 flex items-center justify-center mb-4 opacity-50"><svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div><p class="text-xs text-gray-500 uppercase tracking-widest font-bold text-center">Bereits eingelöst<br><span class="font-normal text-[10px] mt-1 block">Dieser Reward ist nicht mehr verfügbar.</span></p></div>`;
+                contentHtml = `<div class="bg-[#111] p-8 rounded-xl flex flex-col items-center justify-center mb-6 border border-white/5 shadow-inner"><div class="w-12 h-12 rounded-full border-2 border-gray-600 flex items-center justify-center mb-4 opacity-50"><svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div><p class="text-xs text-gray-500 uppercase tracking-widest font-bold text-center">Bereits eingelöst<br><span class="font-normal text-[10px] mt-1 block">Dieser Reward ist nicht mehr verfügbar.</span></p></div>`;
             } else if (type === 'link') {
                 const isUrl = info.startsWith('http');
-                contentHtml = `<div class="bg-[#1f1f1f] p-6 rounded-sm flex flex-col items-center justify-center mb-6 border ${borderClass}"><p class="text-xs text-gray-400 mb-4 uppercase tracking-widest font-bold">Access Code / Link</p>${isUrl ? `<a href="${info}" target="_blank" class="w-full ${bgClass} text-white font-black py-3 px-4 rounded-sm text-center uppercase tracking-widest hover:opacity-80 transition">Link öffnen</a>` : `<div class="w-full bg-black text-white font-mono text-xl py-3 px-4 rounded-sm text-center select-all border border-white/10">${info}</div>`}</div>`;
+                contentHtml = `<div class="bg-[#1f1f1f] p-6 rounded-xl flex flex-col items-center justify-center mb-6 border ${borderClass}"><p class="text-xs text-gray-400 mb-4 uppercase tracking-widest font-bold">Access Code / Link</p>${isUrl ? `<a href="${info}" target="_blank" class="w-full ${bgClass} text-white font-black py-3 px-4 rounded-md text-center uppercase tracking-widest hover:opacity-80 transition">Link öffnen</a>` : `<div class="w-full bg-black text-white font-mono text-xl py-3 px-4 rounded-md text-center select-all border border-white/10">${info}</div>`}</div>`;
             } else if (type === 'xp' || type === 'lvl') {
                 const isXp = type === 'xp'; const unit = isXp ? 'XP' : 'Level';
-                contentHtml = `<div class="bg-[#1f1f1f] p-6 rounded-sm flex flex-col mb-6 border ${borderClass} shadow-2xl relative overflow-hidden"><div class="absolute top-0 right-0 bg-[#000] px-2 py-1 text-[8px] font-bold text-gray-500 uppercase tracking-widest rounded-bl-sm">Instant Boost</div><p class="text-[11px] text-gray-300 mb-8 leading-relaxed text-center font-medium">Dies fügt deinem Account direkt XP/Level hinzu.<br><span class="text-white font-black uppercase tracking-widest block mt-3 text-2xl ${textClass}">+${info} ${unit}</span></p><button type="button" id="boost-claim-btn" onclick="window.claimBoost(${lvl}, '${tier}', '${type}', '${info}')" class="w-full ${bgClass} text-white font-black py-4 px-4 rounded-sm text-sm uppercase tracking-widest shadow-[0_0_20px_rgba(255,77,0,0.4)] hover:scale-[1.02] transition">BOOST AKTIVIEREN</button></div>`;
+                contentHtml = `<div class="bg-[#1f1f1f] p-6 rounded-xl flex flex-col mb-6 border ${borderClass} shadow-2xl relative overflow-hidden"><div class="absolute top-0 right-0 bg-[#000] px-2 py-1 text-[8px] font-bold text-gray-500 uppercase tracking-widest rounded-bl-lg">Instant Boost</div><p class="text-[11px] text-gray-300 mb-8 leading-relaxed text-center font-medium">Dies fügt deinem Account direkt XP/Level hinzu.<br><span class="text-white font-black uppercase tracking-widest block mt-3 text-2xl ${textClass}">+${info} ${unit}</span></p><button type="button" id="boost-claim-btn" onclick="window.claimBoost(${lvl}, '${tier}', '${type}', '${info}')" class="w-full ${bgClass} text-white font-black py-4 px-4 rounded-md text-sm uppercase tracking-widest shadow-[0_0_20px_rgba(255,77,0,0.4)] hover:scale-[1.02] transition">BOOST AKTIVIEREN</button></div>`;
             } else if (type === 'qr') {
-                contentHtml = `<div id="redeem-container" class="bg-[#1f1f1f] p-6 rounded-sm flex flex-col mb-6 border ${borderClass} shadow-2xl relative overflow-hidden"><div class="absolute top-0 right-0 bg-[#000] px-2 py-1 text-[8px] font-bold text-gray-500 uppercase tracking-widest rounded-bl-sm">One-Time Use</div><p class="text-[11px] text-gray-300 mb-8 leading-relaxed text-center font-medium">${info}<br><span class="text-white font-black uppercase tracking-widest block mt-3 border-t border-white/10 pt-3">Das Personal muss das Einlösen bestätigen!</span></p><div onmousedown="window.startRedeemHold(${lvl}, '${tier}', event)" onmouseup="window.stopRedeemHold()" onmouseleave="window.stopRedeemHold()" ontouchstart="window.startRedeemHold(${lvl}, '${tier}', event)" ontouchend="window.stopRedeemHold()" class="relative w-full h-16 bg-black border border-white/20 rounded-sm overflow-hidden cursor-pointer flex items-center justify-center group"><div id="redeem-btn-fill" class="absolute left-0 top-0 bottom-0 w-0 ${bgClass} z-0" style="transition: none;"></div><span id="redeem-btn-text" class="relative z-10 text-white font-black italic uppercase tracking-widest text-sm pointer-events-none drop-shadow-md">Hold to Redeem</span></div></div>`;
+                contentHtml = `<div id="redeem-container" class="bg-[#1f1f1f] p-6 rounded-xl flex flex-col mb-6 border ${borderClass} shadow-2xl relative overflow-hidden"><div class="absolute top-0 right-0 bg-[#000] px-2 py-1 text-[8px] font-bold text-gray-500 uppercase tracking-widest rounded-bl-lg">One-Time Use</div><p class="text-[11px] text-gray-300 mb-8 leading-relaxed text-center font-medium">${info}<br><span class="text-white font-black uppercase tracking-widest block mt-3 border-t border-white/10 pt-3">Das Personal muss das Einlösen bestätigen!</span></p><div onmousedown="window.startRedeemHold(${lvl}, '${tier}', event)" onmouseup="window.stopRedeemHold()" onmouseleave="window.stopRedeemHold()" ontouchstart="window.startRedeemHold(${lvl}, '${tier}', event)" ontouchend="window.stopRedeemHold()" class="relative w-full h-16 bg-black border border-white/20 rounded-md overflow-hidden cursor-pointer flex items-center justify-center group"><div id="redeem-btn-fill" class="absolute left-0 top-0 bottom-0 w-0 ${bgClass} z-0" style="transition: none;"></div><span id="redeem-btn-text" class="relative z-10 text-white font-black italic uppercase tracking-widest text-sm pointer-events-none drop-shadow-md">Hold to Redeem</span></div></div>`;
             } else if (type === 'shipping') {
                 const fieldsStr = reward[`${tier}_fields`] || 'Adresse oder Info...';
                 const fieldsArr = fieldsStr.split(',').map(s => s.trim()).filter(s => s);
                 let fieldsHtml = '';
                 if (fieldsArr.length > 0) {
-                    fieldsArr.forEach((f, idx) => { fieldsHtml += `<input id="shipping_field_${idx}" type="text" placeholder="${f}" class="w-full p-3 bg-black border border-white/20 rounded-sm text-sm text-white outline-none focus:border-white mb-3 shipping-input-field" data-label="${f}">`; });
+                    fieldsArr.forEach((f, idx) => { fieldsHtml += `<input id="shipping_field_${idx}" type="text" placeholder="${f}" class="w-full p-3 bg-black border border-white/20 rounded-md text-sm text-white outline-none focus:border-white mb-3 shipping-input-field" data-label="${f}">`; });
                 } else {
-                    fieldsHtml = `<input id="shipping_field_0" type="text" placeholder="Adresse oder Info..." class="w-full p-3 bg-black border border-white/20 rounded-sm text-sm text-white outline-none focus:border-white mb-3 shipping-input-field" data-label="Eingabe">`;
+                    fieldsHtml = `<input id="shipping_field_0" type="text" placeholder="Adresse oder Info..." class="w-full p-3 bg-black border border-white/20 rounded-md text-sm text-white outline-none focus:border-white mb-3 shipping-input-field" data-label="Eingabe">`;
                 }
-                contentHtml = `<div class="bg-[#1f1f1f] p-6 rounded-sm flex flex-col mb-6 border border-white/10 relative"><div class="absolute top-0 right-0 bg-[#000] px-2 py-1 text-[8px] font-bold text-gray-500 uppercase tracking-widest rounded-bl-sm">One-Time Request</div><p class="text-xs text-gray-400 mb-4 leading-relaxed">${info}</p><div class="w-full">${fieldsHtml}</div><button type="button" onclick="window.submitShipping(${lvl}, '${tier}')" class="w-full ${bgClass} text-white font-black py-3 px-4 rounded-sm text-xs uppercase tracking-widest hover:opacity-80 transition">Versand anfordern</button></div>`;
+                contentHtml = `<div class="bg-[#1f1f1f] p-6 rounded-xl flex flex-col mb-6 border border-white/10 relative"><div class="absolute top-0 right-0 bg-[#000] px-2 py-1 text-[8px] font-bold text-gray-500 uppercase tracking-widest rounded-bl-lg">One-Time Request</div><p class="text-xs text-gray-400 mb-4 leading-relaxed">${info}</p><div class="w-full">${fieldsHtml}</div><button type="button" onclick="window.submitShipping(${lvl}, '${tier}')" class="w-full ${bgClass} text-white font-black py-3 px-4 rounded-md text-xs uppercase tracking-widest hover:opacity-80 transition">Versand anfordern</button></div>`;
             }
-            let innerHtml = `<p class="${textClass} text-[10px] font-black uppercase tracking-widest mb-1">Premium Reward</p><h3 class="text-2xl font-black italic uppercase tracking-tighter mb-6">${title}</h3>${contentHtml}<button type="button" onclick="window.closeModal()" class="w-full bg-[#111] text-gray-400 hover:bg-white hover:text-black font-black italic uppercase py-3 transition text-xs border border-white/5 rounded-sm">Schließen</button>`;
+            let innerHtml = `<p class="${textClass} text-[10px] font-black uppercase tracking-widest mb-1">Premium Reward</p><h3 class="text-2xl font-black italic uppercase tracking-tighter mb-6">${title}</h3>${contentHtml}<button type="button" onclick="window.closeModal()" class="w-full bg-[#111] text-gray-400 hover:bg-white hover:text-black font-black italic uppercase py-3 transition text-xs border border-white/5 rounded-md">Schließen</button>`;
             window.openModal(innerHtml);
         };
 
@@ -913,7 +921,7 @@ window.shareLink = async (link) => {
             let step = 1;
             const tutorialLayer = document.createElement('div');
             tutorialLayer.id = 'tutorial-layer';
-            tutorialLayer.className = 'fixed inset-0 z-[999990] bg-[#050505]/95 backdrop-blur-md flex items-center justify-center p-6 opacity-0 transition-opacity duration-500';
+            tutorialLayer.className = 'fixed inset-0 z-[999990] bg-[#030303]/95 backdrop-blur-md flex items-center justify-center p-6 opacity-0 transition-opacity duration-500';
             const updateTutorial = () => {
                 let content = '';
                 if(step === 1) {
@@ -921,7 +929,7 @@ window.shareLink = async (link) => {
                 } else if(step === 2) {
                     content = `<div class="animate-fade-in text-center flex flex-col items-center w-full max-w-sm"><div class="w-20 h-20 bg-[#1f1f1f] rounded-full flex items-center justify-center mb-8 border border-[#a855f7]/30 shadow-[0_0_30px_rgba(168,85,247,0.2)]"><svg class="w-10 h-10 text-[#a855f7]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg></div><h2 class="text-[#a855f7] text-[10px] font-black uppercase tracking-[0.4em] mb-2">Step 02</h2><h3 class="text-4xl font-black italic tracking-tighter mb-4 text-white uppercase">Active Spots & Habits</h3><p class="text-gray-400 text-sm font-medium leading-relaxed mb-10">Check into partner cafés, hit the gym, and build daily streaks to unlock exclusive local drops.</p><button onclick="document.getElementById('tutorial-layer').dataset.step = 3" class="w-full btn-grind py-4">Weiter</button></div>`;
                 } else if(step === 3) {
-                    content = `<div class="animate-fade-in text-center flex flex-col items-center w-full max-w-sm"><div class="w-20 h-20 bg-[#1f1f1f] rounded-full flex items-center justify-center mb-8 border border-blue-500/30 shadow-[0_0_30px_rgba(59,130,246,0.2)]"><svg class="w-10 h-10 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg></div><h2 class="text-blue-500 text-[10px] font-black uppercase tracking-[0.4em] mb-2">Step 03</h2><h3 class="text-4xl font-black italic tracking-tighter mb-4 text-white uppercase">Crew Activity</h3><p class="text-gray-400 text-sm font-medium leading-relaxed mb-10">Build your circle. Jeder Homie den du einlädst, gibt dir und dem ganzen Network einen fetten XP-Boost.</p><button onclick="document.getElementById('tutorial-layer').dataset.step = 'close'" class="w-full btn-grind py-4 bg-[#ff4d00] text-white border-[#ff4d00]">Enter Network</button></div>`;
+                    content = `<div class="animate-fade-in text-center flex flex-col items-center w-full max-w-sm"><div class="w-20 h-20 bg-[#1f1f1f] rounded-full flex items-center justify-center mb-8 border border-blue-500/30 shadow-[0_0_30px_rgba(59,130,246,0.2)]"><svg class="w-10 h-10 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg></div><h2 class="text-blue-500 text-[10px] font-black uppercase tracking-[0.4em] mb-2">Step 03</h2><h3 class="text-4xl font-black italic tracking-tighter mb-4 text-white uppercase">City Activity</h3><p class="text-gray-400 text-sm font-medium leading-relaxed mb-10">Build your circle. Jeder Homie den du einlädst, gibt dir und dem ganzen Network einen fetten XP-Boost.</p><button onclick="document.getElementById('tutorial-layer').dataset.step = 'close'" class="w-full btn-grind py-4 bg-[#ff4d00] text-white border-[#ff4d00]">Enter Network</button></div>`;
                 }
                 tutorialLayer.innerHTML = content;
             };
@@ -994,7 +1002,7 @@ window.shareLink = async (link) => {
             const progress = (safeXp % 1000) / 1000; ctx.fillStyle = '#ff4d00'; ctx.fillRect(startX, barY, barW * progress, barH);
             ctx.fillStyle = '#777777'; ctx.font = '700 26px "Inter", sans-serif'; 
             if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "4px"; 
-            ctx.fillText(`XP: ${safeXp} / ${safeLvl * 1000}   •   ${opsCount} DROPS ACCESSED`, 540, barY + 70); 
+            ctx.fillText(`XP: ${safeXp} / ${safeLvl * 1000}   •   ${opsCount} ROUTINES CLEARED`, 540, barY + 70); 
             if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "0px";
             let daysLeftText = `JOIN THE NETWORK • COLOGNE ACTIVE`;
             if (state.seasonConfig && state.seasonConfig.end) {
@@ -1049,7 +1057,7 @@ window.shareLink = async (link) => {
         function render() {
             const appDiv = document.getElementById('app');
 
-            // --- FIX: Wir speichern die Scroll-Position vor dem neu Laden ---
+            // --- Scroll Position Setup ---
             let savedScrollPosition = 0;
             const existingViewport = document.getElementById('pass-viewport');
             if (existingViewport) {
@@ -1057,7 +1065,7 @@ window.shareLink = async (link) => {
             }
 
             if (state.view === 'loading') { 
-                appDiv.innerHTML = `<div class="flex-1 flex items-center justify-center min-h-[60vh]"><div class="w-16 h-16 border-t-4 border-l-4 border-[#ff4d00] rounded-full animate-spin"></div></div>`; 
+                appDiv.innerHTML = `<div class="flex-1 flex items-center justify-center min-h-[60vh] relative z-10"><div class="w-16 h-16 border-t-4 border-l-4 border-[#ff4d00] rounded-full animate-spin"></div></div>`; 
                 return; 
             }
 
@@ -1077,7 +1085,8 @@ window.shareLink = async (link) => {
                     } else { if(window.countdownInterval) clearInterval(window.countdownInterval); }
 
                     appDiv.innerHTML = `
-                        <div class="flex-1 flex flex-col items-center justify-center p-6 text-center min-h-[90dvh] relative z-20 glitch-bg">
+                        <div class="flex-1 flex flex-col items-center justify-center p-6 text-center min-h-[90dvh] relative z-20">
+                            <div class="absolute w-[500px] h-[500px] bg-[#ff4d00]/5 blur-[100px] rounded-full pointer-events-none"></div>
                             <div class="w-24 h-24 border border-[#ff4d00]/30 rounded-full flex items-center justify-center mb-8 animate-pulse-slow relative">
                                 <div class="absolute inset-0 border-t-2 border-[#ff4d00] rounded-full animate-spin" style="animation-duration: 3s;"></div>
                                 <svg class="w-8 h-8 text-[#ff4d00]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
@@ -1086,7 +1095,7 @@ window.shareLink = async (link) => {
                             <h1 class="text-4xl md:text-6xl font-black italic tracking-tighter mb-6 text-white leading-none">${msg}</h1>
                             <p class="text-gray-500 font-bold text-xs md:text-sm max-w-sm mx-auto uppercase tracking-widest leading-relaxed">${submsg}</p>
                             ${countdownHtml}
-                            <div class="mt-16 flex justify-center"><button type="button" onclick="window.handleLogout()" class="text-[10px] uppercase font-bold text-gray-600 hover:text-white transition tracking-widest border border-gray-800 hover:border-gray-500 px-6 py-3 rounded-sm bg-[#0a0a0a]">Log out</button></div>
+                            <div class="mt-16 flex justify-center relative z-10"><button type="button" onclick="window.handleLogout()" class="text-[10px] uppercase font-bold text-gray-600 hover:text-white transition tracking-widest border border-gray-800 hover:border-gray-500 px-6 py-3 rounded-md bg-[#0a0a0a]">Log out</button></div>
                         </div>
                         ${getFooterHTML()}
                     `;
@@ -1110,7 +1119,7 @@ window.shareLink = async (link) => {
                     <div class="max-w-3xl mx-auto px-6 py-12 w-full relative z-20">
                         <button onclick="window.goBack()" class="text-[#ff4d00] text-[10px] font-bold uppercase tracking-widest mb-10 flex items-center gap-2 hover:text-white transition"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg> Zurück</button>
                         <h1 class="text-3xl md:text-5xl font-black italic uppercase tracking-tighter mb-8">${title}</h1>
-                        <div class="legal-content bg-[#0a0a0a] border border-[#1f1f1f] p-6 md:p-10 rounded-sm shadow-xl">${content}</div>
+                        <div class="legal-content bg-[#0a0a0a] border border-[#1f1f1f] p-6 md:p-10 rounded-xl shadow-xl">${content}</div>
                     </div>
                     ${getFooterHTML()}
                 `;
@@ -1128,12 +1137,13 @@ window.shareLink = async (link) => {
                 }
                 appDiv.innerHTML = `
                     <div class="flex-1 flex flex-col items-center justify-center p-6 min-h-[80vh] text-center animate-fade-in relative z-20">
-                        <div class="w-16 h-16 border-2 border-[#a855f7] rounded-full flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(168,85,247,0.3)] bg-[#0a0a0a]">
+                        <div class="absolute w-[600px] h-[600px] bg-[#a855f7]/5 blur-[120px] rounded-full pointer-events-none"></div>
+                        <div class="w-16 h-16 border-2 border-[#a855f7] rounded-full flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(168,85,247,0.3)] bg-[#0a0a0a] relative z-10">
                             <svg class="w-8 h-8 text-[#a855f7]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                         </div>
-                        <h2 class="text-4xl font-black italic tracking-tighter mb-2">GRIND. <span class="text-[#a855f7]">PRO</span></h2>
-                        <p class="text-gray-400 font-bold uppercase tracking-widest text-[10px] mb-8 max-w-xs leading-relaxed">Unlock exclusive rewards, access limited partner drops and enter the PRO Network.</p>
-                        <div class="bg-[#0a0a0a] border border-[#1f1f1f] p-8 rounded-sm mb-6 w-full max-w-sm shadow-2xl relative overflow-hidden group">
+                        <h2 class="text-4xl font-black italic tracking-tighter mb-2 relative z-10">GRIND. <span class="text-[#a855f7]">PRO</span></h2>
+                        <p class="text-gray-400 font-bold uppercase tracking-widest text-[10px] mb-8 max-w-xs leading-relaxed relative z-10">Unlock exclusive rewards, access limited partner drops and enter the PRO Network.</p>
+                        <div class="bg-[#0a0a0a] border border-[#1f1f1f] p-8 rounded-xl mb-6 w-full max-w-sm shadow-2xl relative overflow-hidden group">
                             <div class="absolute inset-0 bg-gradient-to-t from-[#a855f7]/10 to-transparent opacity-50"></div>
                             <div class="relative z-10">
                                 <div class="text-[10px] uppercase tracking-[0.2em] text-gray-500 font-bold mb-2">Season Pass</div>
@@ -1141,8 +1151,8 @@ window.shareLink = async (link) => {
                                 <div id="paypal-button-container" class="w-full min-h-[150px] relative z-50 flex items-center justify-center"></div>
                             </div>
                         </div>
-                        <p class="text-[9px] text-gray-600 uppercase tracking-widest mt-2 mb-6 max-w-xs mx-auto leading-relaxed">Mit dem Kauf stimmst du unseren <span class="text-white underline cursor-pointer hover:text-[#a855f7]" onclick="window.setView('agb')">AGB</span> zu und verzichtest auf das Widerrufsrecht für diesen digitalen Inhalt.</p>
-                        <button type="button" onclick="window.setView('dashboard')" class="text-gray-600 hover:text-white text-[10px] uppercase tracking-[0.2em] font-bold transition">Zurück zum Network</button>
+                        <p class="text-[9px] text-gray-600 uppercase tracking-widest mt-2 mb-6 max-w-xs mx-auto leading-relaxed relative z-10">Mit dem Kauf stimmst du unseren <span class="text-white underline cursor-pointer hover:text-[#a855f7]" onclick="window.setView('agb')">AGB</span> zu und verzichtest auf das Widerrufsrecht für diesen digitalen Inhalt.</p>
+                        <button type="button" onclick="window.setView('dashboard')" class="text-gray-600 hover:text-white text-[10px] uppercase tracking-[0.2em] font-bold transition relative z-10">Zurück zum Network</button>
                     </div>
                     ${getFooterHTML()}
                 `;
@@ -1159,13 +1169,14 @@ window.shareLink = async (link) => {
 
             if (state.view === 'onboarding') {
                 appDiv.innerHTML = `
-                    <div class="flex-1 flex flex-col items-center justify-center p-6 min-h-[80vh] text-center">
-                        <h1 class="text-4xl md:text-5xl font-black italic tracking-tighter mb-2">CREATE PROFILE<span class="text-[#ff4d00]">.</span></h1>
-                        <p class="text-gray-500 font-bold uppercase tracking-widest text-[10px] mb-12 max-w-sm leading-relaxed">Wähle deine Stadt und trete dem Network bei.</p>
-                        <form onsubmit="window.submitOnboarding(event)" class="w-full max-w-sm space-y-4">
-                            <input id="onboard_name" type="text" placeholder="Dein Name" required class="w-full p-4 bg-[#0f0f0f] border border-[#1f1f1f] rounded-sm outline-none focus:border-[#ff4d00] text-white transition text-center text-xl tracking-widest uppercase font-black italic">
+                    <div class="flex-1 flex flex-col items-center justify-center p-6 min-h-[80vh] text-center relative z-20">
+                        <div class="absolute w-[400px] h-[400px] bg-[#ff4d00]/5 blur-[100px] rounded-full pointer-events-none"></div>
+                        <h1 class="text-4xl md:text-5xl font-black italic tracking-tighter mb-2 relative z-10">CREATE PROFILE<span class="text-[#ff4d00]">.</span></h1>
+                        <p class="text-gray-500 font-bold uppercase tracking-widest text-[10px] mb-12 max-w-sm leading-relaxed relative z-10">Wähle deine Stadt und trete dem Network bei.</p>
+                        <form onsubmit="window.submitOnboarding(event)" class="w-full max-w-sm space-y-4 relative z-10">
+                            <input id="onboard_name" type="text" placeholder="Dein Name" required class="w-full p-4 bg-[#0a0a0a] border border-[#1f1f1f] rounded-lg outline-none focus:border-[#ff4d00] text-white transition text-center text-xl tracking-widest uppercase font-black italic shadow-inner">
                             <div class="relative">
-                                <select id="onboard_city" required class="w-full p-4 bg-[#0f0f0f] border border-[#1f1f1f] rounded-sm outline-none focus:border-[#ff4d00] text-white transition text-center text-lg tracking-widest uppercase font-bold appearance-none cursor-pointer">
+                                <select id="onboard_city" required class="w-full p-4 bg-[#0a0a0a] border border-[#1f1f1f] rounded-lg outline-none focus:border-[#ff4d00] text-white transition text-center text-lg tracking-widest uppercase font-bold appearance-none cursor-pointer shadow-inner">
                                     <option value="" disabled selected class="text-gray-600">City wählen</option>
                                     <option value="Köln">Köln</option>
                                     <option value="locked" disabled class="text-gray-600">Weitere Städte in Kürze...</option>
@@ -1180,17 +1191,19 @@ window.shareLink = async (link) => {
             }
 
             if (state.view === 'auth') {
-                let authHtml = `<div class="flex-1 flex flex-col items-center justify-center p-6 min-h-[80vh] text-center"><h1 class="text-6xl md:text-8xl font-black italic tracking-tighter mb-2">GRIND<span class="text-[#ff4d00]">.</span></h1><p class="text-gray-500 font-bold uppercase tracking-widest text-xs mb-12 max-w-sm leading-relaxed">The Real-World Lifestyle Game</p><div class="w-full max-w-sm">`;
+                let authHtml = `<div class="flex-1 flex flex-col items-center justify-center p-6 min-h-[80vh] text-center relative z-20">
+                <div class="absolute w-[600px] h-[600px] bg-[#ff4d00]/5 blur-[120px] rounded-full pointer-events-none"></div>
+                <h1 class="text-6xl md:text-8xl font-black italic tracking-tighter mb-2 relative z-10">GRIND<span class="text-[#ff4d00]">.</span></h1><p class="text-gray-500 font-bold uppercase tracking-widest text-xs mb-12 max-w-sm leading-relaxed relative z-10">The Real-World Lifestyle Game</p><div class="w-full max-w-sm relative z-10">`;
                 if (state.authStep === 'phone') { 
                     authHtml += `
                         <form onsubmit="window.sendSMS(event)" class="space-y-4">
                             <div class="flex gap-2">
-                                <select id="auth_prefix" class="w-24 p-4 bg-[#0f0f0f] border border-[#1f1f1f] rounded-sm outline-none focus:border-[#ff4d00] text-gray-400 text-center font-bold appearance-none cursor-pointer">
+                                <select id="auth_prefix" class="w-24 p-4 bg-[#0a0a0a] border border-[#1f1f1f] rounded-lg outline-none focus:border-[#ff4d00] text-gray-400 text-center font-bold appearance-none cursor-pointer shadow-inner">
                                     <option value="+49">🇩🇪 +49</option>
                                     <option value="+43">🇦🇹 +43</option>
                                     <option value="+41">🇨🇭 +41</option>
                                 </select>
-                                <input id="auth_phone" type="tel" placeholder="170 1234567" required class="flex-1 p-4 bg-[#0f0f0f] border border-[#1f1f1f] rounded-sm outline-none focus:border-[#ff4d00] text-white transition text-center text-lg tracking-widest">
+                                <input id="auth_phone" type="tel" placeholder="170 1234567" required class="flex-1 p-4 bg-[#0a0a0a] border border-[#1f1f1f] rounded-lg outline-none focus:border-[#ff4d00] text-white transition text-center text-lg tracking-widest shadow-inner">
                             </div>
                             <button id="auth_submit_btn" type="submit" class="w-full btn-grind py-4">Join Network</button>
                         </form>
@@ -1199,7 +1212,7 @@ window.shareLink = async (link) => {
                     authHtml += `
                         <form onsubmit="window.verifyCode(event)" class="space-y-4">
                             <div class="text-center mb-6"><p class="text-gray-500 text-xs uppercase tracking-widest font-bold">Code gesendet an</p><p class="text-[#ff4d00] font-black tracking-widest mt-1 text-lg">${state.tempPhone}</p></div>
-                            <input id="auth_code" type="text" placeholder="123456" required class="w-full p-4 bg-[#0f0f0f] border border-[#1f1f1f] rounded-sm outline-none focus:border-[#ff4d00] text-white transition text-center text-3xl font-mono tracking-[0.3em]">
+                            <input id="auth_code" type="text" placeholder="123456" required class="w-full p-4 bg-[#0a0a0a] border border-[#1f1f1f] rounded-lg outline-none focus:border-[#ff4d00] text-white transition text-center text-3xl font-mono tracking-[0.3em] shadow-inner">
                             <button id="verify_submit_btn" type="submit" class="w-full btn-grind py-4">Verify Access</button>
                             <button type="button" onclick="window.goBackToPhone()" class="w-full text-center mt-4 text-xs text-gray-500 hover:text-white uppercase tracking-widest transition font-bold">Cancel</button>
                         </form>
@@ -1245,33 +1258,57 @@ window.shareLink = async (link) => {
 
                 let html = `
                     <header class="p-6 max-w-6xl mx-auto flex justify-between items-center w-full relative z-20">
-                        <h1 class="text-3xl font-black italic tracking-tighter">GRIND<span class="text-[#ff4d00]">.</span></h1>
+                        <div class="text-3xl font-black italic tracking-tighter">GRIND<span class="text-[#ff4d00]">.</span></div>
                         <div class="flex gap-3">
-                            <button type="button" onclick="window.generateShareCard()" class="text-[10px] uppercase font-bold text-gray-400 hover:text-white transition tracking-widest border border-gray-800 hover:border-[#ff4d00] px-3 py-1 rounded-sm bg-[#0a0a0a]">Export</button>
-                            <button type="button" onclick="window.handleLogout()" class="text-[10px] uppercase font-bold text-gray-500 hover:text-red-500 transition tracking-widest border border-gray-800 px-3 py-1 rounded-sm bg-[#0a0a0a]">Exit</button>
+                            <button type="button" onclick="window.generateShareCard()" class="text-[10px] uppercase font-bold text-gray-400 hover:text-white transition tracking-widest border border-gray-800 hover:border-[#ff4d00] px-3 py-1.5 rounded-md bg-[#0a0a0a]">Export</button>
+                            <button type="button" onclick="window.handleLogout()" class="text-[10px] uppercase font-bold text-gray-500 hover:text-red-500 transition tracking-widest border border-gray-800 px-3 py-1.5 rounded-md bg-[#0a0a0a]">Exit</button>
                         </div>
                     </header>
+                    
+                    <!-- Live Ticker (From Partner Site) -->
+                    <div class="ticker-container mb-10">
+                        <div class="ticker-content">
+                            <div class="ticker-item"><span class="text-[#3b82f6]">☕ GuMo</span><span>Post-Workout Check-in</span></div>
+                            <div class="ticker-item"><span class="text-white">🔥 4 Week Streak</span><span>Rocycle</span></div>
+                            <div class="ticker-item"><span class="text-[#ff4d00]">+250 XP</span><span>Morning Run am Rhein</span></div>
+                            <div class="ticker-item"><span class="text-white">🎁 Reward</span><span>Free Oat Flat White</span></div>
+                            <div class="ticker-item"><span class="text-[#a855f7]">📍 Ehrenfeld</span><span>Neue Routine gespeichert</span></div>
+                            <!-- Duplicate for loop -->
+                            <div class="ticker-item"><span class="text-[#3b82f6]">☕ GuMo</span><span>Post-Workout Check-in</span></div>
+                            <div class="ticker-item"><span class="text-white">🔥 4 Week Streak</span><span>Rocycle</span></div>
+                            <div class="ticker-item"><span class="text-[#ff4d00]">+250 XP</span><span>Morning Run am Rhein</span></div>
+                            <div class="ticker-item"><span class="text-white">🎁 Reward</span><span>Free Oat Flat White</span></div>
+                            <div class="ticker-item"><span class="text-[#a855f7]">📍 Ehrenfeld</span><span>Neue Routine gespeichert</span></div>
+                        </div>
+                    </div>
+
                     <main class="max-w-6xl mx-auto px-6 w-full relative z-10 pb-10">
-                        <section class="mb-12 flex flex-col md:flex-row gap-8 items-center bg-[#0a0a0a] p-8 border border-[#1f1f1f] rounded-lg shadow-2xl relative overflow-hidden group">
-                            <div class="absolute inset-0 bg-gradient-to-r from-[#ff4d00] to-transparent opacity-0 group-hover:opacity-5 transition duration-1000"></div>
+                        <!-- Dashboard Standing -->
+                        <section class="mb-12 flex flex-col md:flex-row gap-8 items-center bg-[#0a0a0a] p-8 border border-[#1f1f1f] rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative overflow-hidden group">
+                            <div class="absolute inset-0 bg-gradient-to-r from-[#ff4d00]/5 to-transparent opacity-0 group-hover:opacity-100 transition duration-1000"></div>
                             <div class="flex-shrink-0 text-center md:text-left relative z-10">
-                                <p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-[0.4em] mb-2">Standing</p>
-                                <h2 id="main-lvl-text" class="text-6xl font-black italic tracking-tighter leading-none inline-block">LVL ${safeLvl}</h2>
+                                <div class="inline-flex items-center gap-2 border border-white/10 bg-white/[0.03] px-3 py-1 rounded-full mb-3">
+                                    <span class="text-[#ff4d00] text-[8px] font-black uppercase tracking-[0.2em]">Season 0${seasonNum}</span>
+                                    <span class="w-1 h-1 rounded-full bg-white/20"></span>
+                                    <span class="text-gray-400 text-[8px] font-bold uppercase tracking-[0.2em]">${p.city || 'Köln'}</span>
+                                </div>
+                                <h2 id="main-lvl-text" class="text-6xl font-black italic tracking-tighter leading-none block">LVL ${safeLvl}</h2>
                                 <p class="text-gray-500 font-mono mt-3 text-xs tracking-widest uppercase"><span class="text-white">${currentRank}</span></p>
-                                <p class="text-gray-600 font-bold italic mt-1 text-[10px] uppercase tracking-widest">${p.alias} <span class="ml-1 opacity-50">| ${p.city || 'Köln'}</span></p>
+                                <p class="text-gray-600 font-bold italic mt-1 text-[10px] uppercase tracking-widest">${p.alias}</p>
                             </div>
                             <div class="flex-grow w-full relative z-10">
                                 <div class="flex justify-between text-[10px] font-bold uppercase text-gray-500 mb-3 tracking-widest italic"><span>XP: <span class="text-white" id="xp-counter-num">${displayXp}</span> / ${(safeLvl) * 1000}</span></div>
-                                <div class="w-full bg-gray-900 h-3 rounded-full overflow-hidden border border-white/5 relative">
+                                <div class="w-full bg-black h-3 rounded-full overflow-hidden border border-white/5 relative shadow-inner">
                                     <div id="top-xp-bar" class="grind-gradient h-full transition-all ease-out xp-bar-glow" style="width: ${oldXpProgress}%; transition-duration: 2500ms;"></div>
                                 </div>
                             </div>
                         </section>
                     </main>
+
                     <section class="w-full relative z-10 mb-16">
                         <div class="max-w-6xl mx-auto px-6 flex justify-between items-center mb-6">
                             <div><h3 class="text-2xl font-black italic uppercase tracking-tighter">Grind Track <span class="text-[#ff4d00]">S0${seasonNum}</span></h3><p class="text-gray-500 text-[10px] font-bold tracking-widest mt-1">${seasonDaysLeftText}</p></div>
-                            <div>${hasPremium ? '<span class="bg-[#a855f7]/10 text-[#a855f7] border border-[#a855f7]/30 px-3 py-1.5 rounded-sm text-[9px] font-black uppercase tracking-widest shadow-[0_0_10px_rgba(168,85,247,0.2)]">PRO ACTIVE</span>' : '<button type="button" onclick="window.setView(\'paywall\')" class="btn-pro">Get Pro Pass</button>'}</div>
+                            <div>${hasPremium ? '<span class="bg-[#a855f7]/10 text-[#a855f7] border border-[#a855f7]/30 px-3 py-1.5 rounded-md text-[9px] font-black uppercase tracking-widest shadow-[0_0_10px_rgba(168,85,247,0.2)]">PRO ACTIVE</span>' : '<button type="button" onclick="window.setView(\'paywall\')" class="btn-pro">Get Pro Pass</button>'}</div>
                         </div>
                         <div id="pass-viewport" class="w-full no-scrollbar overflow-x-auto py-8 relative flex items-center min-h-[280px] border-y border-white/5 bg-black/40 shadow-inner">
                             <div class="flex items-center px-6 relative" style="min-width: max-content;">
@@ -1287,13 +1324,13 @@ window.shareLink = async (link) => {
                         <div id="level-node-${i}" class="level-node flex flex-col items-center relative z-10">
                             <div ${isUnlocked && r?.free && !freeClaimed ? `onclick="window.openClaimModal(${i}, 'free')" class="reward-box mb-4 unlocked cursor-pointer hover:scale-105"` : (freeClaimed ? `onclick="window.openClaimModal(${i}, 'free')" class="reward-box mb-4 unlocked opacity-50 cursor-pointer"` : `class="reward-box mb-4 opacity-60 scale-95"`)}>
                                 <span class="tag-free">FREE</span>
-                                ${freeClaimed && r?.free ? `<div class="absolute inset-0 bg-black/40 backdrop-blur-[2px] z-20 flex items-center justify-center rounded-[4px]"><span class="text-green-500 font-black text-xs uppercase italic transform -rotate-12"><svg class="w-6 h-6 drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></span></div>` : ''}
+                                ${freeClaimed && r?.free ? `<div class="absolute inset-0 bg-black/40 backdrop-blur-[2px] z-20 flex items-center justify-center rounded-[8px]"><span class="text-green-500 font-black text-xs uppercase italic transform -rotate-12"><svg class="w-6 h-6 drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></span></div>` : ''}
                                 <span class="text-[10px] font-bold uppercase text-center px-2 text-gray-200 mt-3 relative z-10">${r?.free || '-'}</span>
                             </div>
-                            <div id="circle-node-${i}" class="relative w-10 h-10 rounded-full flex items-center justify-center font-black italic text-xs ${isUnlocked ? 'grind-gradient text-black scale-110 shadow-[0_0_15px_rgba(255,77,0,0.5)]' : 'bg-gray-800 text-gray-400 border border-white/20'}">${i}</div>
+                            <div id="circle-node-${i}" class="relative w-10 h-10 rounded-full flex items-center justify-center font-black italic text-xs ${isUnlocked ? 'grind-gradient text-black scale-110 shadow-[0_0_15px_rgba(255,77,0,0.5)]' : 'bg-[#0a0a0a] text-gray-400 border border-[#1f1f1f]'}">${i}</div>
                             <div ${isProUnlocked && r?.pro && !proClaimed ? `onclick="window.openClaimModal(${i}, 'pro')" class="reward-box pro mt-5 unlocked scale-105 cursor-pointer"` : (proClaimed ? `onclick="window.openClaimModal(${i}, 'pro')" class="reward-box pro mt-5 unlocked opacity-50 cursor-pointer"` : `class="reward-box pro mt-5 opacity-70 scale-[0.98] hover:opacity-100"`)}>
                                 <span class="tag-pro italic">PRO</span>
-                                ${proClaimed && r?.pro ? `<div class="absolute inset-0 bg-black/40 backdrop-blur-[2px] z-20 flex items-center justify-center rounded-[4px]"><span class="text-green-500 font-black text-xs uppercase italic transform -rotate-12"><svg class="w-6 h-6 drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></span></div>` : ''}
+                                ${proClaimed && r?.pro ? `<div class="absolute inset-0 bg-black/40 backdrop-blur-[2px] z-20 flex items-center justify-center rounded-[8px]"><span class="text-green-500 font-black text-xs uppercase italic transform -rotate-12"><svg class="w-6 h-6 drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></span></div>` : ''}
                                 <span class="text-[10px] font-bold uppercase text-center px-2 mt-4 relative z-10 ${isProUnlocked ? 'text-[#d8b4fe]' : 'text-purple-300'}">${r?.pro || '-'}</span>
                             </div>
                         </div>
@@ -1305,37 +1342,60 @@ window.shareLink = async (link) => {
                         </div>
                     </section>
                     <main class="max-w-6xl mx-auto px-6 w-full relative z-10 pb-10">
-                        <section class="max-w-3xl mx-auto mb-12">
+                        
+                        <!-- Local Network Spots (Partner Style) -->
+                        <section class="max-w-3xl mx-auto mb-16">
                             <div class="flex flex-col gap-6 mb-6">
                                 <div class="flex justify-between items-end border-b border-white/10 pb-4">
                                     <div><p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">Local Network</p><h3 class="text-3xl font-black uppercase italic tracking-tighter">Active Spots</h3></div>
-                                    <span class="text-[10px] font-black bg-white text-black px-3 py-1 italic shadow-[0_0_10px_rgba(255,255,255,0.4)] uppercase">${p.city || 'KÖLN'}</span>
+                                    <span class="text-[10px] font-black bg-white text-black px-3 py-1.5 rounded-sm italic shadow-[0_0_10px_rgba(255,255,255,0.4)] uppercase">${p.city || 'KÖLN'}</span>
                                 </div>
                             </div>
+                            
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div class="card p-4 rounded-sm border border-white/5 flex flex-col items-center text-center hover:border-white/20 transition">
-                                    <div class="w-12 h-12 bg-[#1f1f1f] rounded-full flex items-center justify-center mb-3 text-xl">☕</div>
-                                    <h4 class="font-black italic uppercase text-sm">GuMo Café</h4>
-                                    <p class="text-[9px] text-gray-500 uppercase tracking-widest mt-1">Morning Drop</p>
+                                <div class="mockup p-5 group cursor-default">
+                                    <div class="absolute inset-0 bg-gradient-to-br from-[#3b82f6]/10 to-transparent opacity-0 group-hover:opacity-100 transition"></div>
+                                    <div class="flex justify-between items-start mb-4 relative z-10">
+                                        <div>
+                                            <div class="w-10 h-10 bg-[#111] border border-white/5 rounded-full flex items-center justify-center mb-2 text-lg">☕</div>
+                                            <h4 class="font-bold text-sm text-white">Morning Check-in</h4>
+                                            <p class="text-[10px] text-gray-500 mt-1 uppercase tracking-widest">GuMo Café</p>
+                                        </div>
+                                        <span class="text-[#3b82f6] font-black text-xs italic bg-[#3b82f6]/10 px-2 py-1 rounded-sm">+200 XP</span>
+                                    </div>
                                 </div>
-                                <div class="card p-4 rounded-sm border border-white/5 flex flex-col items-center text-center hover:border-white/20 transition">
-                                    <div class="w-12 h-12 bg-[#1f1f1f] rounded-full flex items-center justify-center mb-3 text-xl">🏋️</div>
-                                    <h4 class="font-black italic uppercase text-sm">Rocycle</h4>
-                                    <p class="text-[9px] text-gray-500 uppercase tracking-widest mt-1">Check-in Reward</p>
+
+                                <div class="mockup p-5 group cursor-default">
+                                    <div class="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition"></div>
+                                    <div class="flex justify-between items-start mb-4 relative z-10">
+                                        <div>
+                                            <div class="w-10 h-10 bg-[#111] border border-white/5 rounded-full flex items-center justify-center mb-2 text-lg">🔥</div>
+                                            <h4 class="font-bold text-sm text-white">Fitness Check-in</h4>
+                                            <p class="text-[10px] text-gray-500 mt-1 uppercase tracking-widest">Rocycle</p>
+                                        </div>
+                                        <span class="text-white font-black text-xs italic bg-white/10 px-2 py-1 rounded-sm">+400 XP</span>
+                                    </div>
                                 </div>
-                                <div class="card p-4 rounded-sm border border-white/5 flex flex-col items-center text-center hover:border-white/20 transition">
-                                    <div class="w-12 h-12 bg-[#1f1f1f] rounded-full flex items-center justify-center mb-3 text-xl">🥗</div>
-                                    <h4 class="font-black italic uppercase text-sm">Emmi's</h4>
-                                    <p class="text-[9px] text-gray-500 uppercase tracking-widest mt-1">Recovery Meal</p>
+
+                                <div class="mockup p-5 group cursor-default border-[#a855f7]/20">
+                                    <div class="absolute inset-0 bg-gradient-to-br from-[#a855f7]/10 to-transparent opacity-0 group-hover:opacity-100 transition"></div>
+                                    <div class="flex justify-between items-start mb-4 relative z-10">
+                                        <div>
+                                            <div class="w-10 h-10 bg-[#111] border border-white/5 rounded-full flex items-center justify-center mb-2 text-lg">🏃</div>
+                                            <h4 class="font-bold text-sm text-white">Event Drop</h4>
+                                            <p class="text-[10px] text-gray-500 mt-1 uppercase tracking-widest">PopUp Run</p>
+                                        </div>
+                                        <span class="text-[#a855f7] font-black text-xs italic bg-[#a855f7]/10 px-2 py-1 rounded-sm">+800 XP</span>
+                                    </div>
                                 </div>
                             </div>
                         </section>
 
-                        <section class="max-w-3xl mx-auto mb-12">
+                        <section class="max-w-3xl mx-auto mb-16">
                             <div class="flex flex-col gap-6 mb-10">
                                 <div class="flex justify-between items-end border-b border-white/10 pb-4">
-                                    <div><p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">Time-Limited</p><h3 class="text-3xl font-black uppercase italic tracking-tighter">${(state.weeklyData[currentMonthWeek] || {title: 'Active Week'}).title}</h3><p class="text-gray-500 text-[10px] font-bold tracking-widest mt-1">${weekDaysLeftText}</p></div>
-                                    <span class="text-[10px] font-black bg-[#ff4d00] text-white px-3 py-1 italic shadow-[0_0_10px_rgba(255,77,0,0.4)]">LIVE</span>
+                                    <div><p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">Time-Limited</p><h3 class="text-3xl font-black uppercase italic tracking-tighter">City Drops</h3><p class="text-gray-500 text-[10px] font-bold tracking-widest mt-1">${weekDaysLeftText}</p></div>
+                                    <span class="text-[10px] font-black bg-[#ff4d00] text-white px-3 py-1.5 rounded-sm italic shadow-[0_0_10px_rgba(255,77,0,0.4)]">LIVE</span>
                                 </div>
                                 <div class="flex flex-wrap gap-2">
                 `;
@@ -1344,7 +1404,7 @@ window.shareLink = async (link) => {
                     const weekNum = w; const isCurrent = weekNum === currentMonthWeek; const isMissed = weekNum < currentMonthWeek; const isFuture = weekNum > currentMonthWeek;
                     let extraClass = isCurrent ? 'active' : 'opacity-30 cursor-not-allowed border-dashed';
                     let badge = isMissed ? '<span class="text-red-500 ml-1 opacity-70">MISSED</span>' : (isFuture ? '<span class="text-gray-500 ml-1 opacity-70">LOCKED</span>' : '');
-                    html += `<button type="button" class="week-btn px-4 py-2 text-[10px] font-black uppercase transition rounded-sm ${extraClass}">W0${weekNum} ${badge}</button>`;
+                    html += `<button type="button" class="week-btn px-4 py-2 text-[10px] font-black uppercase transition ${extraClass}">W0${weekNum} ${badge}</button>`;
                 });
 
                 html += `</div></div><div class="space-y-4">`;
@@ -1359,20 +1419,23 @@ window.shareLink = async (link) => {
                     const btnAction = m.type === 'instant' ? `window.claimInstantMission('${m.id}', ${m.xp}, '${safeName}')` : `window.openVerifyModal('${m.id}', ${m.xp}, '${m.type}', '${safeName}', '${safeQrSolution}')`;
                     let btnText = m.type === 'instant' ? 'Claim XP' : 'Verify Action';
                     if (isCompleted) btnText = 'Verified'; else if (isPending) btnText = 'Wird überprüft ⏳';
-                    let cardClasses = 'card p-6 rounded-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4 group relative overflow-hidden ';
-                    if (isCompleted) cardClasses += 'is-completed border-[#ff4d00]/30'; else if (isPending) cardClasses += 'is-pending border-yellow-500/30';
+                    let cardClasses = 'mockup p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 group transition ';
+                    if (isCompleted) cardClasses += 'is-completed border-[#ff4d00]/30 opacity-75'; else if (isPending) cardClasses += 'is-pending border-yellow-500/30';
+                    else cardClasses += 'hover:border-[#ff4d00]/30';
+                    
                     html += `
                         <div class="${cardClasses}">
-                            <div class="absolute left-0 top-0 bottom-0 w-1 ${isPending ? 'bg-yellow-500' : 'bg-[#ff4d00]'} opacity-0 group-hover:opacity-100 transition"></div>
+                            <div class="absolute inset-0 bg-gradient-to-r from-[#ff4d00]/5 to-transparent opacity-0 group-hover:opacity-100 transition pointer-events-none"></div>
                             <div class="completed-overlay"><span class="text-[#ff4d00] font-black italic uppercase tracking-widest flex items-center gap-2"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Verified</span></div>
                             <div class="pending-overlay"><span class="text-yellow-500 font-black italic uppercase tracking-widest flex items-center gap-2"><svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> Wird überprüft</span></div>
-                            <div class="pr-6 relative z-0 flex-1">
-                                <h4 class="font-black italic uppercase text-lg group-hover:text-[#ff4d00] transition tracking-tighter">${m.name}</h4><p class="text-gray-400 text-xs mt-1 font-medium leading-relaxed">${m.desc}</p>
-                                ${!isCompleted ? `<span class="inline-block mt-3 border border-gray-700 bg-black px-2 py-0.5 text-[8px] font-bold uppercase tracking-widest text-gray-400">${badgeText}</span>` : ''}
+                            <div class="pr-6 relative z-10 flex-1">
+                                <h4 class="font-bold text-lg group-hover:text-[#ff4d00] transition tracking-tight">${m.name}</h4>
+                                <p class="text-gray-400 text-xs mt-1 font-medium leading-relaxed">${m.desc}</p>
+                                ${!isCompleted ? `<div class="inline-block mt-3 bg-[#111] border border-white/5 px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest text-gray-400">${badgeText}</div>` : ''}
                             </div>
-                            <div class="text-left md:text-right flex-shrink-0 relative z-0 flex flex-col items-start md:items-end w-full md:w-auto mt-4 md:mt-0">
-                                <span class="block text-[#ff4d00] font-black text-2xl italic tracking-tighter mb-2">+${m.xp}</span>
-                                <button type="button" id="btn-${m.id}" onclick="${btnAction}" class="btn-grind w-full md:w-auto py-3 text-[10px]" ${(isCompleted || isPending) ? 'disabled' : ''}>${btnText}</button>
+                            <div class="text-left md:text-right flex-shrink-0 relative z-10 flex flex-col items-start md:items-end w-full md:w-auto mt-4 md:mt-0">
+                                <span class="block text-[#ff4d00] font-black text-2xl italic tracking-tighter mb-3">+${m.xp}</span>
+                                <button type="button" id="btn-${m.id}" onclick="${btnAction}" class="btn-grind w-full md:w-auto text-[10px]" ${(isCompleted || isPending) ? 'disabled' : ''}>${btnText}</button>
                             </div>
                         </div>
                     `;
@@ -1381,17 +1444,17 @@ window.shareLink = async (link) => {
                 html += `
                             </div>
                         </section>
-                        <section class="max-w-3xl mx-auto mb-12">
+                        <section class="max-w-3xl mx-auto mb-16">
                             <div class="flex flex-col gap-6 mb-10">
                                 <div class="flex justify-between items-end border-b border-white/10 pb-4">
-                                    <div><p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">Endless Grind</p><h3 class="text-3xl font-black uppercase italic tracking-tighter">Daily Habits</h3></div>
-                                    <span class="text-[10px] font-black bg-gray-800 text-gray-400 px-3 py-1 italic shadow-[0_0_10px_rgba(0,0,0,0.4)]">REPEATABLE</span>
+                                    <div><p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">Endless Grind</p><h3 class="text-3xl font-black uppercase italic tracking-tighter">Core Routines</h3></div>
+                                    <span class="text-[10px] font-black bg-gray-800 text-gray-400 px-3 py-1.5 rounded-sm italic shadow-[0_0_10px_rgba(0,0,0,0.4)]">REPEATABLE</span>
                                 </div>
                             </div>
                             <div class="space-y-4">
                 `;
 
-                if ((state.habitData || []).length === 0) html += `<div class="text-center p-8 text-gray-600 italic text-sm">Derzeit keine Daily Habits aktiv.</div>`;
+                if ((state.habitData || []).length === 0) html += `<div class="text-center p-8 text-gray-600 italic text-sm border border-white/5 rounded-xl">Derzeit keine Routinen aktiv.</div>`;
 
                 (state.habitData || []).forEach(m => {
                     const todayStr = new Date().toISOString().split('T')[0];
@@ -1418,38 +1481,39 @@ window.shareLink = async (link) => {
                     }
                     
                     const isExpired = habDaysLeftText === "ABGELAUFEN";
-                    let cardClasses = 'card p-6 rounded-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4 group relative overflow-hidden ';
+                    let cardClasses = 'mockup p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 group transition ';
                     if (isDoneToday) cardClasses += 'is-completed border-[#ff4d00]/30 opacity-75';
                     else if (isPending) cardClasses += 'is-pending border-yellow-500/30';
                     else if (isExpired) cardClasses += 'opacity-50 cursor-not-allowed';
+                    else cardClasses += 'hover:border-[#ff4d00]/30';
 
                     let badgeText = m.type === 'qr' ? '📍 Check-in' : (m.type === 'upload' ? '📷 Photo Upload' : '⚡ Action');
                     const safeName = m.name.replace(/'/g, "\\'"); const safeQrSolution = m.qr_solution ? m.qr_solution.replace(/'/g, "\\'") : '';
                     let btnAction = '';
                     if (!isExpired) btnAction = m.type === 'instant' ? `window.claimInstantMission('${m.id}', ${m.xp}, '${safeName}')` : `window.openVerifyModal('${m.id}', ${m.xp}, '${m.type}', '${safeName}', '${safeQrSolution}')`;
                     
-                    let btnText = isDoneToday ? 'VERIFIED' : (isPending ? 'Wird überprüft ⏳' : 'Verify Habit');
+                    let btnText = isDoneToday ? 'VERIFIED' : (isPending ? 'Wird überprüft ⏳' : 'Verify Routine');
                     if (isExpired) btnText = 'LOCKED';
 
                     html += `
                         <div class="${cardClasses}">
-                            <div class="absolute left-0 top-0 bottom-0 w-1 ${isPending ? 'bg-yellow-500' : (isDoneToday ? 'bg-[#ff4d00]' : 'bg-gray-600 group-hover:bg-[#ff4d00]')} transition"></div>
+                            <div class="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition pointer-events-none"></div>
                             ${isDoneToday ? `<div class="completed-overlay"><span class="text-[#ff4d00] font-black italic uppercase tracking-widest flex items-center gap-2"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> VERIFIED</span></div>` : ''}
                             ${isPending ? `<div class="pending-overlay"><span class="text-yellow-500 font-black italic uppercase tracking-widest flex items-center gap-2"><svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> Wird überprüft</span></div>` : ''}
-                            <div class="pr-6 relative z-0 flex-1 w-full">
+                            <div class="pr-6 relative z-10 flex-1 w-full">
                                 <div class="flex justify-between items-start mb-1">
-                                    <h4 class="font-black italic uppercase text-lg group-hover:text-[#ff4d00] transition tracking-tighter break-words max-w-[70%]">${m.name}</h4>
-                                    <span class="text-[9px] font-bold text-gray-500 tracking-widest uppercase bg-black px-2 py-1 rounded-sm border border-gray-800">${habDaysLeftText}</span>
+                                    <h4 class="font-bold text-lg group-hover:text-white transition tracking-tight break-words max-w-[70%]">${m.name}</h4>
+                                    <span class="text-[9px] font-bold text-gray-500 tracking-widest uppercase bg-black px-2 py-1 rounded-sm border border-[#111]">${habDaysLeftText}</span>
                                 </div>
                                 <p class="text-gray-400 text-xs mt-1 font-medium leading-relaxed">${m.desc}</p>
-                                <div class="flex flex-wrap items-center gap-2 mt-3">
-                                    <span class="border border-gray-700 bg-black px-2 py-0.5 text-[8px] font-bold uppercase tracking-widest text-gray-400">${badgeText}</span>
-                                    ${m.streakBonus > 0 ? `<span class="border border-[#ff4d00]/30 bg-[#ff4d00]/10 text-[#ff4d00] px-2 py-0.5 text-[8px] font-bold uppercase tracking-widest shadow-[0_0_10px_rgba(255,77,0,0.2)]">🔥 Streak: ${activeStreak} (+${m.streakBonus} XP/Tag)</span>` : `<span class="border border-gray-700 bg-gray-900 text-gray-300 px-2 py-0.5 text-[8px] font-bold uppercase tracking-widest">🔥 Streak: ${activeStreak}</span>`}
+                                <div class="flex flex-wrap items-center gap-2 mt-4">
+                                    <span class="bg-[#111] border border-white/5 px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest text-gray-400">${badgeText}</span>
+                                    ${m.streakBonus > 0 ? `<span class="border border-[#ff4d00]/30 bg-[#ff4d00]/10 text-[#ff4d00] px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest shadow-[0_0_10px_rgba(255,77,0,0.2)]">🔥 Streak: ${activeStreak} (+${m.streakBonus} XP/Tag)</span>` : `<span class="border border-white/5 bg-[#111] text-gray-300 px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest">🔥 Streak: ${activeStreak}</span>`}
                                 </div>
                             </div>
-                            <div class="text-left md:text-right flex-shrink-0 relative z-0 flex flex-col items-start md:items-end w-full md:w-auto mt-4 md:mt-0">
-                                <span class="block text-[#ff4d00] font-black text-2xl italic tracking-tighter mb-2">+${totalXpDisplay}</span>
-                                <button type="button" onclick="${btnAction}" class="btn-grind w-full md:w-auto py-3 text-[10px] bg-white text-black hover:bg-[#ff4d00] hover:text-white transition" ${(isDoneToday || isPending || isExpired) ? 'disabled' : ''}>${btnText}</button>
+                            <div class="text-left md:text-right flex-shrink-0 relative z-10 flex flex-col items-start md:items-end w-full md:w-auto mt-4 md:mt-0">
+                                <span class="block text-white font-black text-2xl italic tracking-tighter mb-3">+${totalXpDisplay}</span>
+                                <button type="button" onclick="${btnAction}" class="btn-grind w-full md:w-auto text-[10px] bg-white text-black hover:bg-[#ff4d00] hover:text-white transition" ${(isDoneToday || isPending || isExpired) ? 'disabled' : ''}>${btnText}</button>
                             </div>
                         </div>
                     `;
@@ -1461,15 +1525,15 @@ window.shareLink = async (link) => {
                         <section class="max-w-3xl mx-auto mb-12">
                             <div class="flex flex-col gap-6 mb-8">
                                 <div class="flex justify-between items-end border-b border-white/10 pb-4">
-                                    <div><p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">The Network</p><h3 class="text-3xl font-black uppercase italic tracking-tighter">Crew Activity</h3></div>
-                                    <span class="text-[10px] font-black bg-[#1f1f1f] text-gray-400 border border-white/5 px-3 py-1 italic">LIVE FEED</span>
+                                    <div><p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">The Network</p><h3 class="text-3xl font-black uppercase italic tracking-tighter">City Activity</h3></div>
+                                    <span class="text-[10px] font-black bg-[#1f1f1f] text-gray-400 border border-white/5 px-3 py-1.5 rounded-sm italic">LIVE FEED</span>
                                 </div>
                             </div>
                 `;
 
                 const myFriendsCount = (p.friends || []).length; const nextBounty = (myFriendsCount + 1) * 100;
                 html += `
-                            <div class="card p-6 rounded-sm mb-8 border border-[#ff4d00]/20 relative overflow-hidden group">
+                            <div class="mockup p-6 mb-8 border border-[#ff4d00]/20 relative overflow-hidden group">
                                 <div class="absolute inset-0 bg-gradient-to-r from-[#ff4d00]/5 to-transparent"></div>
                                 <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
                                     <div class="text-center md:text-left flex-1">
@@ -1479,7 +1543,7 @@ window.shareLink = async (link) => {
                                         </p>
                                         <p class="text-gray-400 text-[11px] leading-relaxed">Erweitere dein Network. Jeder neue Grinder bringt dir massive XP Boosts. Nächster Invite: <span class="text-white font-bold bg-white/10 px-2 py-0.5 rounded-sm">+${nextBounty} XP</span>.</p>
                                     </div>
-                                    <button type="button" onclick="window.openInviteModal()" class="w-full md:w-auto btn-bounty px-8 py-4 rounded-sm flex items-center justify-center gap-3 whitespace-nowrap flex-shrink-0">
+                                    <button type="button" onclick="window.openInviteModal()" class="w-full md:w-auto btn-bounty px-8 py-4 flex items-center justify-center gap-3 whitespace-nowrap flex-shrink-0">
                                         <svg class="w-5 h-5 text-[#ff4d00]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                                         <span class="font-black italic uppercase text-xs tracking-widest">Crew Erweitern</span>
                                     </button>
@@ -1491,8 +1555,8 @@ window.shareLink = async (link) => {
                 const feedActivities = (state.activities || []).filter(act => act.alias && feedUsersLower.includes(act.alias.toLowerCase())).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0)).slice(0, 10);
 
                 if (feedActivities.length === 0) {
-                    if (friendsList.length === 0) html += `<div class="text-center p-8 text-gray-600 italic text-sm border border-white/5 rounded-sm bg-black/50">Deine Crew ist noch leer. <br><span class="text-[#ff4d00] font-bold">Lade Freunde ein und kassiere deinen XP Boost!</span></div>`;
-                    else html += `<div class="text-center p-8 text-gray-600 italic text-sm border border-white/5 rounded-sm bg-black/50">Noch keine Aktivität in deiner Crew. Time to get active!</div>`;
+                    if (friendsList.length === 0) html += `<div class="text-center p-8 text-gray-600 italic text-sm border border-white/5 rounded-xl bg-[#080808]">Deine Crew ist noch leer. <br><span class="text-[#ff4d00] font-bold">Lade Freunde ein und kassiere deinen XP Boost!</span></div>`;
+                    else html += `<div class="text-center p-8 text-gray-600 italic text-sm border border-white/5 rounded-xl bg-[#080808]">Noch keine Aktivität in deiner Crew. Time to get active!</div>`;
                 } else {
                     html += `<div class="space-y-4 relative before:absolute before:inset-y-0 before:left-[19px] before:w-[2px] before:bg-[#1f1f1f]">`;
                     feedActivities.forEach(act => {
@@ -1509,7 +1573,7 @@ window.shareLink = async (link) => {
                         html += `
                             <div class="flex gap-4 relative z-10">
                                 <div class="w-10 h-10 rounded-full bg-[#0a0a0a] border-2 ${borderClass} flex items-center justify-center flex-shrink-0 ${shadowClass}"><svg class="w-4 h-4 ${colorClass}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${iconSvg}"></path></svg></div>
-                                <div class="card p-4 rounded-sm flex-1"><p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">${time}</p><p class="text-sm font-medium text-gray-300"><span class="${nameColorClass} italic uppercase font-black">${displayName}</span>${proBadge} <span class="text-gray-400 text-xs">${dynamicText}</span></p></div>
+                                <div class="bg-[#080808] border border-[#111] p-4 rounded-xl flex-1 shadow-sm"><p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">${time}</p><p class="text-sm font-medium text-gray-300"><span class="${nameColorClass} italic uppercase font-black">${displayName}</span>${proBadge} <span class="text-gray-400 text-xs">${dynamicText}</span></p></div>
                             </div>
                         `;
                     });
@@ -1616,12 +1680,12 @@ window.shareLink = async (link) => {
         }
     </script>
     <div id="install-banner" class="hidden fixed inset-0 bg-black/90 backdrop-blur-md z-[999999] flex flex-col items-center justify-center p-6">
-        <div class="bg-[#0a0a0a] border border-[#ff4d00]/30 p-8 rounded-sm shadow-[0_0_50px_rgba(255,77,0,0.3)] w-full max-w-md text-center relative animate-pop">
+        <div class="bg-[#0a0a0a] border border-[#ff4d00]/30 p-8 rounded-xl shadow-[0_0_50px_rgba(255,77,0,0.3)] w-full max-w-md text-center relative animate-pop">
             <button onclick="closeInstallBanner()" class="absolute top-4 right-4 text-gray-500 hover:text-white transition"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
             <div class="w-20 h-20 bg-[#1f1f1f] rounded-full mx-auto flex items-center justify-center mb-6 border-2 border-[#ff4d00]"><img src="https://grind-app.de/logo.jpg" class="w-full h-full rounded-full object-cover" alt="Logo"></div>
             <h3 class="text-3xl font-black italic uppercase tracking-tighter mb-2">Install App</h3>
             <p class="text-gray-400 text-xs font-medium leading-relaxed mb-8">Füge GRIND. zu deinem Home-Bildschirm hinzu, um direkt und im schnellen Fullscreen auf das Network zuzugreifen.</p>
-            <div class="bg-black/50 border border-white/10 p-5 rounded-sm flex flex-col gap-5 text-left mb-8">
+            <div class="bg-black/50 border border-white/10 p-5 rounded-lg flex flex-col gap-5 text-left mb-8">
                 <div class="flex items-center gap-4 text-sm text-gray-300">
                     <span class="w-6 h-6 rounded-full bg-[#1f1f1f] text-[#ff4d00] flex items-center justify-center font-black text-xs flex-shrink-0">1</span>
                     <span id="step1-text">Tippe auf das Teilen-Symbol</span>
@@ -1653,3 +1717,4 @@ window.shareLink = async (link) => {
     </script>
 </body>
 </html>
+
