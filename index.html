@@ -37,9 +37,16 @@
             opacity: 0.08; 
             background-size: 60px 60px; 
             background-image: linear-gradient(to right, rgba(255,255,255,0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.08) 1px, transparent 1px); 
-            transform: perspective(500px) rotateX(60deg); 
+            transform: perspective(500px) rotateX(60deg) translateZ(0); 
             pointer-events: none; 
             z-index: 0; 
+            will-change: transform;
+        }
+
+        /* Hardware Accelerated Blurs for better performance */
+        .gpu-blur {
+            transform: translateZ(0);
+            will-change: filter;
         }
         
         .grind-gradient { background: linear-gradient(90deg, #ff4d00, #ff8800); }
@@ -58,7 +65,7 @@
         .card:hover { 
             border-color: rgba(255, 77, 0, 0.4); 
             box-shadow: 0 10px 30px rgba(255, 77, 0, 0.1); 
-            transform: translateY(-2px); 
+            transform: translateY(-2px) translateZ(0); 
         }
         
         .mockup { 
@@ -82,6 +89,7 @@
             width: 100vw; 
             margin-left: -24px; 
             padding-left: 24px; 
+            transform: translateZ(0);
         }
         @media (min-width: 1152px) { 
             .ticker-container { 
@@ -93,10 +101,11 @@
         .ticker-content { 
             display: inline-block; 
             animation: ticker 35s linear infinite; 
+            will-change: transform;
         }
         @keyframes ticker { 
-            0% { transform: translateX(0); } 
-            100% { transform: translateX(-50%); } 
+            0% { transform: translateX(0) translateZ(0); } 
+            100% { transform: translateX(-50%) translateZ(0); } 
         }
         
         .ticker-item { 
@@ -416,8 +425,8 @@
     <div id="toast-container"></div>
     
     <div id="xp-hud" class="fixed top-0 left-0 right-0 z-[999999] transform -translate-y-[150%] transition-transform duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] pointer-events-none flex justify-center pt-4 px-4 sm:px-6">
-        <div class="absolute top-2 w-full max-w-md h-32 bg-black/60 blur-2xl rounded-full pointer-events-none z-0"></div>
-        <div class="bg-[#0a0a0a]/80 border border-[#ff4d00]/40 shadow-[0_20px_50px_rgba(0,0,0,0.7),_0_0_20px_rgba(255,77,0,0.15)] rounded-xl p-5 w-full max-w-sm flex flex-col gap-3 relative overflow-hidden backdrop-blur-2xl z-10">
+        <div class="absolute top-2 w-full max-w-md h-32 bg-black/60 blur-2xl rounded-full pointer-events-none z-0 gpu-blur"></div>
+        <div class="bg-[#0a0a0a]/80 border border-[#ff4d00]/40 shadow-[0_20px_50px_rgba(0,0,0,0.7),_0_0_20px_rgba(255,77,0,0.15)] rounded-xl p-5 w-full max-w-sm flex flex-col gap-3 relative overflow-hidden backdrop-blur-2xl z-10 gpu-blur">
             <div class="absolute inset-0 bg-gradient-to-b from-[#ff4d00]/10 to-transparent"></div>
             <div class="relative z-10 flex justify-between items-end">
                 <div>
@@ -494,6 +503,18 @@
         let holdTimer = null, holdProgress = 0, isRedeeming = false;
         window.currentVerify = null; 
         window.countdownInterval = null;
+
+        // --- PERFORMANCE FIX: Render Debouncing System ---
+        // Dies verhindert, dass sich die Seite aufhängt, wenn Firebase 10 Updates auf einmal schickt.
+        let isRenderScheduled = false;
+        window.scheduleRender = () => {
+            if (isRenderScheduled) return;
+            isRenderScheduled = true;
+            requestAnimationFrame(() => {
+                render();
+                isRenderScheduled = false;
+            });
+        };
 
         const getRelativeTime = (timestamp) => {
             if(!timestamp) return "Gerade eben";
@@ -573,7 +594,7 @@
             if (distance < 0) { 
                 el.innerHTML = "LAUNCHING..."; 
                 if(window.countdownInterval) clearInterval(window.countdownInterval); 
-                setTimeout(() => render(), 2000); 
+                setTimeout(() => window.scheduleRender(), 2000); 
                 return; 
             }
             el.innerHTML = `${Math.floor(distance / 86400000)}D ${Math.floor((distance % 86400000) / 3600000).toString().padStart(2, '0')}H ${Math.floor((distance % 3600000) / 60000).toString().padStart(2, '0')}M ${Math.floor((distance % 60000) / 1000).toString().padStart(2, '0')}S`;
@@ -590,11 +611,12 @@
                     state.seasonConfig = data.seasonConfig || { number: 1, active: true, start: '', end: '' };
                     state.currentWeekTab = getActiveWeek();
                 }
-                if(state.view === 'dashboard' || state.view === 'paywall') render();
+                if(state.view === 'dashboard' || state.view === 'paywall') window.scheduleRender();
             });
         };
 
-        // Neues Partial-Render System: Updatet NUR den Feed und Ticker, um Stuttering zu verhindern
+        // --- PERFORMANCE FIX: Partial Ticker Updates ---
+        let lastTickerHash = '';
         window.updateLiveUI = () => {
             const feedContainer = document.getElementById('live-feed-content');
             const tickerContainer = document.getElementById('live-ticker-content');
@@ -610,8 +632,10 @@
             
             if (tickerWrapper) tickerWrapper.style.display = 'block';
 
-            // Global Ticker Update
-            if (tickerContainer) {
+            // Check if ticker actually needs an update to prevent animation reset stutter
+            const currentHash = state.activities[0]?.timestamp?.toString() || '';
+            if (currentHash !== lastTickerHash && tickerContainer) {
+                lastTickerHash = currentHash;
                 let html = '';
                 state.activities.slice(0, 15).forEach(act => {
                     const c = act.isPro ? 'text-[#a855f7]' : 'text-[#ff4d00]';
@@ -702,17 +726,17 @@
                                 setTimeout(() => window.resolveInvite(crewCode), 1000); 
                             }
                         }
-                        render();
+                        window.scheduleRender();
                     } else { 
                         state.view = 'onboarding'; 
-                        render(); 
+                        window.scheduleRender(); 
                     }
                 });
 
                 onSnapshot(collection(db, 'plot_pending_proofs'), (snap) => { 
                     if (snap && snap.docs) { 
                         state.pendingMissions = snap.docs.map(d => d.data()).filter(data => data.uid === state.user.uid); 
-                        if(state.view === 'dashboard') render(); 
+                        if(state.view === 'dashboard') window.scheduleRender(); 
                     } 
                 });
 
@@ -720,21 +744,23 @@
                     if(snap && snap.docs) { 
                         state.activities = snap.docs.map(d => d.data()); 
                         // Update UI without full re-render
-                        if(state.view === 'dashboard') window.updateLiveUI(); 
+                        if(state.view === 'dashboard') {
+                            requestAnimationFrame(window.updateLiveUI);
+                        } 
                     }
                 }, () => {});
 
                 setupSeasonData();
                 onSnapshot(doc(db, 'system', 'pricing'), (docSnap) => { 
                     if (docSnap.exists()) state.bundlePrice = docSnap.data().bundlePrice; 
-                    if (state.view === 'paywall') render(); 
+                    if (state.view === 'paywall') window.scheduleRender(); 
                 });
             } else { 
                 state.user = null; 
                 state.profile = null; 
                 state.view = 'auth'; 
                 state.authStep = 'phone'; 
-                render(); 
+                window.scheduleRender(); 
             }
         });
 
@@ -1475,17 +1501,17 @@
             if (view === 'dashboard' && state.view !== 'dashboard') state.dashboardNeedsScroll = true; 
             state.prevView = state.view; 
             state.view = view; 
-            render(); 
+            window.scheduleRender(); 
         }; 
         
         window.goBack = () => { 
             state.view = state.prevView || 'dashboard'; 
-            render(); 
+            window.scheduleRender(); 
         }; 
         
         window.handleLogout = () => { 
             state.view = 'loading'; 
-            render(); 
+            window.scheduleRender(); 
             signOut(auth); 
         };
         
@@ -1515,7 +1541,7 @@
                 clearTimeout(timeout); 
                 state.authStep = 'code'; 
                 window.showToast("Code gesendet.", "success"); 
-                render(); 
+                window.scheduleRender(); 
             } catch (err) { 
                 clearTimeout(timeout); 
                 if(window.recaptchaVerifier) { 
@@ -1548,7 +1574,7 @@
         
         window.goBackToPhone = () => { 
             state.authStep = 'phone'; 
-            render(); 
+            window.scheduleRender(); 
         };
 
         window.submitOnboarding = async (e) => {
@@ -1601,7 +1627,7 @@
                     setTimeout(() => layer.remove(), 800); 
                     state.view = 'dashboard'; 
                     state.dashboardNeedsScroll = true; 
-                    render(); 
+                    window.scheduleRender(); 
                 }, timing * 4.2);
             } catch (err) { 
                 layer.remove(); 
@@ -1755,7 +1781,7 @@
                 if (sStatus.status !== 'active' && sStatus.status !== 'loading') {
                     appDiv.innerHTML = `
                         <div class="flex-1 flex flex-col items-center justify-center p-6 text-center min-h-[90dvh] relative z-20">
-                            <div class="absolute w-[500px] h-[500px] bg-[#ff4d00]/5 blur-[100px] rounded-full pointer-events-none"></div>
+                            <div class="absolute w-[500px] h-[500px] bg-[#ff4d00]/5 blur-[100px] rounded-full pointer-events-none gpu-blur"></div>
                             <div class="w-24 h-24 border border-[#ff4d00]/30 rounded-full flex items-center justify-center mb-8 animate-pulse-slow relative">
                                 <div class="absolute inset-0 border-t-2 border-[#ff4d00] rounded-full animate-spin" style="animation-duration: 3s;"></div>
                                 <svg class="w-8 h-8 text-[#ff4d00]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
@@ -1804,7 +1830,7 @@
                 }
                 appDiv.innerHTML = `
                     <div class="flex-1 flex flex-col items-center justify-center p-6 min-h-[80vh] text-center animate-fade-in relative z-20">
-                        <div class="absolute w-[600px] h-[600px] bg-[#a855f7]/5 blur-[120px] rounded-full pointer-events-none"></div>
+                        <div class="absolute w-[600px] h-[600px] bg-[#a855f7]/5 blur-[120px] rounded-full pointer-events-none gpu-blur"></div>
                         <div class="w-16 h-16 border-2 border-[#a855f7] rounded-full flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(168,85,247,0.3)] bg-[#0a0a0a] relative z-10">
                             <svg class="w-8 h-8 text-[#a855f7]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                         </div>
@@ -1848,7 +1874,7 @@
             if (state.view === 'onboarding') {
                 appDiv.innerHTML = `
                     <div class="flex-1 flex flex-col items-center justify-center p-6 min-h-[80vh] text-center relative z-20">
-                        <div class="absolute w-[400px] h-[400px] bg-[#ff4d00]/5 blur-[100px] rounded-full pointer-events-none"></div>
+                        <div class="absolute w-[400px] h-[400px] bg-[#ff4d00]/5 blur-[100px] rounded-full pointer-events-none gpu-blur"></div>
                         <h1 class="text-4xl md:text-5xl font-black italic tracking-tighter mb-2 relative z-10">CREATE PROFILE<span class="text-[#ff4d00]">.</span></h1>
                         <p class="text-gray-500 font-bold uppercase tracking-widest text-[10px] mb-12 max-w-sm leading-relaxed relative z-10">Wähle deine Stadt und trete dem Network bei.</p>
                         <form onsubmit="window.submitOnboarding(event)" class="w-full max-w-sm space-y-4 relative z-10">
@@ -1872,7 +1898,7 @@
             if (state.view === 'auth') {
                 let authHtml = `
                     <div class="flex-1 flex flex-col items-center justify-center p-6 min-h-[80vh] text-center relative z-20">
-                        <div class="absolute w-[600px] h-[600px] bg-[#ff4d00]/5 blur-[120px] rounded-full pointer-events-none"></div>
+                        <div class="absolute w-[600px] h-[600px] bg-[#ff4d00]/5 blur-[120px] rounded-full pointer-events-none gpu-blur"></div>
                         <h1 class="text-6xl md:text-8xl font-black italic tracking-tighter mb-2 relative z-10">GRIND<span class="text-[#ff4d00]">.</span></h1>
                         <p class="text-gray-500 font-bold uppercase tracking-widest text-xs mb-12 max-w-sm leading-relaxed relative z-10">The Real-World Lifestyle Game</p>
                         <div class="w-full max-w-sm relative z-10">
@@ -2213,7 +2239,9 @@
                 
                 window.updateLiveUI();
 
-                setTimeout(() => {
+                // Verhindert das Übereinanderlegen von Animation-Timeouts
+                if (window.xpAnimTimeout) clearTimeout(window.xpAnimTimeout);
+                window.xpAnimTimeout = setTimeout(() => {
                     const passViewport = document.getElementById('pass-viewport');
                     const currentNode = document.getElementById(`level-node-${safeLvl}`);
                     if (passViewport && state.dashboardNeedsScroll && currentNode) { 
@@ -2279,7 +2307,8 @@
                                 hudXpBar.style.width = `${targetXpProgress}%`; 
                             }
                             
-                            setTimeout(() => { 
+                            if (window.hudCloseTimeout) clearTimeout(window.hudCloseTimeout);
+                            window.hudCloseTimeout = setTimeout(() => { 
                                 hud.classList.remove('translate-y-0'); 
                                 hud.classList.add('-translate-y-[150%]'); 
                                 if(hudLvl) hudLvl.classList.remove('animate-pop'); 
