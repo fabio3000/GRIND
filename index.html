@@ -3,21 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-NYKB8MZ2MC"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-NYKB8MZ2MC');
+    </script>
+
     <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
     <meta name="description" content="GRIND connects real-world routines, places and rewards into one shared network.">
     <title>GRIND. | The Real-World Lifestyle Game</title>
-    
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://grind-app.de/">
+    <meta property="og:title" content="GRIND. | The Real-World Lifestyle Game">
+    <meta property="og:description" content="GRIND connects real-world routines, places and rewards into one shared network.">
+    <meta property="og:image" content="https://grind-app.de/logo.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="GRIND. | The Real-World Lifestyle Game">
+    <meta name="twitter:description" content="GRIND connects real-world routines, places and rewards into one shared network.">
+    <meta name="twitter:image" content="https://grind-app.de/logo.jpg">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&display=swap" rel="stylesheet">
-    <link class="rounded-full" rel="icon" type="image/png" sizes="32x32" href="https://grind-app.de/favicon.png">
+    
+    <link rel="icon" type="image/png" sizes="32x32" href="https://grind-app.de/favicon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="https://grind-app.de/favicon.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="https://grind-app.de/favicon.png">
     <link rel="apple-touch-icon" href="https://grind-app.de/logo.jpg">
     
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script src="https://www.paypal.com/sdk/js?client-id=AboxAT2qskA0lY5-23Kj2tu_qY3bOK57rq_LbhtE_cdVOBT37fSHGacBKjgl-zx1XcJM9AZql96OCwc8&currency=EUR"></script>
+
     
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #030303; color: #ffffff; overflow-x: hidden; scroll-behavior: smooth; background-image: radial-gradient(circle at top, #0b0b0b 0%, #030303 70%); min-height: 100vh; overscroll-behavior-y: none; }
-        
         h1, h2, h3, h4 {
     word-spacing: 0.18em;
 }
@@ -506,7 +531,7 @@
         window.openInviteModal = () => {
             if(!state.profile) return;
             const link = `${window.location.origin}/?crew=${state.profile.crewCode || ''}`; const nextXpBounty = ((state.profile.friends || []).length + 1) * 100;
-            let html = `<p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">Network</p><h3 class="text-2xl font-black italic uppercase tracking-tight mb-6">Crew Erweitern</h3><div class="bg-[#1f1f1f] p-5 rounded-lg mb-6 border border-white/10 relative overflow-hidden group"><div class="absolute inset-0 bg-gradient-to-r from-[#ff4d00]/10 to-transparent"></div><div class="relative z-10 flex items-center gap-4"><div class="w-10 h-10 rounded-full border border-[#ff4d00]/30 flex items-center justify-center bg-[#0a0a0a]"><svg class="w-5 h-5 text-[#ff4d00]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg></div><div><p class="text-[#ff4d00] font-black italic uppercase tracking-widest text-sm">Bounty Active</p><p class="text-gray-400 text-[10px] font-medium mt-1 leading-relaxed">Jeder Grinder, der joint, bringt dir <span class="text-white font-bold">+${nextXpBounty} XP</span>.</p></div></div></div><div class="bg-[#111] p-5 rounded-lg mb-6 border border-white/5"><p class="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-3">Option 1: Link teilen</p><div class="flex gap-2"><input type="text" readonly value="${link}" class="flex-1 p-3 bg-black border border-[#333] rounded-md text-xs text-gray-400 outline-none truncate selection:bg-[#ff4d00] selection:text-white"><button type="button" onclick="window.shareLink('${link}')" class="bg-[#1f1f1f] border border-gray-700 text-white px-4 rounded-md hover:bg-[#ff4d00] hover:border-[#ff4d00] transition flex-shrink-0" title="Teilen"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg></button></div></div><div class="bg-[#111] p-5 rounded-lg mb-6 border border-white/5"><p class="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-3">Option 2: Code eingeben</p><form onsubmit="window.submitManualCode(event)" class="flex gap-2"><input id="manual_crew_code" type="text" placeholder="CODE..." required class="flex-1 p-3 bg-black border border-[#333] rounded-md text-sm text-white outline-none focus:border-[#ff4d00] uppercase font-bold tracking-widest"><button type="submit" class="bg-white text-black font-black uppercase tracking-widest px-4 rounded-md hover:bg-[#ff4d00] hover:text-white transition text-xs">Add</button></form></div><button type="button" onclick="window.closeModal()" class="w-full bg-[#111] text-gray-400 hover:bg-white hover:text-black font-black italic uppercase py-3 transition text-xs border border-white/5 rounded-lg">Schließen</button>`;
+            let html = `<p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">Network</p><h3 class="text-2xl font-black italic uppercase tracking-tighter mb-6">Crew Erweitern</h3><div class="bg-[#1f1f1f] p-5 rounded-lg mb-6 border border-white/10 relative overflow-hidden group"><div class="absolute inset-0 bg-gradient-to-r from-[#ff4d00]/10 to-transparent"></div><div class="relative z-10 flex items-center gap-4"><div class="w-10 h-10 rounded-full border border-[#ff4d00]/30 flex items-center justify-center bg-[#0a0a0a]"><svg class="w-5 h-5 text-[#ff4d00]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg></div><div><p class="text-[#ff4d00] font-black italic uppercase tracking-widest text-sm">Bounty Active</p><p class="text-gray-400 text-[10px] font-medium mt-1 leading-relaxed">Jeder Grinder, der joint, bringt dir <span class="text-white font-bold">+${nextXpBounty} XP</span>.</p></div></div></div><div class="bg-[#111] p-5 rounded-lg mb-6 border border-white/5"><p class="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-3">Option 1: Link teilen</p><div class="flex gap-2"><input type="text" readonly value="${link}" class="flex-1 p-3 bg-black border border-[#333] rounded-md text-xs text-gray-400 outline-none truncate selection:bg-[#ff4d00] selection:text-white"><button type="button" onclick="window.shareLink('${link}')" class="bg-[#1f1f1f] border border-gray-700 text-white px-4 rounded-md hover:bg-[#ff4d00] hover:border-[#ff4d00] transition flex-shrink-0" title="Teilen"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg></button></div></div><div class="bg-[#111] p-5 rounded-lg mb-6 border border-white/5"><p class="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-3">Option 2: Code eingeben</p><form onsubmit="window.submitManualCode(event)" class="flex gap-2"><input id="manual_crew_code" type="text" placeholder="CODE..." required class="flex-1 p-3 bg-black border border-[#333] rounded-md text-sm text-white outline-none focus:border-[#ff4d00] uppercase font-bold tracking-widest"><button type="submit" class="bg-white text-black font-black uppercase tracking-widest px-4 rounded-md hover:bg-[#ff4d00] hover:text-white transition text-xs">Add</button></form></div><button type="button" onclick="window.closeModal()" class="w-full bg-[#111] text-gray-400 hover:bg-white hover:text-black font-black italic uppercase py-3 transition text-xs border border-white/5 rounded-lg">Schließen</button>`;
             window.openModal(html);
         };
 
@@ -534,7 +559,7 @@
                 const theirData = snap.docs[0].data(); const theirUid = snap.docs[0].id; const theirAlias = theirData.alias || 'Grinder';
                 if ((state.profile.friends || []).some(f => f.toLowerCase() === theirAlias.toLowerCase())) return window.showToast(`Bereits verbunden.`, "info");
                 const nextXpBounty = ((state.profile.friends || []).length + 1) * 100;
-                let html = `<div class="text-center"><div class="w-16 h-16 bg-[#1f1f1f] rounded-full mx-auto mb-4 border-2 border-[#ff4d00] flex items-center justify-center animate-pulse-slow"><svg class="w-8 h-8 text-[#ff4d00]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg></div><h3 class="text-3xl font-black italic uppercase tracking-tight mb-2">${theirAlias}</h3><p class="text-gray-400 text-[11px] mb-6 leading-relaxed max-w-[200px] mx-auto">Möchtest du dich mit diesem Grinder verbinden?</p><div class="bg-[#ff4d00]/10 border border-[#ff4d00]/30 py-2 px-4 rounded-md inline-block mb-6 shadow-[0_0_10px_rgba(255,77,0,0.2)]"><p class="text-[#ff4d00] font-black italic uppercase tracking-widest text-sm">+${nextXpBounty} XP BOUNTY</p></div><button type="button" onclick="window.confirmFriend('${theirUid}', '${theirAlias}')" class="w-full btn-grind py-4 mb-3">Akzeptieren</button><button type="button" onclick="window.closeModal()" class="text-xs text-gray-500 uppercase tracking-widest font-bold hover:text-white transition py-2">Abbrechen</button></div>`;
+                let html = `<div class="text-center"><div class="w-16 h-16 bg-[#1f1f1f] rounded-full mx-auto mb-4 border-2 border-[#ff4d00] flex items-center justify-center animate-pulse-slow"><svg class="w-8 h-8 text-[#ff4d00]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg></div><h3 class="text-3xl font-black italic uppercase tracking-tighter mb-2">${theirAlias}</h3><p class="text-gray-400 text-[11px] mb-6 leading-relaxed max-w-[200px] mx-auto">Möchtest du dich mit diesem Grinder verbinden?</p><div class="bg-[#ff4d00]/10 border border-[#ff4d00]/30 py-2 px-4 rounded-md inline-block mb-6 shadow-[0_0_10px_rgba(255,77,0,0.2)]"><p class="text-[#ff4d00] font-black italic uppercase tracking-widest text-sm">+${nextXpBounty} XP BOUNTY</p></div><button type="button" onclick="window.confirmFriend('${theirUid}', '${theirAlias}')" class="w-full btn-grind py-4 mb-3">Akzeptieren</button><button type="button" onclick="window.closeModal()" class="text-xs text-gray-500 uppercase tracking-widest font-bold hover:text-white transition py-2">Abbrechen</button></div>`;
                 window.openModal(html);
             } catch(e) { window.showToast("Netzwerkfehler.", "error"); }
         };
@@ -640,7 +665,7 @@
 
         window.openVerifyModal = (mid, xp, type, name, qrSolution = '') => {
             state.tempUploadData = null; window.currentVerify = { mid, xp, name, type, qrSolution };
-            let html = `<p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">Verify Action</p><h3 class="text-2xl font-black italic uppercase tracking-tight mb-6">${name}</h3>`;
+            let html = `<p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">Verify Action</p><h3 class="text-2xl font-black italic uppercase tracking-tighter mb-6">${name}</h3>`;
             if(type === 'qr') {
                 html += `<div id="qr-placeholder" onclick="window.startQRScanner()" class="border border-dashed border-white/20 p-8 mb-4 flex flex-col items-center justify-center bg-black/50 rounded-lg hover:border-[#ff4d00] cursor-pointer transition"><svg class="w-12 h-12 text-[#ff4d00] mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg><p class="text-xs text-white font-bold uppercase tracking-widest text-center">Kamera aktivieren</p></div><div id="qr-reader" class="hidden w-full mb-4 rounded-lg overflow-hidden border border-[#1f1f1f]"></div><input id="verify_code_input" type="text" placeholder="Oder Code manuell eingeben" class="w-full p-4 bg-[#0f0f0f] border border-[#1f1f1f] rounded-lg outline-none focus:border-[#ff4d00] text-white text-center text-sm tracking-widest uppercase mb-6">`;
             } else {
@@ -751,7 +776,7 @@
                 let fieldsHtml = fieldsArr.length > 0 ? fieldsArr.map((f, idx) => `<input id="shipping_field_${idx}" type="text" placeholder="${f}" class="w-full p-3 bg-black border border-white/20 rounded-md text-sm text-white outline-none focus:border-white mb-3 shipping-input-field" data-label="${f}">`).join('') : `<input id="shipping_field_0" type="text" placeholder="Adresse oder Info..." class="w-full p-3 bg-black border border-white/20 rounded-md text-sm text-white outline-none focus:border-white mb-3 shipping-input-field" data-label="Eingabe">`;
                 contentHtml = `<div class="bg-[#1f1f1f] p-6 rounded-xl flex flex-col mb-6 border border-white/10 relative"><div class="absolute top-0 right-0 bg-[#000] px-2 py-1 text-[8px] font-bold text-gray-500 uppercase tracking-widest rounded-bl-lg">One-Time Request</div><p class="text-xs text-gray-400 mb-4 leading-relaxed">${info}</p><div class="w-full">${fieldsHtml}</div><button type="button" onclick="window.submitShipping(${lvl}, '${tier}')" class="w-full ${bgClass} text-white font-black py-3 px-4 rounded-md text-xs uppercase tracking-widest hover:opacity-80 transition">Versand anfordern</button></div>`;
             }
-            window.openModal(`<p class="${textClass} text-[10px] font-black uppercase tracking-widest mb-1">Premium Reward</p><h3 class="text-2xl font-black italic uppercase tracking-tight mb-6">${title}</h3>${contentHtml}<button type="button" onclick="window.closeModal()" class="w-full bg-[#111] text-gray-400 hover:bg-white hover:text-black font-black italic uppercase py-3 transition text-xs border border-white/5 rounded-md">Schließen</button>`);
+            window.openModal(`<p class="${textClass} text-[10px] font-black uppercase tracking-widest mb-1">Premium Reward</p><h3 class="text-2xl font-black italic uppercase tracking-tighter mb-6">${title}</h3>${contentHtml}<button type="button" onclick="window.closeModal()" class="w-full bg-[#111] text-gray-400 hover:bg-white hover:text-black font-black italic uppercase py-3 transition text-xs border border-white/5 rounded-md">Schließen</button>`);
         };
 
         window.setView = (view) => { if (view === 'dashboard' && state.view !== 'dashboard') state.dashboardNeedsScroll = true; state.prevView = state.view; state.view = view; window.scheduleRender(); }; 
@@ -839,7 +864,7 @@
                                 <svg class="w-8 h-8 text-[#ff4d00]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                             </div>
                             <p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-[0.4em] mb-4">Grind Network</p>
-                            <h1 class="text-4xl md:text-6xl font-black italic tracking-tight mb-6 text-white leading-none">${sStatus.status === 'upcoming' ? 'SEASON INCOMING' : 'SYSTEM OFFLINE'}</h1>
+                            <h1 class="text-4xl md:text-6xl font-black italic tracking-tighter mb-6 text-white leading-none">${sStatus.status === 'upcoming' ? 'SEASON INCOMING' : 'SYSTEM OFFLINE'}</h1>
                             <div class="mt-16 flex justify-center relative z-10">
                                 <button type="button" onclick="window.handleLogout()" class="text-[10px] uppercase font-bold text-gray-600 hover:text-white transition tracking-widest border border-gray-800 px-6 py-3 rounded-md bg-[#0a0a0a]">Log out</button>
                             </div>
@@ -864,7 +889,7 @@
                 appDiv.innerHTML = `
                     <div class="max-w-3xl mx-auto px-6 py-12 w-full relative z-20">
                         <button onclick="window.goBack()" class="text-[#ff4d00] text-[10px] font-bold uppercase tracking-widest mb-10 flex items-center gap-2 hover:text-white transition"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg> Zurück</button>
-                        <h1 class="text-3xl md:text-5xl font-black italic uppercase tracking-tight mb-8">${title}</h1>
+                        <h1 class="text-3xl md:text-5xl font-black italic uppercase tracking-tighter mb-8">${title}</h1>
                         <div class="legal-content bg-[#0a0a0a] border border-[#1f1f1f] p-6 md:p-10 rounded-xl shadow-xl">${content}</div>
                     </div>
                     ${getFooterHTML()}
@@ -885,14 +910,14 @@
                         <div class="w-16 h-16 border-2 border-[#a855f7] rounded-full flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(168,85,247,0.3)] bg-[#0a0a0a] relative z-10">
                             <svg class="w-8 h-8 text-[#a855f7]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                         </div>
-                        <h2 class="text-4xl font-black italic tracking-tight mb-2 relative z-10">GRIND. <span class="text-[#a855f7]">PRO</span></h2>
+                        <h2 class="text-4xl font-black italic tracking-tighter mb-2 relative z-10">GRIND. <span class="text-[#a855f7]">PRO</span></h2>
                         <p class="text-gray-400 font-bold uppercase tracking-widest text-[10px] mb-8 max-w-xs leading-relaxed relative z-10">Unlock exclusive rewards, access limited partner drops and enter the PRO Network.</p>
                         
                         <div class="bg-[#0a0a0a] border border-[#1f1f1f] p-8 rounded-xl mb-6 w-full max-w-sm shadow-2xl relative overflow-hidden group">
                             <div class="absolute inset-0 bg-gradient-to-t from-[#a855f7]/10 to-transparent opacity-50"></div>
                             <div class="relative z-10">
                                 <div class="text-[10px] uppercase tracking-[0.2em] text-gray-500 font-bold mb-2">Season Pass</div>
-                                <div id="dynamic-price-display" class="text-5xl font-black text-white italic tracking-tight mb-8">${checkoutPrice.replace('.', ',')} €</div>
+                                <div id="dynamic-price-display" class="text-5xl font-black text-white italic tracking-tighter mb-8">${checkoutPrice.replace('.', ',')} €</div>
                                 <div id="paypal-button-container" class="w-full min-h-[150px] relative z-50 flex items-center justify-center"></div>
                             </div>
                         </div>
@@ -926,7 +951,7 @@
                 appDiv.innerHTML = `
                     <div class="flex-1 flex flex-col items-center justify-center p-6 min-h-[80vh] text-center relative z-20">
                         <div class="absolute inset-0 radial-glow-orange pointer-events-none -z-10"></div>
-                        <h1 class="text-4xl md:text-5xl font-black italic tracking-tight mb-2 relative z-10">CREATE PROFILE<span class="text-[#ff4d00]">.</span></h1>
+                        <h1 class="text-4xl md:text-5xl font-black italic tracking-tighter mb-2 relative z-10">CREATE PROFILE<span class="text-[#ff4d00]">.</span></h1>
                         <p class="text-gray-500 font-bold uppercase tracking-widest text-[10px] mb-12 max-w-sm leading-relaxed relative z-10">Wähle deine Stadt und trete dem Network bei.</p>
                         <form onsubmit="window.submitOnboarding(event)" class="w-full max-w-sm space-y-4 relative z-10">
                             <input id="onboard_name" type="text" placeholder="Dein Name" required class="w-full p-4 bg-[#0a0a0a] border border-[#1f1f1f] rounded-lg outline-none focus:border-[#ff4d00] text-white transition text-center text-xl tracking-widest uppercase font-black italic shadow-inner">
@@ -950,7 +975,7 @@
                 let authHtml = `
                     <div class="flex-1 flex flex-col items-center justify-center p-6 min-h-[80vh] text-center relative z-20">
                         <div class="absolute inset-0 radial-glow-orange pointer-events-none -z-10"></div>
-                        <h1 class="text-6xl md:text-8xl font-black italic tracking-tight mb-2 relative z-10">GRIND<span class="text-[#ff4d00]">.</span></h1>
+                        <h1 class="text-6xl md:text-8xl font-black italic tracking-tighter mb-2 relative z-10">GRIND<span class="text-[#ff4d00]">.</span></h1>
                         <p class="text-gray-500 font-bold uppercase tracking-widest text-xs mb-12 max-w-sm leading-relaxed relative z-10">The Real-World Lifestyle Game</p>
                         <div class="w-full max-w-sm relative z-10">
                 `;
@@ -1006,7 +1031,7 @@
 
                 let html = `
                     <header class="p-6 max-w-6xl mx-auto flex justify-between items-center w-full relative z-20">
-                        <div class="text-3xl font-black italic tracking-tight">GRIND<span class="text-[#ff4d00]">.</span></div>
+                        <div class="text-3xl font-black italic tracking-tighter">GRIND<span class="text-[#ff4d00]">.</span></div>
                         <div class="flex gap-3">
                             <button type="button" onclick="window.generateShareCard()" class="text-[10px] uppercase font-bold text-gray-400 hover:text-white transition tracking-widest border border-gray-800 hover:border-[#ff4d00] px-3 py-1.5 rounded-md bg-[#0a0a0a]">Export</button>
                             <button type="button" onclick="window.handleLogout()" class="text-[10px] uppercase font-bold text-gray-500 hover:text-red-500 transition tracking-widest border border-gray-800 px-3 py-1.5 rounded-md bg-[#0a0a0a]">Exit</button>
@@ -1024,7 +1049,7 @@
                                     <span class="w-1 h-1 rounded-full bg-white/20"></span>
                                     <span class="text-gray-400 text-[8px] font-bold uppercase tracking-[0.2em]">${p.city || 'Köln'}</span>
                                 </div>
-                                <h2 id="main-lvl-text" class="text-6xl font-black italic tracking-tight leading-none block transition-transform duration-300">LVL ${safeLvl}</h2>
+                                <h2 id="main-lvl-text" class="text-6xl font-black italic tracking-tighter leading-none block transition-transform duration-300">LVL ${safeLvl}</h2>
                                 <p class="text-gray-500 font-mono mt-3 text-xs tracking-widest uppercase"><span class="text-white">${currentRank}</span></p>
                                 <p class="text-gray-600 font-bold italic mt-1 text-[10px] uppercase tracking-widest">${p.alias}</p>
                             </div>
@@ -1178,7 +1203,7 @@
                                 ${!isCompleted ? `<div class="inline-block mt-3 bg-[#111] border border-white/5 px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest text-gray-400">${badgeText}</div>` : ''}
                             </div>
                             <div class="text-left md:text-right flex-shrink-0 relative z-10 flex flex-col items-start md:items-end w-full md:w-auto mt-4 md:mt-0">
-                                <span class="block ${isPending ? 'text-yellow-500' : 'text-[#ff4d00]'} font-black text-2xl italic tracking-tight mb-3">+${m.xp}</span>
+                                <span class="block ${isPending ? 'text-yellow-500' : 'text-[#ff4d00]'} font-black text-2xl italic tracking-tighter mb-3">+${m.xp}</span>
                                 <button type="button" id="btn-${m.id}" onclick="window.claimItemById('${m.id}')" class="${btnClasses}" ${(isCompleted || isPending) ? 'disabled' : ''}>${btnText}</button>
                             </div>
                         </div>
@@ -1274,7 +1299,7 @@
                                 </div>
                             </div>
                             <div class="text-left md:text-right flex-shrink-0 relative z-10 flex flex-col items-start md:items-end w-full md:w-auto mt-4 md:mt-0">
-                                <span class="block ${isPending ? 'text-yellow-500' : 'text-white'} font-black text-2xl italic tracking-tight mb-3">+${totalXpDisplay}</span>
+                                <span class="block ${isPending ? 'text-yellow-500' : 'text-white'} font-black text-2xl italic tracking-tighter mb-3">+${totalXpDisplay}</span>
                                 <button type="button" onclick="window.claimItemById('${m.id}')" class="${btnClasses}" ${(isDoneToday || isPending) ? 'disabled' : ''}>${btnText}</button>
                             </div>
                         </div>
@@ -1413,7 +1438,7 @@
             <div class="w-20 h-20 bg-[#1f1f1f] rounded-full mx-auto flex items-center justify-center mb-6 border-2 border-[#ff4d00]">
                 <img src="https://grind-app.de/logo.jpg" class="w-full h-full rounded-full object-cover" alt="Logo">
             </div>
-            <h3 class="text-3xl font-black italic uppercase tracking-tight mb-2">Install App</h3>
+            <h3 class="text-3xl font-black italic uppercase tracking-tighter mb-2">Install App</h3>
             <p class="text-gray-400 text-xs font-medium leading-relaxed mb-8">Füge GRIND. zu deinem Home-Bildschirm hinzu.</p>
             <div class="bg-black/50 border border-white/10 p-5 rounded-lg flex flex-col gap-5 text-left mb-8">
                 <div class="flex items-center gap-4 text-sm text-gray-300">
