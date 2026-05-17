@@ -5,9 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
-    <meta name="description" content="Verwandle deinen Alltag in ein Spiel. Sammle XP durch Fitness, Habits und Hustle. Schalte echte Rewards frei und miss dich mit deiner Crew. Join the GRIND Network.">
-    <meta name="keywords" content="Habit Tracker, Fitness App, Gamification, Motivation, Health, Eisbaden, Run Club, XP sammeln">
-    <title>GRIND. | Level up your life</title>
+    <meta name="description" content="GRIND connects real-world routines, places and rewards into one shared network. Turn Cologne into your progression map.">
+    <meta name="keywords" content="Routine Tracker, Cologne, Fitness Network, Real World Rewards, Health, Run Club">
+    <title>GRIND. | The Real-World Lifestyle Game</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" sizes="32x32" href="https://grind-app.de/favicon.png">
@@ -16,10 +16,10 @@
     <link rel="apple-touch-icon" href="https://grind-app.de/logo.jpg">
     <meta name="apple-mobile-web-app-title" content="GRIND.">
     <link rel="icon" type="image/png" sizes="192x192" href="https://grind-app.de/logo.jpg">
-    <meta property="og:title" content="GRIND. | Level up your life">
+    <meta property="og:title" content="GRIND. | The Real-World Lifestyle Game">
     <meta property="og:url" content="https://grind-app.de">
     <meta property="og:type" content="website">
-    <meta property="og:description" content="Verwandle deinen Alltag in ein Spiel. Sammle XP durch Fitness, Habits und Hustle. Schalte echte Rewards frei und miss dich mit deiner Crew.">
+    <meta property="og:description" content="GRIND connects real-world routines, places and rewards into one shared network. Turn Cologne into your progression map.">
     <meta property="og:image" content="https://grind-app.de/logo.jpg">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
@@ -549,8 +549,8 @@ window.shareLink = async (link) => {
                     Object.assign(emailPayload, addressData);
                     fetch("https://formsubmit.co/ajax/Fabio.maines@grind-app.de", { method: "POST", headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify(emailPayload) }).catch(e => {});
                 } catch(mailErr) {}
-                window.logActivity('REDEEM', `hat physischen Loot ('<span class="font-bold">${itemName}</span>') angefordert.`);
-                window.showToast("Anfrage für physical Loot gesendet!", "success"); 
+                window.logActivity('REDEEM', `hat physischen Reward ('<span class="font-bold">${itemName}</span>') angefordert.`);
+                window.showToast("Anfrage für physical Reward gesendet!", "success"); 
                 window.closeModal();
             } catch(e) { window.showToast("Fehler: " + (e.message || "Netzwerkfehler"), "error"); if(btn) { btn.innerText = "Versand anfordern"; btn.disabled = false; } }
         };
@@ -598,7 +598,7 @@ window.shareLink = async (link) => {
                 }
                 if (claimSuccess) { 
                     await setDoc(doc(db, 'plot_users', state.user.uid), updatePayload, { merge: true }); 
-                    window.logActivity('MISSION', `hat die Operation '<span class="font-bold text-white">${name}</span>' absolviert.`);
+                    window.logActivity('MISSION', `hat '<span class="font-bold text-white">${name}</span>' absolviert.`);
                     if(newLvl > oldLvl) window.logActivity('LEVEL_UP', `hat <span class="font-bold">Level ${newLvl}</span> erreicht!`);
                 } else if (btn) { btn.innerText = "Claim XP"; btn.disabled = false; }
             } catch(e) { window.showToast("Fehler beim Claimen.", "error"); if(btn) { btn.innerText = "Claim XP"; btn.disabled = false; } }
@@ -656,7 +656,7 @@ window.shareLink = async (link) => {
 
         window.openVerifyModal = (mid, xp, type, name, qrSolution = '') => {
             state.tempUploadData = null; window.currentVerify = { mid, xp, name, type, qrSolution };
-            let innerHtml = `<p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">Verify Operation</p><h3 class="text-2xl font-black italic uppercase tracking-tighter mb-6">${name}</h3>`;
+            let innerHtml = `<p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">Verify Action</p><h3 class="text-2xl font-black italic uppercase tracking-tighter mb-6">${name}</h3>`;
             if(type === 'qr') {
                 innerHtml += `
                     <div id="qr-placeholder" onclick="window.startQRScanner()" class="border-2 border-dashed border-[#1f1f1f] p-8 mb-4 flex flex-col items-center justify-center bg-black/50 rounded-sm hover:border-[#ff4d00] cursor-pointer transition">
@@ -731,7 +731,7 @@ window.shareLink = async (link) => {
                     }
                     if (claimSuccess) { 
                         await setDoc(doc(db, 'plot_users', state.user.uid), updatePayload, { merge: true }); 
-                        window.logActivity('MISSION', `hat die Operation '<span class="font-bold text-white">${name}</span>' absolviert.`);
+                        window.logActivity('MISSION', `hat '<span class="font-bold text-white">${name}</span>' absolviert.`);
                         if(newLvl > oldLvl) window.logActivity('LEVEL_UP', `hat <span class="font-bold">Level ${newLvl}</span> erreicht!`);
                     }
                     window.closeModal();
@@ -797,7 +797,7 @@ window.shareLink = async (link) => {
             const rewardId = `lvl${lvl}_${tier}`;
             try {
                 const reward = state.rewardData.find(r => r.lvl === lvl);
-                const itemName = reward ? reward[tier] : 'Loot';
+                const itemName = reward ? reward[tier] : 'Reward';
                 const currentRedeemed = state.profile.redeemed || [];
                 if(!currentRedeemed.includes(rewardId)) { 
                     currentRedeemed.push(rewardId); 
@@ -805,7 +805,7 @@ window.shareLink = async (link) => {
                 }
                 const container = document.getElementById('redeem-container');
                 if(container) { 
-                    container.innerHTML = `<div class="flex flex-col items-center justify-center py-6 animate-pop"><div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mb-4 shadow-[0_0_30px_rgba(34,197,94,0.5)]"><svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></div><h4 class="text-white font-black italic text-xl uppercase tracking-widest text-center">Ticket<br>eingelöst</h4><p class="text-gray-400 text-xs mt-3 text-center">Dieser Loot wurde erfolgreich<br>von deinem Konto abgebucht.</p></div>`; 
+                    container.innerHTML = `<div class="flex flex-col items-center justify-center py-6 animate-pop"><div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mb-4 shadow-[0_0_30px_rgba(34,197,94,0.5)]"><svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></div><h4 class="text-white font-black italic text-xl uppercase tracking-widest text-center">Reward<br>eingelöst</h4><p class="text-gray-400 text-xs mt-3 text-center">Dieser Reward wurde erfolgreich<br>für dich freigeschaltet.</p></div>`; 
                 }
                 window.logActivity('REDEEM', `hat '<span class="font-bold">${itemName}</span>' eingelöst.`);
                 window.showToast("Erfolgreich eingelöst!", "success");
@@ -852,7 +852,7 @@ window.shareLink = async (link) => {
             const isAlreadyRedeemed = (state.profile.redeemed || []).includes(rewardId);
             let contentHtml = '';
             if (isAlreadyRedeemed && (type === 'qr' || type === 'shipping' || type === 'xp' || type === 'lvl')) {
-                contentHtml = `<div class="bg-[#111] p-8 rounded-sm flex flex-col items-center justify-center mb-6 border border-white/5 shadow-inner"><div class="w-12 h-12 rounded-full border-2 border-gray-600 flex items-center justify-center mb-4 opacity-50"><svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div><p class="text-xs text-gray-500 uppercase tracking-widest font-bold text-center">Bereits eingelöst<br><span class="font-normal text-[10px] mt-1 block">Dieser Loot ist nicht mehr verfügbar.</span></p></div>`;
+                contentHtml = `<div class="bg-[#111] p-8 rounded-sm flex flex-col items-center justify-center mb-6 border border-white/5 shadow-inner"><div class="w-12 h-12 rounded-full border-2 border-gray-600 flex items-center justify-center mb-4 opacity-50"><svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div><p class="text-xs text-gray-500 uppercase tracking-widest font-bold text-center">Bereits eingelöst<br><span class="font-normal text-[10px] mt-1 block">Dieser Reward ist nicht mehr verfügbar.</span></p></div>`;
             } else if (type === 'link') {
                 const isUrl = info.startsWith('http');
                 contentHtml = `<div class="bg-[#1f1f1f] p-6 rounded-sm flex flex-col items-center justify-center mb-6 border ${borderClass}"><p class="text-xs text-gray-400 mb-4 uppercase tracking-widest font-bold">Access Code / Link</p>${isUrl ? `<a href="${info}" target="_blank" class="w-full ${bgClass} text-white font-black py-3 px-4 rounded-sm text-center uppercase tracking-widest hover:opacity-80 transition">Link öffnen</a>` : `<div class="w-full bg-black text-white font-mono text-xl py-3 px-4 rounded-sm text-center select-all border border-white/10">${info}</div>`}</div>`;
@@ -872,7 +872,7 @@ window.shareLink = async (link) => {
                 }
                 contentHtml = `<div class="bg-[#1f1f1f] p-6 rounded-sm flex flex-col mb-6 border border-white/10 relative"><div class="absolute top-0 right-0 bg-[#000] px-2 py-1 text-[8px] font-bold text-gray-500 uppercase tracking-widest rounded-bl-sm">One-Time Request</div><p class="text-xs text-gray-400 mb-4 leading-relaxed">${info}</p><div class="w-full">${fieldsHtml}</div><button type="button" onclick="window.submitShipping(${lvl}, '${tier}')" class="w-full ${bgClass} text-white font-black py-3 px-4 rounded-sm text-xs uppercase tracking-widest hover:opacity-80 transition">Versand anfordern</button></div>`;
             }
-            let innerHtml = `<p class="${textClass} text-[10px] font-black uppercase tracking-widest mb-1">Loot Stash</p><h3 class="text-2xl font-black italic uppercase tracking-tighter mb-6">${title}</h3>${contentHtml}<button type="button" onclick="window.closeModal()" class="w-full bg-[#111] text-gray-400 hover:bg-white hover:text-black font-black italic uppercase py-3 transition text-xs border border-white/5 rounded-sm">Schließen</button>`;
+            let innerHtml = `<p class="${textClass} text-[10px] font-black uppercase tracking-widest mb-1">Premium Reward</p><h3 class="text-2xl font-black italic uppercase tracking-tighter mb-6">${title}</h3>${contentHtml}<button type="button" onclick="window.closeModal()" class="w-full bg-[#111] text-gray-400 hover:bg-white hover:text-black font-black italic uppercase py-3 transition text-xs border border-white/5 rounded-sm">Schließen</button>`;
             window.openModal(innerHtml);
         };
 
@@ -886,7 +886,7 @@ window.shareLink = async (link) => {
             if (window.location.protocol === 'file:') return window.showToast("Bitte hosten (lokale Datei blockiert SMS).", "error");
             const fullPhone = document.getElementById('auth_prefix').value + document.getElementById('auth_phone').value.trim().replace(/^0+/, '');
             state.tempPhone = fullPhone; btn.disabled = true; btn.innerText = "Transmitting...";
-            const timeout = setTimeout(() => { if(btn.innerText === "Transmitting...") { btn.disabled = false; btn.innerText = "Enter The Drop"; window.showToast("Zeitüberschreitung.", "error"); } }, 10000);
+            const timeout = setTimeout(() => { if(btn.innerText === "Transmitting...") { btn.disabled = false; btn.innerText = "Join Network"; window.showToast("Zeitüberschreitung.", "error"); } }, 10000);
             try {
                 if (!window.recaptchaVerifier) window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { size: 'invisible' }); 
                 window.confirmationResult = await signInWithPhoneNumber(auth, fullPhone, window.recaptchaVerifier);
@@ -894,7 +894,7 @@ window.shareLink = async (link) => {
             } catch (err) { 
                 clearTimeout(timeout); 
                 if(window.recaptchaVerifier) { window.recaptchaVerifier.clear(); window.recaptchaVerifier = null; } 
-                window.showToast(err.message, "error"); btn.disabled = false; btn.innerText = "Enter The Drop"; 
+                window.showToast(err.message, "error"); btn.disabled = false; btn.innerText = "Join Network"; 
             }
         };
 
@@ -917,11 +917,11 @@ window.shareLink = async (link) => {
             const updateTutorial = () => {
                 let content = '';
                 if(step === 1) {
-                    content = `<div class="animate-fade-in text-center flex flex-col items-center w-full max-w-sm"><div class="w-20 h-20 bg-[#1f1f1f] rounded-full flex items-center justify-center mb-8 border border-[#ff4d00]/30 shadow-[0_0_30px_rgba(255,77,0,0.2)]"><svg class="w-10 h-10 text-[#ff4d00]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg></div><h2 class="text-[#ff4d00] text-[10px] font-black uppercase tracking-[0.4em] mb-2">Step 01</h2><h3 class="text-4xl font-black italic tracking-tighter mb-4 text-white uppercase">The Grind Track</h3><p class="text-gray-400 text-sm font-medium leading-relaxed mb-10">Jede Aktion bringt dir XP. Fülle den Balken, steige im Level auf und schalte echte Rewards und physischen Loot frei.</p><button onclick="document.getElementById('tutorial-layer').dataset.step = 2" class="w-full btn-grind py-4">Weiter</button></div>`;
+                    content = `<div class="animate-fade-in text-center flex flex-col items-center w-full max-w-sm"><div class="w-20 h-20 bg-[#1f1f1f] rounded-full flex items-center justify-center mb-8 border border-[#ff4d00]/30 shadow-[0_0_30px_rgba(255,77,0,0.2)]"><svg class="w-10 h-10 text-[#ff4d00]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg></div><h2 class="text-[#ff4d00] text-[10px] font-black uppercase tracking-[0.4em] mb-2">Step 01</h2><h3 class="text-4xl font-black italic tracking-tighter mb-4 text-white uppercase">The Network</h3><p class="text-gray-400 text-sm font-medium leading-relaxed mb-10">Connect your real-world routines and places into one shared network. Sammle XP, steige im Level auf und schalte echte Rewards frei.</p><button onclick="document.getElementById('tutorial-layer').dataset.step = 2" class="w-full btn-grind py-4">Weiter</button></div>`;
                 } else if(step === 2) {
-                    content = `<div class="animate-fade-in text-center flex flex-col items-center w-full max-w-sm"><div class="w-20 h-20 bg-[#1f1f1f] rounded-full flex items-center justify-center mb-8 border border-[#a855f7]/30 shadow-[0_0_30px_rgba(168,85,247,0.2)]"><svg class="w-10 h-10 text-[#a855f7]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg></div><h2 class="text-[#a855f7] text-[10px] font-black uppercase tracking-[0.4em] mb-2">Step 02</h2><h3 class="text-4xl font-black italic tracking-tighter mb-4 text-white uppercase">Operations</h3><p class="text-gray-400 text-sm font-medium leading-relaxed mb-10">Erfülle wöchentliche Missionen und tracke deine täglichen Habits. Scanne QR Codes vor Ort oder lade Beweisfotos hoch.</p><button onclick="document.getElementById('tutorial-layer').dataset.step = 3" class="w-full btn-grind py-4">Weiter</button></div>`;
+                    content = `<div class="animate-fade-in text-center flex flex-col items-center w-full max-w-sm"><div class="w-20 h-20 bg-[#1f1f1f] rounded-full flex items-center justify-center mb-8 border border-[#a855f7]/30 shadow-[0_0_30px_rgba(168,85,247,0.2)]"><svg class="w-10 h-10 text-[#a855f7]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg></div><h2 class="text-[#a855f7] text-[10px] font-black uppercase tracking-[0.4em] mb-2">Step 02</h2><h3 class="text-4xl font-black italic tracking-tighter mb-4 text-white uppercase">Active Spots & Habits</h3><p class="text-gray-400 text-sm font-medium leading-relaxed mb-10">Check into partner cafés, hit the gym, and build daily streaks to unlock exclusive local drops.</p><button onclick="document.getElementById('tutorial-layer').dataset.step = 3" class="w-full btn-grind py-4">Weiter</button></div>`;
                 } else if(step === 3) {
-                    content = `<div class="animate-fade-in text-center flex flex-col items-center w-full max-w-sm"><div class="w-20 h-20 bg-[#1f1f1f] rounded-full flex items-center justify-center mb-8 border border-blue-500/30 shadow-[0_0_30px_rgba(59,130,246,0.2)]"><svg class="w-10 h-10 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg></div><h2 class="text-blue-500 text-[10px] font-black uppercase tracking-[0.4em] mb-2">Step 03</h2><h3 class="text-4xl font-black italic tracking-tighter mb-4 text-white uppercase">Crew Bounty</h3><p class="text-gray-400 text-sm font-medium leading-relaxed mb-10">Grinden macht zusammen mehr Bock. Lade deine Freunde ein – jeder neue Member gibt dir und deinem Homie fette XP-Boosts.</p><button onclick="document.getElementById('tutorial-layer').dataset.step = 'close'" class="w-full btn-grind py-4 bg-[#ff4d00] text-white border-[#ff4d00]">Start Grinding</button></div>`;
+                    content = `<div class="animate-fade-in text-center flex flex-col items-center w-full max-w-sm"><div class="w-20 h-20 bg-[#1f1f1f] rounded-full flex items-center justify-center mb-8 border border-blue-500/30 shadow-[0_0_30px_rgba(59,130,246,0.2)]"><svg class="w-10 h-10 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg></div><h2 class="text-blue-500 text-[10px] font-black uppercase tracking-[0.4em] mb-2">Step 03</h2><h3 class="text-4xl font-black italic tracking-tighter mb-4 text-white uppercase">Crew Activity</h3><p class="text-gray-400 text-sm font-medium leading-relaxed mb-10">Build your circle. Jeder Homie den du einlädst, gibt dir und dem ganzen Network einen fetten XP-Boost.</p><button onclick="document.getElementById('tutorial-layer').dataset.step = 'close'" class="w-full btn-grind py-4 bg-[#ff4d00] text-white border-[#ff4d00]">Enter Network</button></div>`;
                 }
                 tutorialLayer.innerHTML = content;
             };
@@ -945,10 +945,10 @@ window.shareLink = async (link) => {
             const nameInput = document.getElementById('onboard_name').value.trim(); 
             const cityInput = document.getElementById('onboard_city').value;
             if(!nameInput) return window.showToast("Bitte gib einen Namen ein.", "error"); 
-            if(!cityInput || cityInput === "locked") return window.showToast("Bitte wähle deine Base.", "error");
+            if(!cityInput || cityInput === "locked") return window.showToast("Bitte wähle deine Stadt.", "error");
             const btn = e.target.querySelector('button'); btn.disabled = true; btn.innerText = "Registering...";
             const layer = document.createElement('div'); layer.id = 'intro-layer';
-            layer.innerHTML = `<div id="word1" class="word-flash text-gray-500">DROP IN.</div><div id="word2" class="word-flash text-white">CLEAR MISSIONS.</div><div id="word3" class="word-flash text-white">CLAIM LOOT.</div><div id="word4" class="word-flash"><img src="https://grind-app.de/logo.jpg" class="w-32 h-32 md:w-56 md:h-56 rounded-full border-4 border-[#ff4d00] shadow-[0_0_60px_rgba(255,77,0,0.5)] mx-auto object-cover"></div>`;
+            layer.innerHTML = `<div id="word1" class="word-flash text-gray-500">BUILD ROUTINES.</div><div id="word2" class="word-flash text-white">VISIT PLACES.</div><div id="word3" class="word-flash text-white">UNLOCK REWARDS.</div><div id="word4" class="word-flash"><img src="https://grind-app.de/logo.jpg" class="w-32 h-32 md:w-56 md:h-56 rounded-full border-4 border-[#ff4d00] shadow-[0_0_60px_rgba(255,77,0,0.5)] mx-auto object-cover"></div>`;
             document.body.appendChild(layer); 
             try {
                 const generatedCode = Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -961,7 +961,7 @@ window.shareLink = async (link) => {
                 setTimeout(() => { document.getElementById('word4').style.animation = `flashInOut ${timing * 1.5}ms forwards`; }, timing * 3);
                 setTimeout(() => { layer.style.opacity = "0"; setTimeout(() => layer.remove(), 800); window.startTutorial(); }, timing * 4.2);
                 state.view = 'dashboard'; state.dashboardNeedsScroll = true; render();
-            } catch (err) { layer.remove(); window.showToast("Fehler bei der Registrierung.", "error"); btn.disabled = false; btn.innerText = "Confirm Identity"; }
+            } catch (err) { layer.remove(); window.showToast("Fehler bei der Registrierung.", "error"); btn.disabled = false; btn.innerText = "Join Network"; }
         };
 
         window.generateShareCard = async () => {
@@ -994,16 +994,16 @@ window.shareLink = async (link) => {
             const progress = (safeXp % 1000) / 1000; ctx.fillStyle = '#ff4d00'; ctx.fillRect(startX, barY, barW * progress, barH);
             ctx.fillStyle = '#777777'; ctx.font = '700 26px "Inter", sans-serif'; 
             if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "4px"; 
-            ctx.fillText(`XP: ${safeXp} / ${safeLvl * 1000}   •   ${opsCount} OPERATIONS CLEARED`, 540, barY + 70); 
+            ctx.fillText(`XP: ${safeXp} / ${safeLvl * 1000}   •   ${opsCount} DROPS ACCESSED`, 540, barY + 70); 
             if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "0px";
-            let daysLeftText = `SEASON 0${seasonNum} • ACTIVE`;
+            let daysLeftText = `JOIN THE NETWORK • COLOGNE ACTIVE`;
             if (state.seasonConfig && state.seasonConfig.end) {
                 const endDate = new Date(state.seasonConfig.end); endDate.setHours(23, 59, 59, 999);
                 const diffTime = endDate.getTime() - new Date().getTime();
                 if (diffTime > 0) {
                     const dLeft = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-                    if(dLeft > 0) daysLeftText = `NOCH ${dLeft} TAG${dLeft === 1 ? '' : 'E'} LEFT`;
-                    else daysLeftText = "LETZTER TAG";
+                    if(dLeft > 0) daysLeftText = `JOIN THE NETWORK • COLOGNE ACTIVE`;
+                    else daysLeftText = "JOIN THE NETWORK • COLOGNE ACTIVE";
                 } else { daysLeftText = "SEASON ENDED"; }
             }
             ctx.fillStyle = '#333333'; ctx.font = '700 24px "Inter", sans-serif'; 
@@ -1016,7 +1016,7 @@ window.shareLink = async (link) => {
                 const file = new File([blob], fileName, { type: 'image/png' });
                 const fallback = () => { const link = document.createElement('a'); link.download = fileName; link.href = canvas.toDataURL('image/png'); link.click(); window.showToast("Erfolgreich exportiert.", "success"); };
                 if (navigator.canShare && navigator.canShare({ files: [file] })) { 
-                    try { await navigator.share({ files: [file], title: 'GRIND.', text: `Join the Hustle. My standing in Season ${seasonNum}: Level ${safeLvl}.` }); } catch (err) { if (err.name !== 'AbortError') fallback(); } 
+                    try { await navigator.share({ files: [file], title: 'GRIND.', text: `Join the Network. Cologne Active. Season ${seasonNum} Standing: Level ${safeLvl}.` }); } catch (err) { if (err.name !== 'AbortError') fallback(); } 
                 } else { fallback(); }
             }, 'image/png');
         };
@@ -1065,9 +1065,9 @@ window.shareLink = async (link) => {
                 const sStatus = getSeasonStatus();
                 if (sStatus.status !== 'active' && sStatus.status !== 'loading') {
                     const seasonNum = state.seasonConfig?.number || 1;
-                    let msg = "SYSTEM OFFLINE"; let submsg = "Die Season ist aktuell pausiert. Der Director bereitet das Network vor."; let countdownHtml = "";
+                    let msg = "SYSTEM OFFLINE"; let submsg = "Network restarting. Next drop incoming."; let countdownHtml = "";
                     if (sStatus.status === 'upcoming') {
-                        msg = `SEASON 0${seasonNum} INCOMING`; submsg = "Bereite dich vor. Der Drop startet in Kürze.";
+                        msg = `SEASON 0${seasonNum} INCOMING`; submsg = "Bereite dich vor. The network opens shortly.";
                         countdownHtml = `<div class="mt-10 text-3xl md:text-5xl font-mono font-black text-[#ff4d00] tracking-widest drop-shadow-[0_0_15px_rgba(255,77,0,0.5)]" id="season-countdown">CALCULATING...</div>`;
                         if(window.countdownInterval) clearInterval(window.countdownInterval);
                         window.countdownInterval = setInterval(window.updateCountdown, 1000); setTimeout(window.updateCountdown, 0);
@@ -1132,7 +1132,7 @@ window.shareLink = async (link) => {
                             <svg class="w-8 h-8 text-[#a855f7]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                         </div>
                         <h2 class="text-4xl font-black italic tracking-tighter mb-2">GRIND. <span class="text-[#a855f7]">PRO</span></h2>
-                        <p class="text-gray-400 font-bold uppercase tracking-widest text-[10px] mb-8 max-w-xs leading-relaxed">Schalte alle Premium-Rewards der Season 0${seasonNum} frei und maximiere deinen Progress.</p>
+                        <p class="text-gray-400 font-bold uppercase tracking-widest text-[10px] mb-8 max-w-xs leading-relaxed">Unlock exclusive rewards, access limited partner drops and enter the PRO Network.</p>
                         <div class="bg-[#0a0a0a] border border-[#1f1f1f] p-8 rounded-sm mb-6 w-full max-w-sm shadow-2xl relative overflow-hidden group">
                             <div class="absolute inset-0 bg-gradient-to-t from-[#a855f7]/10 to-transparent opacity-50"></div>
                             <div class="relative z-10">
@@ -1142,7 +1142,7 @@ window.shareLink = async (link) => {
                             </div>
                         </div>
                         <p class="text-[9px] text-gray-600 uppercase tracking-widest mt-2 mb-6 max-w-xs mx-auto leading-relaxed">Mit dem Kauf stimmst du unseren <span class="text-white underline cursor-pointer hover:text-[#a855f7]" onclick="window.setView('agb')">AGB</span> zu und verzichtest auf das Widerrufsrecht für diesen digitalen Inhalt.</p>
-                        <button type="button" onclick="window.setView('dashboard')" class="text-gray-600 hover:text-white text-[10px] uppercase tracking-[0.2em] font-bold transition">Zurück zum Grind.</button>
+                        <button type="button" onclick="window.setView('dashboard')" class="text-gray-600 hover:text-white text-[10px] uppercase tracking-[0.2em] font-bold transition">Zurück zum Network</button>
                     </div>
                     ${getFooterHTML()}
                 `;
@@ -1160,19 +1160,19 @@ window.shareLink = async (link) => {
             if (state.view === 'onboarding') {
                 appDiv.innerHTML = `
                     <div class="flex-1 flex flex-col items-center justify-center p-6 min-h-[80vh] text-center">
-                        <h1 class="text-4xl md:text-5xl font-black italic tracking-tighter mb-2">IDENTIFICATION<span class="text-[#ff4d00]">.</span></h1>
-                        <p class="text-gray-500 font-bold uppercase tracking-widest text-[10px] mb-12 max-w-sm leading-relaxed">Wähle deine Base und finde deinen Health Tribe.</p>
+                        <h1 class="text-4xl md:text-5xl font-black italic tracking-tighter mb-2">CREATE PROFILE<span class="text-[#ff4d00]">.</span></h1>
+                        <p class="text-gray-500 font-bold uppercase tracking-widest text-[10px] mb-12 max-w-sm leading-relaxed">Wähle deine Stadt und trete dem Network bei.</p>
                         <form onsubmit="window.submitOnboarding(event)" class="w-full max-w-sm space-y-4">
                             <input id="onboard_name" type="text" placeholder="Dein Name" required class="w-full p-4 bg-[#0f0f0f] border border-[#1f1f1f] rounded-sm outline-none focus:border-[#ff4d00] text-white transition text-center text-xl tracking-widest uppercase font-black italic">
                             <div class="relative">
                                 <select id="onboard_city" required class="w-full p-4 bg-[#0f0f0f] border border-[#1f1f1f] rounded-sm outline-none focus:border-[#ff4d00] text-white transition text-center text-lg tracking-widest uppercase font-bold appearance-none cursor-pointer">
-                                    <option value="" disabled selected class="text-gray-600">Base wählen</option>
+                                    <option value="" disabled selected class="text-gray-600">City wählen</option>
                                     <option value="Köln">Köln</option>
                                     <option value="locked" disabled class="text-gray-600">Weitere Städte in Kürze...</option>
                                 </select>
                                 <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></div>
                             </div>
-                            <button type="submit" class="w-full btn-grind py-4 mt-2">Confirm Identity</button>
+                            <button type="submit" class="w-full btn-grind py-4 mt-2">Join Network</button>
                         </form>
                     </div>
                 `; 
@@ -1180,8 +1180,7 @@ window.shareLink = async (link) => {
             }
 
             if (state.view === 'auth') {
-                const seasonNum = state.seasonConfig?.number || 1;
-                let authHtml = `<div class="flex-1 flex flex-col items-center justify-center p-6 min-h-[80vh] text-center"><h1 class="text-6xl md:text-8xl font-black italic tracking-tighter mb-2">GRIND<span class="text-[#ff4d00]">.</span></h1><p class="text-gray-500 font-bold uppercase tracking-widest text-xs mb-12 max-w-sm leading-relaxed">Season 0${seasonNum}</p><div class="w-full max-w-sm">`;
+                let authHtml = `<div class="flex-1 flex flex-col items-center justify-center p-6 min-h-[80vh] text-center"><h1 class="text-6xl md:text-8xl font-black italic tracking-tighter mb-2">GRIND<span class="text-[#ff4d00]">.</span></h1><p class="text-gray-500 font-bold uppercase tracking-widest text-xs mb-12 max-w-sm leading-relaxed">The Real-World Lifestyle Game</p><div class="w-full max-w-sm">`;
                 if (state.authStep === 'phone') { 
                     authHtml += `
                         <form onsubmit="window.sendSMS(event)" class="space-y-4">
@@ -1193,7 +1192,7 @@ window.shareLink = async (link) => {
                                 </select>
                                 <input id="auth_phone" type="tel" placeholder="170 1234567" required class="flex-1 p-4 bg-[#0f0f0f] border border-[#1f1f1f] rounded-sm outline-none focus:border-[#ff4d00] text-white transition text-center text-lg tracking-widest">
                             </div>
-                            <button id="auth_submit_btn" type="submit" class="w-full btn-grind py-4">Enter The Drop</button>
+                            <button id="auth_submit_btn" type="submit" class="w-full btn-grind py-4">Join Network</button>
                         </form>
                     `; 
                 } else { 
@@ -1307,9 +1306,35 @@ window.shareLink = async (link) => {
                     </section>
                     <main class="max-w-6xl mx-auto px-6 w-full relative z-10 pb-10">
                         <section class="max-w-3xl mx-auto mb-12">
+                            <div class="flex flex-col gap-6 mb-6">
+                                <div class="flex justify-between items-end border-b border-white/10 pb-4">
+                                    <div><p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">Local Network</p><h3 class="text-3xl font-black uppercase italic tracking-tighter">Active Spots</h3></div>
+                                    <span class="text-[10px] font-black bg-white text-black px-3 py-1 italic shadow-[0_0_10px_rgba(255,255,255,0.4)] uppercase">${p.city || 'KÖLN'}</span>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="card p-4 rounded-sm border border-white/5 flex flex-col items-center text-center hover:border-white/20 transition">
+                                    <div class="w-12 h-12 bg-[#1f1f1f] rounded-full flex items-center justify-center mb-3 text-xl">☕</div>
+                                    <h4 class="font-black italic uppercase text-sm">GuMo Café</h4>
+                                    <p class="text-[9px] text-gray-500 uppercase tracking-widest mt-1">Morning Drop</p>
+                                </div>
+                                <div class="card p-4 rounded-sm border border-white/5 flex flex-col items-center text-center hover:border-white/20 transition">
+                                    <div class="w-12 h-12 bg-[#1f1f1f] rounded-full flex items-center justify-center mb-3 text-xl">🏋️</div>
+                                    <h4 class="font-black italic uppercase text-sm">Rocycle</h4>
+                                    <p class="text-[9px] text-gray-500 uppercase tracking-widest mt-1">Check-in Reward</p>
+                                </div>
+                                <div class="card p-4 rounded-sm border border-white/5 flex flex-col items-center text-center hover:border-white/20 transition">
+                                    <div class="w-12 h-12 bg-[#1f1f1f] rounded-full flex items-center justify-center mb-3 text-xl">🥗</div>
+                                    <h4 class="font-black italic uppercase text-sm">Emmi's</h4>
+                                    <p class="text-[9px] text-gray-500 uppercase tracking-widest mt-1">Recovery Meal</p>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="max-w-3xl mx-auto mb-12">
                             <div class="flex flex-col gap-6 mb-10">
                                 <div class="flex justify-between items-end border-b border-white/10 pb-4">
-                                    <div><p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">Operations</p><h3 class="text-3xl font-black uppercase italic tracking-tighter">${(state.weeklyData[currentMonthWeek] || {title: 'Active Week'}).title}</h3><p class="text-gray-500 text-[10px] font-bold tracking-widest mt-1">${weekDaysLeftText}</p></div>
+                                    <div><p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">Time-Limited</p><h3 class="text-3xl font-black uppercase italic tracking-tighter">${(state.weeklyData[currentMonthWeek] || {title: 'Active Week'}).title}</h3><p class="text-gray-500 text-[10px] font-bold tracking-widest mt-1">${weekDaysLeftText}</p></div>
                                     <span class="text-[10px] font-black bg-[#ff4d00] text-white px-3 py-1 italic shadow-[0_0_10px_rgba(255,77,0,0.4)]">LIVE</span>
                                 </div>
                                 <div class="flex flex-wrap gap-2">
@@ -1324,15 +1349,15 @@ window.shareLink = async (link) => {
 
                 html += `</div></div><div class="space-y-4">`;
                 const currentMissions = state.weeklyData[currentMonthWeek]?.missions || [];
-                if (currentMissions.length === 0) html += `<div class="text-center p-8 text-gray-600 italic text-sm">Der Director bereitet die Operations vor. Stay focused.</div>`;
+                if (currentMissions.length === 0) html += `<div class="text-center p-8 text-gray-600 italic text-sm">Das Network synchronisiert neue Drops. Stay ready.</div>`;
 
                 currentMissions.forEach(m => {
                     const isCompleted = safeCompleted.includes(m.id);
                     const isPending = state.pendingMissions.some(p => p.mid === m.id) && !isCompleted;
-                    let badgeText = m.type === 'qr' ? '📍 QR Scan' : (m.type === 'upload' ? '📷 Photo Upload' : (m.type === 'instant' ? '⚡ Direkt Claim' : '⚡ Action'));
+                    let badgeText = m.type === 'qr' ? '📍 Check-in' : (m.type === 'upload' ? '📷 Photo Upload' : (m.type === 'instant' ? '⚡ Direkt Claim' : '⚡ Action'));
                     const safeName = m.name.replace(/'/g, "\\'"); const safeQrSolution = m.qr_solution ? m.qr_solution.replace(/'/g, "\\'") : '';
                     const btnAction = m.type === 'instant' ? `window.claimInstantMission('${m.id}', ${m.xp}, '${safeName}')` : `window.openVerifyModal('${m.id}', ${m.xp}, '${m.type}', '${safeName}', '${safeQrSolution}')`;
-                    let btnText = m.type === 'instant' ? 'Claim XP' : 'Verify Operation';
+                    let btnText = m.type === 'instant' ? 'Claim XP' : 'Verify Action';
                     if (isCompleted) btnText = 'Verified'; else if (isPending) btnText = 'Wird überprüft ⏳';
                     let cardClasses = 'card p-6 rounded-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4 group relative overflow-hidden ';
                     if (isCompleted) cardClasses += 'is-completed border-[#ff4d00]/30'; else if (isPending) cardClasses += 'is-pending border-yellow-500/30';
@@ -1398,7 +1423,7 @@ window.shareLink = async (link) => {
                     else if (isPending) cardClasses += 'is-pending border-yellow-500/30';
                     else if (isExpired) cardClasses += 'opacity-50 cursor-not-allowed';
 
-                    let badgeText = m.type === 'qr' ? '📍 QR Scan' : (m.type === 'upload' ? '📷 Photo Upload' : '⚡ Action');
+                    let badgeText = m.type === 'qr' ? '📍 Check-in' : (m.type === 'upload' ? '📷 Photo Upload' : '⚡ Action');
                     const safeName = m.name.replace(/'/g, "\\'"); const safeQrSolution = m.qr_solution ? m.qr_solution.replace(/'/g, "\\'") : '';
                     let btnAction = '';
                     if (!isExpired) btnAction = m.type === 'instant' ? `window.claimInstantMission('${m.id}', ${m.xp}, '${safeName}')` : `window.openVerifyModal('${m.id}', ${m.xp}, '${m.type}', '${safeName}', '${safeQrSolution}')`;
@@ -1467,7 +1492,7 @@ window.shareLink = async (link) => {
 
                 if (feedActivities.length === 0) {
                     if (friendsList.length === 0) html += `<div class="text-center p-8 text-gray-600 italic text-sm border border-white/5 rounded-sm bg-black/50">Deine Crew ist noch leer. <br><span class="text-[#ff4d00] font-bold">Lade Freunde ein und kassiere deinen XP Boost!</span></div>`;
-                    else html += `<div class="text-center p-8 text-gray-600 italic text-sm border border-white/5 rounded-sm bg-black/50">Noch keine Aktivität in deiner Crew. Time to grind!</div>`;
+                    else html += `<div class="text-center p-8 text-gray-600 italic text-sm border border-white/5 rounded-sm bg-black/50">Noch keine Aktivität in deiner Crew. Time to get active!</div>`;
                 } else {
                     html += `<div class="space-y-4 relative before:absolute before:inset-y-0 before:left-[19px] before:w-[2px] before:bg-[#1f1f1f]">`;
                     feedActivities.forEach(act => {
@@ -1584,8 +1609,8 @@ window.shareLink = async (link) => {
                 <div class="flex-1 flex flex-col items-center justify-center text-center p-6 min-h-[80vh] relative z-20">
                     <h1 class="text-8xl md:text-9xl font-black italic text-[#1f1f1f] tracking-tighter mb-4 select-none">404</h1>
                     <p class="text-[#ff4d00] font-black uppercase tracking-[0.4em] mb-8 text-sm">Signal Lost</p>
-                    <p class="text-gray-500 font-bold max-w-xs text-xs leading-relaxed mb-10">Die angeforderte Position existiert nicht auf der Grind Map.</p>
-                    <button onclick="window.setView('dashboard')" class="btn-grind">Return to Base</button>
+                    <p class="text-gray-500 font-bold max-w-xs text-xs leading-relaxed mb-10">Die angeforderte Position existiert nicht im Network.</p>
+                    <button onclick="window.setView('dashboard')" class="btn-grind">Return to Network</button>
                 </div>
             `;
         }
@@ -1595,7 +1620,7 @@ window.shareLink = async (link) => {
             <button onclick="closeInstallBanner()" class="absolute top-4 right-4 text-gray-500 hover:text-white transition"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
             <div class="w-20 h-20 bg-[#1f1f1f] rounded-full mx-auto flex items-center justify-center mb-6 border-2 border-[#ff4d00]"><img src="https://grind-app.de/logo.jpg" class="w-full h-full rounded-full object-cover" alt="Logo"></div>
             <h3 class="text-3xl font-black italic uppercase tracking-tighter mb-2">Install App</h3>
-            <p class="text-gray-400 text-xs font-medium leading-relaxed mb-8">Füge GRIND. zu deinem Home-Bildschirm hinzu, um direkt und im schnellen Fullscreen auf den Tracker zuzugreifen.</p>
+            <p class="text-gray-400 text-xs font-medium leading-relaxed mb-8">Füge GRIND. zu deinem Home-Bildschirm hinzu, um direkt und im schnellen Fullscreen auf das Network zuzugreifen.</p>
             <div class="bg-black/50 border border-white/10 p-5 rounded-sm flex flex-col gap-5 text-left mb-8">
                 <div class="flex items-center gap-4 text-sm text-gray-300">
                     <span class="w-6 h-6 rounded-full bg-[#1f1f1f] text-[#ff4d00] flex items-center justify-center font-black text-xs flex-shrink-0">1</span>
