@@ -106,7 +106,7 @@
     <div class="grid-overlay"></div>
     
     <!-- Smart Live Notification Badge -->
-    <div id="live-notification-badge" class="fixed top-6 left-1/2 transform -translate-x-1/2 -translate-y-32 opacity-0 z-[99999] transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] pointer-events-none w-[90%] max-w-sm">
+    <div id="live-notification-badge" class="fixed top-6 left-1/2 z-[99999] transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] pointer-events-none w-[90%] max-w-sm" style="transform: translate(-50%, -8rem); opacity: 0;">
         <div id="live-notification-box" class="bg-black/90 backdrop-blur-md border border-[#ff4d00]/50 shadow-[0_10px_40px_rgba(255,77,0,0.3)] rounded-full py-3 px-5 flex items-center gap-3">
             <span id="live-notification-ping" class="relative flex h-3 w-3 flex-shrink-0 hidden">
                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#ff4d00] opacity-75"></span>
@@ -118,10 +118,10 @@
 
     <div id="toast-container"></div>
     
-    <!-- Original XP Dropdown HUD -->
-    <div id="xp-hud" class="fixed top-0 left-0 right-0 z-[999998] transform -translate-y-[150%] transition-transform duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] pointer-events-none flex justify-center pt-4 px-4 sm:px-6">
+    <!-- Smart XP Dropdown HUD -->
+    <div id="xp-hud" class="fixed top-0 left-0 right-0 z-[999998] transition-transform duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] pointer-events-none flex justify-center pt-4 px-4 sm:px-6" style="transform: translateY(-150%);">
         <div class="absolute top-2 w-full max-w-md h-32 bg-black/60 blur-2xl rounded-full pointer-events-none z-0 gpu-blur"></div>
-        <div class="bg-[#0a0a0a]/80 border border-[#ff4d00]/40 shadow-[0_20px_50px_rgba(0,0,0,0.7),_0_0_20px_rgba(255,77,0,0.15)] rounded-xl p-5 w-full max-w-sm flex flex-col gap-3 relative overflow-hidden backdrop-blur-2xl z-10">
+        <div class="bg-[#0a0a0a]/80 border border-[#ff4d00]/40 shadow-[0_20px_50px_rgba(0,0,0,0.7),_0_0_20px_rgba(255,77,0,0.15)] rounded-xl p-5 w-full max-w-sm flex flex-col gap-3 relative overflow-hidden backdrop-blur-2xl z-10 pointer-events-auto">
             <div class="absolute inset-0 bg-gradient-to-b from-[#ff4d00]/15 to-transparent"></div>
             <div class="relative z-10 flex justify-between items-end">
                 <div>
@@ -219,13 +219,14 @@
 
             if (showPing) ping.classList.remove('hidden'); else ping.classList.add('hidden');
             
-            notif.classList.remove('-translate-y-32', 'opacity-0');
-            notif.classList.add('translate-y-0', 'opacity-100');
+            // Fixes the Tailwind dynamic class rendering issue
+            notif.style.transform = 'translate(-50%, 0)';
+            notif.style.opacity = '1';
             
             if(window.notificationHideTimeout) clearTimeout(window.notificationHideTimeout);
             window.notificationHideTimeout = setTimeout(() => {
-                notif.classList.remove('translate-y-0', 'opacity-100');
-                notif.classList.add('-translate-y-32', 'opacity-0');
+                notif.style.transform = 'translate(-50%, -8rem)'; // Equals -translate-y-32
+                notif.style.opacity = '0';
             }, 4000);
         };
 
@@ -1298,9 +1299,9 @@
                             hudXpBar.style.width = `${oldXpProgress}%`; 
                             void hudXpBar.offsetWidth; 
                             
-                            // Fenster Dropdown
-                            hud.classList.remove('-translate-y-[150%]', 'pointer-events-none'); 
-                            hud.classList.add('translate-y-0', 'pointer-events-auto'); 
+                            // Fixes the Tailwind dynamic class rendering issue
+                            hud.style.transform = 'translateY(0)';
+                            hud.style.pointerEvents = 'auto';
                             
                             animateValue('hud-xp-num', state.prevXp, safeXp, 2500);
                             
@@ -1327,8 +1328,8 @@
                             
                             if (window.hudCloseTimeout) clearTimeout(window.hudCloseTimeout);
                             window.hudCloseTimeout = setTimeout(() => { 
-                                hud.classList.remove('translate-y-0', 'pointer-events-auto'); 
-                                hud.classList.add('-translate-y-[150%]', 'pointer-events-none'); 
+                                hud.style.transform = 'translateY(-150%)';
+                                hud.style.pointerEvents = 'none';
                                 if(hudLvl) hudLvl.classList.remove('animate-level-up'); 
                             }, 5000);
                         }
