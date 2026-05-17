@@ -1054,7 +1054,7 @@
                     const r = state.rewardData.find(x => x.lvl === i); 
                     const isUnlocked = i <= safeLvl; 
                     const isProUnlocked = isUnlocked && hasPremium; 
-                    const freeClaimed = safeRedeemed.includes class="rounded-full"(`lvl${i}_free`); 
+                    const freeClaimed = safeRedeemed.includes(`lvl${i}_free`); 
                     const proClaimed = safeRedeemed.includes(`lvl${i}_pro`);
                     
                     html += `
