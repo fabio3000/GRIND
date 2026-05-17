@@ -24,10 +24,8 @@
         .text-brand { color: #ff4d00; } 
         .bg-brand { background: #ff4d00; }
         
-        .card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; transition: all 0.3s ease; position: relative; z-index: 10; backdrop-filter: blur(10px); }
-        .card:hover { border-color: rgba(255, 77, 0, 0.4); box-shadow: 0 10px 30px rgba(255, 77, 0, 0.1); transform: translateY(-2px); }
         .mockup { background: #080808; border: 1px solid #181818; border-radius: 14px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.7); position: relative; transition: all 0.3s ease; }
-        .mockup:hover { border-color: rgba(255, 77, 0, 0.3); transform: translateY(-2px); }
+        .mockup.interactive:hover { border-color: rgba(255, 77, 0, 0.3); transform: translateY(-2px); }
         
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; scroll-behavior: smooth; }
@@ -43,27 +41,16 @@
         .week-btn { border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.02); transition: all 0.2s; border-radius: 6px; }
         .week-btn.active { background: #ff4d00; color: white; border-color: #ff4d00; font-weight: 900; box-shadow: 0 0 15px rgba(255, 77, 0, 0.2); }
         
-        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 99999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
-        .toast { pointer-events: auto; background: #0a0a0a; border: 1px solid #1f1f1f; color: white; padding: 16px 24px; border-radius: 8px; font-size: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.8); transform: translateX(120%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: flex; align-items: center; gap: 12px; }
-        .toast.show { transform: translateX(0); } 
-        .toast.success { border-left: 4px solid #ff4d00; } 
-        .toast.error { border-left: 4px solid #dc2626; } 
-        .toast.info { border-left: 4px solid #3b82f6; }
-        
         .btn-grind { background: white; color: black; font-weight: 900; text-transform: uppercase; letter-spacing: 0.08em; padding: 14px 28px; font-size: 12px; transition: 0.25s ease; box-shadow: 0 4px 15px rgba(255,255,255,0.05); cursor: pointer; border-radius: 6px; border: none; }
-        .btn-grind:hover { background: #ff4d00; color: white; transform: translateY(-2px); box-shadow: 0 10px 30px rgba(255,77,0,0.25); }
-        .btn-grind:disabled { background: #1f1f1f; color: #555; cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn-grind:hover:not(:disabled) { background: #ff4d00; color: white; transform: translateY(-2px); box-shadow: 0 10px 30px rgba(255,77,0,0.25); }
+        .btn-grind:disabled { cursor: not-allowed; transform: none; box-shadow: none; }
+        
         .btn-pro { background: rgba(168,85,247,0.1); color: #a855f7; font-weight: 900; text-transform: uppercase; letter-spacing: 0.08em; padding: 12px 24px; font-size: 11px; transition: 0.25s ease; cursor: pointer; border-radius: 6px; border: 1px solid rgba(168,85,247,0.3); }
         .btn-pro:hover { background: #a855f7; color: white; box-shadow: 0 10px 30px rgba(168,85,247,0.25); border-color: #a855f7; transform: translateY(-2px); }
         
         @keyframes subtle-pulse { 0%, 100% { opacity: 1; box-shadow: 0 0 10px rgba(255, 77, 0, 0.1); border-color: rgba(255, 77, 0, 0.3); } 50% { opacity: 0.95; box-shadow: 0 0 20px rgba(255, 77, 0, 0.4); border-color: rgba(255, 77, 0, 0.6); } }
         .btn-bounty { animation: subtle-pulse 3s infinite ease-in-out; background: rgba(255,255,255,0.02); color: white; border: 1px solid rgba(255, 77, 0, 0.3); cursor: pointer; transition: all 0.3s ease; border-radius: 6px; }
         .btn-bounty:hover { background: rgba(255,77,0,0.1); border-color: #ff4d00; box-shadow: 0 0 25px rgba(255, 77, 0, 0.5); transform: translateY(-2px); }
-        
-        .completed-overlay { position: absolute; inset: 0; background: rgba(5,5,5,0.8); z-index: 10; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px); opacity: 0; transition: opacity 0.3s; pointer-events: none; border-radius: 12px; }
-        .card.is-completed .completed-overlay, .mockup.is-completed .completed-overlay { opacity: 1; pointer-events: auto; }
-        .pending-overlay { position: absolute; inset: 0; background: rgba(5,5,5,0.8); z-index: 10; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px); opacity: 0; transition: opacity 0.3s; pointer-events: none; border-radius: 12px; }
-        .card.is-pending .pending-overlay, .mockup.is-pending .pending-overlay { opacity: 1; pointer-events: auto; }
         
         @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.1) translateY(-5px); text-shadow: 0 0 20px rgba(255,77,0,0.8); color: #ff4d00; } 100% { transform: scale(1) translateY(0); } }
         .animate-pop { animation: pop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
@@ -75,6 +62,9 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes pulse-slow { 0%, 100% { opacity: 0.3; transform: scale(0.95); } 50% { opacity: 1; transform: scale(1.05); } }
         .animate-pulse-slow { animation: pulse-slow 4s ease-in-out infinite; }
+        
+        .grecaptcha-badge { filter: invert(1) grayscale(0.2) opacity(0.3); transition: all 0.5s ease !important; bottom: 20px !important; z-index: 100; }
+        .grecaptcha-badge:hover { filter: invert(1) grayscale(0) opacity(0.8); }
         
         #intro-layer { position: fixed; inset: 0; z-index: 999999; background-color: #030303; display: flex; align-items: center; justify-content: center; transition: opacity 0.8s ease; }
         .word-flash { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 8vw; font-weight: 900; font-style: italic; text-transform: uppercase; white-space: nowrap; opacity: 0; letter-spacing: -0.02em; text-align: center; }
@@ -94,26 +84,25 @@
 <body class="flex flex-col relative select-none">
     <div class="grid-overlay"></div>
     
-    <!-- Smart Live Notification Badge (Ersetzt den Ticker) -->
-    <div id="live-notification-badge" class="fixed top-6 left-1/2 transform -translate-x-1/2 -translate-y-32 opacity-0 z-[99999] transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] pointer-events-none w-[90%] max-w-sm">
-        <div class="bg-black/90 backdrop-blur-md border border-[#ff4d00]/30 shadow-[0_10px_40px_rgba(255,77,0,0.3)] rounded-full py-3 px-5 flex items-center gap-3">
-            <span class="relative flex h-3 w-3 flex-shrink-0">
+    <!-- Smart Live Notification Badge (Ersetzt die Toasts und Ticker komplett) -->
+    <div id="live-notification-badge" class="fixed top-6 left-1/2 transform -translate-x-1/2 -translate-y-32 opacity-0 z-[99999] transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] pointer-events-none w-max max-w-[90vw]">
+        <div id="live-notification-box" class="bg-black/95 backdrop-blur-md border border-[#ff4d00]/50 shadow-[0_10px_40px_rgba(255,77,0,0.3)] rounded-full py-3 px-6 flex items-center justify-center gap-3">
+            <span id="live-notification-ping" class="relative flex h-3 w-3 flex-shrink-0 hidden">
                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#ff4d00] opacity-75"></span>
                 <span class="relative inline-flex rounded-full h-3 w-3 bg-[#ff4d00]"></span>
             </span>
-            <span id="live-notification-text" class="text-white text-[11px] font-bold uppercase tracking-widest truncate w-full"></span>
+            <span id="live-notification-text" class="text-white text-[11px] font-bold uppercase tracking-widest text-center whitespace-normal break-words leading-snug"></span>
         </div>
     </div>
 
-    <div id="toast-container"></div>
-    
-    <!-- XP Dropdown HUD -->
+    <!-- Das originale große XP HUD aus dem alten Code! -->
     <div id="xp-hud" class="fixed top-0 left-0 right-0 z-[999998] transform -translate-y-[150%] transition-transform duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] pointer-events-none flex justify-center pt-4 px-4 sm:px-6">
-        <div class="absolute inset-0 bg-[#0a0a0a]/80 backdrop-blur-2xl rounded-xl border border-[#ff4d00]/40 shadow-[0_20px_50px_rgba(0,0,0,0.7)] p-5 w-full max-w-sm mx-auto flex flex-col gap-3 relative overflow-hidden pointer-events-auto">
-            <div class="absolute inset-0 bg-gradient-to-b from-[#ff4d00]/10 to-transparent"></div>
+        <div class="absolute top-2 w-full max-w-md h-32 bg-black/60 blur-2xl rounded-full pointer-events-none z-0"></div>
+        <div class="bg-[#0a0a0a]/70 border border-[#ff4d00]/40 shadow-[0_20px_50px_rgba(0,0,0,0.7),_0_0_20px_rgba(255,77,0,0.15)] rounded-lg p-5 w-full max-w-sm flex flex-col gap-3 relative overflow-hidden backdrop-blur-2xl z-10">
+            <div class="absolute inset-0 bg-gradient-to-b from-[#ff4d00]/15 to-transparent"></div>
             <div class="relative z-10 flex justify-between items-end">
                 <div>
-                    <p class="text-[#ff4d00] text-[9px] font-black uppercase tracking-[0.3em] mb-1 drop-shadow-md">Network Sync</p>
+                    <p class="text-[#ff4d00] text-[9px] font-black uppercase tracking-[0.3em] mb-1 drop-shadow-md">XP Sync</p>
                     <h4 class="text-white font-black italic text-2xl leading-none">LVL <span id="hud-lvl">1</span></h4>
                 </div>
                 <div class="text-right">
@@ -186,16 +175,42 @@
             return `vor ${Math.floor(diff/86400)} Tagen`;
         };
 
-        // Robuste Date Helper die keine NaN Fehler werfen
         const getYesterdayStr = () => { const d = new Date(); d.setDate(d.getDate() - 1); return d.toISOString().split('T')[0]; };
         const getWeekYear = (d) => { const date = new Date(d.getTime()); date.setUTCDate(date.getDate() + 4 - (date.getDay()||7)); const yearStart = new Date(Date.UTC(date.getUTCFullYear(),0,1)); return `${date.getUTCFullYear()}-W${Math.ceil(( ( (date - yearStart) / 86400000) + 1)/7)}`; };
         const getPreviousWeekStr = () => { const d = new Date(); d.setDate(d.getDate() - 7); return getWeekYear(d); };
 
+        // Unified Notification System (Replaces Toast & Ticker)
+        window.showLiveNotification = (text, type = 'success', showPing = false) => {
+            const notif = document.getElementById('live-notification-badge');
+            const box = document.getElementById('live-notification-box');
+            const textEl = document.getElementById('live-notification-text');
+            const ping = document.getElementById('live-notification-ping');
+            if(!notif || !textEl || !box) return;
+            
+            textEl.innerHTML = text; 
+            
+            if (type === 'error') {
+                box.className = "bg-black/95 backdrop-blur-md border border-red-500 shadow-[0_10px_40px_rgba(239,68,68,0.3)] rounded-full py-3 px-6 flex items-center gap-3";
+                textEl.className = "text-red-400 text-[11px] font-bold uppercase tracking-widest text-center whitespace-normal break-words leading-snug";
+            } else {
+                box.className = "bg-black/95 backdrop-blur-md border border-[#ff4d00]/50 shadow-[0_10px_40px_rgba(255,77,0,0.3)] rounded-full py-3 px-6 flex items-center gap-3";
+                textEl.className = "text-white text-[11px] font-bold uppercase tracking-widest text-center whitespace-normal break-words leading-snug";
+            }
+
+            if (showPing) ping.classList.remove('hidden'); else ping.classList.add('hidden');
+            
+            notif.classList.remove('-translate-y-32', 'opacity-0');
+            notif.classList.add('translate-y-0', 'opacity-100');
+            
+            if(window.notificationHideTimeout) clearTimeout(window.notificationHideTimeout);
+            window.notificationHideTimeout = setTimeout(() => {
+                notif.classList.remove('translate-y-0', 'opacity-100');
+                notif.classList.add('-translate-y-32', 'opacity-0');
+            }, 4000);
+        };
+
         window.showToast = (msg, type = 'success') => {
-            const container = document.getElementById('toast-container'); const toast = document.createElement('div'); toast.className = `toast ${type}`;
-            const icon = type === 'error' ? `<svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>` : `<svg class="w-5 h-5 text-[#ff4d00]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>`;
-            toast.innerHTML = `${icon} <div><div class="font-black text-[10px] uppercase tracking-widest text-gray-400 mb-0.5">System</div><div>${msg}</div></div>`;
-            container.appendChild(toast); setTimeout(() => toast.classList.add('show'), 10); setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 4000);
+            window.showLiveNotification(msg, type, false);
         };
 
         window.logActivity = async (type, text, customAlias = null, customIsPro = null) => {
@@ -244,25 +259,9 @@
             });
         };
 
-        // --- SMART ANIMATED NOTIFICATION BADGE ---
         let notificationQueue = [];
         let isShowingNotification = false;
         let lastNotifiedTimestamp = Date.now(); 
-
-        window.showLiveNotification = (text) => {
-            const notif = document.getElementById('live-notification-badge');
-            const textEl = document.getElementById('live-notification-text');
-            if(!notif || !textEl) return;
-            
-            textEl.innerText = text;
-            notif.classList.remove('-translate-y-32', 'opacity-0');
-            notif.classList.add('translate-y-0', 'opacity-100');
-            
-            setTimeout(() => {
-                notif.classList.remove('translate-y-0', 'opacity-100');
-                notif.classList.add('-translate-y-32', 'opacity-0');
-            }, 4000);
-        };
 
         const processNotificationQueue = () => {
             if (isShowingNotification || notificationQueue.length === 0) return;
@@ -270,7 +269,7 @@
             
             const act = notificationQueue.shift();
             const t = act.text.replace(/<[^>]*>?/gm, ''); 
-            window.showLiveNotification(`⚡ Jemand ${t}`);
+            window.showLiveNotification(`⚡ <span class="text-[#ff4d00]">${act.alias}</span> ${t}`, 'success', true);
             
             setTimeout(() => {
                 isShowingNotification = false;
@@ -278,44 +277,31 @@
             }, 4500); 
         };
 
+        const generateFeedHTML = () => {
+            const p = state.profile || {}; const friendsList = p.friends || []; const feedUsersLower = friendsList.map(u => (u || '').toLowerCase());
+            const feedActivities = (state.activities || []).filter(act => act.alias && feedUsersLower.includes(act.alias.toLowerCase())).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0)).slice(0, 10);
+            
+            if (feedActivities.length === 0) {
+                return `<div class="text-center p-8 text-gray-600 italic text-sm border border-white/5 rounded-xl bg-[#080808]">Deine Crew ist noch leer oder inaktiv. <br><span class="text-[#ff4d00] font-bold" onclick="window.openInviteModal()" style="cursor:pointer">Lade Freunde ein!</span></div>`;
+            }
+            
+            let html = `<div class="space-y-4 relative before:absolute before:inset-y-0 before:left-[19px] before:w-[2px] before:bg-[#1f1f1f]">`;
+            feedActivities.forEach(act => {
+                const isProUser = act.isPro === true;
+                let iconSvg = 'M5 13l4 4L19 7', colorClass = isProUser ? 'text-[#a855f7]' : 'text-[#ff4d00]', borderClass = isProUser ? 'border-[#a855f7]/30' : 'border-[#ff4d00]/30', shadowClass = '';
+                if (act.type === 'LEVEL_UP') { iconSvg = 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6'; borderClass = isProUser ? 'border-[#a855f7]' : 'border-[#ff4d00]'; shadowClass = isProUser ? 'shadow-[0_0_10px_rgba(168,85,247,0.3)]' : 'shadow-[0_0_10px_rgba(255,77,0,0.3)]'; } 
+                else if (act.type === 'REDEEM') { iconSvg = 'M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7'; borderClass = isProUser ? 'border-[#a855f7]' : 'border-[#ff4d00]'; shadowClass = isProUser ? 'shadow-[0_0_10px_rgba(168,85,247,0.3)]' : 'shadow-[0_0_10px_rgba(255,77,0,0.3)]'; } 
+                else if (act.type === 'PRO') { iconSvg = 'M13 10V3L4 14h7v7l9-11h-7z'; colorClass = 'text-[#a855f7]'; borderClass = 'border-[#a855f7]'; shadowClass = 'shadow-[0_0_15px_rgba(168,85,247,0.4)]'; }
+                const nameColorClass = isProUser ? 'text-[#d8b4fe]' : 'text-[#ff4d00]', proBadge = isProUser ? `<span class="ml-2 align-middle bg-[#a855f7]/20 text-[#a855f7] border border-[#a855f7]/30 text-[8px] px-1.5 py-0.5 rounded-sm font-black shadow-[0_0_10px_rgba(168,85,247,0.2)]">PRO</span>` : '', dynamicText = act.text.replace(/text-\[#[a-fA-F0-9]+\]/g, isProUser ? 'text-[#a855f7]' : 'text-[#ff4d00]');
+                html += `<div class="flex gap-4 relative z-10"><div class="w-10 h-10 rounded-full bg-[#0a0a0a] border-2 ${borderClass} flex items-center justify-center flex-shrink-0 ${shadowClass}"><svg class="w-4 h-4 ${colorClass}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${iconSvg}"></path></svg></div><div class="bg-[#080808] border border-[#111] p-4 rounded-xl flex-1 shadow-sm"><p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">${getRelativeTime(act.timestamp)}</p><p class="text-sm font-medium text-gray-300"><span class="${nameColorClass} italic uppercase font-black">${act.alias}</span>${proBadge} <span class="text-gray-400 text-xs">${dynamicText}</span></p></div></div>`;
+            });
+            html += `</div>`;
+            return html;
+        };
+
         window.updateLiveUI = () => {
             const feedContainer = document.getElementById('live-feed-content');
-            
-            // 1. Crew Feed Update
-            if (feedContainer && state.activities) {
-                const p = state.profile || {}; const friendsList = p.friends || []; const feedUsersLower = friendsList.map(u => (u || '').toLowerCase());
-                const feedActivities = state.activities.filter(act => act.alias && feedUsersLower.includes(act.alias.toLowerCase())).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0)).slice(0, 10);
-                if (feedActivities.length === 0) {
-                    feedContainer.innerHTML = `<div class="text-center p-8 text-gray-600 italic text-sm border border-white/5 rounded-xl bg-[#080808]">Deine Crew ist noch leer oder inaktiv. <br><span class="text-[#ff4d00] font-bold" onclick="window.openInviteModal()" style="cursor:pointer">Lade Freunde ein!</span></div>`;
-                } else {
-                    let html = `<div class="space-y-4 relative before:absolute before:inset-y-0 before:left-[19px] before:w-[2px] before:bg-[#1f1f1f]">`;
-                    feedActivities.forEach(act => {
-                        const isProUser = act.isPro === true;
-                        let iconSvg = 'M5 13l4 4L19 7', colorClass = isProUser ? 'text-[#a855f7]' : 'text-[#ff4d00]', borderClass = isProUser ? 'border-[#a855f7]/30' : 'border-[#ff4d00]/30', shadowClass = '';
-                        if (act.type === 'LEVEL_UP') { iconSvg = 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6'; borderClass = isProUser ? 'border-[#a855f7]' : 'border-[#ff4d00]'; shadowClass = isProUser ? 'shadow-[0_0_10px_rgba(168,85,247,0.3)]' : 'shadow-[0_0_10px_rgba(255,77,0,0.3)]'; } 
-                        else if (act.type === 'REDEEM') { iconSvg = 'M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7'; borderClass = isProUser ? 'border-[#a855f7]' : 'border-[#ff4d00]'; shadowClass = isProUser ? 'shadow-[0_0_10px_rgba(168,85,247,0.3)]' : 'shadow-[0_0_10px_rgba(255,77,0,0.3)]'; } 
-                        else if (act.type === 'PRO') { iconSvg = 'M13 10V3L4 14h7v7l9-11h-7z'; colorClass = 'text-[#a855f7]'; borderClass = 'border-[#a855f7]'; shadowClass = 'shadow-[0_0_15px_rgba(168,85,247,0.4)]'; }
-                        const nameColorClass = isProUser ? 'text-[#d8b4fe]' : 'text-[#ff4d00]', proBadge = isProUser ? `<span class="ml-2 align-middle bg-[#a855f7]/20 text-[#a855f7] border border-[#a855f7]/30 text-[8px] px-1.5 py-0.5 rounded-sm font-black shadow-[0_0_10px_rgba(168,85,247,0.2)]">PRO</span>` : '', dynamicText = act.text.replace(/text-\[#[a-fA-F0-9]+\]/g, isProUser ? 'text-[#a855f7]' : 'text-[#ff4d00]');
-                        html += `<div class="flex gap-4 relative z-10"><div class="w-10 h-10 rounded-full bg-[#0a0a0a] border-2 ${borderClass} flex items-center justify-center flex-shrink-0 ${shadowClass}"><svg class="w-4 h-4 ${colorClass}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${iconSvg}"></path></svg></div><div class="bg-[#080808] border border-[#111] p-4 rounded-xl flex-1 shadow-sm"><p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">${getRelativeTime(act.timestamp)}</p><p class="text-sm font-medium text-gray-300"><span class="${nameColorClass} italic uppercase font-black">${act.alias}</span>${proBadge} <span class="text-gray-400 text-xs">${dynamicText}</span></p></div></div>`;
-                    });
-                    feedContainer.innerHTML = html + `</div>`;
-                }
-            }
-
-            // 2. Process Smart Notification Queue (nur Events < 60 Sek)
-            if (state.activities) {
-                const now = Date.now();
-                const newActs = state.activities.filter(a => a.timestamp > lastNotifiedTimestamp && (now - a.timestamp) < 60000);
-                if (newActs.length > 0) {
-                    newActs.sort((a, b) => a.timestamp - b.timestamp).forEach(a => {
-                        if (a.alias && state.profile && a.alias.toLowerCase() !== state.profile.alias.toLowerCase()) {
-                            notificationQueue.push(a);
-                        }
-                    });
-                    lastNotifiedTimestamp = Math.max(...newActs.map(a => a.timestamp));
-                    processNotificationQueue();
-                }
-            }
+            if (feedContainer) feedContainer.innerHTML = generateFeedHTML();
         };
 
         onAuthStateChanged(auth, (user) => {
@@ -334,15 +320,32 @@
                     } else { state.view = 'onboarding'; window.scheduleRender(); }
                 });
                 onSnapshot(collection(db, 'plot_pending_proofs'), (snap) => { if (snap && snap.docs) { state.pendingMissions = snap.docs.map(d => d.data()).filter(data => data.uid === state.user.uid); if(state.view === 'dashboard') window.scheduleRender(); } });
+                
                 onSnapshot(query(collection(db, 'plot_activities'), orderBy('timestamp', 'desc'), limit(50)), (snap) => {
-                    if(snap && snap.docs) { state.activities = snap.docs.map(d => d.data()); if(state.view === 'dashboard') { requestAnimationFrame(window.updateLiveUI); } }
+                    if(snap && snap.docs) { 
+                        state.activities = snap.docs.map(d => d.data()); 
+                        if(state.view === 'dashboard') {
+                            const now = Date.now();
+                            const newActs = state.activities.filter(a => a.timestamp > lastNotifiedTimestamp && (now - a.timestamp) < 60000);
+                            if (newActs.length > 0) {
+                                newActs.sort((a, b) => a.timestamp - b.timestamp).forEach(a => {
+                                    if (a.alias && state.profile && state.profile.friends && state.profile.friends.map(f=>f.toLowerCase()).includes(a.alias.toLowerCase()) && a.alias.toLowerCase() !== state.profile.alias.toLowerCase()) {
+                                        notificationQueue.push(a);
+                                    }
+                                });
+                                lastNotifiedTimestamp = Math.max(...newActs.map(a => a.timestamp));
+                                processNotificationQueue();
+                            }
+                            requestAnimationFrame(window.updateLiveUI);
+                        } 
+                    }
                 }, () => {});
+                
                 setupSeasonData();
                 onSnapshot(doc(db, 'system', 'pricing'), (docSnap) => { if (docSnap.exists()) state.bundlePrice = docSnap.data().bundlePrice; if (state.view === 'paywall') window.scheduleRender(); });
             } else { state.user = null; state.profile = null; state.view = 'auth'; state.authStep = 'phone'; window.scheduleRender(); }
         });
 
-        // HILFSFUNKTION FÜR MISSION/HABIT CLAIM (Sichere Argument-Übergabe ohne Quote-Fehler)
         window.claimItemById = (mid) => {
             let item = state.habitData.find(h => h.id === mid);
             if (!item) {
@@ -353,11 +356,8 @@
             }
             if (!item) return;
             
-            if (item.type === 'instant') {
-                window.claimInstantMission(item.id, Number(item.xp), item.name);
-            } else {
-                window.openVerifyModal(item.id, Number(item.xp), item.type, item.name, item.qr_solution || '');
-            }
+            if (item.type === 'instant') window.claimInstantMission(item.id, Number(item.xp), item.name);
+            else window.openVerifyModal(item.id, Number(item.xp), item.type, item.name, item.qr_solution || '');
         };
 
         window.closeModal = () => {
@@ -479,7 +479,7 @@
                         streaks[mid] = { streak: activeStreak, lastDate: timeKey, lastWeek: isWeekly ? currentWeekStr : habitStreak.lastWeek }; 
                         newLvl = Math.floor(newTotalXp / 1000) + 1; updatePayload = { xp: newTotalXp, lvl: newLvl, streaks: streaks }; claimSuccess = true;
                         window.showToast(`+${finalXp} XP für ${name}!${earnedBonus>0 ? ' 🔥 Bonus' : ''}`, "success");
-                    } else { window.showToast("Heute bereits erledigt!", "error"); }
+                    } else { window.showToast(isWeekly ? "Diese Woche bereits erledigt!" : "Heute bereits erledigt!", "error"); }
                 } else if (!(state.profile.completed || []).includes(mid)) {
                     const newXp = (state.profile.xp || 0) + xp; newLvl = Math.floor(newXp / 1000) + 1;
                     updatePayload = { xp: newXp, lvl: newLvl, completed: [...(state.profile.completed || []), mid] }; claimSuccess = true;
@@ -978,8 +978,8 @@
                 if (state.activeSpots.length > 0) {
                     state.activeSpots.forEach(s => { 
                         html += `
-                            <div class="mockup p-5 group cursor-default border ${s.color === '#a855f7' ? 'border-[#a855f7]/20' : 'border-transparent'}">
-                                <div class="absolute inset-0 bg-gradient-to-br ${s.bgClass || 'from-white/10'} to-transparent opacity-0 group-hover:opacity-100 transition"></div>
+                            <div class="mockup p-5 border ${s.color === '#a855f7' ? 'border-[#a855f7]/20' : 'border-transparent'}">
+                                <div class="absolute inset-0 bg-gradient-to-br ${s.bgClass || 'from-white/10'} to-transparent opacity-100 pointer-events-none"></div>
                                 <div class="flex justify-between items-start mb-4 relative z-10">
                                     <div>
                                         <div class="w-10 h-10 bg-[#111] border border-white/5 rounded-full flex items-center justify-center mb-2 text-lg">${s.icon || '📍'}</div>
@@ -1028,23 +1028,31 @@
                     const isCompleted = safeCompleted.includes(m.id); 
                     const isPending = state.pendingMissions.some(p => p.mid === m.id) && !isCompleted;
                     const badgeText = m.type === 'qr' ? '📍 Check-in' : (m.type === 'upload' ? '📷 Photo Upload' : '⚡ Action');
-                    const btnText = isCompleted ? 'Verified' : (isPending ? 'Wird überprüft ⏳' : (m.type === 'instant' ? 'Claim XP' : 'Verify Action'));
                     
-                    let cardClasses = `mockup p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 group transition ${isCompleted ? 'is-completed border-[#ff4d00]/30 opacity-75' : (isPending ? 'is-pending border-yellow-500/30' : 'hover:border-[#ff4d00]/30')}`;
+                    let btnText = isCompleted ? 'VERIFIED' : (isPending ? 'WIRD ÜBERPRÜFT ⏳' : (m.type === 'instant' ? 'Claim XP' : 'Verify Action'));
+                    
+                    // Sauberes Verified / Pending Design OHNE überlappende Overlays
+                    let cardClasses = `mockup p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition interactive border-[#1f1f1f]`;
+                    let btnClasses = `btn-grind w-full md:w-auto text-[10px] bg-white text-black hover:bg-[#ff4d00] hover:text-white transition`;
+                    
+                    if (isCompleted) {
+                        cardClasses = `mockup p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition border-[#1f1f1f] opacity-50 grayscale-[30%]`;
+                        btnClasses = `w-full md:w-auto text-[10px] font-black uppercase tracking-widest py-3 px-6 rounded-md bg-[#111] text-gray-500 border border-[#333] cursor-not-allowed`;
+                    } else if (isPending) {
+                        cardClasses = `mockup p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition border-yellow-500/50 shadow-[0_0_15px_rgba(234,179,8,0.15)]`;
+                        btnClasses = `w-full md:w-auto text-[10px] font-black uppercase tracking-widest py-3 px-6 rounded-md bg-yellow-500/10 text-yellow-500 border border-yellow-500/30 cursor-not-allowed`;
+                    }
                     
                     html += `
                         <div class="${cardClasses}">
-                            <div class="absolute inset-0 bg-gradient-to-r from-[#ff4d00]/5 to-transparent opacity-0 group-hover:opacity-100 transition pointer-events-none"></div>
-                            <div class="completed-overlay"><span class="text-[#ff4d00] font-black italic uppercase tracking-widest flex items-center gap-2"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Verified</span></div>
-                            <div class="pending-overlay"><span class="text-yellow-500 font-black italic uppercase tracking-widest flex items-center gap-2">Wird überprüft</span></div>
                             <div class="pr-6 relative z-10 flex-1">
-                                <h4 class="font-bold text-lg group-hover:text-[#ff4d00] transition tracking-tight">${m.name}</h4>
+                                <h4 class="font-bold text-lg text-white tracking-tight">${m.name}</h4>
                                 <p class="text-gray-400 text-xs mt-1 font-medium leading-relaxed">${m.desc}</p>
                                 ${!isCompleted ? `<div class="inline-block mt-3 bg-[#111] border border-white/5 px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest text-gray-400">${badgeText}</div>` : ''}
                             </div>
                             <div class="text-left md:text-right flex-shrink-0 relative z-10 flex flex-col items-start md:items-end w-full md:w-auto mt-4 md:mt-0">
-                                <span class="block text-[#ff4d00] font-black text-2xl italic tracking-tighter mb-3">+${m.xp}</span>
-                                <button type="button" id="btn-${m.id}" onclick="window.claimItemById('${m.id}')" class="btn-grind w-full md:w-auto text-[10px]" ${(isCompleted || isPending) ? 'disabled' : ''}>${btnText}</button>
+                                <span class="block ${isPending ? 'text-yellow-500' : 'text-[#ff4d00]'} font-black text-2xl italic tracking-tighter mb-3">+${m.xp}</span>
+                                <button type="button" id="btn-${m.id}" onclick="window.claimItemById('${m.id}')" class="${btnClasses}" ${(isCompleted || isPending) ? 'disabled' : ''}>${btnText}</button>
                             </div>
                         </div>
                     `;
@@ -1111,19 +1119,26 @@
                     
                     const totalXpDisplay = isDoneToday ? m.xp : m.xp + currentBonus;
 
-                    let cardClasses = `mockup p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 group transition ${isDoneToday ? 'is-completed border-[#ff4d00]/30 opacity-75' : (isPending ? 'is-pending border-yellow-500/30' : 'hover:border-[#ff4d00]/30')}`;
                     let badgeText = m.type === 'qr' ? '📍 Check-in' : (m.type === 'upload' ? '📷 Photo Upload' : '⚡ Action');
-                    let btnText = isDoneToday ? 'VERIFIED' : (isPending ? 'Wird überprüft ⏳' : 'Verify Routine');
+                    let btnText = isDoneToday ? 'VERIFIED' : (isPending ? 'WIRD ÜBERPRÜFT ⏳' : 'Verify Routine');
+
+                    let cardClasses = `mockup p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition interactive border-[#1f1f1f]`;
+                    let btnClasses = `btn-grind w-full md:w-auto text-[10px] bg-white text-black hover:bg-[#ff4d00] hover:text-white transition`;
+
+                    if (isDoneToday) {
+                        cardClasses = `mockup p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition border-[#1f1f1f] opacity-50 grayscale-[30%]`;
+                        btnClasses = `w-full md:w-auto text-[10px] font-black uppercase tracking-widest py-3 px-6 rounded-md bg-[#111] text-gray-500 border border-[#333] cursor-not-allowed`;
+                    } else if (isPending) {
+                        cardClasses = `mockup p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition border-yellow-500/50 shadow-[0_0_15px_rgba(234,179,8,0.15)]`;
+                        btnClasses = `w-full md:w-auto text-[10px] font-black uppercase tracking-widest py-3 px-6 rounded-md bg-yellow-500/10 text-yellow-500 border border-yellow-500/30 cursor-not-allowed`;
+                    }
 
                     html += `
                         <div class="${cardClasses}">
-                            <div class="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition pointer-events-none"></div>
-                            ${isDoneToday ? `<div class="completed-overlay"><span class="text-[#ff4d00] font-black italic uppercase tracking-widest flex items-center gap-2"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> VERIFIED</span></div>` : ''}
-                            ${isPending ? `<div class="pending-overlay"><span class="text-yellow-500 font-black italic uppercase tracking-widest flex items-center gap-2">Wird überprüft</span></div>` : ''}
                             <div class="pr-6 relative z-10 flex-1 w-full">
                                 <div class="flex justify-between items-start mb-1">
-                                    <h4 class="font-bold text-lg group-hover:text-white transition tracking-tight break-words max-w-[70%]">${m.name}</h4>
-                                    <span class="text-[9px] font-bold text-gray-500 tracking-widest uppercase bg-black px-2 py-1 rounded-sm border border-[#111]">${isWeekly ? 'WEEKLY' : 'DAILY'}</span>
+                                    <h4 class="font-bold text-lg text-white tracking-tight break-words max-w-[70%]">${m.name}</h4>
+                                    <span class="text-[9px] font-bold text-gray-500 tracking-widest uppercase bg-black px-2 py-1 rounded-sm border border-[#111]">${isWeekly ? 'WEEKLY STREAK' : 'DAILY'}</span>
                                 </div>
                                 <p class="text-gray-400 text-xs mt-1 font-medium leading-relaxed">${m.desc}</p>
                                 <div class="flex flex-wrap items-center gap-2 mt-4">
@@ -1132,8 +1147,8 @@
                                 </div>
                             </div>
                             <div class="text-left md:text-right flex-shrink-0 relative z-10 flex flex-col items-start md:items-end w-full md:w-auto mt-4 md:mt-0">
-                                <span class="block text-white font-black text-2xl italic tracking-tighter mb-3">+${totalXpDisplay}</span>
-                                <button type="button" onclick="window.claimItemById('${m.id}')" class="btn-grind w-full md:w-auto text-[10px] bg-white text-black hover:bg-[#ff4d00] hover:text-white transition" ${(isDoneToday || isPending) ? 'disabled' : ''}>${btnText}</button>
+                                <span class="block ${isPending ? 'text-yellow-500' : 'text-white'} font-black text-2xl italic tracking-tighter mb-3">+${totalXpDisplay}</span>
+                                <button type="button" onclick="window.claimItemById('${m.id}')" class="${btnClasses}" ${(isDoneToday || isPending) ? 'disabled' : ''}>${btnText}</button>
                             </div>
                         </div>
                     `;
@@ -1173,8 +1188,28 @@
                     </div>
                 `;
                 
-                // Hier wird dynamisch via window.updateLiveUI befüllt
-                html += `<div id="live-feed-content"></div>`;
+                // Sofortiges Ausgeben des Crew-Feeds ohne Verzögerung
+                const friendsList = p.friends || []; 
+                const feedUsersLower = friendsList.map(u => (u || '').toLowerCase());
+                const feedActivities = (state.activities || []).filter(act => act.alias && feedUsersLower.includes(act.alias.toLowerCase())).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0)).slice(0, 10);
+                
+                html += `<div id="live-feed-content">`;
+                if (feedActivities.length === 0) {
+                    html += `<div class="text-center p-8 text-gray-600 italic text-sm border border-white/5 rounded-xl bg-[#080808]">Deine Crew ist noch leer oder inaktiv. <br><span class="text-[#ff4d00] font-bold" onclick="window.openInviteModal()" style="cursor:pointer">Lade Freunde ein!</span></div>`;
+                } else {
+                    html += `<div class="space-y-4 relative before:absolute before:inset-y-0 before:left-[19px] before:w-[2px] before:bg-[#1f1f1f]">`;
+                    feedActivities.forEach(act => {
+                        const isProUser = act.isPro === true;
+                        let iconSvg = 'M5 13l4 4L19 7', colorClass = isProUser ? 'text-[#a855f7]' : 'text-[#ff4d00]', borderClass = isProUser ? 'border-[#a855f7]/30' : 'border-[#ff4d00]/30', shadowClass = '';
+                        if (act.type === 'LEVEL_UP') { iconSvg = 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6'; borderClass = isProUser ? 'border-[#a855f7]' : 'border-[#ff4d00]'; shadowClass = isProUser ? 'shadow-[0_0_10px_rgba(168,85,247,0.3)]' : 'shadow-[0_0_10px_rgba(255,77,0,0.3)]'; } 
+                        else if (act.type === 'REDEEM') { iconSvg = 'M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7'; borderClass = isProUser ? 'border-[#a855f7]' : 'border-[#ff4d00]'; shadowClass = isProUser ? 'shadow-[0_0_10px_rgba(168,85,247,0.3)]' : 'shadow-[0_0_10px_rgba(255,77,0,0.3)]'; } 
+                        else if (act.type === 'PRO') { iconSvg = 'M13 10V3L4 14h7v7l9-11h-7z'; colorClass = 'text-[#a855f7]'; borderClass = 'border-[#a855f7]'; shadowClass = 'shadow-[0_0_15px_rgba(168,85,247,0.4)]'; }
+                        const nameColorClass = isProUser ? 'text-[#d8b4fe]' : 'text-[#ff4d00]', proBadge = isProUser ? `<span class="ml-2 align-middle bg-[#a855f7]/20 text-[#a855f7] border border-[#a855f7]/30 text-[8px] px-1.5 py-0.5 rounded-sm font-black shadow-[0_0_10px_rgba(168,85,247,0.2)]">PRO</span>` : '', dynamicText = act.text.replace(/text-\[#[a-fA-F0-9]+\]/g, isProUser ? 'text-[#a855f7]' : 'text-[#ff4d00]');
+                        html += `<div class="flex gap-4 relative z-10"><div class="w-10 h-10 rounded-full bg-[#0a0a0a] border-2 ${borderClass} flex items-center justify-center flex-shrink-0 ${shadowClass}"><svg class="w-4 h-4 ${colorClass}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${iconSvg}"></path></svg></div><div class="bg-[#080808] border border-[#111] p-4 rounded-xl flex-1 shadow-sm"><p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">${getRelativeTime(act.timestamp)}</p><p class="text-sm font-medium text-gray-300"><span class="${nameColorClass} italic uppercase font-black">${act.alias}</span>${proBadge} <span class="text-gray-400 text-xs">${dynamicText}</span></p></div></div>`;
+                    });
+                    html += `</div>`;
+                }
+                html += `</div>`;
 
                 html += `</section></main>${getFooterHTML()}`;
                 
@@ -1183,9 +1218,6 @@
                 if (syncViewport && !state.dashboardNeedsScroll) {
                     syncViewport.scrollLeft = savedScrollPosition;
                 }
-                
-                // Setzt den Feed beim Render sofort (verhindert Delay!)
-                window.updateLiveUI();
 
                 if (window.xpAnimTimeout) clearTimeout(window.xpAnimTimeout);
                 window.xpAnimTimeout = setTimeout(() => {
@@ -1216,6 +1248,7 @@
                         const hudXpMax = document.getElementById('hud-xp-max');
                         const hudXpBar = document.getElementById('hud-xp-bar');
                         
+                        // Das XP-Fenster erscheint IMMER beim Sammeln von XP
                         if(hud) {
                             hudLvl.innerText = state.prevLvl; 
                             hudXpNum.innerText = state.prevXp; 
