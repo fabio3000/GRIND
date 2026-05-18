@@ -587,24 +587,42 @@
             } catch(e) { window.showToast("Fehler.", "error"); }
         };
 
-        window.submitShipping = async (lvl, tier) => {
-            let addressString = "", addressData = {}, allValid = true;
-            document.querySelectorAll('.shipping-input-field').forEach(input => {
-                const val = input.value.trim(); if(!val) allValid = false; const label = input.getAttribute('data-label'); addressData[label] = val; addressString += `${label}: ${val} | `;
-            });
-            if(!allValid) return window.showToast("Bitte alle Felder ausfüllen.", "error");
-            const btn = document.querySelector('#modal-container button.bg-\\[\\#ff4d00\\], #modal-container button.bg-\\[\\#a855f7\\]'); if(btn) { btn.innerText = "Senden..."; btn.disabled = true; }
-            const rewardId = `lvl${lvl}_${tier}`; const reward = state.rewardData.find(r => r.lvl === lvl); const itemName = reward ? reward[tier] : 'Unbekanntes Item';
-            try {
-                await addDoc(collection(db, 'plot_shipping_requests'), { uid: state.user.uid, alias: state.profile?.alias || 'Grinder', lvl: lvl, tier: tier, itemName: itemName, address: addressString, timestamp: new Date(), status: 'pending' });
-                const currentRedeemed = state.profile?.redeemed || [];
-                if(!currentRedeemed.includes(rewardId)) { currentRedeemed.push(rewardId); await setDoc(doc(db, 'plot_users', state.user.uid), { redeemed: currentRedeemed }, { merge: true }); }
-                try { fetch("https://formsubmit.co/ajax/Fabio.maines@grind-app.de", { method: "POST", headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify({ _subject: "Loot: " + itemName, _template: "table", Artikel: itemName, Alias: state.profile?.alias || 'Grinder', Level: String(lvl), Tier: tier.toUpperCase(), ...addressData }) }).catch(e => {}); } catch(mailErr) {}
-                window.logActivity('REDEEM', `hat physischen Reward ('<span class="font-bold">${itemName}</span>') angefordert.`);
-                window.showToast("Anfrage gesendet!", "success"); window.closeModal();
-            } catch(e) { window.showToast("Fehler.", "error"); if(btn) { btn.innerText = "Versand anfordern"; btn.disabled = false; } }
-        };
+window.submitShipping = async (lvl, tier) => {
+    let addressString = "", addressData = {}, allValid = true;
+    document.querySelectorAll('.shipping-input-field').forEach(input => {
+        const val = input.value.trim(); if(!val) allValid = false; const label = input.getAttribute('data-label'); addressData[label] = val; addressString += `${label}: ${val} | `;
+    });
+    if(!allValid) return window.showToast("Bitte alle Felder ausfüllen.", "error");
+    const btn = document.querySelector('#modal-container button.bg-\\[\\#ff4d00\\], #modal-container button.bg-\\[\\#a855f7\\]'); if(btn) { btn.innerText = "Senden..."; btn.disabled = true; }
+    const rewardId = `lvl${lvl}_${tier}`; const reward = state.rewardData.find(r => r.lvl === lvl); const itemName = reward ? reward[tier] : 'Unbekanntes Item';
+    try {
+        await addDoc(collection(db, 'plot_shipping_requests'), { uid: state.user.uid, alias: state.profile?.alias || 'Grinder', lvl: lvl, tier: tier, itemName: itemName, address: addressString, timestamp: new Date(), status: 'pending' });
+        const currentRedeemed = state.profile?.redeemed || [];
+        if(!currentRedeemed.includes(rewardId)) { currentRedeemed.push(rewardId); await setDoc(doc(db, 'plot_users', state.user.uid), { redeemed: currentRedeemed }, { merge: true }); }
+        
+        // --- HIER IST DAS UPDATE FÜR WEB3FORMS ---
+        try { 
+            fetch("https://api.web3forms.com/submit", { 
+                method: "POST", 
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, 
+                body: JSON.stringify({ 
+                    access_key: "3caac5da-214e-4294-9266-ef4dc37e451b",
+                    subject: "Loot: " + itemName, 
+                    from_name: "Grind-App Rewards",
+                    Artikel: itemName, 
+                    Alias: state.profile?.alias || 'Grinder', 
+                    Level: String(lvl), 
+                    Tier: tier.toUpperCase(), 
+                    ...addressData 
+                }) 
+            }).catch(e => {}); 
+        } catch(mailErr) {}
+        // --- ENDE DES UPDATES ---
 
+        window.logActivity('REDEEM', `hat physischen Reward ('<span class="font-bold">${itemName}</span>') angefordert.`);
+        window.showToast("Anfrage gesendet!", "success"); window.closeModal();
+    } catch(e) { window.showToast("Fehler.", "error"); if(btn) { btn.innerText = "Versand anfordern"; btn.disabled = false; } }
+};
         window.claimInstantMission = async (mid, xp, name) => {
             const btn = document.getElementById(`btn-${mid}`); if(btn) { btn.innerText = "Claiming..."; btn.disabled = true; }
             try {
