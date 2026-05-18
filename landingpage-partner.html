@@ -206,9 +206,9 @@
                 <div class="pill">Community</div>
             </div>
 
-            <a href="#partner" class="btn-grind reveal hidden md:inline-block">
+            <button onclick="openContactModal()" class="btn-grind reveal hidden md:inline-block">
                 Founding Partner werden
-            </a>
+            </button>
         </div>
     </section>
 
@@ -505,47 +505,24 @@
                 Aktuell baut GRIND. das erste Netzwerk aus lokalen Cafés, Studios und Community-Spots in Köln auf.
             </p>
 
-            <!-- Formular -->
-            <div class="max-w-md mx-auto reveal mb-8">
-                <form action="https://api.web3forms.com/submit" method="POST" class="bg-[#080808] border border-[#1f1f1f] p-6 rounded-xl shadow-2xl text-left">
-                    
-                    <!-- Web3Forms Access Key -->
-                    <input type="hidden" name="access_key" value="3caac5da-214e-4294-9266-ef4dc37e451b">
-                    <input type="hidden" name="subject" value="GRIND. Neue Founding Partner Anfrage">
-                    <input type="hidden" name="from_name" value="GRIND. Partner Portal">
-                    <!-- Hinweis: Web3Forms leitet standardmäßig auf eine eigene Erfolgsseite weiter. Dies lässt sich durch <input type="hidden" name="redirect" value="..."> anpassen -->
-                    
-                    <div class="space-y-5">
-                        <div>
-                            <label class="block text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 mb-2">Dein Spot / Brand</label>
-                            <input type="text" name="Spot" required placeholder="z.B. GuMo Café" class="w-full bg-[#030303] border border-white/10 rounded-md px-4 py-3 text-sm text-white focus:outline-none focus:border-[#ff4d00] transition placeholder-gray-700">
-                        </div>
-                        
-                        <div>
-                            <label class="block text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 mb-2">E-Mail Adresse</label>
-                            <input type="email" name="email" required placeholder="hallo@deinspot.de" class="w-full bg-[#030303] border border-white/10 rounded-md px-4 py-3 text-sm text-white focus:outline-none focus:border-[#ff4d00] transition placeholder-gray-700">
-                        </div>
-                        
-                        <div>
-                            <label class="block text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 mb-2">Kurze Info (Optional)</label>
-                            <textarea name="Nachricht" rows="2" placeholder="Lass uns connecten..." class="w-full bg-[#030303] border border-white/10 rounded-md px-4 py-3 text-sm text-white focus:outline-none focus:border-[#ff4d00] transition resize-none placeholder-gray-700"></textarea>
-                        </div>
-                        
-                        <button type="submit" class="btn-grind w-full py-4 text-sm mt-2">
-                            Anfrage senden
-                        </button>
-                    </div>
-                </form>
+            <div class="space-y-4 max-w-sm mx-auto text-left mb-12 reveal bg-[#0a0a0a] border border-[#1f1f1f] p-6 rounded-xl shadow-xl">
+                <div class="flex items-center gap-3 text-gray-300 text-xs font-bold uppercase tracking-widest">
+                    <span class="text-[#ff4d00] text-lg">✔</span>
+                    Kostenlos in der Aufbauphase
+                </div>
+                <div class="flex items-center gap-3 text-gray-300 text-xs font-bold uppercase tracking-widest border-t border-[#1f1f1f] pt-4">
+                    <span class="text-[#ff4d00] text-lg">✔</span>
+                    Sichtbarkeit bei aktiven Nutzern
+                </div>
+                <div class="flex items-center gap-3 text-gray-300 text-xs font-bold uppercase tracking-widest border-t border-[#1f1f1f] pt-4">
+                    <span class="text-[#ff4d00] text-lg">✔</span>
+                    Kein technischer Aufwand
+                </div>
             </div>
 
-            <!-- Trenner & Mailto Fallback -->
-            <div class="reveal flex flex-col items-center justify-center gap-4 mt-8">
-                <p class="text-[10px] uppercase tracking-[0.2em] font-bold text-gray-600">Oder klick hier:</p>
-                <a href="mailto:Fabio.maines@grind-app.de?subject=GRIND.%20Founding%20Partner" class="text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-white transition border-b border-gray-700 hover:border-[#ff4d00] pb-1">
-                    Fabio.maines@grind-app.de
-                </a>
-            </div>
-
+            <button onclick="openContactModal()" class="btn-grind py-4 px-8 text-sm reveal">
+                Founding Partner werden
+            </button>
         </div>
     </section>
 
@@ -560,10 +537,55 @@
     </footer>
 
     <!-- MOBILE CTA -->
-    <div id="mobile-cta" class="fixed bottom-0 left-0 right-0 p-4 bg-[#030303]/90 backdrop-blur-xl border-t border-[#1f1f1f] md:hidden z-50">
-        <a href="#partner" class="btn-grind w-full py-4 text-xs block text-center">
+    <div id="mobile-cta" class="fixed bottom-0 left-0 right-0 p-4 bg-[#030303]/90 backdrop-blur-xl border-t border-[#1f1f1f] md:hidden z-50 transition-transform duration-300">
+        <button onclick="openContactModal()" class="btn-grind w-full py-4 text-xs block text-center">
             Founding Partner werden
-        </a>
+        </button>
+    </div>
+
+    <!-- CONTACT MODAL -->
+    <div id="contact-modal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-[999999] flex flex-col items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-[#080808] border border-[#1f1f1f] p-8 rounded-xl shadow-[0_0_50px_rgba(255,77,0,0.15)] w-full max-w-md relative transform scale-95 transition-transform duration-300" id="contact-modal-content">
+            <button onclick="closeContactModal()" class="absolute top-5 right-5 text-gray-500 hover:text-white transition">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            
+            <h3 class="text-3xl font-black italic tracking-tighter mb-2 text-white">Werde Partner.</h3>
+            <p class="text-gray-400 text-xs font-medium leading-relaxed mb-6">Lass uns schauen, ob dein Spot zu uns passt. Sende uns eine kurze Anfrage.</p>
+            
+            <!-- Web3Forms Integration -->
+            <form action="https://api.web3forms.com/submit" method="POST" class="space-y-4">
+                <input type="hidden" name="access_key" value="3caac5da-214e-4294-9266-ef4dc37e451b">
+                <input type="hidden" name="subject" value="GRIND. Neue Founding Partner Anfrage">
+                <input type="hidden" name="from_name" value="GRIND. Partner Portal">
+                
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 mb-1.5">Dein Spot / Brand</label>
+                    <input type="text" name="Spot" required placeholder="z.B. GuMo Café" class="w-full bg-[#030303] border border-white/10 rounded-md px-4 py-3 text-sm text-white focus:outline-none focus:border-[#ff4d00] transition placeholder-gray-700">
+                </div>
+                
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 mb-1.5">E-Mail Adresse</label>
+                    <input type="email" name="email" required placeholder="hallo@deinspot.de" class="w-full bg-[#030303] border border-white/10 rounded-md px-4 py-3 text-sm text-white focus:outline-none focus:border-[#ff4d00] transition placeholder-gray-700">
+                </div>
+                
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 mb-1.5">Kurze Info (Optional)</label>
+                    <textarea name="Nachricht" rows="2" placeholder="Lass uns connecten..." class="w-full bg-[#030303] border border-white/10 rounded-md px-4 py-3 text-sm text-white focus:outline-none focus:border-[#ff4d00] transition resize-none placeholder-gray-700"></textarea>
+                </div>
+                
+                <button type="submit" class="btn-grind w-full py-4 text-sm mt-2">
+                    Anfrage senden
+                </button>
+            </form>
+
+            <div class="mt-6 pt-5 border-t border-white/5 text-center flex flex-col items-center gap-2">
+                <p class="text-[10px] uppercase tracking-[0.2em] font-bold text-gray-600">Lieber per Mail?</p>
+                <a href="mailto:Fabio.maines@grind-app.de?subject=GRIND.%20Founding%20Partner" class="text-xs font-bold uppercase tracking-widest text-[#ff4d00] hover:text-white transition border-b border-[#ff4d00]/30 hover:border-white pb-0.5">
+                     klick hier
+                </a>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -581,6 +603,21 @@
             window.addEventListener('scroll', revealOnScroll);
             revealOnScroll();
         });
+
+        // Modal Functions
+        function openContactModal() {
+            const modal = document.getElementById('contact-modal');
+            const content = document.getElementById('contact-modal-content');
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            content.classList.remove('scale-95');
+        }
+
+        function closeContactModal() {
+            const modal = document.getElementById('contact-modal');
+            const content = document.getElementById('contact-modal-content');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            content.classList.add('scale-95');
+        }
     </script>
 
 </body>
