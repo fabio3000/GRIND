@@ -182,13 +182,13 @@
         </div>
     </nav>
 
-    <!-- HERO -->
-    <section class="relative min-h-screen flex items-center justify-center text-center px-6 overflow-hidden z-10">
-        <div class="absolute w-[700px] h-[700px] bg-brand/5 blur-[140px] rounded-full pointer-events-none"></div>
+    <!-- HERO (Angepasst für Mobile) -->
+    <section class="relative min-h-[80vh] md:min-h-screen pt-32 pb-16 md:pt-0 md:pb-0 flex items-center justify-center text-center px-4 md:px-6 overflow-hidden z-10">
+        <div class="absolute w-[150vw] h-[150vw] md:w-[700px] md:h-[700px] bg-brand/5 blur-[100px] md:blur-[140px] rounded-full pointer-events-none"></div>
 
-        <div class="relative z-10 max-w-5xl mx-auto pt-28">
+        <div class="relative z-10 max-w-5xl mx-auto w-full flex flex-col items-center">
 
-            <div class="inline-flex items-center gap-3 border border-white/10 bg-white/[0.03] px-4 py-2 rounded-full mb-10 reveal">
+            <div class="inline-flex items-center gap-3 border border-white/10 bg-white/[0.03] px-4 py-2 rounded-full mb-8 md:mb-10 reveal">
                 <span class="text-[#ff4d00] text-[9px] font-black uppercase tracking-[0.2em]">Season 01</span>
                 <span class="w-1 h-1 rounded-full bg-white/20"></span>
                 <span class="text-gray-400 text-[9px] font-bold uppercase tracking-[0.2em]">
@@ -196,20 +196,21 @@
                 </span>
             </div>
 
-            <h1 class="text-6xl md:text-7xl lg:text-8xl font-black italic tracking-tighter leading-[1.02] mb-8 reveal">
+            <!-- Responsive Text Size -->
+            <h1 class="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black italic tracking-tighter leading-[1.05] md:leading-[1.02] mb-6 md:mb-8 reveal text-center mx-auto max-w-[95%]">
                 Die Routinen<br>
                 der Stadt<span class="text-brand">.</span>
             </h1>
 
-            <p class="max-w-3xl mx-auto text-lg md:text-2xl text-gray-300 font-semibold leading-relaxed mb-5 reveal">
+            <p class="max-w-[95%] md:max-w-3xl mx-auto text-base md:text-2xl text-gray-300 font-semibold leading-relaxed mb-5 reveal text-center">
                 GRIND. verbindet Cafés, Fitness und Community über echte Gewohnheiten.
             </p>
 
-            <p class="max-w-2xl mx-auto text-sm md:text-base text-gray-500 leading-relaxed mb-12 reveal">
+            <p class="max-w-[95%] md:max-w-2xl mx-auto text-sm md:text-base text-gray-500 leading-relaxed mb-10 md:mb-12 reveal text-center">
                 Menschen gehen sowieso nach dem Training noch Kaffee trinken, treffen Freunde oder checken bei ihren Lieblingsspots ein. GRIND. macht diese Routinen sichtbar.
             </p>
 
-            <div class="flex flex-wrap justify-center gap-3 mb-12 reveal">
+            <div class="flex flex-wrap justify-center gap-2 md:gap-3 mb-10 md:mb-12 reveal max-w-[95%]">
                 <div class="pill">Boutique Fitness</div>
                 <div class="pill">Run Clubs</div>
                 <div class="pill">Cafés</div>
@@ -241,65 +242,65 @@
     </div>
 
     <!-- PARTNER SOCIAL PROOF -->
-    <section class="py-24 px-6 border-b border-white/5 bg-[#030303] relative z-10">
+    <section class="py-16 md:py-24 px-4 md:px-6 border-b border-white/5 bg-[#030303] relative z-10">
         <div class="max-w-5xl mx-auto text-center reveal">
-            <p class="text-[10px] uppercase tracking-[0.25em] font-bold text-gray-500 mb-7">
+            <p class="text-[10px] uppercase tracking-[0.25em] font-bold text-gray-500 mb-6 md:mb-7">
                 Erste Gespräche mit lokalen Spots in Köln
             </p>
-            <div class="flex flex-wrap justify-center gap-x-12 gap-y-5 text-xl md:text-3xl italic font-black text-white/30 tracking-tighter">
-            <!-- Haupt-Container: Zentriert alles vertikal untereinander -->
-<div class="flex flex-col items-center gap-4">
-  
-  <!-- Reihe 1 (Original - 5 Elemente) -->
-  <div class="flex justify-center gap-6">
-    <span class="hover:text-white/80 transition cursor-default">Rocycle</span>
-    <span class="hover:text-white/80 transition cursor-default">GuMo</span>
-    <span class="hover:text-white/80 transition cursor-default">Achter.Club</span>
-    <span class="hover:text-white/80 transition cursor-default">Emmi’s</span>
-    <span class="hover:text-white/80 transition cursor-default">Cryopoint</span>
-  </div>
+            <div class="text-lg sm:text-xl md:text-3xl italic font-black text-white/30 tracking-tighter">
+                <!-- Haupt-Container: Zentriert alles vertikal untereinander -->
+                <div class="flex flex-col items-center gap-3 md:gap-4">
+                  
+                  <!-- Reihe 1 (Original - 5 Elemente) -->
+                  <!-- flex-wrap und reduzierte Gaps für Mobile hinzugefügt -->
+                  <div class="flex flex-wrap justify-center gap-x-4 gap-y-3 md:gap-6">
+                    <span class="hover:text-white/80 transition cursor-default">Rocycle</span>
+                    <span class="hover:text-white/80 transition cursor-default">GuMo</span>
+                    <span class="hover:text-white/80 transition cursor-default">Achter.Club</span>
+                    <span class="hover:text-white/80 transition cursor-default">Emmi’s</span>
+                    <span class="hover:text-white/80 transition cursor-default">Cryopoint</span>
+                  </div>
 
-  <!-- Reihe 2 (Mittig versetzt - 4 Elemente) -->
-  <div class="flex justify-center gap-6">
-    <span class="hover:text-white/80 transition cursor-default">Onmasportsclub</span>
-    <span class="hover:text-white/80 transition cursor-default">Zenetixx</span>
-    <span class="hover:text-white/80 transition cursor-default">rūtine</span>
-    <span class="hover:text-white/80 transition cursor-default">Athletica</span>
-  </div>
+                  <!-- Reihe 2 (Mittig versetzt - 4 Elemente) -->
+                  <div class="flex flex-wrap justify-center gap-x-4 gap-y-3 md:gap-6">
+                    <span class="hover:text-white/80 transition cursor-default">Onmasportsclub</span>
+                    <span class="hover:text-white/80 transition cursor-default">Zenetixx</span>
+                    <span class="hover:text-white/80 transition cursor-default">rūtine</span>
+                    <span class="hover:text-white/80 transition cursor-default">Athletica</span>
+                  </div>
 
-  <!-- Reihe 3 (Weiter versetzt - 3 Elemente) -->
-  <div class="flex justify-center gap-6">
-    <span class="hover:text-white/80 transition cursor-default">Kölsches Wasser</span>
-    <span class="hover:text-white/80 transition cursor-default">koelnistkool</span>
-    <span class="hover:text-white/80 transition cursor-default">Rausgegangen</span>
-  </div>
+                  <!-- Reihe 3 (Weiter versetzt - 3 Elemente) -->
+                  <div class="flex flex-wrap justify-center gap-x-4 gap-y-3 md:gap-6">
+                    <span class="hover:text-white/80 transition cursor-default">Kölsches Wasser</span>
+                    <span class="hover:text-white/80 transition cursor-default">koelnistkool</span>
+                    <span class="hover:text-white/80 transition cursor-default">Rausgegangen</span>
+                  </div>
 
-</div>
-
+                </div>
             </div>
         </div>
     </section>
 
     <!-- DAS KONZEPT (LIVE TIMELINE) -->
-    <section class="py-32 px-6 max-w-6xl mx-auto relative z-10">
-        <div class="grid md:grid-cols-2 gap-16 items-center">
+    <section class="py-16 md:py-32 px-4 md:px-6 max-w-6xl mx-auto relative z-10">
+        <div class="grid md:grid-cols-2 gap-12 md:gap-16 items-center">
             <div class="reveal">
                 <p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-2">Die Vision</p>
-                <h2 class="text-4xl md:text-5xl font-black italic tracking-tighter mb-6 leading-tight">
+                <h2 class="text-3xl md:text-5xl font-black italic tracking-tighter mb-5 md:mb-6 leading-tight">
                     Nach dem Training<br>
                     beginnt oft die eigentliche Community.
                 </h2>
-                <p class="text-gray-400 text-sm leading-relaxed mb-8">
+                <p class="text-gray-400 text-sm leading-relaxed mb-8 max-w-[95%] md:max-w-full">
                     Viele Routinen in Köln enden nicht im Studio. Leute holen danach Kaffee, treffen Freunde oder sitzen noch zusammen. Genau diese Orte werden Teil der täglichen Gewohnheiten.
                 </p>
                 <div class="space-y-4">
-                    <div class="card p-5">
+                    <div class="card p-4 md:p-5">
                         <h3 class="font-bold text-lg mb-1 text-white">Mehr Wiederkehr</h3>
                         <p class="text-[11px] text-gray-400 uppercase tracking-widest font-bold">
                             Streaks und Rewards geben Menschen einen Grund, regelmäßig zurückzukommen.
                         </p>
                     </div>
-                    <div class="card p-5">
+                    <div class="card p-4 md:p-5">
                         <h3 class="font-bold text-lg mb-1 text-white">Neue Erstbesuche</h3>
                         <p class="text-[11px] text-gray-400 uppercase tracking-widest font-bold">
                             Nutzer entdecken neue Spots über Freunde, Routinen und lokale Check-ins.
@@ -309,47 +310,47 @@
             </div>
 
             <!-- MOCKUP -->
-            <div class="mockup p-8 reveal border-[#1f1f1f]">
+            <div class="mockup p-5 md:p-8 reveal border-[#1f1f1f]">
                 <div class="absolute inset-0 bg-gradient-to-b from-[#ff4d00]/5 to-transparent pointer-events-none"></div>
-                <div class="relative z-10 flex justify-between items-start mb-8 border-b border-white/5 pb-4">
+                <div class="relative z-10 flex justify-between items-start mb-6 md:mb-8 border-b border-white/5 pb-4">
                     <div>
                         <p class="text-[10px] uppercase tracking-[0.2em] text-[#ff4d00] font-black mb-1">Heute</p>
-                        <h3 class="text-2xl font-black italic tracking-tighter">Morning Routine</h3>
+                        <h3 class="text-xl md:text-2xl font-black italic tracking-tighter">Morning Routine</h3>
                     </div>
                     <div class="text-right">
                         <span class="text-[10px] font-black bg-white text-black px-3 py-1.5 rounded-sm italic uppercase">KÖLN</span>
                     </div>
                 </div>
                 
-                <div class="space-y-4 relative z-10">
+                <div class="space-y-3 md:space-y-4 relative z-10">
                     <!-- Task 1 -->
-                    <div class="bg-[#0a0a0a] border border-[#1f1f1f] rounded-xl p-5 flex items-center justify-between gap-4">
-                        <div class="flex items-center gap-4">
-                            <div class="w-10 h-10 bg-[#111] border border-white/5 rounded-full flex items-center justify-center text-lg">🏃</div>
+                    <div class="bg-[#0a0a0a] border border-[#1f1f1f] rounded-xl p-4 md:p-5 flex items-center justify-between gap-3 md:gap-4">
+                        <div class="flex items-center gap-3 md:gap-4">
+                            <div class="w-10 h-10 min-w-[40px] bg-[#111] border border-white/5 rounded-full flex items-center justify-center text-lg">🏃</div>
                             <div>
                                 <p class="font-bold text-white text-sm">Morning Run</p>
                                 <p class="text-[10px] text-gray-500 uppercase tracking-widest mt-1">Rhein Route</p>
                             </div>
                         </div>
-                        <span class="text-[#ff4d00] font-black text-xl italic tracking-tighter">+250</span>
+                        <span class="text-[#ff4d00] font-black text-xl md:text-xl italic tracking-tighter">+250</span>
                     </div>
                     
                     <!-- Task 2 (Streak) -->
-                    <div class="bg-[#0a0a0a] border border-[#ff4d00]/30 rounded-xl p-5 flex items-center justify-between gap-4 shadow-[0_0_15px_rgba(255,77,0,0.1)]">
-                        <div class="flex items-center gap-4">
-                            <div class="w-10 h-10 bg-[#ff4d00]/10 border border-[#ff4d00]/30 rounded-full flex items-center justify-center text-lg shadow-[0_0_10px_rgba(255,77,0,0.2)]">🔥</div>
+                    <div class="bg-[#0a0a0a] border border-[#ff4d00]/30 rounded-xl p-4 md:p-5 flex items-center justify-between gap-3 md:gap-4 shadow-[0_0_15px_rgba(255,77,0,0.1)]">
+                        <div class="flex items-center gap-3 md:gap-4">
+                            <div class="w-10 h-10 min-w-[40px] bg-[#ff4d00]/10 border border-[#ff4d00]/30 rounded-full flex items-center justify-center text-lg shadow-[0_0_10px_rgba(255,77,0,0.2)]">🔥</div>
                             <div>
                                 <p class="font-bold text-white text-sm">Rocycle Session</p>
                                 <span class="inline-block mt-1 bg-[#ff4d00]/10 text-[#ff4d00] px-2 py-0.5 rounded-sm text-[8px] font-black uppercase tracking-widest border border-[#ff4d00]/20">4 Week Streak</span>
                             </div>
                         </div>
-                        <span class="text-[#ff4d00] font-black text-xl italic tracking-tighter">+450</span>
+                        <span class="text-[#ff4d00] font-black text-xl md:text-xl italic tracking-tighter">+450</span>
                     </div>
 
                     <!-- Task 3 (Completed) -->
-                    <div class="bg-[#0a0a0a] border border-[#1f1f1f] rounded-xl p-5 flex items-center justify-between gap-4 opacity-60 grayscale-[30%]">
-                        <div class="flex items-center gap-4">
-                            <div class="w-10 h-10 bg-[#111] border border-white/5 rounded-full flex items-center justify-center text-lg">☕</div>
+                    <div class="bg-[#0a0a0a] border border-[#1f1f1f] rounded-xl p-4 md:p-5 flex items-center justify-between gap-3 md:gap-4 opacity-60 grayscale-[30%]">
+                        <div class="flex items-center gap-3 md:gap-4">
+                            <div class="w-10 h-10 min-w-[40px] bg-[#111] border border-white/5 rounded-full flex items-center justify-center text-lg">☕</div>
                             <div>
                                 <p class="font-bold text-white text-sm">GuMo Café</p>
                                 <p class="text-[10px] text-gray-500 uppercase tracking-widest mt-1">Check-In</p>
@@ -363,16 +364,16 @@
     </section>
 
     <!-- USE CASES (DIE 4 KATEGORIEN) -->
-    <section class="py-24 px-6 max-w-6xl mx-auto flex flex-col gap-28 border-t border-white/5 relative z-10">
+    <section class="py-16 md:py-24 px-4 md:px-6 max-w-6xl mx-auto flex flex-col gap-16 md:gap-28 border-t border-white/5 relative z-10">
         
         <!-- Bereich 1: Sport & Fitness -->
-        <div class="flex flex-col md:flex-row items-center gap-12 reveal">
-            <div class="md:w-1/2 order-2 md:order-1">
-                <div class="mockup p-6 border-[#1f1f1f] interactive">
+        <div class="flex flex-col md:flex-row items-center gap-10 md:gap-12 reveal">
+            <div class="md:w-1/2 order-2 md:order-1 w-full">
+                <div class="mockup p-5 md:p-6 border-[#1f1f1f] interactive">
                     <div class="flex justify-between items-center mb-6 border-b border-white/5 pb-4">
                         <div>
                             <p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">Check-in</p>
-                            <h4 class="font-bold text-xl text-white tracking-tight">Rowing Session</h4>
+                            <h4 class="font-bold text-lg md:text-xl text-white tracking-tight">Rowing Session</h4>
                             <p class="text-xs text-gray-500 mt-1 uppercase tracking-widest">Achter.Club Köln</p>
                         </div>
                         <span class="text-[#ff4d00] font-black text-2xl italic tracking-tighter">+500</span>
@@ -390,7 +391,7 @@
                     </div>
                 </div>
             </div>
-            <div class="md:w-1/2 order-1 md:order-2">
+            <div class="md:w-1/2 order-1 md:order-2 w-full">
                 <span class="text-[10px] font-black uppercase tracking-widest text-[#ff4d00] mb-2 block">Sport, Gyms & Run Clubs</span>
                 <h2 class="text-3xl md:text-4xl font-black italic tracking-tighter mb-4">Mach das Workout zur Gewohnheit.</h2>
                 <p class="text-gray-400 text-sm leading-relaxed mb-6">
@@ -398,15 +399,15 @@
                 </p>
                 <ul class="space-y-4 text-[11px] text-gray-300 font-bold uppercase tracking-widest">
                     <li class="flex items-center bg-[#0a0a0a] border border-[#1f1f1f] p-3 rounded-md"><span class="text-[#ff4d00] mr-3">✔</span> Belohnung für jede Teilnahme</li>
-                    <li class="flex items-center bg-[#0a0a0a] border border-[#1f1f1f] p-3 rounded-md"><span class="text-[#ff4d00] mr-3">✔</span> Bindung durch tägliche / wöchentliche Streaks"</li>
+                    <li class="flex items-center bg-[#0a0a0a] border border-[#1f1f1f] p-3 rounded-md"><span class="text-[#ff4d00] mr-3">✔</span> Bindung durch tägliche / wöchentliche Streaks</li>
                     <li class="flex items-center bg-[#0a0a0a] border border-[#1f1f1f] p-3 rounded-md"><span class="text-[#ff4d00] mr-3">✔</span> Sichtbarkeit in der Zielgruppe</li>
                 </ul>
             </div>
         </div>
 
         <!-- Bereich 2: Food & Gastronomie -->
-        <div class="flex flex-col md:flex-row items-center gap-12 reveal">
-            <div class="md:w-1/2">
+        <div class="flex flex-col md:flex-row items-center gap-10 md:gap-12 reveal">
+            <div class="md:w-1/2 w-full">
                 <span class="text-[10px] font-black uppercase tracking-widest text-[#3b82f6] mb-2 block">Cafés & Healthy Food</span>
                 <h2 class="text-3xl md:text-4xl font-black italic tracking-tighter mb-4">Die feste Post-Workout Routine.</h2>
                 <p class="text-gray-400 text-sm leading-relaxed mb-6">
@@ -418,18 +419,18 @@
                     <li class="flex items-center bg-[#0a0a0a] border border-[#1f1f1f] p-3 rounded-md"><span class="text-[#3b82f6] mr-3">✔</span> Stammkunden organisch aufbauen</li>
                 </ul>
             </div>
-            <div class="md:w-1/2">
-                <div class="mockup p-6 border-[#3b82f6]/30 interactive relative overflow-hidden">
+            <div class="md:w-1/2 w-full">
+                <div class="mockup p-5 md:p-6 border-[#3b82f6]/30 interactive relative overflow-hidden">
                     <div class="absolute inset-0 bg-gradient-to-br from-[#3b82f6]/10 to-transparent pointer-events-none"></div>
                     <div class="flex justify-between items-center mb-6 border-b border-white/5 pb-4 relative z-10">
                         <div>
                             <p class="text-[#3b82f6] text-[10px] font-black uppercase tracking-widest mb-1">Local Network</p>
-                            <h4 class="font-bold text-xl text-white tracking-tight">Post-Workout Snack</h4>
+                            <h4 class="font-bold text-lg md:text-xl text-white tracking-tight">Post-Workout Snack</h4>
                             <p class="text-xs text-gray-500 mt-1 uppercase tracking-widest">GuMo Café</p>
                         </div>
                         <span class="text-[#3b82f6] font-black text-2xl italic tracking-tighter">+200</span>
                     </div>
-                    <div class="bg-[#0a0a0a] border border-white/5 rounded-xl p-4 flex items-center justify-center gap-2 text-xs text-white font-bold tracking-widest uppercase relative z-10">
+                    <div class="bg-[#0a0a0a] border border-white/5 rounded-xl p-4 flex items-center justify-center gap-2 text-[10px] md:text-xs text-white font-bold tracking-widest uppercase relative z-10">
                         <span>☕️</span> Besuch erfolgreich bestätigt
                     </div>
                 </div>
@@ -437,26 +438,26 @@
         </div>
 
         <!-- Bereich 3: Events -->
-        <div class="flex flex-col md:flex-row items-center gap-12 reveal">
-            <div class="md:w-1/2 order-2 md:order-1">
-                <div class="mockup p-6 relative overflow-hidden border-[#a855f7]/30 interactive">
+        <div class="flex flex-col md:flex-row items-center gap-10 md:gap-12 reveal">
+            <div class="md:w-1/2 order-2 md:order-1 w-full">
+                <div class="mockup p-5 md:p-6 relative overflow-hidden border-[#a855f7]/30 interactive">
                     <div class="absolute inset-0 bg-gradient-to-br from-[#a855f7]/10 to-transparent pointer-events-none"></div>
                     <div class="absolute top-0 right-0 bg-black px-3 py-1 text-[8px] font-black uppercase tracking-widest text-gray-500 rounded-bl-lg border-l border-b border-[#1f1f1f] z-20">Versteckter Check-in</div>
                     
                     <div class="flex justify-between items-center mb-6 border-b border-white/5 pb-4 mt-2 relative z-10">
                         <div>
                             <p class="text-[#a855f7] text-[10px] font-black uppercase tracking-widest mb-1">Time-Limited</p>
-                            <h4 class="font-bold text-xl text-white tracking-tight">PopUp Beach Besuch</h4>
+                            <h4 class="font-bold text-lg md:text-xl text-white tracking-tight">PopUp Beach Besuch</h4>
                             <p class="text-xs text-gray-500 mt-1 uppercase tracking-widest">Rausgegangen Event</p>
                         </div>
                         <span class="text-[#a855f7] font-black text-2xl italic tracking-tighter">+800</span>
                     </div>
                     <div class="bg-[#a855f7]/10 border border-[#a855f7]/30 rounded-xl p-4 text-center relative z-10 shadow-[0_0_15px_rgba(168,85,247,0.15)]">
-                        <p class="text-[#a855f7] font-black text-[11px] uppercase tracking-widest">🎉 Event-Bonuspunkte gesammelt!</p>
+                        <p class="text-[#a855f7] font-black text-[10px] md:text-[11px] uppercase tracking-widest">🎉 Event-Bonuspunkte gesammelt!</p>
                     </div>
                 </div>
             </div>
-            <div class="md:w-1/2 order-1 md:order-2">
+            <div class="md:w-1/2 order-1 md:order-2 w-full">
                 <span class="text-[10px] font-black uppercase tracking-widest text-[#a855f7] mb-2 block">Events & Kultur</span>
                 <h2 class="text-3xl md:text-4xl font-black italic tracking-tighter mb-4">Events als Teil der aktiven Szene.</h2>
                 <p class="text-gray-400 text-sm leading-relaxed mb-6">
@@ -471,8 +472,8 @@
         </div>
 
         <!-- Bereich 4: Brands & Premium -->
-        <div class="flex flex-col md:flex-row items-center gap-12 reveal">
-            <div class="md:w-1/2">
+        <div class="flex flex-col md:flex-row items-center gap-10 md:gap-12 reveal">
+            <div class="md:w-1/2 w-full">
                 <span class="text-[10px] font-black uppercase tracking-widest text-[#ff4d00] mb-2 block">Marken & Regeneration</span>
                 <h2 class="text-3xl md:text-4xl font-black italic tracking-tighter mb-4">Werde zum exklusiven Ritual-Reward.</h2>
                 <p class="text-gray-400 text-sm leading-relaxed mb-6">
@@ -484,10 +485,9 @@
                     <li class="flex items-center bg-[#0a0a0a] border border-[#1f1f1f] p-3 rounded-md"><span class="text-[#ff4d00] mr-3">✔</span> Stärke dein Image als Premium-Brand</li>
                 </ul>
             </div>
-            <div class="md:w-1/2">
-                <div class="mockup p-8 text-center relative overflow-hidden border-[#ff4d00]/30 interactive">
+            <div class="md:w-1/2 w-full">
+                <div class="mockup p-6 md:p-8 text-center relative overflow-hidden border-[#ff4d00]/30 interactive">
                     <div class="absolute inset-0 bg-gradient-to-t from-[#ff4d00]/10 to-transparent pointer-events-none"></div>
-                    <!-- Die große angeschnittene 50 -->
                     <div class="absolute -right-6 -top-8 opacity-5 rotate-12 text-9xl font-black italic text-white select-none pointer-events-none drop-shadow-2xl">50</div>
                     
                     <div class="relative z-10">
@@ -509,20 +509,20 @@
     </section>
 
     <!-- ZERO FRICTION -->
-    <section class="py-24 px-6 border-y border-[#1f1f1f] bg-[#080808] relative z-10">
+    <section class="py-16 md:py-24 px-4 md:px-6 border-y border-[#1f1f1f] bg-[#080808] relative z-10">
         <div class="max-w-3xl mx-auto text-center reveal">
-            <h2 class="text-4xl md:text-5xl font-black italic tracking-tighter mb-6">
+            <h2 class="text-3xl md:text-5xl font-black italic tracking-tighter mb-6">
                 Kein IT-Projekt<span class="text-[#ff4d00]">.</span>
             </h2>
-            <p class="text-sm md:text-base text-gray-400 leading-relaxed max-w-2xl mx-auto">
+            <p class="text-sm md:text-base text-gray-400 leading-relaxed max-w-[95%] md:max-w-2xl mx-auto">
                 Keine Kassen-Integration. Keine Tablets am Eingang. Kein kompliziertes Setup. Ein kleiner, edler Acryl-Aufsteller am Empfang reicht auch völlig aus. Deine Gäste verifizieren ihre Routinen selbst über ihr eigenes Smartphone.
             </p>
         </div>
     </section>
 
     <!-- CTA -->
-    <section id="partner" class="py-32 px-6 relative overflow-hidden flex-1 z-10">
-        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[300px] bg-[#ff4d00]/10 blur-[120px] rounded-full pointer-events-none"></div>
+    <section id="partner" class="py-20 md:py-32 px-4 md:px-6 relative overflow-hidden flex-1 z-10">
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[150vw] h-[300px] md:w-[700px] bg-[#ff4d00]/10 blur-[100px] md:blur-[120px] rounded-full pointer-events-none"></div>
 
         <div class="max-w-2xl mx-auto text-center relative z-10">
             <div class="inline-flex items-center gap-2 bg-[#ff4d00]/10 border border-[#ff4d00]/20 px-4 py-2 rounded-md mb-8 reveal shadow-[0_0_15px_rgba(255,77,0,0.1)]">
@@ -531,16 +531,16 @@
                 </span>
             </div>
 
-            <h2 class="text-5xl md:text-7xl font-black italic tracking-tighter mb-6 reveal leading-[1.1]">
+            <h2 class="text-4xl md:text-7xl font-black italic tracking-tighter mb-6 reveal leading-[1.1]">
                 Erste Partner<br>
                 in Köln<span class="text-[#ff4d00]">.</span>
             </h2>
 
-            <p class="text-sm md:text-lg text-gray-300 leading-relaxed mb-10 reveal max-w-md mx-auto">
+            <p class="text-sm md:text-lg text-gray-300 leading-relaxed mb-10 reveal max-w-[95%] md:max-w-md mx-auto">
                 Aktuell baut GRIND. das erste Netzwerk aus lokalen Cafés, Studios und Community-Spots in Köln auf.
             </p>
 
-            <div class="space-y-4 max-w-sm mx-auto text-left mb-12 reveal bg-[#0a0a0a] border border-[#1f1f1f] p-6 rounded-xl shadow-xl">
+            <div class="space-y-4 max-w-sm mx-auto text-left mb-12 reveal bg-[#0a0a0a] border border-[#1f1f1f] p-5 md:p-6 rounded-xl shadow-xl">
                 <div class="flex items-center gap-3 text-gray-300 text-xs font-bold uppercase tracking-widest">
                     <span class="text-[#ff4d00] text-lg">✔</span>
                     Kostenlos in der Aufbauphase
