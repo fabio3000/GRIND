@@ -43,9 +43,7 @@
     
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #030303; color: #ffffff; overflow-x: hidden; scroll-behavior: smooth; background-image: radial-gradient(circle at top, #0b0b0b 0%, #030303 70%); min-height: 100vh; overscroll-behavior-y: none; }
-        h1, h2, h3, h4 {
-    word-spacing: 0.13em;
-}
+        h1, h2, h3, h4 { word-spacing: 0.13em; }
         .grid-overlay { position: fixed; inset: 0; opacity: 0.08; background-size: 60px 60px; background-image: linear-gradient(to right, rgba(255,255,255,0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.08) 1px, transparent 1px); transform: perspective(500px) rotateX(60deg) translateZ(0); pointer-events: none; z-index: 0; }
         
         .grind-gradient { background: linear-gradient(90deg, #ff4d00, #ff8800); }
@@ -142,9 +140,6 @@
         .legal-content strong { color: #ffffff; font-weight: bold; }
         .legal-content a { color: #ff4d00; text-decoration: none; transition: color 0.2s; } 
         .legal-content a:hover { color: #ffffff; text-decoration: underline; }
-   
-}
-
     </style>
 </head>
 <body class="flex flex-col relative select-none">
@@ -197,6 +192,17 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, updateDoc, arrayUnion, onSnapshot, collection, addDoc, query, where, getDocs, orderBy, limit, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // GANZ WICHTIG: URL Parameter direkt zu Beginn laden und sichern, 
+        // damit sie durch Page-Loads / State-Updates nicht verloren gehen!
+        const initialUrlParams = new URLSearchParams(window.location.search);
+        window.deepLinkVerifyId = initialUrlParams.get('verify');
+        window.deepLinkCrewCode = initialUrlParams.get('crew');
+
+        // Parameter aus der Adressleiste verstecken, damit Reload nicht doppelt triggert
+        if (window.deepLinkVerifyId || window.deepLinkCrewCode) {
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
 
         const firebaseConfig = {
             apiKey: "AIzaSyDtwsvmYSONjFufhbJ5I8G_RAMffnh7re0",
@@ -311,7 +317,6 @@
             el.innerHTML = `${Math.floor(distance / 86400000)}D ${Math.floor((distance % 86400000) / 3600000).toString().padStart(2, '0')}H ${Math.floor((distance % 3600000) / 60000).toString().padStart(2, '0')}M ${Math.floor((distance % 60000) / 1000).toString().padStart(2, '0')}S`;
         };
 
-        // 100% ZUVERLÄSSIGER XP DROPDOWN TRIGGER (Entkoppelt vom reaktiven App-Rendern)
         window.triggerXpHud = (gainedXp, oldXp, newXp, oldLvl, newLvl) => {
             const hud = document.getElementById('xp-hud');
             const hudLvl = document.getElementById('hud-lvl');
@@ -326,37 +331,31 @@
             const startXpInLvl = oldXp % 1000;
             const targetXpInLvl = newXp % 1000;
             
-            // Setze initiale Werte vor dem Runterfahren
             hudLvl.innerText = oldLvl;
             hudXpNum.innerText = startXpInLvl;
             hudXpMax.innerText = oldLvl * 1000;
             
             hudXpBar.style.transition = 'none';
             hudXpBar.style.width = `${startXpInLvl / 10}%`;
-            void hudXpBar.offsetWidth; // Force Reflow
+            void hudXpBar.offsetWidth;
             
-            // 1. HUD runterfahren
             hud.style.transform = 'translateY(0)';
             hud.style.pointerEvents = 'auto';
             
-            // 2. XP Zuwachs animieren nach sanfter Verzögerung
             setTimeout(() => {
                 animateValue('hud-xp-num', startXpInLvl, newLvl > oldLvl ? 1000 : targetXpInLvl, 1500);
                 
                 if (newLvl > oldLvl) {
-                    // Balken füllt sich komplett
                     hudXpBar.style.transition = 'width 1000ms ease-in';
                     hudXpBar.style.width = '100%';
                     
                     setTimeout(() => {
-                        // Level Up Flash-Effekt
                         hudLvl.innerText = newLvl;
                         hudLvl.classList.remove('animate-level-up');
                         void hudLvl.offsetWidth;
                         hudLvl.classList.add('animate-level-up');
                         hudXpMax.innerText = newLvl * 1000;
                         
-                        // Setze Balken auf 0 zurück und fülle auf Zielwert
                         hudXpBar.style.transition = 'none';
                         hudXpBar.style.width = '0%';
                         void hudXpBar.offsetWidth;
@@ -371,7 +370,6 @@
                 }
             }, 300);
             
-            // 3. HUD nach 5,5 Sekunden automatisch wieder hochfahren
             window.hudCloseTimeout = setTimeout(() => {
                 hud.style.transform = 'translateY(-150%)';
                 hud.style.pointerEvents = 'none';
@@ -442,51 +440,45 @@
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 state.user = user;
-// --- ÄNDERUNG IN INDEX.HTML ---
-onSnapshot(doc(db, 'plot_users', user.uid), (docSnap) => {
-    if (docSnap.exists()) {
-        const newData = docSnap.data();
-        
-        // [Deine bestehende XP-Detektions-Logik bleibt hier unverändert]
-        if (state.profile) { /* ... */ }
-        
-        state.profile = newData;
-        if (!state.profile.crewCode) { /* ... */ }
-        
-        if (['loading', 'auth', 'onboarding'].includes(state.view)) {
-            state.view = 'dashboard'; 
-            state.dashboardNeedsScroll = true;
-            
-            // URL-Parameter auslesen
-            const urlParams = new URLSearchParams(window.location.search);
-            const crewCode = urlParams.get('crew');
-            const verifyId = urlParams.get('verify'); // NEU: QR-Parameter abgreifen
-            
-            // 1. Crew-Einladung verarbeiten
-            if (crewCode) { 
-                window.history.replaceState({}, document.title, window.location.pathname); 
-                setTimeout(() => window.resolveInvite(crewCode), 1000); 
-            }
-            
-            // 2. NEU: QR-Deep-Link verarbeiten
-            if (verifyId) {
-                // Parameter sofort aus der Adresszeile löschen, damit ein Refresh den Trigger nicht wiederholt
-                window.history.replaceState({}, document.title, window.location.pathname); 
-                
-                // Kleiner Delay, damit das Dashboard sauber gerendert ist und die Daten bereitstehen
-                setTimeout(() => {
-                    if (typeof window.claimItemById === 'function') {
-                        window.claimItemById(verifyId);
+                onSnapshot(doc(db, 'plot_users', user.uid), (docSnap) => {
+                    if (docSnap.exists()) {
+                        const newData = docSnap.data();
+                        
+                        state.profile = newData;
+                        
+                        if (['loading', 'auth', 'onboarding'].includes(state.view)) {
+                            state.view = 'dashboard'; 
+                            state.dashboardNeedsScroll = true;
+                            
+                            // Abarbeiten der gesicherten Deep Links
+                            if (window.deepLinkCrewCode) { 
+                                setTimeout(() => window.resolveInvite(window.deepLinkCrewCode), 1000); 
+                                window.deepLinkCrewCode = null;
+                            }
+                            
+                            if (window.deepLinkVerifyId) {
+                                window.showToast("QR-Code erkannt. Lade Routine...", "info");
+                                
+                                // Wir warten kurz, bis die Season Data (habitData etc.) zu 100% geladen ist
+                                let attempts = 0;
+                                const checkAndClaim = setInterval(() => {
+                                    attempts++;
+                                    if (state.habitData.length > 0 || Object.keys(state.weeklyData).length > 0 || attempts > 20) {
+                                        clearInterval(checkAndClaim);
+                                        if (typeof window.claimItemById === 'function') {
+                                            window.claimItemById(window.deepLinkVerifyId);
+                                        }
+                                        window.deepLinkVerifyId = null;
+                                    }
+                                }, 500);
+                            }
+                        }
+                        window.scheduleRender();
+                    } else { 
+                        state.view = 'onboarding'; 
+                        window.scheduleRender(); 
                     }
-                }, 1200); 
-            }
-        }
-        window.scheduleRender();
-    } else { 
-        state.view = 'onboarding'; 
-        window.scheduleRender(); 
-    }
-});
+                });
                 onSnapshot(collection(db, 'plot_pending_proofs'), (snap) => { if (snap && snap.docs) { state.pendingMissions = snap.docs.map(d => d.data()).filter(data => data.uid === state.user.uid); if(state.view === 'dashboard') window.scheduleRender(); } });
                 
                 onSnapshot(query(collection(db, 'plot_activities'), orderBy('timestamp', 'desc'), limit(50)), (snap) => {
@@ -522,7 +514,12 @@ onSnapshot(doc(db, 'plot_users', user.uid), (docSnap) => {
                     if (m) { item = m; break; }
                 }
             }
-            if (!item) return;
+            
+            // KLARES FEEDBACK WENN NICHT GEFUNDEN
+            if (!item) {
+                window.showToast("Fehler: Mission/Routine nicht gefunden oder abgelaufen.", "error");
+                return; 
+            }
             
             if (item.type === 'instant') window.claimInstantMission(item.id, Number(item.xp), item.name);
             else window.openVerifyModal(item.id, Number(item.xp), item.type, item.name, item.qr_solution || '');
@@ -606,42 +603,41 @@ onSnapshot(doc(db, 'plot_users', user.uid), (docSnap) => {
             } catch(e) { window.showToast("Fehler.", "error"); }
         };
 
-window.submitShipping = async (lvl, tier) => {
-    let addressString = "", addressData = {}, allValid = true;
-    document.querySelectorAll('.shipping-input-field').forEach(input => {
-        const val = input.value.trim(); if(!val) allValid = false; const label = input.getAttribute('data-label'); addressData[label] = val; addressString += `${label}: ${val} | `;
-    });
-    if(!allValid) return window.showToast("Bitte alle Felder ausfüllen.", "error");
-    const btn = document.querySelector('#modal-container button.bg-\\[\\#ff4d00\\], #modal-container button.bg-\\[\\#a855f7\\]'); if(btn) { btn.innerText = "Senden..."; btn.disabled = true; }
-    const rewardId = `lvl${lvl}_${tier}`; const reward = state.rewardData.find(r => r.lvl === lvl); const itemName = reward ? reward[tier] : 'Unbekanntes Item';
-    try {
-        await addDoc(collection(db, 'plot_shipping_requests'), { uid: state.user.uid, alias: state.profile?.alias || 'Grinder', lvl: lvl, tier: tier, itemName: itemName, address: addressString, timestamp: new Date(), status: 'pending' });
-        const currentRedeemed = state.profile?.redeemed || [];
-        if(!currentRedeemed.includes(rewardId)) { currentRedeemed.push(rewardId); await setDoc(doc(db, 'plot_users', state.user.uid), { redeemed: currentRedeemed }, { merge: true }); }
-        
-        // --- HIER IST DAS UPDATE FÜR WEB3FORMS ---
-        try { 
-            fetch("https://api.web3forms.com/submit", { 
-                method: "POST", 
-                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, 
-                body: JSON.stringify({ 
-                    access_key: "3caac5da-214e-4294-9266-ef4dc37e451b",
-                    subject: "Loot: " + itemName, 
-                    from_name: "Grind-App Rewards",
-                    Artikel: itemName, 
-                    Alias: state.profile?.alias || 'Grinder', 
-                    Level: String(lvl), 
-                    Tier: tier.toUpperCase(), 
-                    ...addressData 
-                }) 
-            }).catch(e => {}); 
-        } catch(mailErr) {}
-        // --- ENDE DES UPDATES ---
+        window.submitShipping = async (lvl, tier) => {
+            let addressString = "", addressData = {}, allValid = true;
+            document.querySelectorAll('.shipping-input-field').forEach(input => {
+                const val = input.value.trim(); if(!val) allValid = false; const label = input.getAttribute('data-label'); addressData[label] = val; addressString += `${label}: ${val} | `;
+            });
+            if(!allValid) return window.showToast("Bitte alle Felder ausfüllen.", "error");
+            const btn = document.querySelector('#modal-container button.bg-\\[\\#ff4d00\\], #modal-container button.bg-\\[\\#a855f7\\]'); if(btn) { btn.innerText = "Senden..."; btn.disabled = true; }
+            const rewardId = `lvl${lvl}_${tier}`; const reward = state.rewardData.find(r => r.lvl === lvl); const itemName = reward ? reward[tier] : 'Unbekanntes Item';
+            try {
+                await addDoc(collection(db, 'plot_shipping_requests'), { uid: state.user.uid, alias: state.profile?.alias || 'Grinder', lvl: lvl, tier: tier, itemName: itemName, address: addressString, timestamp: new Date(), status: 'pending' });
+                const currentRedeemed = state.profile?.redeemed || [];
+                if(!currentRedeemed.includes(rewardId)) { currentRedeemed.push(rewardId); await setDoc(doc(db, 'plot_users', state.user.uid), { redeemed: currentRedeemed }, { merge: true }); }
+                
+                try { 
+                    fetch("https://api.web3forms.com/submit", { 
+                        method: "POST", 
+                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, 
+                        body: JSON.stringify({ 
+                            access_key: "3caac5da-214e-4294-9266-ef4dc37e451b",
+                            subject: "Loot: " + itemName, 
+                            from_name: "Grind-App Rewards",
+                            Artikel: itemName, 
+                            Alias: state.profile?.alias || 'Grinder', 
+                            Level: String(lvl), 
+                            Tier: tier.toUpperCase(), 
+                            ...addressData 
+                        }) 
+                    }).catch(e => {}); 
+                } catch(mailErr) {}
 
-        window.logActivity('REDEEM', `hat physischen Reward ('<span class="font-bold">${itemName}</span>') angefordert.`);
-        window.showToast("Anfrage gesendet!", "success"); window.closeModal();
-    } catch(e) { window.showToast("Fehler.", "error"); if(btn) { btn.innerText = "Versand anfordern"; btn.disabled = false; } }
-};
+                window.logActivity('REDEEM', `hat physischen Reward ('<span class="font-bold">${itemName}</span>') angefordert.`);
+                window.showToast("Anfrage gesendet!", "success"); window.closeModal();
+            } catch(e) { window.showToast("Fehler.", "error"); if(btn) { btn.innerText = "Versand anfordern"; btn.disabled = false; } }
+        };
+
         window.claimInstantMission = async (mid, xp, name) => {
             const btn = document.getElementById(`btn-${mid}`); if(btn) { btn.innerText = "Claiming..."; btn.disabled = true; }
             try {
@@ -1149,43 +1145,8 @@ window.submitShipping = async (lvl, tier) => {
                     </section>
                     <main class="max-w-6xl mx-auto px-6 w-full relative z-10 pb-10"> <!-- Reopen container for the rest -->
                 `;
-
-          /*    html += `
-                    <section class="max-w-3xl mx-auto mb-16">
-                        <div class="flex flex-col gap-6 mb-6">
-                            <div class="flex justify-between items-end border-b border-white/10 pb-4">
-                                <div>
-                                    <p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">Local Network</p>
-                                    <h3 class="text-3xl font-black uppercase italic tracking-tight">Active Spots</h3>
-                                </div>
-                                <span class="text-[10px] font-black bg-white text-black px-3 py-1.5 rounded-sm italic shadow-[0_0_10px_rgba(255,255,255,0.4)] uppercase">${p.city || 'KÖLN'}</span>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                `;
                 
-                if (state.activeSpots.length > 0) {
-                    state.activeSpots.forEach(s => { 
-                        html += `
-                            <div class="mockup p-5 border ${s.color === '#a855f7' ? 'border-[#a855f7]/20' : 'border-transparent'}">
-                                <div class="absolute inset-0 bg-gradient-to-br ${s.bgClass || 'from-white/10'} to-transparent opacity-100 pointer-events-none"></div>
-                                <div class="flex justify-between items-start mb-4 relative z-10">
-                                    <div>
-                                        <div class="w-10 h-10 bg-[#111] border border-white/5 rounded-full flex items-center justify-center mb-2 text-lg">${s.icon || '📍'}</div>
-                                        <h4 class="font-bold text-sm text-white">${s.name}</h4>
-                                        <p class="text-[10px] text-gray-500 mt-1 uppercase tracking-widest">${s.subtitle}</p>
-                                    </div>
-                                    <span class="${s.colorClass || 'text-white'} font-black text-xs italic bg-[#111] border border-white/5 px-2 py-1 rounded-sm">+${s.xp} XP</span>
-                                </div>
-                            </div>
-                        `; 
-                    });
-                } else {
-                    html += `<div class="col-span-3 text-center p-8 text-gray-600 italic text-sm">Keine Active Spots verfügbar.</div>`;
-                }
-*/
-                
-                html += `</div></section>`;
+                html += `</section>`;
 
                 html += `
                     <section class="max-w-3xl mx-auto mb-16">
@@ -1448,7 +1409,6 @@ window.submitShipping = async (lvl, tier) => {
                         }
                     }
                     
-                    // Wir animieren die Dashboard-Statistiken weiterhin hierüber
                     if (state.prevXp !== null && state.prevXp < safeXp) {
                         animateValue('xp-counter-num', state.prevXp, safeXp, 2500);
                         
@@ -1513,24 +1473,5 @@ window.submitShipping = async (lvl, tier) => {
             setTimeout(() => document.getElementById('install-banner').classList.remove('hidden'), 2000); 
         }
     </script>
-    <script>
-    // Sobald die Seite geladen ist, prüfen wir den URL-Parameter
-    window.addEventListener('load', function() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const verifyId = urlParams.get('verify');
-        
-        if (verifyId) {
-            console.log("Verifiziere Routine: " + verifyId);
-            
-            // HIER deine Logik einfügen:
-            // 1. Ggf. Nutzer zur Verifizierung auffordern / einloggen
-            // 2. Deine API-Funktion aufrufen, z.B.:
-            // verifyRoutine(verifyId);
-            
-            // Falls du ein modales Fenster hast, das sich öffnen soll:
-            // openVerificationModal(verifyId);
-        }
-    });
-</script>
 </body>
 </html>
