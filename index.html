@@ -442,32 +442,51 @@
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 state.user = user;
-                onSnapshot(doc(db, 'plot_users', user.uid), (docSnap) => {
-                    if (docSnap.exists()) {
-                        const newData = docSnap.data();
-                        
-                        // HIER WIRD JEDER ENTSCHEIDENDE XP-ZUWACHS DETEKTIERT & ANIMIERT (100% Sicher!)
-                        if (state.profile) {
-                            const oldXp = state.profile.xp || 0;
-                            const newXp = newData.xp || 0;
-                            const oldLvl = state.profile.lvl || 1;
-                            const newLvl = newData.lvl || 1;
-                            
-                            if (newXp > oldXp) {
-                                window.triggerXpHud(newXp - oldXp, oldXp, newXp, oldLvl, newLvl);
-                            }
-                        }
-                        
-                        state.profile = newData;
-                        if (!state.profile.crewCode) { const c = Math.random().toString(36).substring(2, 8).toUpperCase(); state.profile.crewCode = c; setDoc(doc(db, 'plot_users', user.uid), { crewCode: c }, { merge: true }); }
-                        if (['loading', 'auth', 'onboarding'].includes(state.view)) {
-                            state.view = 'dashboard'; state.dashboardNeedsScroll = true;
-                            const crewCode = new URLSearchParams(window.location.search).get('crew');
-                            if (crewCode) { window.history.replaceState({}, document.title, window.location.pathname); setTimeout(() => window.resolveInvite(crewCode), 1000); }
-                        }
-                        window.scheduleRender();
-                    } else { state.view = 'onboarding'; window.scheduleRender(); }
-                });
+// --- ÄNDERUNG IN INDEX.HTML ---
+onSnapshot(doc(db, 'plot_users', user.uid), (docSnap) => {
+    if (docSnap.exists()) {
+        const newData = docSnap.data();
+        
+        // [Deine bestehende XP-Detektions-Logik bleibt hier unverändert]
+        if (state.profile) { /* ... */ }
+        
+        state.profile = newData;
+        if (!state.profile.crewCode) { /* ... */ }
+        
+        if (['loading', 'auth', 'onboarding'].includes(state.view)) {
+            state.view = 'dashboard'; 
+            state.dashboardNeedsScroll = true;
+            
+            // URL-Parameter auslesen
+            const urlParams = new URLSearchParams(window.location.search);
+            const crewCode = urlParams.get('crew');
+            const verifyId = urlParams.get('verify'); // NEU: QR-Parameter abgreifen
+            
+            // 1. Crew-Einladung verarbeiten
+            if (crewCode) { 
+                window.history.replaceState({}, document.title, window.location.pathname); 
+                setTimeout(() => window.resolveInvite(crewCode), 1000); 
+            }
+            
+            // 2. NEU: QR-Deep-Link verarbeiten
+            if (verifyId) {
+                // Parameter sofort aus der Adresszeile löschen, damit ein Refresh den Trigger nicht wiederholt
+                window.history.replaceState({}, document.title, window.location.pathname); 
+                
+                // Kleiner Delay, damit das Dashboard sauber gerendert ist und die Daten bereitstehen
+                setTimeout(() => {
+                    if (typeof window.claimItemById === 'function') {
+                        window.claimItemById(verifyId);
+                    }
+                }, 1200); 
+            }
+        }
+        window.scheduleRender();
+    } else { 
+        state.view = 'onboarding'; 
+        window.scheduleRender(); 
+    }
+});
                 onSnapshot(collection(db, 'plot_pending_proofs'), (snap) => { if (snap && snap.docs) { state.pendingMissions = snap.docs.map(d => d.data()).filter(data => data.uid === state.user.uid); if(state.view === 'dashboard') window.scheduleRender(); } });
                 
                 onSnapshot(query(collection(db, 'plot_activities'), orderBy('timestamp', 'desc'), limit(50)), (snap) => {
@@ -1494,5 +1513,24 @@ window.submitShipping = async (lvl, tier) => {
             setTimeout(() => document.getElementById('install-banner').classList.remove('hidden'), 2000); 
         }
     </script>
+    <script>
+    // Sobald die Seite geladen ist, prüfen wir den URL-Parameter
+    window.addEventListener('load', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const verifyId = urlParams.get('verify');
+        
+        if (verifyId) {
+            console.log("Verifiziere Routine: " + verifyId);
+            
+            // HIER deine Logik einfügen:
+            // 1. Ggf. Nutzer zur Verifizierung auffordern / einloggen
+            // 2. Deine API-Funktion aufrufen, z.B.:
+            // verifyRoutine(verifyId);
+            
+            // Falls du ein modales Fenster hast, das sich öffnen soll:
+            // openVerificationModal(verifyId);
+        }
+    });
+</script>
 </body>
 </html>
