@@ -1513,24 +1513,5 @@ window.submitShipping = async (lvl, tier) => {
             setTimeout(() => document.getElementById('install-banner').classList.remove('hidden'), 2000); 
         }
     </script>
-    <script>
-    // Sobald die Seite geladen ist, prüfen wir den URL-Parameter
-    window.addEventListener('load', function() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const verifyId = urlParams.get('verify');
-        
-        if (verifyId) {
-            console.log("Verifiziere Routine: " + verifyId);
-            
-            // HIER deine Logik einfügen:
-            // 1. Ggf. Nutzer zur Verifizierung auffordern / einloggen
-            // 2. Deine API-Funktion aufrufen, z.B.:
-            // verifyRoutine(verifyId);
-            
-            // Falls du ein modales Fenster hast, das sich öffnen soll:
-            // openVerificationModal(verifyId);
-        }
-    });
-</script>
 </body>
 </html>
