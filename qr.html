@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -105,9 +106,10 @@
             max-width: 348px;
             aspect-ratio: 1 / 1;
             box-sizing: border-box;
-            transition: opacity 0.2s ease;
+            transition: opacity 0.2s ease; /* Weicher Übergang beim Download */
         }
 
+        /* SVG ordentlich in den Container einpassen */
         #canvas-container svg, 
         #canvas-container canvas {
             width: 100% !important;
@@ -145,32 +147,24 @@
                 
                 <div class="space-y-5">
                     <div>
-                        <label class="block text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-2">QR-Code Typ</label>
-                        <select id="qr-type" onchange="toggleQrTargetPlaceholder()" class="w-full p-4 bg-[#0f0f0f] border border-[#1f1f1f] rounded text-sm text-white outline-none focus:border-[#ff4d00] mb-3 appearance-none cursor-pointer">
-                            <option value="grind">⚡ GRIND. Check-In (Deep Link)</option>
-                            <option value="raw">🌐 Standard URL / Freitext</option>
-                        </select>
+                        <label class="block text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-2">Ziel (Text oder URL)</label>
+                        <textarea id="data" rows="3" class="input-grind font-mono text-sm" placeholder="https://grind-app.de/mission-1">https://grind-app.de</textarea>
                     </div>
 
                     <div>
-                        <label id="target-label" class="block text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-2">Missions- oder Routine-ID</label>
-                        <textarea id="data" rows="3" class="input-grind font-mono text-sm" placeholder="z.B. m_morning_run">m_morning_run</textarea>
-                    </div>
-
-                    <div>
-                        <label class="block text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-2">Custom Logo Upload (Überschreibt Standard)</label>
+                        <label class="block text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-2">Logo Upload</label>
                         <div class="relative">
                             <input type="file" id="logoUpload" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
                             <div class="input-grind flex items-center justify-center border-dashed border-2 text-gray-400 hover:text-[#ff4d00] hover:border-[#ff4d00]">
                                 <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-                                <span id="fileName" class="font-bold text-xs tracking-widest uppercase">Eigenes Partner-Logo laden</span>
+                                <span id="fileName" class="font-bold text-xs tracking-widest uppercase">Klicke für GRIND Logo</span>
                             </div>
                         </div>
                     </div>
 
                     <label class="checkbox-container">
-                        <input type="checkbox" id="darkBgToggle">
-                        <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">Dunkle Base generieren (Kapsel)</span>
+                        <input type="checkbox" id="darkBgToggle" checked>
+                        <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">Dunkle Base für weißes Logo generieren</span>
                     </label>
 
                     <div class="grid grid-cols-2 gap-4 pt-2">
@@ -205,133 +199,45 @@
     <script>
         let uploadedLogoDataUrl = "";
         let originalLogoImage = null;
-        let isDefaultGrindLogo = true;
 
-        // MAGIC TRICK: Wir nutzen Konturen-Maskierung statt Rechteck-Ausschnitt
-        function generateGrindLogoCanvas(useDarkKapsel = false) {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-
-            const fontSize = 140;
-            ctx.font = `italic 900 ${fontSize}px "Inter", sans-serif`;
-            const text = "GRIND";
-            const dot = ".";
-            
-            const textWidth = ctx.measureText(text).width;
-            
-            ctx.font = `italic 900 ${fontSize}px "Inter", sans-serif`;
-            const dotWidth = ctx.measureText(dot).width;
-            const gap = 4;
-            
-            // Komfortabler Abstand, damit die dicke weiße Umrandung nicht vom Canvas abgeschnitten wird
-            const paddingX = 40; 
-            const paddingY = 40; 
-            const italicOverhang = 10;
-            
-            const totalTextWidth = textWidth + gap + dotWidth + italicOverhang;
-            const totalTextHeight = fontSize; 
-            
-            canvas.width = totalTextWidth + (paddingX * 2);
-            canvas.height = totalTextHeight + (paddingY * 2);
-            
-            const ctx2 = canvas.getContext('2d');
-            ctx2.textBaseline = 'middle';
-            
-            const startX = paddingX;
-            const startY = (canvas.height / 2) + (fontSize * 0.05); 
-
-            if (useDarkKapsel) {
-                // Modus 2: Dunkle Kapsel
-                ctx2.fillStyle = '#050505';
-                ctx2.beginPath();
-                ctx2.roundRect(10, 10, canvas.width - 20, canvas.height - 20, canvas.height / 2);
-                ctx2.strokeStyle = '#ffffff';
-                ctx2.lineWidth = 15; // Weiße Kante um Kapsel
-                ctx2.stroke();
-                ctx2.fill();
-            } else {
-                // Modus 1 (Default): Weiße Kontur als exakte Maske zeichnen!
-                ctx2.font = `italic 900 ${fontSize}px "Inter", sans-serif`;
-                ctx2.lineJoin = 'round';
-                ctx2.miterLimit = 2;
-                ctx2.lineWidth = 32; // Dicke der weißen Schablone um die Buchstaben herum
-                ctx2.strokeStyle = '#ffffff';
-
-                ctx2.strokeText(text, startX, startY);
-                ctx2.strokeText(dot, startX + textWidth + gap, startY);
-            }
-
-            // Den eigentlichen Text über die weiße Schablone legen
-            ctx2.font = `italic 900 ${fontSize}px "Inter", sans-serif`;
-            ctx2.fillStyle = useDarkKapsel ? '#ffffff' : '#050505'; 
-            ctx2.fillText(text, startX, startY);
-
-            ctx2.fillStyle = '#ff4d00';
-            ctx2.fillText(dot, startX + textWidth + gap, startY);
-
-            return canvas.toDataURL('image/png');
-        }
-
-        // Initialisierung - hideBackgroundDots ist FALSE, damit die weißen Konturen perfekt übernehmen
+        // 1. Initialisierung mit UI-freundlicher Größe (300x300)
         const qrCode = new QRCodeStyling({
             width: 300, 
             height: 300, 
             type: "svg",
-            data: "https://grind-app.de/?verify=m_morning_run",
-            image: "", 
+            data: "https://grind-app.de",
+            image: "",
             qrOptions: {
-                errorCorrectionLevel: 'H' 
+                errorCorrectionLevel: 'H'
             },
             dotsOptions: {
                 color: "#050505",
-                type: "rounded" 
+                type: "rounded"
             },
             backgroundOptions: {
                 color: "#ffffff",
             },
             cornersSquareOptions: {
                 color: "#ff4d00",
-                type: "extra-rounded" 
+                type: "extra-rounded"
             },
             cornersDotOptions: {
                 color: "#ff4d00",
-                type: "dot" 
+                type: "dot"
             },
             imageOptions: {
                 crossOrigin: "anonymous",
-                margin: 0,               
-                imageSize: 0.6, // Jetzt angenehm groß
-                hideBackgroundDots: false // DAS IST DAS GEHEIMNIS FÜR DEN NAHTLOSEN LOOK!
+                margin: 0,
+                imageSize: 0.4,
+                hideBackgroundDots: true
             }
         });
 
         qrCode.append(document.getElementById("canvas-container"));
 
-        document.fonts.ready.then(() => {
-            setTimeout(processLogoAndUpdateQR, 150);
-        });
-
-        function toggleQrTargetPlaceholder() {
-            const type = document.getElementById('qr-type').value;
-            const label = document.getElementById('target-label');
-            const textarea = document.getElementById('data');
-            
-            if (type === 'grind') {
-                label.innerText = "Missions- oder Routine-ID";
-                textarea.placeholder = "z.B. m_morning_run oder rep_cold_plunge";
-                textarea.value = "m_morning_run";
-            } else {
-                label.innerText = "Ziel (Text oder URL)";
-                textarea.placeholder = "https://grind-app.de";
-                textarea.value = "https://grind-app.de";
-            }
-            updateQR();
-        }
-
         document.getElementById('logoUpload').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
-                isDefaultGrindLogo = false;
                 document.getElementById('fileName').innerText = file.name;
                 const reader = new FileReader();
                 reader.onload = function(event) {
@@ -349,79 +255,64 @@
         document.getElementById('darkBgToggle').addEventListener('change', processLogoAndUpdateQR);
 
         function processLogoAndUpdateQR() {
-            const useBgKapsel = document.getElementById('darkBgToggle').checked;
+            if (!originalLogoImage) {
+                updateQR();
+                return;
+            }
 
-            if (isDefaultGrindLogo) {
-                uploadedLogoDataUrl = generateGrindLogoCanvas(useBgKapsel);
+            const useDarkBg = document.getElementById('darkBgToggle').checked;
+            
+            if (useDarkBg) {
+                const canvas = document.createElement('canvas');
+                const padding = 60;
+                canvas.width = originalLogoImage.width + padding * 2;
+                canvas.height = originalLogoImage.height + padding * 2;
+                const ctx = canvas.getContext('2d');
+
+                ctx.fillStyle = '#050505';
+                ctx.beginPath();
+                ctx.roundRect(0, 0, canvas.width, canvas.height, canvas.width * 0.2); 
+                ctx.fill();
+
+                ctx.drawImage(originalLogoImage, padding, padding);
+                uploadedLogoDataUrl = canvas.toDataURL('image/png');
             } else {
-                if (!originalLogoImage) {
-                    updateQR();
-                    return;
-                }
-                
-                if (useBgKapsel) {
-                    const canvas = document.createElement('canvas');
-                    const padding = 30;
-                    canvas.width = originalLogoImage.width + padding * 2;
-                    canvas.height = originalLogoImage.height + padding * 2;
-                    const ctx = canvas.getContext('2d');
-
-                    ctx.fillStyle = '#050505';
-                    ctx.beginPath();
-                    ctx.roundRect(0, 0, canvas.width, canvas.height, canvas.height * 0.25); 
-                    
-                    ctx.lineWidth = 15;
-                    ctx.strokeStyle = '#ffffff';
-                    ctx.stroke();
-                    ctx.fill();
-
-                    ctx.drawImage(originalLogoImage, padding, padding);
-                    uploadedLogoDataUrl = canvas.toDataURL('image/png');
-                } else {
-                    uploadedLogoDataUrl = originalLogoImage.src;
-                }
+                uploadedLogoDataUrl = originalLogoImage.src;
             }
 
             updateQR();
         }
 
         function updateQR() {
-            const type = document.getElementById('qr-type').value;
-            let dataInput = document.getElementById('data').value.trim();
+            const dataInput = document.getElementById('data').value;
             const colorDarkInput = document.getElementById('colorDark').value;
             const colorAccentInput = document.getElementById('colorAccent').value;
 
-            if (type === 'grind' && dataInput) {
-                if (!dataInput.startsWith('http')) {
-                    dataInput = `https://grind-app.de/?verify=${dataInput}`;
-                }
-            }
-
-            // Wir schalten die Maskierungs-Methode dynamisch um, je nachdem ob es das Standard-Logo ist
             qrCode.update({
                 data: dataInput || " ",
                 image: uploadedLogoDataUrl,
                 dotsOptions: { color: colorDarkInput },
                 cornersSquareOptions: { color: colorAccentInput },
-                cornersDotOptions: { color: colorAccentInput },
-                imageOptions: {
-                    crossOrigin: "anonymous",
-                    margin: isDefaultGrindLogo ? 0 : 5,
-                    imageSize: isDefaultGrindLogo ? 0.6 : 0.4,
-                    hideBackgroundDots: isDefaultGrindLogo ? false : true 
-                }
+                cornersDotOptions: { color: colorAccentInput }
             });
         }
 
+        // 5. Clevere Download-Funktion: Hochskalieren -> Downloaden -> Zurücksetzen
         function downloadQR(extension) {
             const container = document.getElementById('canvas-container');
+            
+            // Verstecke die UI kurzzeitig fließend, damit das UI beim Skalieren nicht springt
             container.style.opacity = '0';
 
+            // Skaliere den Code intern auf 4K-Qualität für den Download
             qrCode.update({ width: 2048, height: 2048 });
 
+            // Gib dem Browser 100ms Zeit, das Update zu rendern, bevor der Download startet
             setTimeout(() => {
                 qrCode.download({ name: "GRIND-QR-Code", extension: extension }).then(() => {
+                    // Setze die Größe sofort wieder auf UI-freundliche 300px zurück
                     qrCode.update({ width: 300, height: 300 });
+                    // Blende das UI wieder ein
                     container.style.opacity = '1';
                 });
             }, 100);
