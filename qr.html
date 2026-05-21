@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GRIND. QR Forge</title>
     
-    <!-- Tailwind & Google Fonts -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&display=swap" rel="stylesheet">
     <script type="text/javascript" src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
@@ -207,11 +206,12 @@
         let originalLogoImage = null;
         let isDefaultGrindLogo = true;
 
+        // Perfektes, hautenges Canvas-Logo
         function generateGrindLogoCanvas(useDarkKapsel = false) {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
 
-            const fontSize = 140;
+            const fontSize = 120; // Etwas verkleinert für perfekte Proportionen
             ctx.font = `italic 900 ${fontSize}px "Inter", sans-serif`;
             const text = "GRIND";
             const dot = ".";
@@ -222,12 +222,14 @@
             const dotWidth = ctx.measureText(dot).width;
             const gap = 4;
             
-            const paddingX = 40; 
-            const paddingY = 40; 
-            const italicOverhang = 10;
+            // WICHTIG: Das Padding muss groß genug sein, damit die kursive Schrift 
+            // und die weiße Kontur nicht am Rand abgeschnitten werden!
+            const paddingX = useDarkKapsel ? 50 : 24; 
+            const paddingY = useDarkKapsel ? 30 : 24; 
+            const italicOverhang = 12;
             
             const totalTextWidth = textWidth + gap + dotWidth + italicOverhang;
-            const totalTextHeight = fontSize; 
+            const totalTextHeight = fontSize * 0.88; 
             
             canvas.width = totalTextWidth + (paddingX * 2);
             canvas.height = totalTextHeight + (paddingY * 2);
@@ -236,23 +238,20 @@
             ctx2.textBaseline = 'middle';
             
             const startX = paddingX;
-            const startY = (canvas.height / 2) + (fontSize * 0.05); 
+            const startY = (canvas.height / 2) + (fontSize * 0.04); 
 
             if (useDarkKapsel) {
                 ctx2.fillStyle = '#050505';
                 ctx2.beginPath();
-                ctx2.roundRect(10, 10, canvas.width - 20, canvas.height - 20, canvas.height / 2);
-                ctx2.strokeStyle = '#ffffff';
-                ctx2.lineWidth = 15;
-                ctx2.stroke();
+                ctx2.roundRect(0, 0, canvas.width, canvas.height, canvas.height / 2);
                 ctx2.fill();
             } else {
+                // NEU: Weiße Kontur als Maske HINTER dem Text zeichnen (verhindert weiße Vierecke an den Seiten!)
                 ctx2.font = `italic 900 ${fontSize}px "Inter", sans-serif`;
                 ctx2.lineJoin = 'round';
                 ctx2.miterLimit = 2;
-                ctx2.lineWidth = 32;
+                ctx2.lineWidth = 24; 
                 ctx2.strokeStyle = '#ffffff';
-
                 ctx2.strokeText(text, startX, startY);
                 ctx2.strokeText(dot, startX + textWidth + gap, startY);
             }
@@ -267,7 +266,7 @@
             return canvas.toDataURL('image/png');
         }
 
-        // INITIALISIERUNG MIT KORRIGIERTEN WERTEN (Kleinere imageSize für Fehlerkorrektur, weniger Margin)
+        // Initialisierung
         const qrCode = new QRCodeStyling({
             width: 300, 
             height: 300, 
@@ -275,7 +274,7 @@
             data: "https://grind-app.de/?verify=m_morning_run",
             image: "", 
             qrOptions: {
-                errorCorrectionLevel: 'H' 
+                errorCorrectionLevel: 'H' // H = Höchste Scanbarkeit bei Logos (zwingend erforderlich!)
             },
             dotsOptions: {
                 color: "#050505",
@@ -294,9 +293,9 @@
             },
             imageOptions: {
                 crossOrigin: "anonymous",
-                margin: 2,              // REDUZIERT: Weniger hässlicher weißer Rand
-                imageSize: 0.35,        // REDUZIERT: Höhere Chance auf Scannbarkeit!
-                hideBackgroundDots: true 
+                margin: 0,
+                imageSize: 0.45, // DARF NICHT GRÖSSER ALS 0.45 SEIN, sonst zerstört es den Scanner!
+                hideBackgroundDots: false // Auf false, damit unsere weiße Kontur perfekt wirkt
             }
         });
 
@@ -364,10 +363,6 @@
                     ctx.fillStyle = '#050505';
                     ctx.beginPath();
                     ctx.roundRect(0, 0, canvas.width, canvas.height, canvas.height * 0.25); 
-                    
-                    ctx.lineWidth = 15;
-                    ctx.strokeStyle = '#ffffff';
-                    ctx.stroke();
                     ctx.fill();
 
                     ctx.drawImage(originalLogoImage, padding, padding);
@@ -386,29 +381,29 @@
             const colorDarkInput = document.getElementById('colorDark').value;
             const colorAccentInput = document.getElementById('colorAccent').value;
 
-            // ERZWINGE HTTPS URLs FÜR SAUBERES SCANNEN
+            // Deep-Link Logik erzwingen (Scanner benötigen "https://", um es als Link zu erkennen)
             if (type === 'grind' && dataInput) {
                 if (!dataInput.startsWith('http')) {
                     dataInput = `https://grind-app.de/?verify=${dataInput}`;
                 }
-            } else if (type === 'raw' && dataInput) {
-                if (!dataInput.startsWith('http') && dataInput.includes('.')) {
-                    dataInput = `https://${dataInput}`;
-                }
+            } else if (type === 'raw' && dataInput && !dataInput.startsWith('http')) {
+                dataInput = `https://${dataInput}`;
             }
 
-            // IMMER SAUBERE SCANNBARKEIT GEWÄHRLEISTEN
             qrCode.update({
-                data: dataInput || " ",
+                data: dataInput || "https://grind-app.de",
                 image: uploadedLogoDataUrl,
                 dotsOptions: { color: colorDarkInput },
                 cornersSquareOptions: { color: colorAccentInput },
                 cornersDotOptions: { color: colorAccentInput },
+                qrOptions: {
+                    errorCorrectionLevel: 'H'
+                },
                 imageOptions: {
                     crossOrigin: "anonymous",
-                    margin: isDefaultGrindLogo ? 2 : 3,  // REDUZIERT
-                    imageSize: isDefaultGrindLogo ? 0.35 : 0.3, // REDUZIERT für Scannbarkeit!
-                    hideBackgroundDots: true // IMMER Punkte ausblenden für starken Kontrast
+                    margin: isDefaultGrindLogo ? 0 : 5,
+                    imageSize: isDefaultGrindLogo ? 0.45 : 0.4,
+                    hideBackgroundDots: isDefaultGrindLogo ? false : true 
                 }
             });
         }
