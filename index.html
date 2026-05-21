@@ -39,32 +39,18 @@
     
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script src="https://www.paypal.com/sdk/js?client-id=AboxAT2qskA0lY5-23Kj2tu_qY3bOK57rq_LbhtE_cdVOBT37fSHGacBKjgl-zx1XcJM9AZql96OCwc8&currency=EUR"></script>
-
     
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #030303; color: #ffffff; overflow-x: hidden; scroll-behavior: smooth; background-image: radial-gradient(circle at top, #0b0b0b 0%, #030303 70%); min-height: 100vh; overscroll-behavior-y: none; }
-        h1, h2, h3, h4 {
-    word-spacing: 0.13em;
-}
+        h1, h2, h3, h4 { word-spacing: 0.13em; }
         .grid-overlay { position: fixed; inset: 0; opacity: 0.08; background-size: 60px 60px; background-image: linear-gradient(to right, rgba(255,255,255,0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.08) 1px, transparent 1px); transform: perspective(500px) rotateX(60deg) translateZ(0); pointer-events: none; z-index: 0; }
         
         .grind-gradient { background: linear-gradient(90deg, #ff4d00, #ff8800); }
         .text-brand { color: #ff4d00; } 
         .bg-brand { background: #ff4d00; }
         
-        /* 100% ZUVERLÄSSIGE ANIMATIONS-KLASSEN (Hardware-Beschleunigt) */
-        .notif-wrapper {
-            transform: translate(-50%, -8rem);
-            opacity: 0;
-            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-            pointer-events: none;
-            will-change: transform, opacity;
-        }
-        .notif-wrapper.show {
-            transform: translate(-50%, 0);
-            opacity: 1;
-            pointer-events: auto;
-        }
+        .notif-wrapper { transform: translate(-50%, -8rem); opacity: 0; transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); pointer-events: none; will-change: transform, opacity; }
+        .notif-wrapper.show { transform: translate(-50%, 0); opacity: 1; pointer-events: auto; }
 
         .mockup { background: #080808; border: 1px solid #181818; border-radius: 14px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.7); position: relative; transition: all 0.3s ease; }
         .mockup.interactive:hover { border-color: rgba(255, 77, 0, 0.3); transform: translateY(-2px); }
@@ -100,11 +86,6 @@
         @keyframes subtle-pulse { 0%, 100% { opacity: 1; box-shadow: 0 0 10px rgba(255, 77, 0, 0.1); border-color: rgba(255, 77, 0, 0.3); } 50% { opacity: 0.95; box-shadow: 0 0 20px rgba(255, 77, 0, 0.4); border-color: rgba(255, 77, 0, 0.6); } }
         .btn-bounty { animation: subtle-pulse 3s infinite ease-in-out; background: rgba(255,255,255,0.02); color: white; border: 1px solid rgba(255, 77, 0, 0.3); cursor: pointer; transition: all 0.3s ease; border-radius: 6px; }
         .btn-bounty:hover { background: rgba(255,77,0,0.1); border-color: #ff4d00; box-shadow: 0 0 25px rgba(255, 77, 0, 0.5); transform: translateY(-2px); }
-        
-        .completed-overlay { position: absolute; inset: 0; background: rgba(5,5,5,0.8); z-index: 10; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px); opacity: 0; transition: opacity 0.3s; pointer-events: none; border-radius: 12px; }
-        .card.is-completed .completed-overlay, .mockup.is-completed .completed-overlay { opacity: 1; pointer-events: auto; }
-        .pending-overlay { position: absolute; inset: 0; background: rgba(5,5,5,0.8); z-index: 10; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px); opacity: 0; transition: opacity 0.3s; pointer-events: none; border-radius: 12px; }
-        .card.is-pending .pending-overlay, .mockup.is-pending .pending-overlay { opacity: 1; pointer-events: auto; }
         
         @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.1) translateY(-5px); text-shadow: 0 0 20px rgba(255,77,0,0.8); color: #ff4d00; } 100% { transform: scale(1) translateY(0); } }
         .animate-pop { animation: pop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
@@ -142,15 +123,11 @@
         .legal-content strong { color: #ffffff; font-weight: bold; }
         .legal-content a { color: #ff4d00; text-decoration: none; transition: color 0.2s; } 
         .legal-content a:hover { color: #ffffff; text-decoration: underline; }
-   
-}
-
     </style>
 </head>
 <body class="flex flex-col relative select-none">
     <div class="grid-overlay"></div>
     
-    <!-- Smart Live Notification Badge -->
     <div id="live-notification-badge" class="notif-wrapper fixed top-6 left-1/2 z-[99999] w-[90%] max-w-sm">
         <div id="live-notification-box" class="bg-black/90 backdrop-blur-md border border-[#ff4d00]/50 shadow-[0_10px_40px_rgba(255,77,0,0.3)] rounded-full py-3 px-5 flex items-center gap-3">
             <span id="live-notification-ping" class="relative flex h-3 w-3 flex-shrink-0 hidden">
@@ -163,7 +140,6 @@
 
     <div id="toast-container"></div>
     
-    <!-- Smart XP Dropdown HUD (Hardware-beschleunigtes Dropdown über Inline-Styles) -->
     <div id="xp-hud" class="fixed top-0 left-0 right-0 z-[999998] flex justify-center pt-4 px-4 sm:px-6" style="transform: translateY(-150%); transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none; will-change: transform;">
         <div class="absolute top-2 w-full max-w-md h-32 bg-black/60 blur-2xl rounded-full pointer-events-none z-0 gpu-blur"></div>
         <div class="bg-[#0a0a0a]/95 border border-[#ff4d00]/50 shadow-[0_20px_50px_rgba(0,0,0,0.9),_0_0_30px_rgba(255,77,0,0.3)] rounded-xl p-5 w-full max-w-sm flex flex-col gap-3 relative overflow-hidden backdrop-blur-2xl z-10 pointer-events-auto">
@@ -217,12 +193,6 @@
             weeklyData: { 1: { title: "Loading...", startOffset: 0, missions: [] } }, rewardData: [], habitData: [], pendingMissions: [], activities: [], activeSpots: [], seasonConfig: null, dashboardNeedsScroll: true
         };
 
-        const defaultSpots = [
-            { icon: '☕', name: 'Morning Check-in', subtitle: 'GuMo Café', xp: 200, color: '#3b82f6', colorClass: 'text-[#3b82f6]', bgClass: 'from-[#3b82f6]/10' },
-            { icon: '🔥', name: 'Fitness Check-in', subtitle: 'Rocycle', xp: 400, color: '#ffffff', colorClass: 'text-white', bgClass: 'from-white/10' },
-            { icon: '🏃', name: 'Event Drop', subtitle: 'PopUp Run', xp: 800, color: '#a855f7', colorClass: 'text-[#a855f7]', bgClass: 'from-[#a855f7]/10' }
-        ];
-
         const RANKS = ["Rookie", "Grinder", "Hustler", "Athlete", "Machine", "Legend"];
         let holdTimer = null, holdProgress = 0, isRedeeming = false;
         window.currentVerify = null; window.countdownInterval = null;
@@ -265,18 +235,14 @@
             if (showPing) ping.classList.remove('hidden'); else ping.classList.add('hidden');
             
             notif.classList.remove('show');
-            void notif.offsetWidth; // Force Reflow to ensure animation triggers
+            void notif.offsetWidth; 
             notif.classList.add('show');
             
             if(window.notificationHideTimeout) clearTimeout(window.notificationHideTimeout);
-            window.notificationHideTimeout = setTimeout(() => {
-                notif.classList.remove('show');
-            }, 4000);
+            window.notificationHideTimeout = setTimeout(() => { notif.classList.remove('show'); }, 4000);
         };
 
-        window.showToast = (msg, type = 'success') => {
-            window.showLiveNotification(msg, type, false);
-        };
+        window.showToast = (msg, type = 'success') => { window.showLiveNotification(msg, type, false); };
 
         window.logActivity = async (type, text, customAlias = null, customIsPro = null) => {
             try {
@@ -304,91 +270,55 @@
             if (now < start) return { status: 'upcoming', date: start }; if (now > end) return { status: 'ended', date: end }; return { status: 'active' };
         };
 
-        window.updateCountdown = () => {
-            const el = document.getElementById('season-countdown'); if(!el || !state.seasonConfig) return;
-            const distance = new Date(state.seasonConfig.start).getTime() - new Date().getTime();
-            if (distance < 0) { el.innerHTML = "LAUNCHING..."; if(window.countdownInterval) clearInterval(window.countdownInterval); window.scheduleRender(); return; }
-            el.innerHTML = `${Math.floor(distance / 86400000)}D ${Math.floor((distance % 86400000) / 3600000).toString().padStart(2, '0')}H ${Math.floor((distance % 3600000) / 60000).toString().padStart(2, '0')}M ${Math.floor((distance % 60000) / 1000).toString().padStart(2, '0')}S`;
-        };
-
-        // 100% ZUVERLÄSSIGER XP DROPDOWN TRIGGER (Entkoppelt vom reaktiven App-Rendern)
         window.triggerXpHud = (gainedXp, oldXp, newXp, oldLvl, newLvl) => {
-            const hud = document.getElementById('xp-hud');
-            const hudLvl = document.getElementById('hud-lvl');
-            const hudXpNum = document.getElementById('hud-xp-num');
-            const hudXpMax = document.getElementById('hud-xp-max');
-            const hudXpBar = document.getElementById('hud-xp-bar');
-            
+            const hud = document.getElementById('xp-hud'); const hudLvl = document.getElementById('hud-lvl'); const hudXpNum = document.getElementById('hud-xp-num'); const hudXpMax = document.getElementById('hud-xp-max'); const hudXpBar = document.getElementById('hud-xp-bar');
             if (!hud || !hudLvl || !hudXpNum || !hudXpMax || !hudXpBar) return;
-            
             if (window.hudCloseTimeout) clearTimeout(window.hudCloseTimeout);
             
-            const startXpInLvl = oldXp % 1000;
-            const targetXpInLvl = newXp % 1000;
+            const startXpInLvl = oldXp % 1000; const targetXpInLvl = newXp % 1000;
+            hudLvl.innerText = oldLvl; hudXpNum.innerText = startXpInLvl; hudXpMax.innerText = oldLvl * 1000;
+            hudXpBar.style.transition = 'none'; hudXpBar.style.width = `${startXpInLvl / 10}%`; void hudXpBar.offsetWidth;
             
-            // Setze initiale Werte vor dem Runterfahren
-            hudLvl.innerText = oldLvl;
-            hudXpNum.innerText = startXpInLvl;
-            hudXpMax.innerText = oldLvl * 1000;
-            
-            hudXpBar.style.transition = 'none';
-            hudXpBar.style.width = `${startXpInLvl / 10}%`;
-            void hudXpBar.offsetWidth; // Force Reflow
-            
-            // 1. HUD runterfahren
-            hud.style.transform = 'translateY(0)';
-            hud.style.pointerEvents = 'auto';
-            
-            // 2. XP Zuwachs animieren nach sanfter Verzögerung
+            hud.style.transform = 'translateY(0)'; hud.style.pointerEvents = 'auto';
             setTimeout(() => {
                 animateValue('hud-xp-num', startXpInLvl, newLvl > oldLvl ? 1000 : targetXpInLvl, 1500);
-                
                 if (newLvl > oldLvl) {
-                    // Balken füllt sich komplett
-                    hudXpBar.style.transition = 'width 1000ms ease-in';
-                    hudXpBar.style.width = '100%';
-                    
+                    hudXpBar.style.transition = 'width 1000ms ease-in'; hudXpBar.style.width = '100%';
                     setTimeout(() => {
-                        // Level Up Flash-Effekt
-                        hudLvl.innerText = newLvl;
-                        hudLvl.classList.remove('animate-level-up');
-                        void hudLvl.offsetWidth;
-                        hudLvl.classList.add('animate-level-up');
-                        hudXpMax.innerText = newLvl * 1000;
-                        
-                        // Setze Balken auf 0 zurück und fülle auf Zielwert
-                        hudXpBar.style.transition = 'none';
-                        hudXpBar.style.width = '0%';
-                        void hudXpBar.offsetWidth;
-                        
-                        animateValue('hud-xp-num', 0, targetXpInLvl, 800);
-                        hudXpBar.style.transition = 'width 800ms ease-out';
-                        hudXpBar.style.width = `${targetXpInLvl / 10}%`;
+                        hudLvl.innerText = newLvl; hudLvl.classList.remove('animate-level-up'); void hudLvl.offsetWidth; hudLvl.classList.add('animate-level-up'); hudXpMax.innerText = newLvl * 1000;
+                        hudXpBar.style.transition = 'none'; hudXpBar.style.width = '0%'; void hudXpBar.offsetWidth;
+                        animateValue('hud-xp-num', 0, targetXpInLvl, 800); hudXpBar.style.transition = 'width 800ms ease-out'; hudXpBar.style.width = `${targetXpInLvl / 10}%`;
                     }, 1000);
-                } else {
-                    hudXpBar.style.transition = 'width 1500ms ease-out';
-                    hudXpBar.style.width = `${targetXpInLvl / 10}%`;
-                }
+                } else { hudXpBar.style.transition = 'width 1500ms ease-out'; hudXpBar.style.width = `${targetXpInLvl / 10}%`; }
             }, 300);
-            
-            // 3. HUD nach 5,5 Sekunden automatisch wieder hochfahren
-            window.hudCloseTimeout = setTimeout(() => {
-                hud.style.transform = 'translateY(-150%)';
-                hud.style.pointerEvents = 'none';
-                setTimeout(() => {
-                    hudLvl.classList.remove('animate-level-up');
-                }, 600);
-            }, 5500);
+            window.hudCloseTimeout = setTimeout(() => { hud.style.transform = 'translateY(-150%)'; hud.style.pointerEvents = 'none'; setTimeout(() => { hudLvl.classList.remove('animate-level-up'); }, 600); }, 5500);
         };
 
         const setupSeasonData = () => {
             onSnapshot(doc(db, 'system', 'grind_season'), (docSnap) => {
                 if (docSnap.exists()) {
                     const data = docSnap.data();
-                    state.weeklyData = data.weeklyData || state.weeklyData; state.rewardData = data.rewardData || [];
-                    state.habitData = data.habitData || []; state.activeSpots = data.activeSpots || defaultSpots;
+                    state.weeklyData = data.weeklyData || state.weeklyData; 
+                    state.rewardData = data.rewardData || [];
+                    state.habitData = data.habitData || []; 
+                    state.activeSpots = data.activeSpots || [];
                     state.seasonConfig = data.seasonConfig || { number: 1, active: true, start: '', end: '' };
                     state.currentWeekTab = getActiveWeek();
+
+                    // HIER PASSIERT DIE DEEP-LINK MAGIE FÜR QR CODES
+                    // Sobald die Missionsdaten aus Firebase geladen sind, wird der Link geparst
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const verifyId = urlParams.get('verify');
+                    if (verifyId && (state.view === 'dashboard' || state.view === 'loading')) {
+                        // Lösche den Parameter aus der Browser-Zeile, damit kein Reload erneut triggert
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                        // Timeout sorgt dafür, dass das Dashboard komplett gezeichnet ist
+                        setTimeout(() => {
+                            if (typeof window.claimItemById === 'function') {
+                                window.claimItemById(verifyId);
+                            }
+                        }, 800);
+                    }
                 }
                 if(state.view === 'dashboard' || state.view === 'paywall') window.scheduleRender();
             });
@@ -401,15 +331,10 @@
         const processNotificationQueue = () => {
             if (isShowingNotification || notificationQueue.length === 0) return;
             isShowingNotification = true;
-            
             const act = notificationQueue.shift();
             const t = act.text.replace(/<[^>]*>?/gm, ''); 
             window.showLiveNotification(`⚡ <span class="text-[#ff4d00]">${act.alias}</span> ${t}`, 'success', true);
-            
-            setTimeout(() => {
-                isShowingNotification = false;
-                processNotificationQueue();
-            }, 4500); 
+            setTimeout(() => { isShowingNotification = false; processNotificationQueue(); }, 4500); 
         };
 
         const generateFeedHTML = () => {
@@ -430,46 +355,34 @@
                 const nameColorClass = isProUser ? 'text-[#d8b4fe]' : 'text-[#ff4d00]', proBadge = isProUser ? `<span class="ml-2 align-middle bg-[#a855f7]/20 text-[#a855f7] border border-[#a855f7]/30 text-[8px] px-1.5 py-0.5 rounded-sm font-black shadow-[0_0_10px_rgba(168,85,247,0.2)]">PRO</span>` : '', dynamicText = act.text.replace(/text-\[#[a-fA-F0-9]+\]/g, isProUser ? 'text-[#a855f7]' : 'text-[#ff4d00]');
                 html += `<div class="flex gap-4 relative z-10"><div class="w-10 h-10 rounded-full bg-[#0a0a0a] border-2 ${borderClass} flex items-center justify-center flex-shrink-0 ${shadowClass}"><svg class="w-4 h-4 ${colorClass}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${iconSvg}"></path></svg></div><div class="bg-[#080808] border border-[#111] p-4 rounded-xl flex-1 shadow-sm"><p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">${getRelativeTime(act.timestamp)}</p><p class="text-sm font-medium text-gray-300"><span class="${nameColorClass} italic uppercase font-black">${act.alias}</span>${proBadge} <span class="text-gray-400 text-xs">${dynamicText}</span></p></div></div>`;
             });
-            html += `</div>`;
-            return html;
+            html += `</div>`; return html;
         };
 
-        window.updateLiveUI = () => {
-            const feedContainer = document.getElementById('live-feed-content');
-            if (feedContainer) feedContainer.innerHTML = generateFeedHTML();
-        };
+        window.updateLiveUI = () => { const feedContainer = document.getElementById('live-feed-content'); if (feedContainer) feedContainer.innerHTML = generateFeedHTML(); };
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 state.user = user;
                 onSnapshot(doc(db, 'plot_users', user.uid), (docSnap) => {
                     if (docSnap.exists()) {
-                        const newData = docSnap.data();
+                        state.profile = docSnap.data();
                         
-                        // HIER WIRD JEDER ENTSCHEIDENDE XP-ZUWACHS DETEKTIERT & ANIMIERT (100% Sicher!)
-                        if (state.profile) {
-                            const oldXp = state.profile.xp || 0;
-                            const newXp = newData.xp || 0;
-                            const oldLvl = state.profile.lvl || 1;
-                            const newLvl = newData.lvl || 1;
-                            
-                            if (newXp > oldXp) {
-                                window.triggerXpHud(newXp - oldXp, oldXp, newXp, oldLvl, newLvl);
-                            }
+                        // Crew Deep Link Logic
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const crewCode = urlParams.get('crew');
+                        if (crewCode) { 
+                            window.history.replaceState({}, document.title, window.location.pathname); 
+                            setTimeout(() => window.resolveInvite(crewCode), 1000); 
                         }
-                        
-                        state.profile = newData;
-                        if (!state.profile.crewCode) { const c = Math.random().toString(36).substring(2, 8).toUpperCase(); state.profile.crewCode = c; setDoc(doc(db, 'plot_users', user.uid), { crewCode: c }, { merge: true }); }
+
                         if (['loading', 'auth', 'onboarding'].includes(state.view)) {
                             state.view = 'dashboard'; state.dashboardNeedsScroll = true;
-                            const crewCode = new URLSearchParams(window.location.search).get('crew');
-                            if (crewCode) { window.history.replaceState({}, document.title, window.location.pathname); setTimeout(() => window.resolveInvite(crewCode), 1000); }
                         }
                         window.scheduleRender();
                     } else { state.view = 'onboarding'; window.scheduleRender(); }
                 });
-                onSnapshot(collection(db, 'plot_pending_proofs'), (snap) => { if (snap && snap.docs) { state.pendingMissions = snap.docs.map(d => d.data()).filter(data => data.uid === state.user.uid); if(state.view === 'dashboard') window.scheduleRender(); } });
                 
+                onSnapshot(collection(db, 'plot_pending_proofs'), (snap) => { if (snap && snap.docs) { state.pendingMissions = snap.docs.map(d => d.data()).filter(data => data.uid === state.user.uid); if(state.view === 'dashboard') window.scheduleRender(); } });
                 onSnapshot(query(collection(db, 'plot_activities'), orderBy('timestamp', 'desc'), limit(50)), (snap) => {
                     if(snap && snap.docs) { 
                         state.activities = snap.docs.map(d => d.data()); 
@@ -504,7 +417,6 @@
                 }
             }
             if (!item) return;
-            
             if (item.type === 'instant') window.claimInstantMission(item.id, Number(item.xp), item.name);
             else window.openVerifyModal(item.id, Number(item.xp), item.type, item.name, item.qr_solution || '');
         };
@@ -587,42 +499,41 @@
             } catch(e) { window.showToast("Fehler.", "error"); }
         };
 
-window.submitShipping = async (lvl, tier) => {
-    let addressString = "", addressData = {}, allValid = true;
-    document.querySelectorAll('.shipping-input-field').forEach(input => {
-        const val = input.value.trim(); if(!val) allValid = false; const label = input.getAttribute('data-label'); addressData[label] = val; addressString += `${label}: ${val} | `;
-    });
-    if(!allValid) return window.showToast("Bitte alle Felder ausfüllen.", "error");
-    const btn = document.querySelector('#modal-container button.bg-\\[\\#ff4d00\\], #modal-container button.bg-\\[\\#a855f7\\]'); if(btn) { btn.innerText = "Senden..."; btn.disabled = true; }
-    const rewardId = `lvl${lvl}_${tier}`; const reward = state.rewardData.find(r => r.lvl === lvl); const itemName = reward ? reward[tier] : 'Unbekanntes Item';
-    try {
-        await addDoc(collection(db, 'plot_shipping_requests'), { uid: state.user.uid, alias: state.profile?.alias || 'Grinder', lvl: lvl, tier: tier, itemName: itemName, address: addressString, timestamp: new Date(), status: 'pending' });
-        const currentRedeemed = state.profile?.redeemed || [];
-        if(!currentRedeemed.includes(rewardId)) { currentRedeemed.push(rewardId); await setDoc(doc(db, 'plot_users', state.user.uid), { redeemed: currentRedeemed }, { merge: true }); }
-        
-        // --- HIER IST DAS UPDATE FÜR WEB3FORMS ---
-        try { 
-            fetch("https://api.web3forms.com/submit", { 
-                method: "POST", 
-                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, 
-                body: JSON.stringify({ 
-                    access_key: "3caac5da-214e-4294-9266-ef4dc37e451b",
-                    subject: "Loot: " + itemName, 
-                    from_name: "Grind-App Rewards",
-                    Artikel: itemName, 
-                    Alias: state.profile?.alias || 'Grinder', 
-                    Level: String(lvl), 
-                    Tier: tier.toUpperCase(), 
-                    ...addressData 
-                }) 
-            }).catch(e => {}); 
-        } catch(mailErr) {}
-        // --- ENDE DES UPDATES ---
+        window.submitShipping = async (lvl, tier) => {
+            let addressString = "", addressData = {}, allValid = true;
+            document.querySelectorAll('.shipping-input-field').forEach(input => {
+                const val = input.value.trim(); if(!val) allValid = false; const label = input.getAttribute('data-label'); addressData[label] = val; addressString += `${label}: ${val} | `;
+            });
+            if(!allValid) return window.showToast("Bitte alle Felder ausfüllen.", "error");
+            const btn = document.querySelector('#modal-container button.bg-\\[\\#ff4d00\\], #modal-container button.bg-\\[\\#a855f7\\]'); if(btn) { btn.innerText = "Senden..."; btn.disabled = true; }
+            const rewardId = `lvl${lvl}_${tier}`; const reward = state.rewardData.find(r => r.lvl === lvl); const itemName = reward ? reward[tier] : 'Unbekanntes Item';
+            try {
+                await addDoc(collection(db, 'plot_shipping_requests'), { uid: state.user.uid, alias: state.profile?.alias || 'Grinder', lvl: lvl, tier: tier, itemName: itemName, address: addressString, timestamp: new Date(), status: 'pending' });
+                const currentRedeemed = state.profile?.redeemed || [];
+                if(!currentRedeemed.includes(rewardId)) { currentRedeemed.push(rewardId); await setDoc(doc(db, 'plot_users', state.user.uid), { redeemed: currentRedeemed }, { merge: true }); }
+                
+                try { 
+                    fetch("https://api.web3forms.com/submit", { 
+                        method: "POST", 
+                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, 
+                        body: JSON.stringify({ 
+                            access_key: "3caac5da-214e-4294-9266-ef4dc37e451b",
+                            subject: "Loot: " + itemName, 
+                            from_name: "Grind-App Rewards",
+                            Artikel: itemName, 
+                            Alias: state.profile?.alias || 'Grinder', 
+                            Level: String(lvl), 
+                            Tier: tier.toUpperCase(), 
+                            ...addressData 
+                        }) 
+                    }).catch(e => {}); 
+                } catch(mailErr) {}
 
-        window.logActivity('REDEEM', `hat physischen Reward ('<span class="font-bold">${itemName}</span>') angefordert.`);
-        window.showToast("Anfrage gesendet!", "success"); window.closeModal();
-    } catch(e) { window.showToast("Fehler.", "error"); if(btn) { btn.innerText = "Versand anfordern"; btn.disabled = false; } }
-};
+                window.logActivity('REDEEM', `hat physischen Reward ('<span class="font-bold">${itemName}</span>') angefordert.`);
+                window.showToast("Anfrage gesendet!", "success"); window.closeModal();
+            } catch(e) { window.showToast("Fehler.", "error"); if(btn) { btn.innerText = "Versand anfordern"; btn.disabled = false; } }
+        };
+
         window.claimInstantMission = async (mid, xp, name) => {
             const btn = document.getElementById(`btn-${mid}`); if(btn) { btn.innerText = "Claiming..."; btn.disabled = true; }
             try {
@@ -693,9 +604,24 @@ window.submitShipping = async (lvl, tier) => {
             window.openModal(html);
         };
 
+        // IN-APP SCANNER FIX: Kann jetzt Deep Links (URLs) scannen und verarbeiten!
         window.checkCode = async (scannedValue = null) => {
-            const val = scannedValue || document.getElementById('verify_code_input').value.trim(); if(!window.currentVerify) return; 
-            const { mid, xp, name, qrSolution } = window.currentVerify; if(!val) return window.showToast("Code eingeben.", "error");
+            let val = scannedValue || document.getElementById('verify_code_input').value.trim(); 
+            if(!window.currentVerify) return; 
+            
+            // Wenn der Code ein GRIND-Deep-Link ist, filtere nur die ID heraus
+            if (val.includes('?verify=')) {
+                try {
+                    const urlObj = new URL(val);
+                    val = urlObj.searchParams.get('verify') || val;
+                } catch(e) {
+                    val = val.split('?verify=')[1] || val;
+                }
+            }
+
+            const { mid, xp, name, qrSolution } = window.currentVerify; 
+            if(!val) return window.showToast("Code eingeben.", "error");
+
             if (val.toLowerCase() === qrSolution.toLowerCase()) {
                 const btn = document.querySelector('#modal-container button.btn-grind'); if(btn) { btn.innerText = "Verifying..."; btn.disabled = true; }
                 try {
@@ -1091,11 +1017,8 @@ window.submitShipping = async (lvl, tier) => {
                         </div>
                         <div id="pass-viewport" class="w-full no-scrollbar overflow-x-auto py-8 relative flex items-center min-h-[280px] border-y border-white/5 bg-black/40 shadow-inner">
                             <div class="flex items-center relative w-max" style="min-width: max-content;">
-                                <!-- Voll durchgängige Track Background Line -->
                                 <div class="absolute top-1/2 left-0 right-0 h-[2px] bg-[#1f1f1f] z-0 -translate-y-1/2 pointer-events-none"></div>
-                                <!-- Progress Track Line -->
                                 <div id="track-line" class="absolute top-1/2 left-0 h-[2px] bg-[#ff4d00] shadow-[0_0_15px_rgba(255,77,0,0.6)] z-0 transition-all duration-1000 ease-out -translate-y-1/2 pointer-events-none" style="width: calc(max(1.5rem, calc((100vw - 72rem) / 2 + 1.5rem)) + 70px + (140px * ${oldTrackProgress}));"></div>
-                                
                                 <div class="w-[max(1.5rem,calc((100vw-72rem)/2+1.5rem))] flex-shrink-0"></div> <!-- Dynamischer Left-Spacer -->
                 `;
                 
@@ -1130,43 +1053,6 @@ window.submitShipping = async (lvl, tier) => {
                     </section>
                     <main class="max-w-6xl mx-auto px-6 w-full relative z-10 pb-10"> <!-- Reopen container for the rest -->
                 `;
-
-          /*    html += `
-                    <section class="max-w-3xl mx-auto mb-16">
-                        <div class="flex flex-col gap-6 mb-6">
-                            <div class="flex justify-between items-end border-b border-white/10 pb-4">
-                                <div>
-                                    <p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">Local Network</p>
-                                    <h3 class="text-3xl font-black uppercase italic tracking-tight">Active Spots</h3>
-                                </div>
-                                <span class="text-[10px] font-black bg-white text-black px-3 py-1.5 rounded-sm italic shadow-[0_0_10px_rgba(255,255,255,0.4)] uppercase">${p.city || 'KÖLN'}</span>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                `;
-                
-                if (state.activeSpots.length > 0) {
-                    state.activeSpots.forEach(s => { 
-                        html += `
-                            <div class="mockup p-5 border ${s.color === '#a855f7' ? 'border-[#a855f7]/20' : 'border-transparent'}">
-                                <div class="absolute inset-0 bg-gradient-to-br ${s.bgClass || 'from-white/10'} to-transparent opacity-100 pointer-events-none"></div>
-                                <div class="flex justify-between items-start mb-4 relative z-10">
-                                    <div>
-                                        <div class="w-10 h-10 bg-[#111] border border-white/5 rounded-full flex items-center justify-center mb-2 text-lg">${s.icon || '📍'}</div>
-                                        <h4 class="font-bold text-sm text-white">${s.name}</h4>
-                                        <p class="text-[10px] text-gray-500 mt-1 uppercase tracking-widest">${s.subtitle}</p>
-                                    </div>
-                                    <span class="${s.colorClass || 'text-white'} font-black text-xs italic bg-[#111] border border-white/5 px-2 py-1 rounded-sm">+${s.xp} XP</span>
-                                </div>
-                            </div>
-                        `; 
-                    });
-                } else {
-                    html += `<div class="col-span-3 text-center p-8 text-gray-600 italic text-sm">Keine Active Spots verfügbar.</div>`;
-                }
-*/
-                
-                html += `</div></section>`;
 
                 html += `
                     <section class="max-w-3xl mx-auto mb-16">
@@ -1384,8 +1270,9 @@ window.submitShipping = async (lvl, tier) => {
                 
                 appDiv.innerHTML = html;
 
-                if (syncViewport && !state.dashboardNeedsScroll) {
-                    syncViewport.scrollLeft = savedScrollPosition;
+                if (existingViewport && !state.dashboardNeedsScroll) {
+                    const passViewport = document.getElementById('pass-viewport');
+                    if (passViewport) passViewport.scrollLeft = savedScrollPosition;
                 }
 
                 if (window.xpAnimTimeout) clearTimeout(window.xpAnimTimeout);
@@ -1429,7 +1316,6 @@ window.submitShipping = async (lvl, tier) => {
                         }
                     }
                     
-                    // Wir animieren die Dashboard-Statistiken weiterhin hierüber
                     if (state.prevXp !== null && state.prevXp < safeXp) {
                         animateValue('xp-counter-num', state.prevXp, safeXp, 2500);
                         
