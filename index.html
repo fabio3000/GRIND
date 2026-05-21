@@ -294,6 +294,35 @@
             window.hudCloseTimeout = setTimeout(() => { hud.style.transform = 'translateY(-150%)'; hud.style.pointerEvents = 'none'; setTimeout(() => { hudLvl.classList.remove('animate-level-up'); }, 600); }, 5500);
         };
 
+        // DIE NEUE, ROBUSTE DEEP LINK FUNKTION
+        // Wartet, bis alle benötigten Daten (Profil + Missionen) vom Firebase Server da sind,
+        // und öffnet dann erst das Modal. Das verhindert Abstürze!
+        const handleDeepLink = () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const verifyId = urlParams.get('verify');
+            if (verifyId) {
+                // Parameter aus der URL löschen (damit ein Reload nicht nochmal triggert)
+                window.history.replaceState({}, document.title, window.location.pathname);
+                
+                let checks = 0;
+                const waitForData = setInterval(() => {
+                    checks++;
+                    // Wir prüfen: Gibt es ein Profil und gibt es Missionsdaten?
+                    if (state.profile && (state.habitData?.length > 0 || Object.keys(state.weeklyData || {}).length > 0)) {
+                        clearInterval(waitForData);
+                        // Leichtes Delay, damit das Dashboard fertig gezeichnet ist
+                        setTimeout(() => {
+                            if (typeof window.claimItemById === 'function') {
+                                window.claimItemById(verifyId);
+                            }
+                        }, 500);
+                    }
+                    // Wenn nach 10 Sekunden (50x200ms) immer noch keine Daten da sind: Timeout
+                    if (checks > 50) clearInterval(waitForData);
+                }, 200);
+            }
+        };
+
         const setupSeasonData = () => {
             onSnapshot(doc(db, 'system', 'grind_season'), (docSnap) => {
                 if (docSnap.exists()) {
@@ -304,21 +333,6 @@
                     state.activeSpots = data.activeSpots || [];
                     state.seasonConfig = data.seasonConfig || { number: 1, active: true, start: '', end: '' };
                     state.currentWeekTab = getActiveWeek();
-
-                    // HIER PASSIERT DIE DEEP-LINK MAGIE FÜR QR CODES
-                    // Sobald die Missionsdaten aus Firebase geladen sind, wird der Link geparst
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const verifyId = urlParams.get('verify');
-                    if (verifyId && (state.view === 'dashboard' || state.view === 'loading')) {
-                        // Lösche den Parameter aus der Browser-Zeile, damit kein Reload erneut triggert
-                        window.history.replaceState({}, document.title, window.location.pathname);
-                        // Timeout sorgt dafür, dass das Dashboard komplett gezeichnet ist
-                        setTimeout(() => {
-                            if (typeof window.claimItemById === 'function') {
-                                window.claimItemById(verifyId);
-                            }
-                        }, 800);
-                    }
                 }
                 if(state.view === 'dashboard' || state.view === 'paywall') window.scheduleRender();
             });
@@ -367,7 +381,6 @@
                     if (docSnap.exists()) {
                         state.profile = docSnap.data();
                         
-                        // Crew Deep Link Logic
                         const urlParams = new URLSearchParams(window.location.search);
                         const crewCode = urlParams.get('crew');
                         if (crewCode) { 
@@ -406,6 +419,11 @@
                 setupSeasonData();
                 onSnapshot(doc(db, 'system', 'pricing'), (docSnap) => { if (docSnap.exists()) state.bundlePrice = docSnap.data().bundlePrice; if (state.view === 'paywall') window.scheduleRender(); });
             } else { state.user = null; state.profile = null; state.view = 'auth'; state.authStep = 'phone'; window.scheduleRender(); }
+        });
+
+        // HIER STARTET DIE DEEP LINK LOGIK AUF DER SEITE!
+        window.addEventListener('load', () => {
+            handleDeepLink();
         });
 
         window.claimItemById = (mid) => {
@@ -604,12 +622,11 @@
             window.openModal(html);
         };
 
-        // IN-APP SCANNER FIX: Kann jetzt Deep Links (URLs) scannen und verarbeiten!
         window.checkCode = async (scannedValue = null) => {
             let val = scannedValue || document.getElementById('verify_code_input').value.trim(); 
             if(!window.currentVerify) return; 
             
-            // Wenn der Code ein GRIND-Deep-Link ist, filtere nur die ID heraus
+            // In-App Scanner filtert korrekterweise die ID aus Deep-Links heraus
             if (val.includes('?verify=')) {
                 try {
                     const urlObj = new URL(val);
