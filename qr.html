@@ -293,9 +293,9 @@
             },
             imageOptions: {
                 crossOrigin: "anonymous",
-                margin: 0,
-                imageSize: 0.45, // DARF NICHT GRÖSSER ALS 0.45 SEIN, sonst zerstört es den Scanner!
-                hideBackgroundDots: false // Auf false, damit unsere weiße Kontur perfekt wirkt
+                margin: 4,
+                imageSize: 0.30, // Reduced from 0.45 — keeps data capacity high, logo readable, scanner-friendly
+                hideBackgroundDots: true // true = clears dots under logo so scanners can read edges
             }
         });
 
@@ -401,9 +401,9 @@
                 },
                 imageOptions: {
                     crossOrigin: "anonymous",
-                    margin: isDefaultGrindLogo ? 0 : 5,
-                    imageSize: isDefaultGrindLogo ? 0.45 : 0.4,
-                    hideBackgroundDots: isDefaultGrindLogo ? false : true 
+                    margin: isDefaultGrindLogo ? 4 : 5,
+                    imageSize: isDefaultGrindLogo ? 0.30 : 0.28,
+                    hideBackgroundDots: true
                 }
             });
         }
