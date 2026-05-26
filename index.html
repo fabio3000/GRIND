@@ -37,7 +37,7 @@
     <link rel="icon" type="image/png" sizes="512x512" href="https://grind-app.de/favicon.png">
     <link rel="apple-touch-icon" href="https://grind-app.de/logo.jpg">
     
-    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
     <script src="https://www.paypal.com/sdk/js?client-id=AboxAT2qskA0lY5-23Kj2tu_qY3bOK57rq_LbhtE_cdVOBT37fSHGacBKjgl-zx1XcJM9AZql96OCwc8&currency=EUR"></script>
     
     <style>
@@ -313,30 +313,23 @@
         // DIE NEUE, ROBUSTE DEEP LINK FUNKTION
         // Wartet, bis alle benötigten Daten (Profil + Missionen) vom Firebase Server da sind,
         // und öffnet dann erst das Modal. Das verhindert Abstürze!
+        // Store pending deep-link verify ID immediately on page load (before auth)
+        const _pendingVerifyId = new URLSearchParams(window.location.search).get('verify');
+        if (_pendingVerifyId) {
+            window.history.replaceState({}, document.title, window.location.pathname);
+            window._pendingVerify = _pendingVerifyId;
+        }
+
         const handleDeepLink = () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const verifyId = urlParams.get('verify');
-            if (verifyId) {
-                // Parameter aus der URL löschen (damit ein Reload nicht nochmal triggert)
-                window.history.replaceState({}, document.title, window.location.pathname);
-                
-                let checks = 0;
-                const waitForData = setInterval(() => {
-                    checks++;
-                    // Wir prüfen: Gibt es ein Profil und gibt es Missionsdaten?
-                    if (state.profile && (state.habitData?.length > 0 || Object.keys(state.weeklyData || {}).length > 0)) {
-                        clearInterval(waitForData);
-                        // Leichtes Delay, damit das Dashboard fertig gezeichnet ist
-                        setTimeout(() => {
-                            if (typeof window.claimItemById === 'function') {
-                                window.claimItemById(verifyId);
-                            }
-                        }, 500);
-                    }
-                    // Wenn nach 10 Sekunden (50x200ms) immer noch keine Daten da sind: Timeout
-                    if (checks > 50) clearInterval(waitForData);
-                }, 200);
-            }
+            const verifyId = window._pendingVerify;
+            if (!verifyId) return;
+            // Profile + data must be ready
+            if (!state.profile) return; // called again from render cycle
+            if (state.habitData?.length === 0 && Object.keys(state.weeklyData || {}).length === 0) return;
+            window._pendingVerify = null; // consume once
+            setTimeout(() => {
+                if (typeof window.claimItemById === 'function') window.claimItemById(verifyId);
+            }, 400);
         };
 
         const setupSeasonData = () => {
@@ -600,28 +593,89 @@
             } catch(e) { window.showToast("Fehler.", "error"); if(btn) { btn.innerText = "Claim XP"; btn.disabled = false; } }
         };
 
-        window.startQRScanner = () => {
-            document.getElementById('qr-placeholder').classList.add('hidden');
-            const readerEl = document.getElementById('qr-reader');
-            readerEl.classList.remove('hidden');
-            readerEl.style.minHeight = '280px';
-            try {
-                window.html5QrCode = new Html5Qrcode("qr-reader");
-                const qrConfig = {
-                    fps: 15,
-                    qrbox: (vw, vh) => { const s = Math.floor(Math.min(vw, vh) * 0.75); return { width: s, height: s }; },
-                    aspectRatio: 1.0,
-                    disableFlip: false
-                };
-                window.html5QrCode.start({ facingMode: "environment" }, qrConfig, (decodedText) => {
-                    document.getElementById('verify_code_input').value = decodedText;
-                    if (window.currentVerify && window.currentVerify.qrSolution) { window.checkCode(decodedText); } else { window.showToast("Code erfasst!", "success"); }
-                    try { if(window.html5QrCode) { const stopScan = () => { readerEl.classList.add('hidden'); document.getElementById('qr-placeholder').classList.remove('hidden'); window.html5QrCode = null; }; window.html5QrCode.stop().then(() => { try { window.html5QrCode.clear(); } catch(e){} stopScan(); }).catch(stopScan); } } catch(e) {}
-                }, () => {}).catch(err => { window.showToast("Kamera Zugriff verweigert.", "error"); readerEl.classList.add('hidden'); document.getElementById('qr-placeholder').classList.remove('hidden'); });
-            } catch (e) { window.showToast("Scanner Error.", "error"); }
+        // jsQR-based scanner — no vendor overhead, works with logos in QR center
+        window._qrScanLoop = null;
+        window._qrVideo = null;
+        window._qrStream = null;
+
+        window.stopQRScanner = () => {
+            if (window._qrScanLoop) { cancelAnimationFrame(window._qrScanLoop); window._qrScanLoop = null; }
+            if (window._qrStream) { window._qrStream.getTracks().forEach(t => t.stop()); window._qrStream = null; }
+            if (window._qrVideo) { window._qrVideo.srcObject = null; window._qrVideo = null; }
         };
 
-        window.triggerFileInput = () => document.getElementById('proof_file_input').click();
+        window.startQRScanner = () => {
+            const placeholder = document.getElementById('qr-placeholder');
+            const readerEl = document.getElementById('qr-reader');
+            placeholder.classList.add('hidden');
+            readerEl.classList.remove('hidden');
+            readerEl.style.position = 'relative';
+            readerEl.style.minHeight = '280px';
+            readerEl.style.background = '#000';
+            readerEl.style.borderRadius = '8px';
+            readerEl.style.overflow = 'hidden';
+
+            // Build video + canvas inside the reader div
+            readerEl.innerHTML = '';
+            const video = document.createElement('video');
+            video.setAttribute('playsinline', '');
+            video.setAttribute('muted', '');
+            video.style.cssText = 'width:100%;height:280px;object-fit:cover;display:block;';
+            const canvas = document.createElement('canvas');
+            canvas.style.display = 'none';
+            const overlay = document.createElement('div');
+            overlay.style.cssText = 'position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;';
+            overlay.innerHTML = '<div style="width:200px;height:200px;border:2px solid #ff4d00;border-radius:8px;box-shadow:0 0 0 9999px rgba(0,0,0,0.4);"></div>';
+            readerEl.appendChild(video);
+            readerEl.appendChild(canvas);
+            readerEl.appendChild(overlay);
+            window._qrVideo = video;
+
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } } })
+                .then(stream => {
+                    window._qrStream = stream;
+                    video.srcObject = stream;
+                    video.play();
+                    const ctx = canvas.getContext('2d');
+
+                    const scan = () => {
+                        if (!window._qrStream) return;
+                        if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                            canvas.width = video.videoWidth;
+                            canvas.height = video.videoHeight;
+                            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                            const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: 'dontInvert' });
+                            if (code && code.data) {
+                                window.stopQRScanner();
+                                readerEl.classList.add('hidden');
+                                placeholder.classList.remove('hidden');
+                                const decoded = code.data;
+                                document.getElementById('verify_code_input').value = decoded;
+                                if (window.currentVerify && window.currentVerify.qrSolution) {
+                                    window.checkCode(decoded);
+                                } else {
+                                    window.showToast('Code erfasst!', 'success');
+                                }
+                                return;
+                            }
+                        }
+                        window._qrScanLoop = requestAnimationFrame(scan);
+                    };
+                    window._qrScanLoop = requestAnimationFrame(scan);
+                })
+                .catch(() => {
+                    window.showToast('Kamera Zugriff verweigert.', 'error');
+                    readerEl.classList.add('hidden');
+                    placeholder.classList.remove('hidden');
+                });
+        };
+
+        // Also stop scanner on modal close
+        const _origCloseModal = window.closeModal;
+        window.closeModal = () => { window.stopQRScanner(); if(_origCloseModal) _origCloseModal(); };
+
+                window.triggerFileInput = () => document.getElementById('proof_file_input').click();
         window.handleFileSelect = (e) => {
             const file = e.target.files[0]; if(!file) return; const reader = new FileReader();
             reader.onload = (ev) => { 
@@ -922,6 +976,10 @@
         `;
 
         function render() {
+            // Fire pending deep-link verify as soon as dashboard is ready
+            if (window._pendingVerify && state.profile && (state.habitData?.length > 0 || Object.keys(state.weeklyData || {}).length > 0)) {
+                handleDeepLink();
+            }
             const appDiv = document.getElementById('app'); let savedScrollPosition = 0; const existingViewport = document.getElementById('pass-viewport'); if (existingViewport) { savedScrollPosition = existingViewport.scrollLeft; }
             if (state.view === 'loading') { appDiv.innerHTML = `<div class="flex-1 flex items-center justify-center min-h-[60vh] relative z-10"><div class="w-16 h-16 border-t-4 border-l-4 border-[#ff4d00] rounded-full animate-spin"></div></div>`; return; }
             if (state.view === 'dashboard' || state.view === 'paywall') {
