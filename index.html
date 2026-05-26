@@ -37,7 +37,7 @@
     <link rel="icon" type="image/png" sizes="512x512" href="https://grind-app.de/favicon.png">
     <link rel="apple-touch-icon" href="https://grind-app.de/logo.jpg">
     
-    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script src="https://www.paypal.com/sdk/js?client-id=AboxAT2qskA0lY5-23Kj2tu_qY3bOK57rq_LbhtE_cdVOBT37fSHGacBKjgl-zx1XcJM9AZql96OCwc8&currency=EUR"></script>
     
     <style>
@@ -586,59 +586,23 @@
                     updatePayload = { xp: newXp, lvl: newLvl, completed: [...(state.profile.completed || []), mid] }; claimSuccess = true;
                 }
                 if (claimSuccess) { 
+                    const oldXpVal = state.profile.xp || 0;
                     await setDoc(doc(db, 'plot_users', state.user.uid), updatePayload, { merge: true }); 
+                    const newXpVal = updatePayload.xp || oldXpVal;
+                    window.triggerXpHud(newXpVal - oldXpVal, oldXpVal, newXpVal, oldLvl, newLvl);
                     window.logActivity('MISSION', `hat '<span class="font-bold text-white">${name}</span>' absolviert.`);
                     if(newLvl > oldLvl) window.logActivity('LEVEL_UP', `hat <span class="font-bold">Level ${newLvl}</span> erreicht!`);
                 } else if (btn) { btn.innerText = "Claim XP"; btn.disabled = false; }
             } catch(e) { window.showToast("Fehler.", "error"); if(btn) { btn.innerText = "Claim XP"; btn.disabled = false; } }
         };
 
-        window._qrScanLoop = null;
-        window._qrVideo = null;
-        window._qrStream = null;
-
-        // tryDecode: NEVER writes back to canvas — uses a dedicated off-screen buffer for contrast pass
-        const _boostCanvas = document.createElement('canvas');
-        const _boostCtx = _boostCanvas.getContext('2d', { willReadFrequently: true });
-
-        const tryDecode = (imageData, w, h) => {
-            // Pass 1-3: all inversion modes on original pixels
-            let hit = jsQR(imageData.data, w, h, { inversionAttempts: 'dontInvert' });
-            if (hit && hit.data) return hit.data;
-            hit = jsQR(imageData.data, w, h, { inversionAttempts: 'onlyInvert' });
-            if (hit && hit.data) return hit.data;
-            hit = jsQR(imageData.data, w, h, { inversionAttempts: 'attemptBoth' });
-            if (hit && hit.data) return hit.data;
-
-            // Pass 4: binarize into a SEPARATE buffer — never touches the source canvas
-            _boostCanvas.width = w;
-            _boostCanvas.height = h;
-            const boosted = _boostCtx.createImageData(w, h);
-            for (let i = 0; i < imageData.data.length; i += 4) {
-                const avg = (imageData.data[i] * 0.299 + imageData.data[i+1] * 0.587 + imageData.data[i+2] * 0.114);
-                const v = avg > 128 ? 255 : 0;
-                boosted.data[i] = boosted.data[i+1] = boosted.data[i+2] = v;
-                boosted.data[i+3] = 255;
-            }
-            hit = jsQR(boosted.data, w, h, { inversionAttempts: 'attemptBoth' });
-            if (hit && hit.data) return hit.data;
-
-            // Pass 5: sharpen luminance contrast (gamma 0.5) into separate buffer
-            const sharp = _boostCtx.createImageData(w, h);
-            for (let i = 0; i < imageData.data.length; i += 4) {
-                const lum = (imageData.data[i] * 0.299 + imageData.data[i+1] * 0.587 + imageData.data[i+2] * 0.114) / 255;
-                const v = Math.round(Math.pow(lum, 0.5) * 255);
-                sharp.data[i] = sharp.data[i+1] = sharp.data[i+2] = v;
-                sharp.data[i+3] = 255;
-            }
-            hit = jsQR(sharp.data, w, h, { inversionAttempts: 'attemptBoth' });
-            return hit ? hit.data : null;
-        };
+        window._h5qr = null;
 
         window.stopQRScanner = () => {
-            if (window._qrScanLoop) { cancelAnimationFrame(window._qrScanLoop); window._qrScanLoop = null; }
-            if (window._qrStream) { window._qrStream.getTracks().forEach(t => t.stop()); window._qrStream = null; }
-            if (window._qrVideo) { window._qrVideo.srcObject = null; window._qrVideo = null; }
+            if (!window._h5qr) return;
+            try {
+                window._h5qr.stop().then(() => { try { window._h5qr.clear(); } catch(e){} window._h5qr = null; }).catch(() => { window._h5qr = null; });
+            } catch(e) { window._h5qr = null; }
         };
 
         window.startQRScanner = () => {
@@ -646,94 +610,44 @@
             const readerEl = document.getElementById('qr-reader');
             placeholder.classList.add('hidden');
             readerEl.classList.remove('hidden');
-            readerEl.style.cssText = 'position:relative;min-height:300px;background:#000;border-radius:8px;overflow:hidden;';
+            readerEl.style.minHeight = '300px';
 
-            readerEl.innerHTML = '';
-            const video = document.createElement('video');
-            video.setAttribute('playsinline', '');
-            video.setAttribute('muted', '');
-            video.style.cssText = 'width:100%;height:300px;object-fit:cover;display:block;';
-
-            // One canvas for full frame, one for center crop — both read-only after drawImage
-            const canvasFull = document.createElement('canvas');
-            const canvasCrop = document.createElement('canvas');
-            canvasFull.style.display = 'none';
-            canvasCrop.style.display = 'none';
-
-            const overlay = document.createElement('div');
-            overlay.style.cssText = 'position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;';
-            overlay.innerHTML = '<div style="width:220px;height:220px;border:2.5px solid #ff4d00;border-radius:10px;box-shadow:0 0 0 9999px rgba(0,0,0,0.45);"></div>';
-
-            readerEl.appendChild(video);
-            readerEl.appendChild(canvasFull);
-            readerEl.appendChild(canvasCrop);
-            readerEl.appendChild(overlay);
-            window._qrVideo = video;
-
-            navigator.mediaDevices.getUserMedia({
-                video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } }
-            })
-            .then(stream => {
-                window._qrStream = stream;
-                video.srcObject = stream;
-                video.play();
-
-                const ctxFull = canvasFull.getContext('2d', { willReadFrequently: true });
-                const ctxCrop = canvasCrop.getContext('2d', { willReadFrequently: true });
-                let frameCount = 0;
-
-                const onDecoded = (decoded) => {
-                    window.stopQRScanner();
-                    readerEl.classList.add('hidden');
-                    placeholder.classList.remove('hidden');
-                    document.getElementById('verify_code_input').value = decoded;
-                    if (window.currentVerify && window.currentVerify.qrSolution) {
-                        window.checkCode(decoded);
-                    } else {
-                        window.showToast('Code erfasst!', 'success');
-                    }
-                };
-
-                const scan = () => {
-                    if (!window._qrStream) return;
-                    if (video.readyState >= 2) {
-                        const vw = video.videoWidth, vh = video.videoHeight;
-                        if (vw > 0 && vh > 0) {
-                            frameCount++;
-
-                            // Every frame: full image scan
-                            canvasFull.width = vw;
-                            canvasFull.height = vh;
-                            ctxFull.drawImage(video, 0, 0, vw, vh);
-                            const fullData = ctxFull.getImageData(0, 0, vw, vh);
-                            const r1 = tryDecode(fullData, vw, vh);
-                            if (r1) { onDecoded(r1); return; }
-
-                            // Every 2nd frame: center crop scaled to 640x640
-                            if (frameCount % 2 === 0) {
-                                const cropSize = Math.min(vw, vh) * 0.65;
-                                const cx = (vw - cropSize) / 2, cy = (vh - cropSize) / 2;
-                                canvasCrop.width = 640;
-                                canvasCrop.height = 640;
-                                ctxCrop.drawImage(video, cx, cy, cropSize, cropSize, 0, 0, 640, 640);
-                                const cropData = ctxCrop.getImageData(0, 0, 640, 640);
-                                const r2 = tryDecode(cropData, 640, 640);
-                                if (r2) { onDecoded(r2); return; }
-                            }
-                        }
-                    }
-                    window._qrScanLoop = requestAnimationFrame(scan);
-                };
-                window._qrScanLoop = requestAnimationFrame(scan);
-            })
-            .catch(() => {
-                window.showToast('Kamera Zugriff verweigert.', 'error');
+            const onDecoded = (text) => {
+                window.stopQRScanner();
                 readerEl.classList.add('hidden');
                 placeholder.classList.remove('hidden');
-            });
+                document.getElementById('verify_code_input').value = text;
+                if (window.currentVerify && window.currentVerify.qrSolution) {
+                    window.checkCode(text);
+                } else {
+                    window.showToast('Code erfasst!', 'success');
+                }
+            };
+
+            try {
+                window._h5qr = new Html5Qrcode('qr-reader');
+                window._h5qr.start(
+                    { facingMode: 'environment' },
+                    {
+                        fps: 10,
+                        qrbox: (w, h) => { const s = Math.floor(Math.min(w, h) * 0.7); return { width: s, height: s }; },
+                        aspectRatio: 1.333,
+                        experimentalFeatures: { useBarCodeDetectorIfSupported: true }
+                    },
+                    onDecoded,
+                    () => {}
+                ).catch(() => {
+                    window.showToast('Kamera Zugriff verweigert.', 'error');
+                    readerEl.classList.add('hidden');
+                    placeholder.classList.remove('hidden');
+                });
+            } catch(e) {
+                window.showToast('Scanner konnte nicht gestartet werden.', 'error');
+                readerEl.classList.add('hidden');
+                placeholder.classList.remove('hidden');
+            }
         };
 
-        // Stop scanner when modal closes
         const _origCloseModal = window.closeModal;
         window.closeModal = () => { window.stopQRScanner(); if(_origCloseModal) _origCloseModal(); };
 
@@ -854,7 +768,10 @@
                         updatePayload = { xp: newXp, lvl: newLvl, completed: [...(state.profile.completed || []), mid] }; claimSuccess = true;
                     }
                     if (claimSuccess) { 
+                        const oldXpVal = state.profile.xp || 0;
                         await setDoc(doc(db, 'plot_users', state.user.uid), updatePayload, { merge: true }); 
+                        const newXpVal = updatePayload.xp || oldXpVal;
+                        window.triggerXpHud(newXpVal - oldXpVal, oldXpVal, newXpVal, oldLvl, newLvl);
                         window.logActivity('MISSION', `hat '<span class="font-bold text-white">${name}</span>' absolviert.`);
                         if(newLvl > oldLvl) window.logActivity('LEVEL_UP', `hat <span class="font-bold">Level ${newLvl}</span> erreicht!`);
                     }
