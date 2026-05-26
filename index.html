@@ -601,14 +601,23 @@
         };
 
         window.startQRScanner = () => {
-            document.getElementById('qr-placeholder').classList.add('hidden'); document.getElementById('qr-reader').classList.remove('hidden');
+            document.getElementById('qr-placeholder').classList.add('hidden');
+            const readerEl = document.getElementById('qr-reader');
+            readerEl.classList.remove('hidden');
+            readerEl.style.minHeight = '280px';
             try {
                 window.html5QrCode = new Html5Qrcode("qr-reader");
-                window.html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 } }, (decodedText) => {
+                const qrConfig = {
+                    fps: 15,
+                    qrbox: (vw, vh) => { const s = Math.floor(Math.min(vw, vh) * 0.75); return { width: s, height: s }; },
+                    aspectRatio: 1.0,
+                    disableFlip: false
+                };
+                window.html5QrCode.start({ facingMode: "environment" }, qrConfig, (decodedText) => {
                     document.getElementById('verify_code_input').value = decodedText;
                     if (window.currentVerify && window.currentVerify.qrSolution) { window.checkCode(decodedText); } else { window.showToast("Code erfasst!", "success"); }
-                    try { if(window.html5QrCode) { const stopScan = () => { document.getElementById('qr-reader').classList.add('hidden'); document.getElementById('qr-placeholder').classList.remove('hidden'); window.html5QrCode = null; }; window.html5QrCode.stop().then(() => { try { window.html5QrCode.clear(); } catch(e){} stopScan(); }).catch(stopScan); } } catch(e) {}
-                }, () => {}).catch(err => { window.showToast("Kamera Zugriff verweigert.", "error"); document.getElementById('qr-reader').classList.add('hidden'); document.getElementById('qr-placeholder').classList.remove('hidden'); });
+                    try { if(window.html5QrCode) { const stopScan = () => { readerEl.classList.add('hidden'); document.getElementById('qr-placeholder').classList.remove('hidden'); window.html5QrCode = null; }; window.html5QrCode.stop().then(() => { try { window.html5QrCode.clear(); } catch(e){} stopScan(); }).catch(stopScan); } } catch(e) {}
+                }, () => {}).catch(err => { window.showToast("Kamera Zugriff verweigert.", "error"); readerEl.classList.add('hidden'); document.getElementById('qr-placeholder').classList.remove('hidden'); });
             } catch (e) { window.showToast("Scanner Error.", "error"); }
         };
 
@@ -658,21 +667,49 @@
             if (val.toLowerCase() === qrSolution.toLowerCase()) {
                 const btn = document.querySelector('#modal-container button.btn-grind'); if(btn) { btn.innerText = "Verifying..."; btn.disabled = true; }
                 
-                // GEOFENCING: find the spot for this mission
-                const habit = state.habitData.find(h => h.id === mid);
-                const spotForMission = (state.activeSpots || []).find(s => (s.missions || []).includes(mid) || s.qr_solution === qrSolution) || (habit?.lat ? habit : null);
-                if (spotForMission?.lat && spotForMission?.lng) {
+                // GEOFENCING: check lat/lng on mission item directly, then fallback to spots
+                const habitForGeo = state.habitData.find(h => h.id === mid);
+                let missionForGeo = habitForGeo;
+                if (!missionForGeo?.lat) {
+                    for (const wk of Object.values(state.weeklyData || {})) {
+                        const found = (wk.missions || []).find(x => x.id === mid);
+                        if (found?.lat) { missionForGeo = found; break; }
+                    }
+                }
+                if (!missionForGeo?.lat) {
+                    missionForGeo = (state.activeSpots || []).find(s => (s.missions || []).includes(mid) || s.qr_solution === qrSolution);
+                }
+                if (missionForGeo?.lat && missionForGeo?.lng) {
+                    // Ask permission first with friendly explanation
+                    const permResult = await new Promise((res) => {
+                        if (!navigator.geolocation) { res('skip'); return; }
+                        navigator.permissions?.query({ name: 'geolocation' }).then(p => {
+                            if (p.state === 'denied') res('denied');
+                            else if (p.state === 'granted') res('ok');
+                            else res('prompt'); // 'prompt' = noch nicht gefragt
+                        }).catch(() => res('ok')); // permissions API nicht verfügbar
+                    });
+                    if (permResult === 'denied') {
+                        window.showToast("📍 Standort ist gesperrt. In Browser-Einstellungen freigeben, um vor Ort zu claimen.", "error");
+                        if(btn) { btn.innerText = "Code Prüfen"; btn.disabled = false; }
+                        return;
+                    }
+                    if (permResult === 'prompt') {
+                        window.showToast("📍 Bitte Standort einmalig freigeben – nur zur Vor-Ort-Verifikation.", "info");
+                    }
                     try {
                         await new Promise((resolve, reject) => {
-                            if (!navigator.geolocation) { resolve(); return; }
                             navigator.geolocation.getCurrentPosition(
                                 (pos) => {
-                                    const dist = getDistanceMeters(pos.coords.latitude, pos.coords.longitude, Number(spotForMission.lat), Number(spotForMission.lng));
+                                    const dist = getDistanceMeters(pos.coords.latitude, pos.coords.longitude, Number(missionForGeo.lat), Number(missionForGeo.lng));
                                     if (dist > 150) reject(new Error(`📍 Du bist ${Math.round(dist)}m entfernt. Check-in nur vor Ort möglich.`));
                                     else resolve();
                                 },
-                                () => resolve(), // GPS nicht verfügbar → erlaubt (Fallback)
-                                { timeout: 6000, maximumAge: 30000 }
+                                (err) => {
+                                    if (err.code === 1) reject(new Error("📍 Standort verweigert. Bitte in den Browser-Einstellungen freigeben."));
+                                    else resolve(); // Timeout / unavailable → allow
+                                },
+                                { timeout: 8000, maximumAge: 30000, enableHighAccuracy: true }
                             );
                         });
                     } catch(geoErr) {
