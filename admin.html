@@ -107,7 +107,7 @@
             const diffTime = now.getTime() - firstSunday.getTime();
             const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)); 
             let week = 2 + Math.floor(diffDays / 7);
-            return Math.max(1, Math.min(week, 4));
+            return Math.max(1, Math.min(week, 12));
         };
 
         // --- 4. AUTH & DATEN-LISTENER ---
@@ -135,7 +135,7 @@
                                         state.seasonConfig = data.seasonConfig || { number: 1, active: true, start: '', end: '' };
                                         
                                         const curW = getActiveWeek();
-                                        if (state.adminEditWeek < 1 || state.adminEditWeek > 4) state.adminEditWeek = curW;
+                                        if (state.adminEditWeek < 1 || state.adminEditWeek > 12) state.adminEditWeek = curW;
 
                                         if(state.view === 'admin') safeRender();
                                     } else {
@@ -361,6 +361,8 @@
                 name: document.getElementById('new_spot_name').value.trim(),
                 subtitle: document.getElementById('new_spot_subtitle').value.trim(),
                 xp: parseInt(document.getElementById('new_spot_xp').value) || 0,
+                lat: parseFloat(document.getElementById('new_spot_lat').value) || null,
+                lng: parseFloat(document.getElementById('new_spot_lng').value) || null,
                 color, colorClass, bgClass
             };
 
@@ -695,7 +697,8 @@
                             
                                 <!-- SEASON SETUP -->
                                 <div class="card p-6 rounded-sm border-[#ff4d00]/20 shadow-[0_0_15px_rgba(255,77,0,0.05)]">
-                                    <h3 class="text-lg font-black uppercase tracking-widest text-[#ff4d00] mb-4">Season Setup</h3>
+                                    <h3 class="text-lg font-black uppercase tracking-widest text-[#ff4d00] mb-1">Season Setup</h3>
+                                    <p class="text-[9px] text-gray-600 uppercase tracking-widest font-bold mb-4">Empfehlung: 3 Monate (~12 Wochen) pro Season · Spring / Summer / Fall / Winter</p>
                                     <form onsubmit="window.saveSeasonSetup(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
                                             <label class="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1 block">Season Nummer</label>
@@ -725,9 +728,12 @@
                                 <!-- TIME-LIMITED DROPS (Wochenmissionen) -->
                                 <div class="card p-6 rounded-sm">
                                     <div class="flex justify-between items-center mb-6">
-                                        <h3 class="text-lg font-black uppercase tracking-widest text-[#ff4d00]">Time-Limited Drops</h3>
+                                        <div>
+                                            <h3 class="text-lg font-black uppercase tracking-widest text-[#ff4d00]">Time-Limited Drops</h3>
+                                            <p class="text-[9px] text-gray-600 uppercase tracking-widest font-bold mt-1">12 Wochen · 3 Monate · Monat 1 = W01–W04 · Monat 2 = W05–W08 · Monat 3 = W09–W12</p>
+                                        </div>
                                         <select onchange="window.setAdminEditWeek(this.value)" class="bg-[#050505] border border-[#1f1f1f] text-white text-xs p-2 rounded-sm outline-none focus:border-[#ff4d00]">
-                                            ${[1,2,3,4].map(w => `<option value="${w}" ${state.adminEditWeek == w ? 'selected' : ''}>Woche ${w}</option>`).join('')}
+                                            ${[1,2,3,4,5,6,7,8,9,10,11,12].map(w => `<option value="${w}" ${state.adminEditWeek == w ? 'selected' : ''}>W${w < 10 ? '0' : ''}${w} — Monat ${Math.ceil(w/4)}</option>`).join('')}
                                         </select>
                                     </div>
                                     <div class="space-y-3 mb-8">
@@ -749,12 +755,13 @@
                                             <input id="new_mis_desc" required placeholder="Beschreibung" class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00]">
                                             <div class="flex gap-3">
                                                 <input id="new_mis_xp" type="number" required placeholder="XP" class="w-1/2 p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00]">
-                                                <select id="new_mis_type" onchange="document.getElementById('new_mis_qr_solution').style.display = this.value === 'qr' ? 'block' : 'none'" class="w-1/2 p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white appearance-none outline-none focus:border-[#ff4d00]">
-                                                    <option value="qr">QR Scan</option>
-                                                    <option value="upload">Upload</option>
+                                                <select id="new_mis_type" onchange="document.getElementById('new_mis_qr_solution').style.display = this.value === 'qr' ? 'block' : 'none'; document.getElementById('upload_warning').style.display = this.value === 'upload' ? 'block' : 'none';" class="w-1/2 p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white appearance-none outline-none focus:border-[#ff4d00]">
+                                                    <option value="qr">QR Scan (empfohlen)</option>
                                                     <option value="instant">Instant Claim</option>
+                                                    <option value="upload">Upload (manuell / langsam)</option>
                                                 </select>
                                             </div>
+                                            <div id="upload_warning" class="bg-yellow-500/10 border border-yellow-500/30 rounded-sm p-3" style="display:none"><p class="text-[9px] text-yellow-400 font-bold uppercase tracking-widest">⚠️ Upload bricht Instant Gratification. User warten bis zu 12h auf Freigabe. Besser: QR Scan + Geofencing.</p></div>
                                             <input id="new_mis_qr_solution" placeholder="QR Code Text (für Auto-Verify)" class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00]" style="display: block;">
                                             <button type="submit" class="w-full bg-white text-black font-black uppercase text-[10px] tracking-widest py-3 rounded-sm hover:bg-[#ff4d00] hover:text-white transition">Hinzufügen</button>
                                         </form>
@@ -783,12 +790,17 @@
                                     </div>
                                     <div class="border-t border-[#1f1f1f] pt-6">
                                         <h4 class="text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-4">Neuen Spot hinzufügen</h4>
+                                        <div class="bg-[#ff4d00]/5 border border-[#ff4d00]/20 rounded-sm p-3 mb-3"><p class="text-[9px] text-[#ff4d00] font-bold uppercase tracking-widest">📍 Geofencing: Latitude + Longitude eintragen, damit User nur vor Ort claimen können (Radius: 150m). Leer lassen = kein Geofencing.</p></div>
                                         <form onsubmit="event.preventDefault(); window.addSpot(event);" class="space-y-3">
                                             <div class="flex gap-3">
                                                 <input id="new_spot_icon" placeholder="Emoji (📍)" value="📍" required class="w-1/4 p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-white text-center">
                                                 <input id="new_spot_name" required placeholder="Titel (z.B. Morning Check-in)" class="w-3/4 p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-white">
                                             </div>
                                             <input id="new_spot_subtitle" required placeholder="Location (z.B. GuMo Café)" class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-white">
+                                            <div class="flex gap-3">
+                                                <input id="new_spot_lat" type="number" step="any" placeholder="Latitude (z.B. 50.9333)" class="w-1/2 p-3 bg-[#050505] border border-[#ff4d00]/30 rounded-sm text-sm text-white outline-none focus:border-[#ff4d00]">
+                                                <input id="new_spot_lng" type="number" step="any" placeholder="Longitude (z.B. 6.9595)" class="w-1/2 p-3 bg-[#050505] border border-[#ff4d00]/30 rounded-sm text-sm text-white outline-none focus:border-[#ff4d00]">
+                                            </div>
                                             <div class="flex gap-3">
                                                 <input id="new_spot_xp" type="number" required placeholder="XP Bonus" class="w-1/2 p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-white">
                                                 <select id="new_spot_theme" class="w-1/2 p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white appearance-none outline-none focus:border-white cursor-pointer">
