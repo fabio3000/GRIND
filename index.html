@@ -593,10 +593,31 @@
             } catch(e) { window.showToast("Fehler.", "error"); if(btn) { btn.innerText = "Claim XP"; btn.disabled = false; } }
         };
 
-        // jsQR-based scanner — no vendor overhead, works with logos in QR center
+        // jsQR multi-pass scanner — tries 4 decode strategies per frame for near-100% hit rate
         window._qrScanLoop = null;
         window._qrVideo = null;
         window._qrStream = null;
+
+        // tryDecodeAll: runs jsQR with all inversion modes + contrast-boosted copy
+        const tryDecodeAll = (ctx, w, h) => {
+            const modes = ['dontInvert', 'onlyInvert', 'attemptBoth'];
+            for (const mode of modes) {
+                const raw = ctx.getImageData(0, 0, w, h);
+                const hit = jsQR(raw.data, w, h, { inversionAttempts: mode });
+                if (hit && hit.data) return hit.data;
+            }
+            // 4th pass: boost contrast then retry
+            const img = ctx.getImageData(0, 0, w, h);
+            for (let i = 0; i < img.data.length; i += 4) {
+                const avg = (img.data[i] + img.data[i+1] + img.data[i+2]) / 3;
+                const v = avg > 128 ? 255 : 0;
+                img.data[i] = img.data[i+1] = img.data[i+2] = v;
+            }
+            ctx.putImageData(img, 0, 0);
+            const boosted = ctx.getImageData(0, 0, w, h);
+            const hit2 = jsQR(boosted.data, w, h, { inversionAttempts: 'attemptBoth' });
+            return hit2 ? hit2.data : null;
+        };
 
         window.stopQRScanner = () => {
             if (window._qrScanLoop) { cancelAnimationFrame(window._qrScanLoop); window._qrScanLoop = null; }
@@ -609,66 +630,94 @@
             const readerEl = document.getElementById('qr-reader');
             placeholder.classList.add('hidden');
             readerEl.classList.remove('hidden');
-            readerEl.style.position = 'relative';
-            readerEl.style.minHeight = '280px';
-            readerEl.style.background = '#000';
-            readerEl.style.borderRadius = '8px';
-            readerEl.style.overflow = 'hidden';
+            readerEl.style.cssText = 'position:relative;min-height:300px;background:#000;border-radius:8px;overflow:hidden;';
 
-            // Build video + canvas inside the reader div
             readerEl.innerHTML = '';
             const video = document.createElement('video');
             video.setAttribute('playsinline', '');
             video.setAttribute('muted', '');
-            video.style.cssText = 'width:100%;height:280px;object-fit:cover;display:block;';
-            const canvas = document.createElement('canvas');
-            canvas.style.display = 'none';
+            video.style.cssText = 'width:100%;height:300px;object-fit:cover;display:block;';
+
+            // Two canvases: one full-frame, one cropped center square for close-up codes
+            const canvasFull = document.createElement('canvas');
+            const canvasCrop = document.createElement('canvas');
+            canvasFull.style.display = 'none';
+            canvasCrop.style.display = 'none';
+
             const overlay = document.createElement('div');
             overlay.style.cssText = 'position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;';
-            overlay.innerHTML = '<div style="width:200px;height:200px;border:2px solid #ff4d00;border-radius:8px;box-shadow:0 0 0 9999px rgba(0,0,0,0.4);"></div>';
+            overlay.innerHTML = '<div style="width:220px;height:220px;border:2.5px solid #ff4d00;border-radius:10px;box-shadow:0 0 0 9999px rgba(0,0,0,0.45);"></div>';
+
             readerEl.appendChild(video);
-            readerEl.appendChild(canvas);
+            readerEl.appendChild(canvasFull);
+            readerEl.appendChild(canvasCrop);
             readerEl.appendChild(overlay);
             window._qrVideo = video;
 
-            navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } } })
-                .then(stream => {
-                    window._qrStream = stream;
-                    video.srcObject = stream;
-                    video.play();
-                    const ctx = canvas.getContext('2d');
+            // Request highest res rear camera available
+            navigator.mediaDevices.getUserMedia({
+                video: {
+                    facingMode: { ideal: 'environment' },
+                    width: { ideal: 1920 },
+                    height: { ideal: 1080 },
+                    focusMode: { ideal: 'continuous' }
+                }
+            })
+            .then(stream => {
+                window._qrStream = stream;
+                video.srcObject = stream;
+                video.play();
 
-                    const scan = () => {
-                        if (!window._qrStream) return;
-                        if (video.readyState === video.HAVE_ENOUGH_DATA) {
-                            canvas.width = video.videoWidth;
-                            canvas.height = video.videoHeight;
-                            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                            const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: 'dontInvert' });
-                            if (code && code.data) {
-                                window.stopQRScanner();
-                                readerEl.classList.add('hidden');
-                                placeholder.classList.remove('hidden');
-                                const decoded = code.data;
-                                document.getElementById('verify_code_input').value = decoded;
-                                if (window.currentVerify && window.currentVerify.qrSolution) {
-                                    window.checkCode(decoded);
-                                } else {
-                                    window.showToast('Code erfasst!', 'success');
-                                }
-                                return;
-                            }
-                        }
-                        window._qrScanLoop = requestAnimationFrame(scan);
-                    };
-                    window._qrScanLoop = requestAnimationFrame(scan);
-                })
-                .catch(() => {
-                    window.showToast('Kamera Zugriff verweigert.', 'error');
+                const ctxFull = canvasFull.getContext('2d', { willReadFrequently: true });
+                const ctxCrop = canvasCrop.getContext('2d', { willReadFrequently: true });
+                let frameSkip = 0;
+
+                const onDecoded = (decoded) => {
+                    window.stopQRScanner();
                     readerEl.classList.add('hidden');
                     placeholder.classList.remove('hidden');
-                });
+                    document.getElementById('verify_code_input').value = decoded;
+                    if (window.currentVerify && window.currentVerify.qrSolution) {
+                        window.checkCode(decoded);
+                    } else {
+                        window.showToast('Code erfasst!', 'success');
+                    }
+                };
+
+                const scan = () => {
+                    if (!window._qrStream) return;
+                    if (video.readyState >= 2) {
+                        const vw = video.videoWidth, vh = video.videoHeight;
+                        if (vw && vh) {
+                            // Every frame: try full image
+                            canvasFull.width = vw;
+                            canvasFull.height = vh;
+                            ctxFull.drawImage(video, 0, 0, vw, vh);
+                            const result = tryDecodeAll(ctxFull, vw, vh);
+                            if (result) { onDecoded(result); return; }
+
+                            // Every 3rd frame: also try center crop (for close-up scans)
+                            frameSkip++;
+                            if (frameSkip % 3 === 0) {
+                                const cropSize = Math.min(vw, vh) * 0.7;
+                                const cx = (vw - cropSize) / 2, cy = (vh - cropSize) / 2;
+                                canvasCrop.width = 512;
+                                canvasCrop.height = 512;
+                                ctxCrop.drawImage(video, cx, cy, cropSize, cropSize, 0, 0, 512, 512);
+                                const result2 = tryDecodeAll(ctxCrop, 512, 512);
+                                if (result2) { onDecoded(result2); return; }
+                            }
+                        }
+                    }
+                    window._qrScanLoop = requestAnimationFrame(scan);
+                };
+                window._qrScanLoop = requestAnimationFrame(scan);
+            })
+            .catch(() => {
+                window.showToast('Kamera Zugriff verweigert.', 'error');
+                readerEl.classList.add('hidden');
+                placeholder.classList.remove('hidden');
+            });
         };
 
         // Also stop scanner on modal close
