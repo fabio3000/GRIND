@@ -593,30 +593,46 @@
             } catch(e) { window.showToast("Fehler.", "error"); if(btn) { btn.innerText = "Claim XP"; btn.disabled = false; } }
         };
 
-        // jsQR multi-pass scanner — tries 4 decode strategies per frame for near-100% hit rate
         window._qrScanLoop = null;
         window._qrVideo = null;
         window._qrStream = null;
 
-        // tryDecodeAll: runs jsQR with all inversion modes + contrast-boosted copy
-        const tryDecodeAll = (ctx, w, h) => {
-            const modes = ['dontInvert', 'onlyInvert', 'attemptBoth'];
-            for (const mode of modes) {
-                const raw = ctx.getImageData(0, 0, w, h);
-                const hit = jsQR(raw.data, w, h, { inversionAttempts: mode });
-                if (hit && hit.data) return hit.data;
-            }
-            // 4th pass: boost contrast then retry
-            const img = ctx.getImageData(0, 0, w, h);
-            for (let i = 0; i < img.data.length; i += 4) {
-                const avg = (img.data[i] + img.data[i+1] + img.data[i+2]) / 3;
+        // tryDecode: NEVER writes back to canvas — uses a dedicated off-screen buffer for contrast pass
+        const _boostCanvas = document.createElement('canvas');
+        const _boostCtx = _boostCanvas.getContext('2d', { willReadFrequently: true });
+
+        const tryDecode = (imageData, w, h) => {
+            // Pass 1-3: all inversion modes on original pixels
+            let hit = jsQR(imageData.data, w, h, { inversionAttempts: 'dontInvert' });
+            if (hit && hit.data) return hit.data;
+            hit = jsQR(imageData.data, w, h, { inversionAttempts: 'onlyInvert' });
+            if (hit && hit.data) return hit.data;
+            hit = jsQR(imageData.data, w, h, { inversionAttempts: 'attemptBoth' });
+            if (hit && hit.data) return hit.data;
+
+            // Pass 4: binarize into a SEPARATE buffer — never touches the source canvas
+            _boostCanvas.width = w;
+            _boostCanvas.height = h;
+            const boosted = _boostCtx.createImageData(w, h);
+            for (let i = 0; i < imageData.data.length; i += 4) {
+                const avg = (imageData.data[i] * 0.299 + imageData.data[i+1] * 0.587 + imageData.data[i+2] * 0.114);
                 const v = avg > 128 ? 255 : 0;
-                img.data[i] = img.data[i+1] = img.data[i+2] = v;
+                boosted.data[i] = boosted.data[i+1] = boosted.data[i+2] = v;
+                boosted.data[i+3] = 255;
             }
-            ctx.putImageData(img, 0, 0);
-            const boosted = ctx.getImageData(0, 0, w, h);
-            const hit2 = jsQR(boosted.data, w, h, { inversionAttempts: 'attemptBoth' });
-            return hit2 ? hit2.data : null;
+            hit = jsQR(boosted.data, w, h, { inversionAttempts: 'attemptBoth' });
+            if (hit && hit.data) return hit.data;
+
+            // Pass 5: sharpen luminance contrast (gamma 0.5) into separate buffer
+            const sharp = _boostCtx.createImageData(w, h);
+            for (let i = 0; i < imageData.data.length; i += 4) {
+                const lum = (imageData.data[i] * 0.299 + imageData.data[i+1] * 0.587 + imageData.data[i+2] * 0.114) / 255;
+                const v = Math.round(Math.pow(lum, 0.5) * 255);
+                sharp.data[i] = sharp.data[i+1] = sharp.data[i+2] = v;
+                sharp.data[i+3] = 255;
+            }
+            hit = jsQR(sharp.data, w, h, { inversionAttempts: 'attemptBoth' });
+            return hit ? hit.data : null;
         };
 
         window.stopQRScanner = () => {
@@ -638,7 +654,7 @@
             video.setAttribute('muted', '');
             video.style.cssText = 'width:100%;height:300px;object-fit:cover;display:block;';
 
-            // Two canvases: one full-frame, one cropped center square for close-up codes
+            // One canvas for full frame, one for center crop — both read-only after drawImage
             const canvasFull = document.createElement('canvas');
             const canvasCrop = document.createElement('canvas');
             canvasFull.style.display = 'none';
@@ -654,14 +670,8 @@
             readerEl.appendChild(overlay);
             window._qrVideo = video;
 
-            // Request highest res rear camera available
             navigator.mediaDevices.getUserMedia({
-                video: {
-                    facingMode: { ideal: 'environment' },
-                    width: { ideal: 1920 },
-                    height: { ideal: 1080 },
-                    focusMode: { ideal: 'continuous' }
-                }
+                video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } }
             })
             .then(stream => {
                 window._qrStream = stream;
@@ -670,7 +680,7 @@
 
                 const ctxFull = canvasFull.getContext('2d', { willReadFrequently: true });
                 const ctxCrop = canvasCrop.getContext('2d', { willReadFrequently: true });
-                let frameSkip = 0;
+                let frameCount = 0;
 
                 const onDecoded = (decoded) => {
                     window.stopQRScanner();
@@ -688,24 +698,27 @@
                     if (!window._qrStream) return;
                     if (video.readyState >= 2) {
                         const vw = video.videoWidth, vh = video.videoHeight;
-                        if (vw && vh) {
-                            // Every frame: try full image
+                        if (vw > 0 && vh > 0) {
+                            frameCount++;
+
+                            // Every frame: full image scan
                             canvasFull.width = vw;
                             canvasFull.height = vh;
                             ctxFull.drawImage(video, 0, 0, vw, vh);
-                            const result = tryDecodeAll(ctxFull, vw, vh);
-                            if (result) { onDecoded(result); return; }
+                            const fullData = ctxFull.getImageData(0, 0, vw, vh);
+                            const r1 = tryDecode(fullData, vw, vh);
+                            if (r1) { onDecoded(r1); return; }
 
-                            // Every 3rd frame: also try center crop (for close-up scans)
-                            frameSkip++;
-                            if (frameSkip % 3 === 0) {
-                                const cropSize = Math.min(vw, vh) * 0.7;
+                            // Every 2nd frame: center crop scaled to 640x640
+                            if (frameCount % 2 === 0) {
+                                const cropSize = Math.min(vw, vh) * 0.65;
                                 const cx = (vw - cropSize) / 2, cy = (vh - cropSize) / 2;
-                                canvasCrop.width = 512;
-                                canvasCrop.height = 512;
-                                ctxCrop.drawImage(video, cx, cy, cropSize, cropSize, 0, 0, 512, 512);
-                                const result2 = tryDecodeAll(ctxCrop, 512, 512);
-                                if (result2) { onDecoded(result2); return; }
+                                canvasCrop.width = 640;
+                                canvasCrop.height = 640;
+                                ctxCrop.drawImage(video, cx, cy, cropSize, cropSize, 0, 0, 640, 640);
+                                const cropData = ctxCrop.getImageData(0, 0, 640, 640);
+                                const r2 = tryDecode(cropData, 640, 640);
+                                if (r2) { onDecoded(r2); return; }
                             }
                         }
                     }
@@ -720,7 +733,7 @@
             });
         };
 
-        // Also stop scanner on modal close
+        // Stop scanner when modal closes
         const _origCloseModal = window.closeModal;
         window.closeModal = () => { window.stopQRScanner(); if(_origCloseModal) _origCloseModal(); };
 
@@ -778,9 +791,6 @@
                         const found = (wk.missions || []).find(x => x.id === mid);
                         if (found?.lat) { missionForGeo = found; break; }
                     }
-                }
-                if (!missionForGeo?.lat) {
-                    missionForGeo = (state.activeSpots || []).find(s => (s.missions || []).includes(mid) || s.qr_solution === qrSolution);
                 }
                 if (missionForGeo?.lat && missionForGeo?.lng) {
                     // Ask permission first with friendly explanation
