@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>GRIND. | Command Center</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>window.initGooglePlaces = function() { window._googlePlacesReady = true; document.dispatchEvent(new Event('googlePlacesReady')); };</script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD-9tSrke72PouQMnMX-a7eZSW0jkFMBWY&libraries=places&callback=initGooglePlaces" async defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&display=swap" rel="stylesheet">
     <style>
@@ -416,30 +417,7 @@
         };
 
         // Neu: Active Spots Manager Logic
-        window.addManualHabit = async (e) => {
-            const type = document.getElementById('new_hab_type').value;
-            const freq = document.getElementById('new_hab_freq').value;
-            const latVal = parseFloat(document.getElementById('new_hab_lat')?.value) || null;
-            const lngVal = parseFloat(document.getElementById('new_hab_lng')?.value) || null;
-            const newHabit = { 
-                id: 'rep_' + Date.now(), 
-                name: document.getElementById('new_hab_name').value, 
-                desc: document.getElementById('new_hab_desc').value, 
-                xp: parseInt(document.getElementById('new_hab_xp').value), 
-                streakBonus: freq !== 'daily' ? (parseInt(document.getElementById('new_hab_streak').value) || 0) : 0,
-                endDate: document.getElementById('new_hab_end').value,
-                frequency: freq,
-                type: type,
-                qr_solution: type === 'qr' ? document.getElementById('new_hab_qr').value.trim() : '',
-                lat: (type === 'qr' && latVal) ? latVal : null,
-                lng: (type === 'qr' && lngVal) ? lngVal : null
-            };
-            const updatedHabits = JSON.parse(JSON.stringify(state.habitData));
-            updatedHabits.push(newHabit);
-            
-            try {
-                await setDoc(doc(db, 'system', 'grind_season'), { habitData: updatedHabits }, { merge: true });
-                window.showToast("Core Routine live geschaltet.", "success");
+        window.showToast("Core Routine live geschaltet.", "success");
                 e.target.reset(); document.getElementById('new_hab_qr').style.display = 'none';
                 document.getElementById('new_hab_geo').style.display = 'none';
                 document.getElementById('streak_wrapper').style.display = 'none';
@@ -447,11 +425,7 @@
             } catch(err) { window.showToast("Fehler beim Speichern.", "error"); }
         };
 
-        window.deleteHabit = async (habitId) => {
-            if(!confirm("Routine wirklich löschen?")) return;
-            const updatedHabits = state.habitData.filter(h => h.id !== habitId);
-            await setDoc(doc(db, 'system', 'grind_season'), { habitData: updatedHabits }, { merge: true });
-            window.showToast("Routine entfernt.", "success");
+        window.showToast("Routine entfernt.", "success");
         };
 
         // --- ANNOUNCEMENTS ---
@@ -853,7 +827,7 @@
                                 <div class="space-y-3">${annListHtml}</div>
                             </div>
                         </div>
-                    \`;
+                    `;
 
                 } else if (state.adminTab === 'control') {
                     const currentWeekData = state.weeklyData[state.adminEditWeek] || { missions: [] };
