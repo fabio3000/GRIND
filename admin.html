@@ -88,9 +88,9 @@
             setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 4000);
         };
 
-        function safeRender() {
+        function safeRender(force = false) {
             const active = document.activeElement;
-            const isTyping = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.tagName === 'SELECT');
+            const isTyping = !force && active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.tagName === 'SELECT');
             if (!isTyping) {
                 render();
             }
@@ -138,19 +138,19 @@
                                         const curW = getActiveWeek();
                                         if (state.adminEditWeek < 1 || state.adminEditWeek > 12) state.adminEditWeek = curW;
 
-                                        if(state.view === 'admin') safeRender();
+                                        if(state.view === 'admin') safeRender(true);
                                     } else {
                                         setDoc(doc(db, 'system', 'grind_season'), { weeklyData: {}, rewardData: [], habitData: [], activeSpots: [], seasonConfig: state.seasonConfig }, { merge: true });
-                                        if(state.view === 'admin') safeRender(); // render even on empty doc
+                                        if(state.view === 'admin') safeRender(true);
                                     }
                                 });
 
                                 onSnapshot(collection(db, 'plot_pending_proofs'), (pSnap) => {
                                     state.pendingProofs = pSnap.docs.map(d => ({id: d.id, ...d.data()}));
-                                    if(state.view === 'admin') safeRender();
+                                    if(state.view === 'admin') safeRender(true);
                                 });
                             }
-                            safeRender();
+                            safeRender(true); // force — initial load, no input should block this
                         } else { state.view = 'denied'; render(); }
                     } else { state.view = 'denied'; render(); }
                 });
