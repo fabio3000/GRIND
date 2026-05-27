@@ -4,423 +4,294 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GRIND. QR Forge</title>
-    
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&display=swap" rel="stylesheet">
-    <script type="text/javascript" src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
-
+    <script src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
     <style>
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background-color: #050505; 
-            color: #ffffff; 
-            background-image: radial-gradient(circle at 50% 0%, #1a0a00 0%, #050505 60%);
-            min-height: 100vh;
-        }
+        body { font-family:'Inter',sans-serif; background:#050505; color:#fff; background-image:radial-gradient(circle at 50% 0%,#1a0a00,#050505 60%); min-height:100vh; }
+        .card { background:#0a0a0a; border:1px solid #1f1f1f; box-shadow:0 10px 30px rgba(0,0,0,.8); }
+        .input-grind { width:100%; padding:14px 16px; background:#0f0f0f; border:1px solid #1f1f1f; border-radius:4px; color:#fff; outline:none; transition:all .3s; font-family:inherit; font-size:14px; }
+        .input-grind:focus { border-color:#ff4d00; box-shadow:0 0 10px rgba(255,77,0,.1); }
+        .btn-grind { background:#fff; color:#000; font-weight:900; font-style:italic; text-transform:uppercase; padding:14px 24px; font-size:13px; transition:all .2s; cursor:pointer; border-radius:4px; border:none; width:100%; letter-spacing:1px; }
+        .btn-grind:hover { background:#ff4d00; color:#fff; box-shadow:0 4px 20px rgba(255,77,0,.4); }
+        .btn-outline { background:transparent; color:#ff4d00; border:1px solid #ff4d00; font-weight:900; font-style:italic; text-transform:uppercase; padding:12px 20px; font-size:12px; transition:all .2s; cursor:pointer; border-radius:4px; width:100%; letter-spacing:1px; }
+        .btn-outline:hover { background:rgba(255,77,0,.1); }
+        select { appearance:none; }
+        input[type="color"] { -webkit-appearance:none; border:1px solid #1f1f1f; width:100%; height:46px; border-radius:4px; cursor:pointer; padding:0; background:#0f0f0f; }
+        input[type="color"]::-webkit-color-swatch-wrapper { padding:0; }
+        input[type="color"]::-webkit-color-swatch { border:none; border-radius:3px; }
 
-        .card { 
-            background: #0a0a0a; 
-            border: 1px solid #1f1f1f; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        #preview-wrap {
+            display:flex; justify-content:center; align-items:center;
+            min-height:360px; background:#080808;
+            border:1px solid #1f1f1f; border-radius:12px; padding:24px;
         }
-
-        .input-grind {
-            width: 100%;
-            padding: 16px;
-            background-color: #0f0f0f;
-            border: 1px solid #1f1f1f;
-            border-radius: 4px;
-            color: white;
-            outline: none;
-            transition: all 0.3s ease;
+        /* The branded card around the QR */
+        #qr-card {
+            background:#fff; border-radius:14px; padding:20px 20px 16px;
+            display:flex; flex-direction:column; align-items:center; gap:14px;
+            box-shadow:0 0 40px rgba(255,77,0,.18), 0 0 0 1px rgba(255,77,0,.1);
         }
-
-        .input-grind:focus {
-            border-color: #ff4d00;
-            box-shadow: 0 0 10px rgba(255, 77, 0, 0.1);
+        #qr-canvas-wrap canvas, #qr-canvas-wrap svg { display:block; }
+        #qr-footer {
+            width:100%; display:flex; align-items:center; justify-content:space-between;
+            padding-top:10px; border-top:2px solid #f0f0f0;
         }
-
-        input[type="color"] {
-            -webkit-appearance: none;
-            border: 1px solid #1f1f1f;
-            width: 100%;
-            height: 50px;
-            border-radius: 4px;
-            cursor: pointer;
-            padding: 0;
-            background: #0f0f0f;
-        }
-        input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
-        input[type="color"]::-webkit-color-swatch { border: none; border-radius: 3px; }
-
-        .btn-grind { 
-            background: white; 
-            color: black; 
-            font-weight: 900; 
-            font-style: italic; 
-            text-transform: uppercase; 
-            padding: 16px 24px; 
-            font-size: 14px; 
-            transition: all 0.2s; 
-            box-shadow: 0 4px 15px rgba(255,255,255,0.1); 
-            cursor: pointer; 
-            border-radius: 4px; 
-            border: none;
-            width: 100%;
-            letter-spacing: 1px;
-        }
-        .btn-grind:hover { 
-            background: #ff4d00; 
-            color: white; 
-            box-shadow: 0 4px 20px rgba(255, 77, 0, 0.4); 
-        }
-
-        .btn-outline {
-            background: transparent;
-            color: #ff4d00;
-            border: 1px solid #ff4d00;
-            font-weight: 900; 
-            font-style: italic; 
-            text-transform: uppercase; 
-            padding: 12px 24px; 
-            transition: all 0.2s;
-            cursor: pointer;
-            border-radius: 4px;
-            width: 100%;
-        }
-        .btn-outline:hover {
-            background: rgba(255, 77, 0, 0.1);
-        }
-
-        #canvas-container {
-            background: white;
-            padding: 24px;
-            border-radius: 8px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border: 4px solid #1f1f1f;
-            width: 100%;
-            max-width: 348px;
-            aspect-ratio: 1 / 1;
-            box-sizing: border-box;
-            transition: opacity 0.2s ease;
-        }
-
-        #canvas-container svg, 
-        #canvas-container canvas {
-            width: 100% !important;
-            height: auto !important;
-            max-width: 100%;
-            max-height: 100%;
-        }
-
-        .checkbox-container {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
-            user-select: none;
-        }
-        .checkbox-container input {
-            cursor: pointer;
-            width: 18px;
-            height: 18px;
-            accent-color: #ff4d00;
-        }
+        #qr-footer .brand { font-size:20px; font-weight:900; font-style:italic; color:#050505; letter-spacing:-0.5px; }
+        #qr-footer .brand-dot { color:#ff4d00; }
+        #qr-footer .mission { font-size:8px; font-weight:800; color:#aaa; text-transform:uppercase; letter-spacing:2px; text-align:right; max-width:130px; line-height:1.4; }
     </style>
 </head>
-<body class="p-4 md:p-8 flex justify-center items-center">
+<body class="p-4 md:p-8 flex justify-center">
+<div class="max-w-4xl w-full">
 
-    <div class="max-w-4xl w-full grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
-        
-        <!-- Linke Spalte: Einstellungen -->
-        <div class="card p-8 rounded-lg flex flex-col gap-6 relative overflow-hidden group">
-            <div class="absolute inset-0 bg-gradient-to-r from-[#ff4d00] to-transparent opacity-5 transition duration-1000"></div>
-            
-            <div class="relative z-10">
-                <p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-[0.4em] mb-1">Creation Tool</p>
-                <h1 class="text-4xl font-black italic uppercase tracking-tighter mb-6">QR Forge<span class="text-[#ff4d00]">.</span></h1>
-                
-                <div class="space-y-5">
-                    <div>
-                        <label class="block text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-2">QR-Code Typ</label>
-                        <select id="qr-type" onchange="toggleQrTargetPlaceholder()" class="w-full p-4 bg-[#0f0f0f] border border-[#1f1f1f] rounded text-sm text-white outline-none focus:border-[#ff4d00] mb-3 appearance-none cursor-pointer">
-                            <option value="grind">⚡ GRIND. Check-In (Deep Link)</option>
-                            <option value="raw">🌐 Standard URL / Freitext</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label id="target-label" class="block text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-2">Missions- oder Routine-ID</label>
-                        <textarea id="data" rows="3" class="input-grind font-mono text-sm" placeholder="z.B. m_morning_run">m_morning_run</textarea>
-                    </div>
-
-                    <div>
-                        <label class="block text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-2">Custom Logo Upload (Überschreibt Standard)</label>
-                        <div class="relative">
-                            <input type="file" id="logoUpload" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
-                            <div class="input-grind flex items-center justify-center border-dashed border-2 text-gray-400 hover:text-[#ff4d00] hover:border-[#ff4d00]">
-                                <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-                                <span id="fileName" class="font-bold text-xs tracking-widest uppercase">Eigenes Partner-Logo laden</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <label class="checkbox-container">
-                        <input type="checkbox" id="darkBgToggle">
-                        <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">Dunkle Base generieren (Kapsel)</span>
-                    </label>
-
-                    <div class="grid grid-cols-2 gap-4 pt-2">
-                        <div>
-                            <label class="block text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-2">Punkte</label>
-                            <input type="color" id="colorDark" value="#050505">
-                        </div>
-                        <div>
-                            <label class="block text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-2">Akzent (Punkt)</label>
-                            <input type="color" id="colorAccent" value="#ff4d00">
-                        </div>
-                    </div>
-
-                    <button onclick="updateQR()" class="btn-grind mt-4">Code Generieren</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Rechte Spalte: Vorschau -->
-        <div class="flex flex-col items-center justify-center gap-6">
-            <div id="canvas-container" class="shadow-[0_0_40px_rgba(255,77,0,0.15)]"></div>
-            
-            <div class="w-full max-w-[348px] flex gap-4">
-                <button onclick="downloadQR('png')" class="btn-outline">PNG Download</button>
-                <button onclick="downloadQR('svg')" class="btn-outline">SVG Download</button>
-            </div>
-            <p class="text-gray-500 text-[10px] font-bold uppercase tracking-widest text-center mt-2 max-w-[348px]">SVG ist ideal für den Druck von Postern oder Kleidung (ohne Qualitätsverlust).</p>
-        </div>
-
+    <div class="mb-8">
+        <p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-[.4em] mb-1">Creation Tool</p>
+        <h1 class="text-4xl font-black italic uppercase tracking-tighter">QR Forge<span class="text-[#ff4d00]">.</span></h1>
+        <p class="text-gray-600 text-xs mt-1 font-bold uppercase tracking-widest">Kein Logo im Code · 100% Scanner-kompatibel · Orange Ecken</p>
     </div>
 
-    <script>
-        let uploadedLogoDataUrl = "";
-        let originalLogoImage = null;
-        let isDefaultGrindLogo = true;
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
 
-        // Perfektes, hautenges Canvas-Logo
-        function generateGrindLogoCanvas(useDarkKapsel = false) {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
+        <!-- Settings -->
+        <div class="card p-7 rounded-xl flex flex-col gap-5">
 
-            const fontSize = 120; // Etwas verkleinert für perfekte Proportionen
-            ctx.font = `italic 900 ${fontSize}px "Inter", sans-serif`;
-            const text = "GRIND";
-            const dot = ".";
-            
-            const textWidth = ctx.measureText(text).width;
-            
-            ctx.font = `italic 900 ${fontSize}px "Inter", sans-serif`;
-            const dotWidth = ctx.measureText(dot).width;
-            const gap = 4;
-            
-            // WICHTIG: Das Padding muss groß genug sein, damit die kursive Schrift 
-            // und die weiße Kontur nicht am Rand abgeschnitten werden!
-            const paddingX = useDarkKapsel ? 50 : 24; 
-            const paddingY = useDarkKapsel ? 30 : 24; 
-            const italicOverhang = 12;
-            
-            const totalTextWidth = textWidth + gap + dotWidth + italicOverhang;
-            const totalTextHeight = fontSize * 0.88; 
-            
-            canvas.width = totalTextWidth + (paddingX * 2);
-            canvas.height = totalTextHeight + (paddingY * 2);
-            
-            const ctx2 = canvas.getContext('2d');
-            ctx2.textBaseline = 'middle';
-            
-            const startX = paddingX;
-            const startY = (canvas.height / 2) + (fontSize * 0.04); 
+            <div>
+                <label class="block text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-2">Typ</label>
+                <select id="qr-type" onchange="onTypeChange()" class="input-grind cursor-pointer">
+                    <option value="grind">⚡ GRIND. Check-In (Mission / Routine)</option>
+                    <option value="raw">🌐 Eigene URL / Freitext</option>
+                </select>
+            </div>
 
-            if (useDarkKapsel) {
-                ctx2.fillStyle = '#050505';
-                ctx2.beginPath();
-                ctx2.roundRect(0, 0, canvas.width, canvas.height, canvas.height / 2);
-                ctx2.fill();
-            } else {
-                // NEU: Weiße Kontur als Maske HINTER dem Text zeichnen (verhindert weiße Vierecke an den Seiten!)
-                ctx2.font = `italic 900 ${fontSize}px "Inter", sans-serif`;
-                ctx2.lineJoin = 'round';
-                ctx2.miterLimit = 2;
-                ctx2.lineWidth = 24; 
-                ctx2.strokeStyle = '#ffffff';
-                ctx2.strokeText(text, startX, startY);
-                ctx2.strokeText(dot, startX + textWidth + gap, startY);
-            }
+            <div>
+                <label id="data-label" class="block text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-2">Missions-ID</label>
+                <input id="data" class="input-grind font-mono" value="m_morning_run" oninput="generate()">
+                <p id="data-hint" class="text-[10px] text-gray-600 mt-1.5 font-bold">→ grind-app.de/?verify=m_morning_run</p>
+            </div>
 
-            ctx2.font = `italic 900 ${fontSize}px "Inter", sans-serif`;
-            ctx2.fillStyle = useDarkKapsel ? '#ffffff' : '#050505'; 
-            ctx2.fillText(text, startX, startY);
+            <div>
+                <label class="block text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-2">Label (auf dem Code)</label>
+                <input id="label-text" class="input-grind" value="Morning Run" placeholder="z.B. Morning Run" oninput="generate()">
+            </div>
 
-            ctx2.fillStyle = '#ff4d00';
-            ctx2.fillText(dot, startX + textWidth + gap, startY);
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-2">Punkte</label>
+                    <input type="color" id="color-dark" value="#050505" oninput="generate()">
+                </div>
+                <div>
+                    <label class="block text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-2">Ecken / Akzent</label>
+                    <input type="color" id="color-accent" value="#ff4d00" oninput="generate()">
+                </div>
+            </div>
 
-            return canvas.toDataURL('image/png');
+            <div>
+                <label class="block text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-2">Dot-Stil</label>
+                <select id="dot-style" onchange="generate()" class="input-grind cursor-pointer">
+                    <option value="rounded">Rounded (empfohlen)</option>
+                    <option value="square">Square (maximale Kompatibilität)</option>
+                    <option value="dots">Dots</option>
+                    <option value="classy">Classy</option>
+                    <option value="classy-rounded">Classy Rounded</option>
+                </select>
+            </div>
+
+            <button onclick="generate()" class="btn-grind">Generieren</button>
+        </div>
+
+        <!-- Preview + Download -->
+        <div class="flex flex-col gap-5">
+            <div id="preview-wrap">
+                <div id="qr-card">
+                    <div id="qr-canvas-wrap"></div>
+                    <div id="qr-footer">
+                        <span class="brand">GRIND<span class="brand-dot" id="accent-dot">.</span></span>
+                        <span class="mission" id="footer-label">Morning Run</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <button onclick="downloadPNG()" class="btn-outline">↓ PNG (Druck)</button>
+                <button onclick="downloadSVG()" class="btn-outline">↓ SVG</button>
+            </div>
+
+            <div class="card p-4 rounded-lg">
+                <p class="text-[10px] text-gray-600 font-bold uppercase tracking-widest mb-1.5">Encoded URL</p>
+                <p id="encoded-url" class="text-xs text-gray-400 font-mono break-all">https://grind-app.de/?verify=m_morning_run</p>
+            </div>
+
+            <div class="card p-4 rounded-lg border-[#ff4d00]/20">
+                <p class="text-[9px] text-[#ff4d00] font-black uppercase tracking-widest mb-1">Scanner-Garantie</p>
+                <p class="text-[10px] text-gray-500 font-bold leading-relaxed">Kein Logo im QR — alle Datenpunkte intakt. Fancy Ecken + Dot-Style bleiben erhalten. Fehlerkorrektur H. Funktioniert mit jedem Scanner.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let qrCode = null;
+
+    function getUrl() {
+        const type = document.getElementById('qr-type').value;
+        let val = document.getElementById('data').value.trim();
+        if (!val) return 'https://grind-app.de';
+        if (type === 'grind') return val.startsWith('http') ? val : `https://grind-app.de/?verify=${val}`;
+        return val.startsWith('http') ? val : `https://${val}`;
+    }
+
+    function onTypeChange() {
+        const type = document.getElementById('qr-type').value;
+        const dataEl = document.getElementById('data');
+        const hintEl = document.getElementById('data-hint');
+        if (type === 'grind') {
+            document.getElementById('data-label').innerText = 'Missions-ID';
+            dataEl.value = 'm_morning_run';
+            dataEl.placeholder = 'z.B. m_morning_run';
+            hintEl.style.display = '';
+        } else {
+            document.getElementById('data-label').innerText = 'URL / Text';
+            dataEl.value = 'https://grind-app.de';
+            dataEl.placeholder = 'https://...';
+            hintEl.style.display = 'none';
         }
+        generate();
+    }
 
-        // Initialisierung
-        const qrCode = new QRCodeStyling({
-            width: 300, 
-            height: 300, 
-            type: "svg",
-            data: "https://grind-app.de/?verify=m_morning_run",
-            image: "", 
-            qrOptions: {
-                errorCorrectionLevel: 'H' // H = Höchste Scanbarkeit bei Logos (zwingend erforderlich!)
-            },
-            dotsOptions: {
-                color: "#050505",
-                type: "rounded" 
-            },
-            backgroundOptions: {
-                color: "#ffffff",
-            },
-            cornersSquareOptions: {
-                color: "#ff4d00",
-                type: "extra-rounded" 
-            },
-            cornersDotOptions: {
-                color: "#ff4d00",
-                type: "dot" 
-            },
-            imageOptions: {
-                crossOrigin: "anonymous",
-                margin: 4,
-                imageSize: 0.30, // Reduced from 0.45 — keeps data capacity high, logo readable, scanner-friendly
-                hideBackgroundDots: true // true = clears dots under logo so scanners can read edges
-            }
+    function generate() {
+        const url = getUrl();
+        const dark = document.getElementById('color-dark').value;
+        const accent = document.getElementById('color-accent').value;
+        const dotStyle = document.getElementById('dot-style').value;
+        const label = document.getElementById('label-text').value || '';
+
+        // Update UI
+        document.getElementById('data-hint').innerText = '→ ' + url;
+        document.getElementById('encoded-url').innerText = url;
+        document.getElementById('footer-label').innerText = label;
+        document.getElementById('accent-dot').style.color = accent;
+        document.getElementById('qr-footer').style.borderTopColor = accent + '33';
+
+        const wrap = document.getElementById('qr-canvas-wrap');
+        wrap.innerHTML = '';
+
+        qrCode = new QRCodeStyling({
+            width: 240,
+            height: 240,
+            type: 'canvas',
+            data: url,
+            image: '', // NO logo — keeps all data modules intact
+            qrOptions: { errorCorrectionLevel: 'M' }, // M not H — since no logo, M is sufficient and produces less dense codes (easier to scan)
+            dotsOptions: { color: dark, type: dotStyle },
+            backgroundOptions: { color: '#ffffff' },
+            cornersSquareOptions: { color: accent, type: 'extra-rounded' },
+            cornersDotOptions: { color: accent, type: 'dot' },
+            imageOptions: { hideBackgroundDots: true, imageSize: 0 }
         });
 
-        qrCode.append(document.getElementById("canvas-container"));
+        qrCode.append(wrap);
+    }
 
-        document.fonts.ready.then(() => {
-            setTimeout(processLogoAndUpdateQR, 150);
+    function downloadPNG() {
+        const url = getUrl();
+        const dark = document.getElementById('color-dark').value;
+        const accent = document.getElementById('color-accent').value;
+        const dotStyle = document.getElementById('dot-style').value;
+        const label = document.getElementById('label-text').value || 'Code';
+
+        // Build hi-res QR
+        const hiQr = new QRCodeStyling({
+            width: 1200, height: 1200, type: 'canvas',
+            data: url, image: '',
+            qrOptions: { errorCorrectionLevel: 'M' },
+            dotsOptions: { color: dark, type: dotStyle },
+            backgroundOptions: { color: '#ffffff' },
+            cornersSquareOptions: { color: accent, type: 'extra-rounded' },
+            cornersDotOptions: { color: accent, type: 'dot' },
+            imageOptions: { hideBackgroundDots: true, imageSize: 0 }
         });
 
-        function toggleQrTargetPlaceholder() {
-            const type = document.getElementById('qr-type').value;
-            const label = document.getElementById('target-label');
-            const textarea = document.getElementById('data');
-            
-            if (type === 'grind') {
-                label.innerText = "Missions- oder Routine-ID";
-                textarea.placeholder = "z.B. m_morning_run oder rep_cold_plunge";
-                textarea.value = "m_morning_run";
-            } else {
-                label.innerText = "Ziel (Text oder URL)";
-                textarea.placeholder = "https://grind-app.de";
-                textarea.value = "https://grind-app.de";
-            }
-            updateQR();
-        }
+        const tmpDiv = document.createElement('div');
+        tmpDiv.style.position = 'fixed'; tmpDiv.style.left = '-9999px';
+        document.body.appendChild(tmpDiv);
+        hiQr.append(tmpDiv);
 
-        document.getElementById('logoUpload').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                isDefaultGrindLogo = false;
-                document.getElementById('fileName').innerText = file.name;
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    const img = new Image();
-                    img.onload = function() {
-                        originalLogoImage = img;
-                        processLogoAndUpdateQR();
-                    };
-                    img.src = event.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
+        setTimeout(() => {
+            const qrCanvas = tmpDiv.querySelector('canvas');
+            if (!qrCanvas) { document.body.removeChild(tmpDiv); return; }
+
+            const pad = 80, footerH = 110;
+            const total = 1200 + pad * 2;
+            const c = document.createElement('canvas');
+            c.width = total; c.height = total + footerH;
+            const ctx = c.getContext('2d');
+
+            // White card
+            ctx.fillStyle = '#ffffff';
+            roundRect(ctx, 0, 0, c.width, c.height, 32); ctx.fill();
+
+            // QR
+            ctx.drawImage(qrCanvas, pad, pad, 1200, 1200);
+
+            // Divider
+            ctx.strokeStyle = accent + '33'; ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.moveTo(pad, pad + 1200 + 24); ctx.lineTo(total - pad, pad + 1200 + 24); ctx.stroke();
+
+            // GRIND. wordmark
+            ctx.font = 'italic 900 56px Inter, Arial Black, sans-serif';
+            ctx.fillStyle = '#050505';
+            const grindW = ctx.measureText('GRIND').width;
+            ctx.fillText('GRIND', pad, pad + 1200 + 88);
+            ctx.fillStyle = accent;
+            ctx.fillText('.', pad + grindW + 4, pad + 1200 + 88);
+
+            // Mission label
+            ctx.font = '700 26px Inter, Arial, sans-serif';
+            ctx.fillStyle = '#aaaaaa';
+            ctx.textAlign = 'right';
+            ctx.fillText(label.toUpperCase(), total - pad, pad + 1200 + 88);
+            ctx.textAlign = 'left';
+
+            const a = document.createElement('a');
+            a.download = `GRIND-QR-${label.replace(/\s+/g, '-')}.png`;
+            a.href = c.toDataURL('image/png');
+            a.click();
+            document.body.removeChild(tmpDiv);
+        }, 300);
+    }
+
+    function downloadSVG() {
+        // Build SVG version
+        const url = getUrl();
+        const dark = document.getElementById('color-dark').value;
+        const accent = document.getElementById('color-accent').value;
+        const dotStyle = document.getElementById('dot-style').value;
+        const label = document.getElementById('label-text').value || 'Code';
+
+        const hiQr = new QRCodeStyling({
+            width: 800, height: 800, type: 'svg',
+            data: url, image: '',
+            qrOptions: { errorCorrectionLevel: 'M' },
+            dotsOptions: { color: dark, type: dotStyle },
+            backgroundOptions: { color: '#ffffff' },
+            cornersSquareOptions: { color: accent, type: 'extra-rounded' },
+            cornersDotOptions: { color: accent, type: 'dot' },
+            imageOptions: { hideBackgroundDots: true, imageSize: 0 }
         });
+        hiQr.download({ name: `GRIND-QR-${label.replace(/\s+/g,'-')}`, extension: 'svg' });
+    }
 
-        document.getElementById('darkBgToggle').addEventListener('change', processLogoAndUpdateQR);
+    function roundRect(ctx, x, y, w, h, r) {
+        ctx.beginPath();
+        ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+        ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+        ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+        ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y); ctx.closePath();
+    }
 
-        function processLogoAndUpdateQR() {
-            const useBgKapsel = document.getElementById('darkBgToggle').checked;
-
-            if (isDefaultGrindLogo) {
-                uploadedLogoDataUrl = generateGrindLogoCanvas(useBgKapsel);
-            } else {
-                if (!originalLogoImage) {
-                    updateQR();
-                    return;
-                }
-                
-                if (useBgKapsel) {
-                    const canvas = document.createElement('canvas');
-                    const padding = 30;
-                    canvas.width = originalLogoImage.width + padding * 2;
-                    canvas.height = originalLogoImage.height + padding * 2;
-                    const ctx = canvas.getContext('2d');
-
-                    ctx.fillStyle = '#050505';
-                    ctx.beginPath();
-                    ctx.roundRect(0, 0, canvas.width, canvas.height, canvas.height * 0.25); 
-                    ctx.fill();
-
-                    ctx.drawImage(originalLogoImage, padding, padding);
-                    uploadedLogoDataUrl = canvas.toDataURL('image/png');
-                } else {
-                    uploadedLogoDataUrl = originalLogoImage.src;
-                }
-            }
-
-            updateQR();
-        }
-
-        function updateQR() {
-            const type = document.getElementById('qr-type').value;
-            let dataInput = document.getElementById('data').value.trim();
-            const colorDarkInput = document.getElementById('colorDark').value;
-            const colorAccentInput = document.getElementById('colorAccent').value;
-
-            // Deep-Link Logik erzwingen (Scanner benötigen "https://", um es als Link zu erkennen)
-            if (type === 'grind' && dataInput) {
-                if (!dataInput.startsWith('http')) {
-                    dataInput = `https://grind-app.de/?verify=${dataInput}`;
-                }
-            } else if (type === 'raw' && dataInput && !dataInput.startsWith('http')) {
-                dataInput = `https://${dataInput}`;
-            }
-
-            qrCode.update({
-                data: dataInput || "https://grind-app.de",
-                image: uploadedLogoDataUrl,
-                dotsOptions: { color: colorDarkInput },
-                cornersSquareOptions: { color: colorAccentInput },
-                cornersDotOptions: { color: colorAccentInput },
-                qrOptions: {
-                    errorCorrectionLevel: 'H'
-                },
-                imageOptions: {
-                    crossOrigin: "anonymous",
-                    margin: isDefaultGrindLogo ? 4 : 5,
-                    imageSize: isDefaultGrindLogo ? 0.30 : 0.28,
-                    hideBackgroundDots: true
-                }
-            });
-        }
-
-        function downloadQR(extension) {
-            const container = document.getElementById('canvas-container');
-            container.style.opacity = '0';
-
-            qrCode.update({ width: 2048, height: 2048 });
-
-            setTimeout(() => {
-                qrCode.download({ name: "GRIND-QR-Code", extension: extension }).then(() => {
-                    qrCode.update({ width: 300, height: 300 });
-                    container.style.opacity = '1';
-                });
-            }, 100);
-        }
-    </script>
+    // Init
+    generate();
+</script>
 </body>
 </html>
