@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -5,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>GRIND. | Command Center</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>window.initGooglePlaces = function() { window._googlePlacesReady = true; document.dispatchEvent(new Event('googlePlacesReady')); };</script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD-9tSrke72PouQMnMX-a7eZSW0jkFMBWY&libraries=places&callback=initGooglePlaces" async defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&display=swap" rel="stylesheet">
     <style>
@@ -71,7 +71,7 @@
         let state = {
             user: null, profile: null, view: 'loading',
             authStep: 'phone', tempPhone: '',
-            adminTab: 'control', adminEditWeek: 1, announcements: [], 
+            adminTab: 'control', adminEditWeek: 1, announcements: null, 
             pendingProofs: [], weeklyData: {}, rewardData: [], habitData: [], activeSpots: [],
             rewardBackup: null, tempAiContent: null,
             seasonConfig: { number: 1, active: true, start: '', end: '' }
@@ -151,7 +151,7 @@
                                     if(state.view === 'admin') safeRender(true);
                                 });
                             }
-                            safeRender(true); // force — initial load, no input should block this
+                            safeRender(true); 
                         } else { state.view = 'denied'; render(); }
                     } else { state.view = 'denied'; render(); }
                 });
@@ -219,10 +219,8 @@
                             updateData.streaks = streaks;
                             
                             if (habit && (habit.frequency === 'weekly_streak' || habit.frequency === 'weekly')) {
-                                // Weekly streak: Bonus nur, wenn alle 7 Tage in Folge
                                 finalXp = xp + (newStreak > 0 && newStreak % 7 === 0 ? streakBonus : 0);
                             } else {
-                                // Daily streak: Steigender Bonus für jeden darauffolgenden Tag
                                 finalXp = xp + (newStreak > 1 ? (newStreak - 1) * streakBonus : 0);
                             }
                         } else {
@@ -291,7 +289,6 @@
         };
 
         // --- 7. MANUAL MISSION & HABIT & SPOTS CONTROL ---
-        // Google Places Autocomplete init — called by Maps API callback
         window.initGooglePlaces = () => {
             window._googlePlacesReady = true;
             document.querySelectorAll('.geo-search-input').forEach(input => window.attachPlacesAutocomplete(input));
@@ -304,7 +301,6 @@
                 componentRestrictions: { country: 'de' },
                 fields: ['name', 'geometry', 'formatted_address']
             });
-            // Style the dropdown to match dark theme
             const pacStyle = document.getElementById('pac-dark-style');
             if (!pacStyle) {
                 const s = document.createElement('style');
@@ -317,14 +313,12 @@
                 if (!place.geometry) return;
                 const lat = place.geometry.location.lat();
                 const lng = place.geometry.location.lng();
-                // Find the sibling lat/lng inputs in the same geo container
                 const container = input.closest('[data-geo-container]');
                 if (container) {
                     const latIn = container.querySelector('[data-lat-input]');
                     const lngIn = container.querySelector('[data-lng-input]');
                     if (latIn) latIn.value = lat.toFixed(7);
                     if (lngIn) lngIn.value = lng.toFixed(7);
-                    // Show confirmation
                     const conf = container.querySelector('[data-geo-confirm]');
                     if (conf) {
                         conf.textContent = '✓ ' + (place.name || place.formatted_address) + ' · ' + lat.toFixed(5) + ', ' + lng.toFixed(5);
@@ -334,7 +328,6 @@
             });
         };
 
-        // Re-attach when new geo inputs appear (after render)
         const _attachNewGeoInputs = () => {
             if (!window._googlePlacesReady) return;
             document.querySelectorAll('.geo-search-input:not([data-ac-attached])').forEach(input => {
@@ -416,18 +409,6 @@
             window.showToast("Routine entfernt.", "success");
         };
 
-        // Neu: Active Spots Manager Logic
-        window.showToast("Core Routine live geschaltet.", "success");
-                e.target.reset(); document.getElementById('new_hab_qr').style.display = 'none';
-                document.getElementById('new_hab_geo').style.display = 'none';
-                document.getElementById('streak_wrapper').style.display = 'none';
-                document.getElementById('xp_wrapper').className = 'w-full transition-all';
-            } catch(err) { window.showToast("Fehler beim Speichern.", "error"); }
-        };
-
-        window.showToast("Routine entfernt.", "success");
-        };
-
         // --- ANNOUNCEMENTS ---
         window.sendAnnouncement = async () => {
             const title = document.getElementById('ann_title').value.trim();
@@ -450,7 +431,7 @@
         };
 
         window.loadAnnouncementsList = async () => {
-            state.announcements = null; // triggers spinner in render
+            state.announcements = null;
             safeRender();
             try {
                 const snap = await getDocs(query(collection(db, 'grind_announcements'), orderBy('timestamp', 'desc'), limit(20)));
@@ -481,7 +462,7 @@
             resDiv.innerHTML = '<div class="flex justify-center p-6"><div class="w-8 h-8 border-2 border-[#ff4d00] border-t-transparent rounded-full animate-spin"></div></div>';
             
             try {
-                const apiKey = ""; // Runtime provides this automatically
+                const apiKey = ""; 
                 const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
                 
                 const schema = {
@@ -593,9 +574,9 @@
                 } else if (category === 'habits') {
                     item.id = 'ai_hab_' + Date.now();
                     if(!item.qr_solution) item.qr_solution = '';
-                    item.frequency = item.streakBonus > 0 ? 'daily_streak' : 'daily'; // Default to daily with/without streak
+                    item.frequency = item.streakBonus > 0 ? 'daily_streak' : 'daily'; 
                     if(item.frequency === 'daily') item.streakBonus = 0; 
-                    item.endDate = new Date(Date.now() + 60*86400000).toISOString().split('T')[0]; // Default 60 days
+                    item.endDate = new Date(Date.now() + 60*86400000).toISOString().split('T')[0]; 
                     const updatedHabits = JSON.parse(JSON.stringify(state.habitData));
                     updatedHabits.push(item);
                     await setDoc(doc(db, 'system', 'grind_season'), { habitData: updatedHabits }, { merge: true });
@@ -610,7 +591,6 @@
                     await setDoc(doc(db, 'system', 'grind_season'), { rewardData: updatedRewards }, { merge: true });
                 }
 
-                // Remove accepted item from UI
                 state.tempAiContent[category].splice(index, 1);
                 window.renderAiResults();
                 window.showToast("Erfolgreich hinzugefügt!", "success");
@@ -931,89 +911,6 @@
                             </div>
 
                             <div class="space-y-8">
-                            
-                                <!-- SEASON SETUP -->
-                                <div class="card p-6 rounded-sm border-[#ff4d00]/20 shadow-[0_0_15px_rgba(255,77,0,0.05)]">
-                                    <h3 class="text-lg font-black uppercase tracking-widest text-[#ff4d00] mb-1">Season Setup</h3>
-                                    <p class="text-[9px] text-gray-600 uppercase tracking-widest font-bold mb-4">Empfehlung: 3 Monate (~12 Wochen) pro Season · Spring / Summer / Fall / Winter</p>
-                                    <form onsubmit="window.saveSeasonSetup(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
-                                            <label class="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1 block">Season Nummer</label>
-                                            <input id="cfg_num" type="number" min="1" value="${state.seasonConfig.number}" required class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00]">
-                                        </div>
-                                        <div>
-                                            <label class="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1 block">Status</label>
-                                            <select id="cfg_active" class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00] appearance-none cursor-pointer">
-                                                <option value="true" ${state.seasonConfig.active ? 'selected' : ''}>LIVE (Aktiv)</option>
-                                                <option value="false" ${!state.seasonConfig.active ? 'selected' : ''}>OFFLINE (Pausiert)</option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label class="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1 block">Startdatum</label>
-                                            <input id="cfg_start" type="date" value="${state.seasonConfig.start}" required style="color-scheme: dark;" class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00] cursor-pointer">
-                                        </div>
-                                        <div>
-                                            <label class="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1 block">Enddatum</label>
-                                            <input id="cfg_end" type="date" value="${state.seasonConfig.end}" required style="color-scheme: dark;" class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00] cursor-pointer">
-                                        </div>
-                                        <div class="md:col-span-2 mt-2">
-                                            <button type="submit" class="w-full bg-[#1f1f1f] hover:bg-[#ff4d00] text-white font-bold py-3 rounded-sm text-xs uppercase tracking-widest transition">Config Speichern</button>
-                                        </div>
-                                    </form>
-                                </div>
-                                
-                                <!-- TIME-LIMITED DROPS (Wochenmissionen) -->
-                                <div class="card p-6 rounded-sm">
-                                    <div class="flex justify-between items-center mb-6">
-                                        <div>
-                                            <h3 class="text-lg font-black uppercase tracking-widest text-[#ff4d00]">Time-Limited Drops</h3>
-                                            <p class="text-[9px] text-gray-600 uppercase tracking-widest font-bold mt-1">12 Wochen · 3 Monate · Monat 1 = W01–W04 · Monat 2 = W05–W08 · Monat 3 = W09–W12</p>
-                                        </div>
-                                        <select onchange="window.setAdminEditWeek(this.value)" class="bg-[#050505] border border-[#1f1f1f] text-white text-xs p-2 rounded-sm outline-none focus:border-[#ff4d00]">
-                                            ${[1,2,3,4,5,6,7,8,9,10,11,12].map(w => `<option value="${w}" ${state.adminEditWeek == w ? 'selected' : ''}>W${w < 10 ? '0' : ''}${w} — Monat ${Math.ceil(w/4)}</option>`).join('')}
-                                        </select>
-                                    </div>
-                                    <div class="space-y-3 mb-8">
-                                        ${(currentWeekData.missions || []).length === 0 ? '<p class="text-xs text-gray-600 italic">Keine Drops in dieser Woche.</p>' : ''}
-                                        ${(currentWeekData.missions || []).map(m => `
-                                            <div class="bg-[#050505] p-3 border border-white/10 rounded-sm flex justify-between items-start">
-                                                <div>
-                                                    <div class="font-black italic uppercase text-sm">${m.name}</div>
-                                                    <div class="text-[9px] text-[#ff4d00] font-bold uppercase tracking-widest mt-1">${m.xp} XP | ${m.type} ${m.qr_solution ? ' | AUTO' : ''}</div>
-                                                </div>
-                                                <button type="button" onclick="window.deleteMission(${state.adminEditWeek}, '${m.id}')" class="text-gray-600 hover:text-red-500 transition ml-4"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
-                                            </div>
-                                        `).join('')}
-                                    </div>
-                                    <div class="border-t border-[#1f1f1f] pt-6">
-                                        <h4 class="text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-4">Manuell hinzufügen</h4>
-                                        <form onsubmit="event.preventDefault(); window.addManualMission(event);" class="space-y-3">
-                                            <input id="new_mis_name" required placeholder="Titel (z.B. Morning Run)" class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00]">
-                                            <input id="new_mis_desc" required placeholder="Beschreibung" class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00]">
-                                            <div class="flex gap-3">
-                                                <input id="new_mis_xp" type="number" required placeholder="XP" class="w-1/2 p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00]">
-                                                <select id="new_mis_type" onchange="document.getElementById('new_mis_qr_solution').style.display = this.value === 'qr' ? 'block' : 'none'; const mg=document.getElementById('new_mis_geo'); mg.style.display=this.value==='qr'?'flex':'none'; mg.style.flexDirection='column'; if(this.value==='qr') setTimeout(_attachNewGeoInputs, 50); document.getElementById('upload_warning').style.display = this.value === 'upload' ? 'block' : 'none';" class="w-1/2 p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white appearance-none outline-none focus:border-[#ff4d00]">
-                                                    <option value="qr">QR Scan (empfohlen)</option>
-                                                    <option value="instant">Instant Claim</option>
-                                                    <option value="upload">Upload (manuell / langsam)</option>
-                                                </select>
-                                            </div>
-                                            <div id="upload_warning" class="bg-yellow-500/10 border border-yellow-500/30 rounded-sm p-3" style="display:none"><p class="text-[9px] text-yellow-400 font-bold uppercase tracking-widest">⚠️ Upload bricht Instant Gratification. User warten bis zu 12h auf Freigabe. Besser: QR Scan + Geofencing.</p></div>
-                                            <input id="new_mis_qr_solution" placeholder="QR Code Text (für Auto-Verify)" class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00]" style="display: block;">
-                                            <div id="new_mis_geo" data-geo-container style="display:flex;flex-direction:column;gap:8px;">
-                                                <input type="text" class="geo-search-input w-full p-3 bg-[#050505] border border-[#ff4d00]/30 rounded-sm text-sm text-white outline-none focus:border-[#ff4d00]" placeholder="🔍 Location suchen (z.B. GuMo Café Köln)..." autocomplete="off" onkeydown="_attachNewGeoInputs()">
-                                                <p data-geo-confirm class="text-[9px] text-[#ff4d00] font-bold uppercase tracking-widest px-1" style="display:none"></p>
-                                                <input id="new_mis_lat" data-lat-input type="number" step="any" class="hidden" readonly>
-                                                <input id="new_mis_lng" data-lng-input type="number" step="any" class="hidden" readonly>
-                                            </div>
-                                            <button type="submit" class="w-full bg-white text-black font-black uppercase text-[10px] tracking-widest py-3 rounded-sm hover:bg-[#ff4d00] hover:text-white transition">Hinzufügen</button>
-                                        </form>
-                                    </div>
-                                </div>
-
-                            </div>
-
-                            <div class="space-y-8">
 
                                 <!-- CORE ROUTINES -->
                                 <div class="card p-6 rounded-sm border-blue-900/20 shadow-[0_0_15px_rgba(59,130,246,0.05)]">
@@ -1140,6 +1037,7 @@
                             </div>
                         </div>
                     `;
+
                 }
 
                 html += `</main>`; appDiv.innerHTML = html;
@@ -1148,3 +1046,5 @@
     </script>
 </body>
 </html>
+
+```
