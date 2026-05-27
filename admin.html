@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>GRIND. | Command Center</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD-9tSrke72PouQMnMX-a7eZSW0jkFMBWY&libraries=places&callback=initGooglePlaces" async defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&display=swap" rel="stylesheet">
     <style>
         body { 
@@ -49,7 +50,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot, collection, getDoc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, onSnapshot, collection, getDoc, deleteDoc, updateDoc, addDoc, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // --- 1. FIREBASE SETUP ---
         const firebaseConfig = {
@@ -282,6 +283,58 @@
         };
 
         // --- 7. MANUAL MISSION & HABIT & SPOTS CONTROL ---
+        // Google Places Autocomplete init — called by Maps API callback
+        window.initGooglePlaces = () => {
+            window._googlePlacesReady = true;
+            document.querySelectorAll('.geo-search-input').forEach(input => window.attachPlacesAutocomplete(input));
+        };
+
+        window.attachPlacesAutocomplete = (input) => {
+            if (!window.google || !window.google.maps || !window.google.maps.places) return;
+            const ac = new google.maps.places.Autocomplete(input, {
+                types: ['establishment', 'geocode'],
+                componentRestrictions: { country: 'de' },
+                fields: ['name', 'geometry', 'formatted_address']
+            });
+            // Style the dropdown to match dark theme
+            const pacStyle = document.getElementById('pac-dark-style');
+            if (!pacStyle) {
+                const s = document.createElement('style');
+                s.id = 'pac-dark-style';
+                s.textContent = `.pac-container{background:#0a0a0a!important;border:1px solid #1f1f1f!important;border-top:none!important;font-family:Inter,sans-serif!important;z-index:99999!important}.pac-item{background:#0a0a0a!important;color:#9ca3af!important;border-top:1px solid #1f1f1f!important;padding:8px 12px!important;cursor:pointer!important;font-size:12px!important}.pac-item:hover,.pac-item-selected{background:#1f1f1f!important}.pac-item-query{color:#fff!important;font-weight:900!important}.pac-icon{display:none!important}.pac-matched{color:#ff4d00!important}`;
+                document.head.appendChild(s);
+            }
+            ac.addListener('place_changed', () => {
+                const place = ac.getPlace();
+                if (!place.geometry) return;
+                const lat = place.geometry.location.lat();
+                const lng = place.geometry.location.lng();
+                // Find the sibling lat/lng inputs in the same geo container
+                const container = input.closest('[data-geo-container]');
+                if (container) {
+                    const latIn = container.querySelector('[data-lat-input]');
+                    const lngIn = container.querySelector('[data-lng-input]');
+                    if (latIn) latIn.value = lat.toFixed(7);
+                    if (lngIn) lngIn.value = lng.toFixed(7);
+                    // Show confirmation
+                    const conf = container.querySelector('[data-geo-confirm]');
+                    if (conf) {
+                        conf.textContent = '✓ ' + (place.name || place.formatted_address) + ' · ' + lat.toFixed(5) + ', ' + lng.toFixed(5);
+                        conf.style.display = 'block';
+                    }
+                }
+            });
+        };
+
+        // Re-attach when new geo inputs appear (after render)
+        const _attachNewGeoInputs = () => {
+            if (!window._googlePlacesReady) return;
+            document.querySelectorAll('.geo-search-input:not([data-ac-attached])').forEach(input => {
+                input.setAttribute('data-ac-attached', '1');
+                window.attachPlacesAutocomplete(input);
+            });
+        };
+
         window.addManualMission = async (e) => {
             const type = document.getElementById('new_mis_type').value;
             const latVal = parseFloat(document.getElementById('new_mis_lat')?.value) || null;
@@ -356,38 +409,97 @@
         };
 
         // Neu: Active Spots Manager Logic
-        window.addSpot = async (e) => {
-            const theme = document.getElementById('new_spot_theme').value;
-            let color, colorClass, bgClass;
-            if (theme === 'orange') { color = '#ff4d00'; colorClass = 'text-[#ff4d00]'; bgClass = 'from-[#ff4d00]/10'; }
-            else if (theme === 'blue') { color = '#3b82f6'; colorClass = 'text-[#3b82f6]'; bgClass = 'from-[#3b82f6]/10'; }
-            else if (theme === 'purple') { color = '#a855f7'; colorClass = 'text-[#a855f7]'; bgClass = 'from-[#a855f7]/10'; }
-            else { color = '#ffffff'; colorClass = 'text-white'; bgClass = 'from-white/10'; }
-
-            const newSpot = {
-                id: 'spot_' + Date.now(),
-                icon: document.getElementById('new_spot_icon').value.trim() || '📍',
-                name: document.getElementById('new_spot_name').value.trim(),
-                subtitle: document.getElementById('new_spot_subtitle').value.trim(),
-                xp: parseInt(document.getElementById('new_spot_xp').value) || 0,
-                lat: parseFloat(document.getElementById('new_spot_lat').value) || null,
-                lng: parseFloat(document.getElementById('new_spot_lng').value) || null,
-                color, colorClass, bgClass
+        window.addManualHabit = async (e) => {
+            const type = document.getElementById('new_hab_type').value;
+            const freq = document.getElementById('new_hab_freq').value;
+            const latVal = parseFloat(document.getElementById('new_hab_lat')?.value) || null;
+            const lngVal = parseFloat(document.getElementById('new_hab_lng')?.value) || null;
+            const newHabit = { 
+                id: 'rep_' + Date.now(), 
+                name: document.getElementById('new_hab_name').value, 
+                desc: document.getElementById('new_hab_desc').value, 
+                xp: parseInt(document.getElementById('new_hab_xp').value), 
+                streakBonus: freq !== 'daily' ? (parseInt(document.getElementById('new_hab_streak').value) || 0) : 0,
+                endDate: document.getElementById('new_hab_end').value,
+                frequency: freq,
+                type: type,
+                qr_solution: type === 'qr' ? document.getElementById('new_hab_qr').value.trim() : '',
+                lat: (type === 'qr' && latVal) ? latVal : null,
+                lng: (type === 'qr' && lngVal) ? lngVal : null
             };
-
-            const updatedSpots = [...(state.activeSpots || []), newSpot];
+            const updatedHabits = JSON.parse(JSON.stringify(state.habitData));
+            updatedHabits.push(newHabit);
+            
             try {
-                await setDoc(doc(db, 'system', 'grind_season'), { activeSpots: updatedSpots }, { merge: true });
-                window.showToast("Local Spot hinzugefügt.", "success");
-                e.target.reset();
+                await setDoc(doc(db, 'system', 'grind_season'), { habitData: updatedHabits }, { merge: true });
+                window.showToast("Core Routine live geschaltet.", "success");
+                e.target.reset(); document.getElementById('new_hab_qr').style.display = 'none';
+                document.getElementById('new_hab_geo').style.display = 'none';
+                document.getElementById('streak_wrapper').style.display = 'none';
+                document.getElementById('xp_wrapper').className = 'w-full transition-all';
             } catch(err) { window.showToast("Fehler beim Speichern.", "error"); }
         };
 
-        window.deleteSpot = async (spotId) => {
-            if(!confirm("Local Spot wirklich entfernen?")) return;
-            const updatedSpots = (state.activeSpots || []).filter(s => s.id !== spotId);
-            await setDoc(doc(db, 'system', 'grind_season'), { activeSpots: updatedSpots }, { merge: true });
-            window.showToast("Spot entfernt.", "success");
+        window.deleteHabit = async (habitId) => {
+            if(!confirm("Routine wirklich löschen?")) return;
+            const updatedHabits = state.habitData.filter(h => h.id !== habitId);
+            await setDoc(doc(db, 'system', 'grind_season'), { habitData: updatedHabits }, { merge: true });
+            window.showToast("Routine entfernt.", "success");
+        };
+
+        // --- ANNOUNCEMENTS ---
+        window.sendAnnouncement = async () => {
+            const title = document.getElementById('ann_title').value.trim();
+            const body = document.getElementById('ann_body').value.trim();
+            const type = document.getElementById('ann_type').value;
+            const cta_label = document.getElementById('ann_cta_label').value.trim();
+            const cta_link = document.getElementById('ann_cta_link').value.trim();
+            if (!title || !body) return window.showToast('Titel und Text sind Pflichtfelder.', 'error');
+            try {
+                await addDoc(collection(db, 'grind_announcements'), {
+                    type, title, body,
+                    cta_label: cta_label || null,
+                    cta_link: cta_link || null,
+                    timestamp: Date.now()
+                });
+                window.showToast('Mitteilung gesendet!', 'success');
+                ['ann_title','ann_body','ann_cta_label','ann_cta_link'].forEach(id => document.getElementById(id).value = '');
+                window.loadAnnouncementsList();
+            } catch(e) { window.showToast('Fehler: ' + e.message, 'error'); }
+        };
+
+        window.loadAnnouncementsList = async () => {
+            const el = document.getElementById('ann-list');
+            if (!el) return;
+            try {
+                const snap = await getDocs(query(collection(db, 'grind_announcements'), orderBy('timestamp', 'desc'), limit(20)));
+                if (snap.empty) { el.innerHTML = '<p>Noch keine Mitteilungen.</p>'; return; }
+                const typeIcon = t => ({ drop:'🎁', event:'⚡', alert:'🚨' }[t] || '📣');
+                el.innerHTML = snap.docs.map(d => {
+                    const a = d.data();
+                    const date = new Date(a.timestamp).toLocaleDateString('de-DE', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
+                    return `<div class="bg-[#050505] border border-[#1f1f1f] p-4 rounded-lg flex gap-3 items-start">
+                        <span class="text-lg flex-shrink-0">${typeIcon(a.type)}</span>
+                        <div class="flex-1">
+                            <p class="text-white font-black text-sm">${a.title}</p>
+                            <p class="text-gray-500 text-xs mt-0.5 leading-relaxed">${a.body}</p>
+                            <p class="text-gray-700 text-[9px] mt-1 uppercase tracking-widest">${date}</p>
+                        </div>
+                        <button type="button" onclick="window.deleteAnnouncement('${d.id}')" class="text-gray-700 hover:text-red-500 flex-shrink-0 transition">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        </button>
+                    </div>`;
+                }).join('');
+            } catch(e) { el.innerHTML = '<p>Fehler beim Laden.</p>'; }
+        };
+
+        window.deleteAnnouncement = async (id) => {
+            if (!confirm('Mitteilung löschen?')) return;
+            try {
+                await deleteDoc(doc(db, 'grind_announcements', id));
+                window.showToast('Gelöscht.', 'success');
+                window.loadAnnouncementsList();
+            } catch(e) { window.showToast('Fehler.', 'error'); }
         };
 
         // --- 8. MAGIC CREATOR (KI GENERATOR) ---
@@ -653,6 +765,7 @@
                     <div class="flex gap-4 border-b border-[#1f1f1f] mb-8">
                         <button type="button" onclick="window.setAdminTab('control')" class="admin-tab ${state.adminTab === 'control' ? 'active' : ''}">Season Control</button>
                         <button type="button" onclick="window.setAdminTab('proofs')" class="admin-tab ${state.adminTab === 'proofs' ? 'active' : ''}">Pending Proofs <span class="bg-[#ff4d00]/20 text-[#ff4d00] px-1.5 py-0.5 rounded-sm ml-1">${state.pendingProofs.length}</span></button>
+                        <button type="button" onclick="window.setAdminTab('announcements')" class="admin-tab ${state.adminTab === 'announcements' ? 'active' : ''}">📣 Mitteilungen</button>
                     </div>
                 `;
 
@@ -684,6 +797,52 @@
                             </div>
                         </div>
                     `;
+                } else if (state.adminTab === 'announcements') {
+                    html += `
+                        <div class="max-w-2xl mx-auto space-y-6">
+                            <div class="card p-7 rounded-xl">
+                                <h3 class="text-lg font-black uppercase tracking-widest text-[#ff4d00] mb-1">Neue Mitteilung</h3>
+                                <p class="text-[9px] text-gray-600 uppercase tracking-widest font-bold mb-6">Erscheint im Glocken-Icon aller User</p>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-2">Typ</label>
+                                        <select id="ann_type" class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white appearance-none outline-none focus:border-[#ff4d00]">
+                                            <option value="update">📣 Update</option>
+                                            <option value="drop">🎁 Drop</option>
+                                            <option value="event">⚡ Event</option>
+                                            <option value="alert">🚨 Alert</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-2">Titel</label>
+                                        <input id="ann_title" placeholder="z.B. Summer Season startet Sonntag!" class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00]">
+                                    </div>
+                                    <div>
+                                        <label class="block text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-2">Text</label>
+                                        <textarea id="ann_body" rows="3" placeholder="Weitere Details zur Mitteilung..." class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00] resize-none"></textarea>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-2">Button Label (optional)</label>
+                                            <input id="ann_cta_label" placeholder="z.B. Jetzt ansehen" class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00]">
+                                        </div>
+                                        <div>
+                                            <label class="block text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-2">Button Link (optional)</label>
+                                            <input id="ann_cta_link" placeholder="https://..." class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00]">
+                                        </div>
+                                    </div>
+                                    <button type="button" onclick="window.sendAnnouncement()" class="w-full bg-[#ff4d00] text-white font-black italic uppercase py-4 text-sm tracking-widest hover:bg-[#ff6600] transition rounded-sm shadow-[0_0_20px_rgba(255,77,0,0.3)]">📣 Mitteilung senden</button>
+                                </div>
+                            </div>
+                            <div class="card p-6 rounded-xl">
+                                <h3 class="text-sm font-black uppercase tracking-widest text-gray-400 mb-4">Gesendete Mitteilungen</h3>
+                                <div id="ann-list" class="space-y-3 text-xs text-gray-600 italic">Lädt...</div>
+                            </div>
+                        </div>
+                    \`;
+                    // Load existing announcements into list
+                    setTimeout(() => window.loadAnnouncementsList(), 100);
+
                 } else if (state.adminTab === 'control') {
                     const currentWeekData = state.weeklyData[state.adminEditWeek] || { missions: [] };
                     
@@ -764,7 +923,7 @@
                                             <input id="new_mis_desc" required placeholder="Beschreibung" class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00]">
                                             <div class="flex gap-3">
                                                 <input id="new_mis_xp" type="number" required placeholder="XP" class="w-1/2 p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00]">
-                                                <select id="new_mis_type" onchange="document.getElementById('new_mis_qr_solution').style.display = this.value === 'qr' ? 'block' : 'none'; document.getElementById('new_mis_geo').style.display = this.value === 'qr' ? 'flex' : 'none'; document.getElementById('upload_warning').style.display = this.value === 'upload' ? 'block' : 'none';" class="w-1/2 p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white appearance-none outline-none focus:border-[#ff4d00]">
+                                                <select id="new_mis_type" onchange="document.getElementById('new_mis_qr_solution').style.display = this.value === 'qr' ? 'block' : 'none'; const mg=document.getElementById('new_mis_geo'); mg.style.display=this.value==='qr'?'flex':'none'; mg.style.flexDirection='column'; if(this.value==='qr') setTimeout(_attachNewGeoInputs, 50); document.getElementById('upload_warning').style.display = this.value === 'upload' ? 'block' : 'none';" class="w-1/2 p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white appearance-none outline-none focus:border-[#ff4d00]">
                                                     <option value="qr">QR Scan (empfohlen)</option>
                                                     <option value="instant">Instant Claim</option>
                                                     <option value="upload">Upload (manuell / langsam)</option>
@@ -772,61 +931,100 @@
                                             </div>
                                             <div id="upload_warning" class="bg-yellow-500/10 border border-yellow-500/30 rounded-sm p-3" style="display:none"><p class="text-[9px] text-yellow-400 font-bold uppercase tracking-widest">⚠️ Upload bricht Instant Gratification. User warten bis zu 12h auf Freigabe. Besser: QR Scan + Geofencing.</p></div>
                                             <input id="new_mis_qr_solution" placeholder="QR Code Text (für Auto-Verify)" class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00]" style="display: block;">
-                                            <div id="new_mis_geo" class="gap-3" style="display:flex">
-                                                <input id="new_mis_lat" type="number" step="any" placeholder="📍 Latitude (z.B. 50.9333)" class="w-1/2 p-3 bg-[#050505] border border-[#ff4d00]/30 rounded-sm text-sm text-white outline-none focus:border-[#ff4d00]">
-                                                <input id="new_mis_lng" type="number" step="any" placeholder="Longitude (z.B. 6.9595)" class="w-1/2 p-3 bg-[#050505] border border-[#ff4d00]/30 rounded-sm text-sm text-white outline-none focus:border-[#ff4d00]">
+                                            <div id="new_mis_geo" data-geo-container style="display:flex;flex-direction:column;gap:8px;">
+                                                <input type="text" class="geo-search-input w-full p-3 bg-[#050505] border border-[#ff4d00]/30 rounded-sm text-sm text-white outline-none focus:border-[#ff4d00]" placeholder="🔍 Location suchen (z.B. GuMo Café Köln)..." autocomplete="off" onkeydown="_attachNewGeoInputs()">
+                                                <p data-geo-confirm class="text-[9px] text-[#ff4d00] font-bold uppercase tracking-widest px-1" style="display:none"></p>
+                                                <input id="new_mis_lat" data-lat-input type="number" step="any" class="hidden" readonly>
+                                                <input id="new_mis_lng" data-lng-input type="number" step="any" class="hidden" readonly>
                                             </div>
                                             <button type="submit" class="w-full bg-white text-black font-black uppercase text-[10px] tracking-widest py-3 rounded-sm hover:bg-[#ff4d00] hover:text-white transition">Hinzufügen</button>
                                         </form>
                                     </div>
                                 </div>
 
-                                <!-- ACTIVE SPOTS MANAGER -->
-                                <div class="card p-6 rounded-sm border-white/20 shadow-[0_0_15px_rgba(255,255,255,0.05)]">
+                            </div>
+
+                            <div class="space-y-8">
+                            
+                                <!-- SEASON SETUP -->
+                                <div class="card p-6 rounded-sm border-[#ff4d00]/20 shadow-[0_0_15px_rgba(255,77,0,0.05)]">
+                                    <h3 class="text-lg font-black uppercase tracking-widest text-[#ff4d00] mb-1">Season Setup</h3>
+                                    <p class="text-[9px] text-gray-600 uppercase tracking-widest font-bold mb-4">Empfehlung: 3 Monate (~12 Wochen) pro Season · Spring / Summer / Fall / Winter</p>
+                                    <form onsubmit="window.saveSeasonSetup(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1 block">Season Nummer</label>
+                                            <input id="cfg_num" type="number" min="1" value="${state.seasonConfig.number}" required class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00]">
+                                        </div>
+                                        <div>
+                                            <label class="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1 block">Status</label>
+                                            <select id="cfg_active" class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00] appearance-none cursor-pointer">
+                                                <option value="true" ${state.seasonConfig.active ? 'selected' : ''}>LIVE (Aktiv)</option>
+                                                <option value="false" ${!state.seasonConfig.active ? 'selected' : ''}>OFFLINE (Pausiert)</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1 block">Startdatum</label>
+                                            <input id="cfg_start" type="date" value="${state.seasonConfig.start}" required style="color-scheme: dark;" class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00] cursor-pointer">
+                                        </div>
+                                        <div>
+                                            <label class="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1 block">Enddatum</label>
+                                            <input id="cfg_end" type="date" value="${state.seasonConfig.end}" required style="color-scheme: dark;" class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00] cursor-pointer">
+                                        </div>
+                                        <div class="md:col-span-2 mt-2">
+                                            <button type="submit" class="w-full bg-[#1f1f1f] hover:bg-[#ff4d00] text-white font-bold py-3 rounded-sm text-xs uppercase tracking-widest transition">Config Speichern</button>
+                                        </div>
+                                    </form>
+                                </div>
+                                
+                                <!-- TIME-LIMITED DROPS (Wochenmissionen) -->
+                                <div class="card p-6 rounded-sm">
                                     <div class="flex justify-between items-center mb-6">
-                                        <h3 class="text-lg font-black uppercase tracking-widest text-white">Local Spots Manager</h3>
+                                        <div>
+                                            <h3 class="text-lg font-black uppercase tracking-widest text-[#ff4d00]">Time-Limited Drops</h3>
+                                            <p class="text-[9px] text-gray-600 uppercase tracking-widest font-bold mt-1">12 Wochen · 3 Monate · Monat 1 = W01–W04 · Monat 2 = W05–W08 · Monat 3 = W09–W12</p>
+                                        </div>
+                                        <select onchange="window.setAdminEditWeek(this.value)" class="bg-[#050505] border border-[#1f1f1f] text-white text-xs p-2 rounded-sm outline-none focus:border-[#ff4d00]">
+                                            ${[1,2,3,4,5,6,7,8,9,10,11,12].map(w => `<option value="${w}" ${state.adminEditWeek == w ? 'selected' : ''}>W${w < 10 ? '0' : ''}${w} — Monat ${Math.ceil(w/4)}</option>`).join('')}
+                                        </select>
                                     </div>
                                     <div class="space-y-3 mb-8">
-                                        ${state.activeSpots.length === 0 ? '<p class="text-xs text-gray-600 italic">Keine Local Spots aktiv.</p>' : ''}
-                                        ${state.activeSpots.map(s => `
-                                            <div class="bg-[#050505] p-3 border border-white/10 rounded-sm flex justify-between items-center">
-                                                <div class="flex items-center gap-3">
-                                                    <div class="w-8 h-8 rounded-full bg-[#111] flex items-center justify-center border border-white/5 text-lg">${s.icon}</div>
-                                                    <div>
-                                                        <div class="font-black italic uppercase text-sm" style="color: ${s.color}">${s.name}</div>
-                                                        <div class="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">${s.subtitle} | +${s.xp} XP</div>
-                                                    </div>
+                                        ${(currentWeekData.missions || []).length === 0 ? '<p class="text-xs text-gray-600 italic">Keine Drops in dieser Woche.</p>' : ''}
+                                        ${(currentWeekData.missions || []).map(m => `
+                                            <div class="bg-[#050505] p-3 border border-white/10 rounded-sm flex justify-between items-start">
+                                                <div>
+                                                    <div class="font-black italic uppercase text-sm">${m.name}</div>
+                                                    <div class="text-[9px] text-[#ff4d00] font-bold uppercase tracking-widest mt-1">${m.xp} XP | ${m.type} ${m.qr_solution ? ' | AUTO' : ''}</div>
                                                 </div>
-                                                <button type="button" onclick="window.deleteSpot('${s.id}')" class="text-gray-600 hover:text-red-500 transition ml-4"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+                                                <button type="button" onclick="window.deleteMission(${state.adminEditWeek}, '${m.id}')" class="text-gray-600 hover:text-red-500 transition ml-4"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
                                             </div>
                                         `).join('')}
                                     </div>
                                     <div class="border-t border-[#1f1f1f] pt-6">
-                                        <h4 class="text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-4">Neuen Spot hinzufügen</h4>
-                                        <div class="bg-[#ff4d00]/5 border border-[#ff4d00]/20 rounded-sm p-3 mb-3"><p class="text-[9px] text-[#ff4d00] font-bold uppercase tracking-widest">📍 Geofencing: Latitude + Longitude eintragen, damit User nur vor Ort claimen können (Radius: 150m). Leer lassen = kein Geofencing.</p></div>
-                                        <form onsubmit="event.preventDefault(); window.addSpot(event);" class="space-y-3">
+                                        <h4 class="text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-4">Manuell hinzufügen</h4>
+                                        <form onsubmit="event.preventDefault(); window.addManualMission(event);" class="space-y-3">
+                                            <input id="new_mis_name" required placeholder="Titel (z.B. Morning Run)" class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00]">
+                                            <input id="new_mis_desc" required placeholder="Beschreibung" class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00]">
                                             <div class="flex gap-3">
-                                                <input id="new_spot_icon" placeholder="Emoji (📍)" value="📍" required class="w-1/4 p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-white text-center">
-                                                <input id="new_spot_name" required placeholder="Titel (z.B. Morning Check-in)" class="w-3/4 p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-white">
-                                            </div>
-                                            <input id="new_spot_subtitle" required placeholder="Location (z.B. GuMo Café)" class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-white">
-                                            <div class="flex gap-3">
-                                                <input id="new_spot_lat" type="number" step="any" placeholder="Latitude (z.B. 50.9333)" class="w-1/2 p-3 bg-[#050505] border border-[#ff4d00]/30 rounded-sm text-sm text-white outline-none focus:border-[#ff4d00]">
-                                                <input id="new_spot_lng" type="number" step="any" placeholder="Longitude (z.B. 6.9595)" class="w-1/2 p-3 bg-[#050505] border border-[#ff4d00]/30 rounded-sm text-sm text-white outline-none focus:border-[#ff4d00]">
-                                            </div>
-                                            <div class="flex gap-3">
-                                                <input id="new_spot_xp" type="number" required placeholder="XP Bonus" class="w-1/2 p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-white">
-                                                <select id="new_spot_theme" class="w-1/2 p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white appearance-none outline-none focus:border-white cursor-pointer">
-                                                    <option value="white">Weiß (Standard)</option>
-                                                    <option value="orange">Orange (Brand)</option>
-                                                    <option value="blue">Blau (Café / Recovery)</option>
-                                                    <option value="purple">Lila (Pro / Event)</option>
+                                                <input id="new_mis_xp" type="number" required placeholder="XP" class="w-1/2 p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00]">
+                                                <select id="new_mis_type" onchange="document.getElementById('new_mis_qr_solution').style.display = this.value === 'qr' ? 'block' : 'none'; const mg=document.getElementById('new_mis_geo'); mg.style.display=this.value==='qr'?'flex':'none'; mg.style.flexDirection='column'; if(this.value==='qr') setTimeout(_attachNewGeoInputs, 50); document.getElementById('upload_warning').style.display = this.value === 'upload' ? 'block' : 'none';" class="w-1/2 p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white appearance-none outline-none focus:border-[#ff4d00]">
+                                                    <option value="qr">QR Scan (empfohlen)</option>
+                                                    <option value="instant">Instant Claim</option>
+                                                    <option value="upload">Upload (manuell / langsam)</option>
                                                 </select>
                                             </div>
-                                            <button type="submit" class="w-full bg-white text-black font-black uppercase text-[10px] tracking-widest py-3 rounded-sm hover:bg-gray-200 transition">Spot Live schalten</button>
+                                            <div id="upload_warning" class="bg-yellow-500/10 border border-yellow-500/30 rounded-sm p-3" style="display:none"><p class="text-[9px] text-yellow-400 font-bold uppercase tracking-widest">⚠️ Upload bricht Instant Gratification. User warten bis zu 12h auf Freigabe. Besser: QR Scan + Geofencing.</p></div>
+                                            <input id="new_mis_qr_solution" placeholder="QR Code Text (für Auto-Verify)" class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00]" style="display: block;">
+                                            <div id="new_mis_geo" data-geo-container style="display:flex;flex-direction:column;gap:8px;">
+                                                <input type="text" class="geo-search-input w-full p-3 bg-[#050505] border border-[#ff4d00]/30 rounded-sm text-sm text-white outline-none focus:border-[#ff4d00]" placeholder="🔍 Location suchen (z.B. GuMo Café Köln)..." autocomplete="off" onkeydown="_attachNewGeoInputs()">
+                                                <p data-geo-confirm class="text-[9px] text-[#ff4d00] font-bold uppercase tracking-widest px-1" style="display:none"></p>
+                                                <input id="new_mis_lat" data-lat-input type="number" step="any" class="hidden" readonly>
+                                                <input id="new_mis_lng" data-lng-input type="number" step="any" class="hidden" readonly>
+                                            </div>
+                                            <button type="submit" class="w-full bg-white text-black font-black uppercase text-[10px] tracking-widest py-3 rounded-sm hover:bg-[#ff4d00] hover:text-white transition">Hinzufügen</button>
                                         </form>
                                     </div>
                                 </div>
+
                             </div>
 
                             <div class="space-y-8">
@@ -885,15 +1083,17 @@
                                                 <label class="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1 block">Gültig bis (Enddatum)</label>
                                                 <input id="new_hab_end" type="date" required style="color-scheme: dark;" class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#3b82f6] cursor-pointer">
                                             </div>
-                                            <select id="new_hab_type" onchange="document.getElementById('new_hab_qr').style.display = this.value === 'qr' ? 'block' : 'none'; document.getElementById('new_hab_geo').style.display = this.value === 'qr' ? 'flex' : 'none';" class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white appearance-none outline-none focus:border-[#3b82f6] cursor-pointer">
+                                            <select id="new_hab_type" onchange="document.getElementById('new_hab_qr').style.display = this.value === 'qr' ? 'block' : 'none'; const hg=document.getElementById('new_hab_geo'); hg.style.display=this.value==='qr'?'flex':'none'; hg.style.flexDirection='column'; if(this.value==='qr') setTimeout(_attachNewGeoInputs, 50);" class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white appearance-none outline-none focus:border-[#3b82f6] cursor-pointer">
                                                 <option value="upload">Photo Upload</option>
                                                 <option value="qr">QR Scan</option>
                                                 <option value="instant">Instant Claim</option>
                                             </select>
                                             <input id="new_hab_qr" placeholder="QR Code Text" class="w-full p-3 bg-[#050505] border border-[#1f1f1f] rounded-sm text-sm text-white outline-none focus:border-[#3b82f6]" style="display: none;">
-                                            <div id="new_hab_geo" class="gap-3" style="display:none">
-                                                <input id="new_hab_lat" type="number" step="any" placeholder="📍 Latitude (z.B. 50.9333)" class="w-1/2 p-3 bg-[#050505] border border-[#3b82f6]/30 rounded-sm text-sm text-white outline-none focus:border-[#3b82f6]">
-                                                <input id="new_hab_lng" type="number" step="any" placeholder="Longitude (z.B. 6.9595)" class="w-1/2 p-3 bg-[#050505] border border-[#3b82f6]/30 rounded-sm text-sm text-white outline-none focus:border-[#3b82f6]">
+                                            <div id="new_hab_geo" data-geo-container style="display:none;flex-direction:column;gap:8px;">
+                                                <input type="text" class="geo-search-input w-full p-3 bg-[#050505] border border-[#3b82f6]/30 rounded-sm text-sm text-white outline-none focus:border-[#3b82f6]" placeholder="🔍 Location suchen (z.B. Rheinufer Köln)..." autocomplete="off" onkeydown="_attachNewGeoInputs()">
+                                                <p data-geo-confirm class="text-[9px] text-[#3b82f6] font-bold uppercase tracking-widest px-1" style="display:none"></p>
+                                                <input id="new_hab_lat" data-lat-input type="number" step="any" class="hidden" readonly>
+                                                <input id="new_hab_lng" data-lng-input type="number" step="any" class="hidden" readonly>
                                             </div>
                                             <button type="submit" class="w-full bg-white text-black font-black uppercase text-[10px] tracking-widest py-3 rounded-sm hover:bg-[#3b82f6] hover:text-white transition">Routine Hinzufügen</button>
                                         </form>
