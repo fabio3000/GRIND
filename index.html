@@ -903,8 +903,7 @@
                 <button type="button" onclick="window.closeModal()" class="w-full mt-4 bg-[#111] text-gray-400 hover:bg-white hover:text-black font-black italic uppercase py-3 transition text-xs border border-white/5 rounded-lg">Schließen</button>
             `);
             try {
-                const { getDocs, query: fsQuery, collection: fsCol, orderBy: fsOrderBy, limit: fsLimit } = await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js');
-                const snap = await getDocs(fsQuery(fsCol(db, 'grind_announcements'), fsOrderBy('timestamp', 'desc'), fsLimit(20)));
+                const snap = await getDocs(query(collection(db, 'grind_announcements'), orderBy('timestamp', 'desc'), limit(20)));
                 const announcements = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
                 // Mark all as read
