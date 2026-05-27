@@ -190,7 +190,7 @@
         let state = {
             user: null, profile: null, prevXp: null, prevLvl: null, bundlePrice: '19.00', view: 'loading', prevView: 'dashboard',
             currentWeekTab: 1, authStep: 'phone', tempPhone: '', tempUploadData: null,
-            weeklyData: { 1: { title: "Loading...", startOffset: 0, missions: [] } }, rewardData: [], habitData: [], pendingMissions: [], activities: [], activeSpots: [], seasonConfig: null, dashboardNeedsScroll: true
+            weeklyData: { 1: { title: "Loading...", startOffset: 0, missions: [] } }, rewardData: [], habitData: [], pendingMissions: [], activities: [], activeSpots: [], seasonConfig: null, dashboardNeedsScroll: true, _notifUnread: 0
         };
 
         const RANKS = ["Rookie", "Grinder", "Hustler", "Athlete", "Machine", "Legend"];
@@ -333,26 +333,31 @@
 
         const openDeepLinkModal = (verifyId) => {
             window._pendingVerify = null;
-            // Navigate to dashboard if not there
-            if (state.view !== 'dashboard') { state.view = 'dashboard'; window.scheduleRender(); }
-            const item = findItemById(verifyId);
-            if (item) {
-                // Mission found — open its verify modal immediately, auto-start scanner for QR type
-                window.currentVerify = { mid: item.id, xp: Number(item.xp), name: item.name, type: item.type, qrSolution: item.qr_solution || '' };
-                if (item.type === 'instant') {
-                    window.claimInstantMission(item.id, Number(item.xp), item.name);
-                } else if (item.type === 'qr') {
-                    window.openVerifyModal(item.id, Number(item.xp), item.type, item.name, item.qr_solution || '');
-                    // Auto-start scanner immediately — no tap needed
-                    setTimeout(() => window.startQRScanner(), 350);
+
+            const doOpen = () => {
+                const item = findItemById(verifyId);
+                if (item) {
+                    if (item.type === 'instant') {
+                        window.claimInstantMission(item.id, Number(item.xp), item.name);
+                    } else {
+                        window.openVerifyModal(item.id, Number(item.xp), item.type, item.name, item.qr_solution || '');
+                        if (item.type === 'qr') setTimeout(() => window.startQRScanner(), 400);
+                    }
                 } else {
-                    window.openVerifyModal(item.id, Number(item.xp), item.type, item.name, item.qr_solution || '');
+                    // ID not found — open scanner, use the raw ID as qrSolution
+                    window.openVerifyModal(verifyId, 0, 'qr', 'Check-In', verifyId);
+                    setTimeout(() => window.startQRScanner(), 400);
                 }
+            };
+
+            if (state.view !== 'dashboard') {
+                state.view = 'dashboard';
+                window.scheduleRender();
+                // Wait for dashboard to fully render before opening modal
+                setTimeout(doOpen, 600);
             } else {
-                // Mission not in Firestore — open scanner directly so user can still scan
-                window.currentVerify = { mid: verifyId, xp: 0, name: 'Check-In', type: 'qr', qrSolution: verifyId };
-                window.openVerifyModal(verifyId, 0, 'qr', 'Check-In', verifyId);
-                setTimeout(() => window.startQRScanner(), 350);
+                // Already on dashboard — open straight away
+                doOpen();
             }
         };
 
@@ -437,7 +442,20 @@
                         if (['loading', 'auth', 'onboarding'].includes(state.view)) {
                             state.view = 'dashboard'; state.dashboardNeedsScroll = true;
                         }
+                        // Check for unread announcements (stored timestamp in localStorage)
+                        import('https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js').then(({ getDocs, query: q, collection: col, orderBy: ob, limit: lim }) => {
+                            getDocs(q(col(db, 'grind_announcements'), ob('timestamp','desc'), lim(1))).then(snap => {
+                                if (!snap.empty) {
+                                    const latest = snap.docs[0].data().timestamp || 0;
+                                    const lastRead = parseInt(localStorage.getItem('grind_notif_read') || '0');
+                                    state._notifUnread = latest > lastRead ? 1 : 0;
+                                    window.scheduleRender();
+                                }
+                            }).catch(() => {});
+                        }).catch(() => {});
                         window.scheduleRender();
+                        // Fire deep link once profile is ready (season data may still load)
+                        if (window._pendingVerify) handleDeepLink();
                     } else { state.view = 'onboarding'; window.scheduleRender(); }
                 });
                 
@@ -467,10 +485,8 @@
             } else { state.user = null; state.profile = null; state.view = 'auth'; state.authStep = 'phone'; window.scheduleRender(); }
         });
 
-        // HIER STARTET DIE DEEP LINK LOGIK AUF DER SEITE!
-        window.addEventListener('load', () => {
-            handleDeepLink();
-        });
+        // Deep link fires from inside onSnapshot callbacks (profile + season data)
+        // Nothing to do here at load time — Firebase isn't ready yet
 
         window.claimItemById = (mid) => {
             const item = findItemById(mid);
@@ -878,37 +894,71 @@
             window.openModal(`<p class="${textClass} text-[10px] font-black uppercase tracking-widest mb-1">Premium Reward</p><h3 class="text-2xl font-black italic uppercase tracking-tighter mb-6">${title}</h3>${contentHtml}<button type="button" onclick="window.closeModal()" class="w-full bg-[#111] text-gray-400 hover:bg-white hover:text-black font-black italic uppercase py-3 transition text-xs border border-white/5 rounded-md">Schließen</button>`);
         };
 
-        window.openNotifCenter = () => {
-            const p = state.profile || {};
-            const friends = (p.friends || []).map(f => f.toLowerCase());
-            const now = Date.now();
-            const recent = (state.activities || [])
-                .filter(a => (now - (a.timestamp||0)) < 86400000 && friends.includes((a.alias||'').toLowerCase()))
-                .sort((a,b) => (b.timestamp||0)-(a.timestamp||0)).slice(0, 20);
-            
-            let feedHtml = recent.length === 0 
-                ? `<div class="text-center py-8 text-gray-600 text-xs italic">Keine Crew-Aktivität in den letzten 24h.</div>`
-                : `<div class="space-y-3 max-h-80 overflow-y-auto no-scrollbar">` + recent.map(act => {
-                    const isProUser = act.isPro === true;
-                    const nameClass = isProUser ? 'text-[#d8b4fe]' : 'text-[#ff4d00]';
-                    const proBadge = isProUser ? `<span class="ml-1 bg-[#a855f7]/20 text-[#a855f7] border border-[#a855f7]/30 text-[7px] px-1 py-0.5 rounded-sm font-black">PRO</span>` : '';
-                    return `<div class="bg-[#0a0a0a] border border-[#111] p-3 rounded-lg flex gap-3 items-start">
-                        <div class="w-8 h-8 rounded-full bg-black border border-[#1f1f1f] flex items-center justify-center flex-shrink-0 text-[#ff4d00]">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-[10px] text-gray-600 font-bold uppercase tracking-widest mb-0.5">${getRelativeTime(act.timestamp)}</p>
-                            <p class="text-xs text-gray-300 break-words"><span class="${nameClass} italic font-black uppercase">${act.alias}</span>${proBadge} <span class="text-gray-500">${(act.text||'').replace(/<[^>]*>?/gm,'')}</span></p>
-                        </div>
-                    </div>`;
-                }).join('') + `</div>`;
-            
+        window.openNotifCenter = async () => {
+            // Show loading state immediately
             window.openModal(`
-                <p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">Letzte 24h</p>
-                <h3 class="text-2xl font-black italic uppercase tracking-tighter mb-6">Crew Activity</h3>
-                ${feedHtml}
+                <p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">Von GRIND.</p>
+                <h3 class="text-2xl font-black italic uppercase tracking-tighter mb-6">Mitteilungen</h3>
+                <div class="flex items-center justify-center py-10 text-gray-600 text-xs">Lädt...</div>
                 <button type="button" onclick="window.closeModal()" class="w-full mt-4 bg-[#111] text-gray-400 hover:bg-white hover:text-black font-black italic uppercase py-3 transition text-xs border border-white/5 rounded-lg">Schließen</button>
             `);
+            try {
+                const { getDocs, query: fsQuery, collection: fsCol, orderBy: fsOrderBy, limit: fsLimit } = await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js');
+                const snap = await getDocs(fsQuery(fsCol(db, 'grind_announcements'), fsOrderBy('timestamp', 'desc'), fsLimit(20)));
+                const announcements = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+                // Mark all as read
+                const readKey = 'grind_notif_read';
+                const lastRead = parseInt(localStorage.getItem(readKey) || '0');
+                if (announcements.length > 0) localStorage.setItem(readKey, String(announcements[0].timestamp || Date.now()));
+                state._notifUnread = 0;
+
+                const typeIcon = (type) => {
+                    if (type === 'drop') return '🎁';
+                    if (type === 'event') return '⚡';
+                    if (type === 'alert') return '🚨';
+                    return '📣';
+                };
+                const typeColor = (type) => {
+                    if (type === 'drop') return 'text-[#a855f7]';
+                    if (type === 'event') return 'text-[#ff4d00]';
+                    if (type === 'alert') return 'text-red-400';
+                    return 'text-white';
+                };
+
+                const listHtml = announcements.length === 0
+                    ? `<div class="text-center py-10 text-gray-600 text-xs italic">Noch keine Mitteilungen.</div>`
+                    : `<div class="space-y-3 max-h-96 overflow-y-auto no-scrollbar">` + announcements.map(a => {
+                        const isNew = (a.timestamp || 0) > lastRead;
+                        return `<div class="bg-[#0a0a0a] border ${isNew ? 'border-[#ff4d00]/30' : 'border-[#111]'} p-4 rounded-xl relative">
+                            ${isNew ? '<span class="absolute top-3 right-3 w-1.5 h-1.5 bg-[#ff4d00] rounded-full"></span>' : ''}
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="text-lg">${typeIcon(a.type)}</span>
+                                <span class="text-[9px] font-black uppercase tracking-widest ${typeColor(a.type)}">${a.type || 'update'}</span>
+                                <span class="text-[9px] text-gray-600 font-bold ml-auto">${getRelativeTime(a.timestamp)}</span>
+                            </div>
+                            <p class="text-sm font-black text-white mb-1">${a.title || ''}</p>
+                            <p class="text-xs text-gray-400 leading-relaxed">${a.body || ''}</p>
+                            ${a.cta_label && a.cta_link ? `<a href="${a.cta_link}" target="_blank" class="inline-block mt-3 text-[10px] font-black uppercase tracking-widest text-[#ff4d00] border border-[#ff4d00]/30 px-3 py-1.5 rounded-md hover:bg-[#ff4d00]/10 transition">${a.cta_label} →</a>` : ''}
+                        </div>`;
+                    }).join('') + `</div>`;
+
+                // Re-render modal content
+                const container = document.getElementById('modal-container');
+                if (container) {
+                    const inner = container.querySelector('.relative.z-10');
+                    if (inner) inner.innerHTML = `
+                        <button type="button" onclick="window.closeModal()" class="absolute top-4 right-4 text-gray-500 hover:text-white z-50"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                        <p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">Von GRIND.</p>
+                        <h3 class="text-2xl font-black italic uppercase tracking-tighter mb-6">Mitteilungen</h3>
+                        ${listHtml}
+                        <button type="button" onclick="window.closeModal()" class="w-full mt-4 bg-[#111] text-gray-400 hover:bg-white hover:text-black font-black italic uppercase py-3 transition text-xs border border-white/5 rounded-lg">Schließen</button>
+                    `;
+                }
+                window.scheduleRender(); // refresh bell dot
+            } catch(e) {
+                console.error('Announcements load error:', e);
+            }
         };
 
         window.setView = (view) => { if (view === 'dashboard' && state.view !== 'dashboard') state.dashboardNeedsScroll = true; state.prevView = state.view; state.view = view; window.scheduleRender(); }; 
@@ -1173,9 +1223,9 @@
                     <header class="p-6 max-w-6xl mx-auto flex justify-between items-center w-full relative z-20">
                         <div class="text-3xl font-black italic tracking-tighter">GRIND<span class="text-[#ff4d00]">.</span></div>
                         <div class="flex gap-3 items-center">
-                            <button type="button" onclick="window.openNotifCenter()" class="relative text-gray-500 hover:text-[#ff4d00] transition border border-gray-800 hover:border-[#ff4d00] p-1.5 rounded-md bg-[#0a0a0a]" title="Crew Activity">
+                            <button type="button" onclick="window.openNotifCenter()" class="relative text-gray-500 hover:text-[#ff4d00] transition border border-gray-800 hover:border-[#ff4d00] p-1.5 rounded-md bg-[#0a0a0a]" title="Mitteilungen">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
-                                ${(state.activities || []).filter(a => (Date.now() - (a.timestamp||0)) < 86400000 && (p.friends||[]).map(f=>f.toLowerCase()).includes((a.alias||'').toLowerCase())).length > 0 ? `<span class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[#ff4d00] rounded-full border border-[#030303] shadow-[0_0_6px_rgba(255,77,0,0.8)]"></span>` : ''}
+                                ${(state._notifUnread || 0) > 0 ? `<span class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[#ff4d00] rounded-full border border-[#030303] shadow-[0_0_6px_rgba(255,77,0,0.8)]"></span>` : ''}
                             </button>
                             <button type="button" onclick="window.generateShareCard()" class="text-[10px] uppercase font-bold text-gray-400 hover:text-white transition tracking-widest border border-gray-800 hover:border-[#ff4d00] px-3 py-1.5 rounded-md bg-[#0a0a0a]">Export</button>
                             <button type="button" onclick="window.handleLogout()" class="text-[10px] uppercase font-bold text-gray-500 hover:text-red-500 transition tracking-widest border border-gray-800 px-3 py-1.5 rounded-md bg-[#0a0a0a]">Exit</button>
