@@ -323,13 +323,43 @@
         const handleDeepLink = () => {
             const verifyId = window._pendingVerify;
             if (!verifyId) return;
-            // Profile + data must be ready
-            if (!state.profile) return; // called again from render cycle
-            if (state.habitData?.length === 0 && Object.keys(state.weeklyData || {}).length === 0) return;
-            window._pendingVerify = null; // consume once
-            setTimeout(() => {
-                if (typeof window.claimItemById === 'function') window.claimItemById(verifyId);
-            }, 400);
+            if (!state.profile) return;
+
+            // Search across all mission sources
+            const findItem = (id) => {
+                let item = state.habitData.find(h => h.id === id);
+                if (!item) {
+                    for (let w in state.weeklyData) {
+                        const m = (state.weeklyData[w].missions || []).find(x => x.id === id);
+                        if (m) { item = m; break; }
+                    }
+                }
+                return item;
+            };
+
+            const tryOpen = (attempts = 0) => {
+                const item = findItem(verifyId);
+                if (item) {
+                    window._pendingVerify = null;
+                    // Make sure we're on dashboard first
+                    if (state.view !== 'dashboard') {
+                        state.view = 'dashboard';
+                        window.scheduleRender();
+                    }
+                    setTimeout(() => window.claimItemById(verifyId), 500);
+                } else if (attempts < 20) {
+                    // Retry every 300ms for up to 6 seconds while data loads
+                    setTimeout(() => tryOpen(attempts + 1), 300);
+                } else {
+                    // Data never loaded — still open a generic verify modal
+                    window._pendingVerify = null;
+                    if (state.view !== 'dashboard') { state.view = 'dashboard'; window.scheduleRender(); }
+                    setTimeout(() => {
+                        window.openVerifyModal(verifyId, 0, 'qr', 'Check-In', verifyId);
+                    }, 500);
+                }
+            };
+            tryOpen();
         };
 
         const setupSeasonData = () => {
@@ -344,6 +374,8 @@
                     state.currentWeekTab = getActiveWeek();
                 }
                 if(state.view === 'dashboard' || state.view === 'paywall') window.scheduleRender();
+                // Fire deep link as soon as season data is ready
+                if (window._pendingVerify) handleDeepLink();
             });
         };
 
@@ -952,10 +984,6 @@
         `;
 
         function render() {
-            // Fire pending deep-link verify as soon as dashboard is ready
-            if (window._pendingVerify && state.profile && (state.habitData?.length > 0 || Object.keys(state.weeklyData || {}).length > 0)) {
-                handleDeepLink();
-            }
             const appDiv = document.getElementById('app'); let savedScrollPosition = 0; const existingViewport = document.getElementById('pass-viewport'); if (existingViewport) { savedScrollPosition = existingViewport.scrollLeft; }
             if (state.view === 'loading') { appDiv.innerHTML = `<div class="flex-1 flex items-center justify-center min-h-[60vh] relative z-10"><div class="w-16 h-16 border-t-4 border-l-4 border-[#ff4d00] rounded-full animate-spin"></div></div>`; return; }
             if (state.view === 'dashboard' || state.view === 'paywall') {
