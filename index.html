@@ -320,46 +320,51 @@
             window._pendingVerify = _pendingVerifyId;
         }
 
+        const findItemById = (id) => {
+            let item = state.habitData.find(h => h.id === id);
+            if (!item) {
+                for (let w in state.weeklyData) {
+                    const m = (state.weeklyData[w].missions || []).find(x => x.id === id);
+                    if (m) { item = m; break; }
+                }
+            }
+            return item || null;
+        };
+
+        const openDeepLinkModal = (verifyId) => {
+            window._pendingVerify = null;
+            // Navigate to dashboard if not there
+            if (state.view !== 'dashboard') { state.view = 'dashboard'; window.scheduleRender(); }
+            const item = findItemById(verifyId);
+            if (item) {
+                // Mission found — open its verify modal immediately, auto-start scanner for QR type
+                window.currentVerify = { mid: item.id, xp: Number(item.xp), name: item.name, type: item.type, qrSolution: item.qr_solution || '' };
+                if (item.type === 'instant') {
+                    window.claimInstantMission(item.id, Number(item.xp), item.name);
+                } else if (item.type === 'qr') {
+                    window.openVerifyModal(item.id, Number(item.xp), item.type, item.name, item.qr_solution || '');
+                    // Auto-start scanner immediately — no tap needed
+                    setTimeout(() => window.startQRScanner(), 350);
+                } else {
+                    window.openVerifyModal(item.id, Number(item.xp), item.type, item.name, item.qr_solution || '');
+                }
+            } else {
+                // Mission not in Firestore — open scanner directly so user can still scan
+                window.currentVerify = { mid: verifyId, xp: 0, name: 'Check-In', type: 'qr', qrSolution: verifyId };
+                window.openVerifyModal(verifyId, 0, 'qr', 'Check-In', verifyId);
+                setTimeout(() => window.startQRScanner(), 350);
+            }
+        };
+
         const handleDeepLink = () => {
             const verifyId = window._pendingVerify;
-            if (!verifyId) return;
-            if (!state.profile) return;
-
-            // Search across all mission sources
-            const findItem = (id) => {
-                let item = state.habitData.find(h => h.id === id);
-                if (!item) {
-                    for (let w in state.weeklyData) {
-                        const m = (state.weeklyData[w].missions || []).find(x => x.id === id);
-                        if (m) { item = m; break; }
-                    }
-                }
-                return item;
-            };
-
-            const tryOpen = (attempts = 0) => {
-                const item = findItem(verifyId);
-                if (item) {
-                    window._pendingVerify = null;
-                    // Make sure we're on dashboard first
-                    if (state.view !== 'dashboard') {
-                        state.view = 'dashboard';
-                        window.scheduleRender();
-                    }
-                    setTimeout(() => window.claimItemById(verifyId), 500);
-                } else if (attempts < 20) {
-                    // Retry every 300ms for up to 6 seconds while data loads
-                    setTimeout(() => tryOpen(attempts + 1), 300);
-                } else {
-                    // Data never loaded — still open a generic verify modal
-                    window._pendingVerify = null;
-                    if (state.view !== 'dashboard') { state.view = 'dashboard'; window.scheduleRender(); }
-                    setTimeout(() => {
-                        window.openVerifyModal(verifyId, 0, 'qr', 'Check-In', verifyId);
-                    }, 500);
-                }
-            };
-            tryOpen();
+            if (!verifyId || !state.profile) return;
+            // Data already loaded — open immediately
+            const hasData = state.habitData.length > 0 || Object.keys(state.weeklyData || {}).length > 0;
+            if (hasData) {
+                openDeepLinkModal(verifyId);
+            }
+            // If no data yet — onSnapshot will call handleDeepLink again when data arrives
         };
 
         const setupSeasonData = () => {
@@ -468,13 +473,7 @@
         });
 
         window.claimItemById = (mid) => {
-            let item = state.habitData.find(h => h.id === mid);
-            if (!item) {
-                for (let w in state.weeklyData) {
-                    let m = state.weeklyData[w].missions?.find(x => x.id === mid);
-                    if (m) { item = m; break; }
-                }
-            }
+            const item = findItemById(mid);
             if (!item) return;
             if (item.type === 'instant') window.claimInstantMission(item.id, Number(item.xp), item.name);
             else window.openVerifyModal(item.id, Number(item.xp), item.type, item.name, item.qr_solution || '');
