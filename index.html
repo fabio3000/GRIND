@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
+    
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-NYKB8MZ2MC"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -13,20 +13,21 @@
     </script>
 
     <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
-    <meta name="description" content="GRIND connects real-world routines, places and rewards into one shared network.">
+    <meta name="description" content="Verwandle deinen Alltag in ein Spiel. Sammle XP durch Fitness, Habits und Hustle. Schalte echte Rewards frei und miss dich mit deiner Crew. Join the GRIND Network.">
+    <meta name="keywords" content="Habit Tracker, Fitness App, Gamification, Motivation, Health, Eisbaden, Run Club, XP sammeln">
     <title>GRIND. | Level up your life</title>
 
+    <!-- Open Graph & Twitter -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://grind-app.de/">
     <meta property="og:title" content="GRIND. | The Real-World Lifestyle Game">
-    <meta property="og:description" content="GRIND connects real-world routines, places and rewards into one shared network.">
+    <meta property="og:description" content="Verwandle deinen Alltag in ein Spiel. Sammle XP durch Fitness, Habits und Hustle. Schalte echte Rewards frei und miss dich mit deiner Crew.">
     <meta property="og:image" content="https://grind-app.de/logo.jpg">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="GRIND. | The Real-World Lifestyle Game">
-    <meta name="twitter:description" content="GRIND connects real-world routines, places and rewards into one shared network.">
+    <meta name="twitter:title" content="GRIND. | Level up your life">
+    <meta name="twitter:description" content="Verwandle deinen Alltag in ein Spiel. Sammle XP, schalte echte Rewards frei.">
     <meta name="twitter:image" content="https://grind-app.de/logo.jpg">
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -36,57 +37,86 @@
     <link rel="icon" type="image/png" sizes="192x192" href="https://grind-app.de/favicon.png">
     <link rel="icon" type="image/png" sizes="512x512" href="https://grind-app.de/favicon.png">
     <link rel="apple-touch-icon" href="https://grind-app.de/logo.jpg">
+    <meta name="apple-mobile-web-app-title" content="GRIND.">
     
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script src="https://www.paypal.com/sdk/js?client-id=AboxAT2qskA0lY5-23Kj2tu_qY3bOK57rq_LbhtE_cdVOBT37fSHGacBKjgl-zx1XcJM9AZql96OCwc8&currency=EUR"></script>
     
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #030303; color: #ffffff; overflow-x: hidden; scroll-behavior: smooth; background-image: radial-gradient(circle at top, #0b0b0b 0%, #030303 70%); min-height: 100vh; overscroll-behavior-y: none; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #050505; 
+            color: #ffffff; 
+            overflow-x: hidden; 
+            scroll-behavior: smooth; 
+            background-image: radial-gradient(circle at 50% 0%, #1a0a00 0%, #050505 60%);
+            min-height: 100vh;
+            overscroll-behavior-y: none;
+        }
+
         h1, h2, h3, h4 { word-spacing: 0.13em; }
-        .grid-overlay { position: fixed; inset: 0; opacity: 0.08; background-size: 60px 60px; background-image: linear-gradient(to right, rgba(255,255,255,0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.08) 1px, transparent 1px); transform: perspective(500px) rotateX(60deg) translateZ(0); pointer-events: none; z-index: 0; }
+
+        /* Cyberpunk Grid Overlay (from Feature Build) */
+        .grid-overlay { 
+            position: fixed; inset: 0; opacity: 0.08; background-size: 60px 60px; 
+            background-image: linear-gradient(to right, rgba(255,255,255,0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.08) 1px, transparent 1px); 
+            transform: perspective(500px) rotateX(60deg) translateZ(0); pointer-events: none; z-index: 0; 
+        }
         
         .grind-gradient { background: linear-gradient(90deg, #ff4d00, #ff8800); }
         .text-brand { color: #ff4d00; } 
-        .bg-brand { background: #ff4d00; }
         
-        .notif-wrapper { transform: translate(-50%, -8rem); opacity: 0; transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); pointer-events: none; will-change: transform, opacity; }
-        .notif-wrapper.show { transform: translate(-50%, 0); opacity: 1; pointer-events: auto; }
-
-        .mockup { background: #080808; border: 1px solid #181818; border-radius: 14px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.7); position: relative; transition: all 0.3s ease; }
-        .mockup.interactive:hover { border-color: rgba(255, 77, 0, 0.3); transform: translateY(-2px); }
+        /* Cards & Components (Aggressive styling from UI Build) */
+        .card { background: #0f0f0f; border: 1px solid #1f1f1f; transition: all 0.3s ease; border-radius: 4px; }
+        .card.interactive:hover { border-color: #ff4d00; box-shadow: 0 0 20px rgba(255, 77, 0, 0.1); transform: translateY(-2px); }
         
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; scroll-behavior: smooth; }
         
+        /* Level Nodes */
         .level-node { min-width: 140px; width: 140px; position: relative; }
-        .reward-box { width: 100px; height: 85px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.5); display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; z-index: 10; border-radius: 8px; transition: all 0.3s ease; backdrop-filter: blur(5px); }
+        .reward-box { width: 100px; height: 85px; border: 1px solid #1f1f1f; background: rgba(10,10,10,0.8); display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; z-index: 10; border-radius: 4px; transition: all 0.3s ease; backdrop-filter: blur(5px); }
         .reward-box.unlocked { border-color: #ff4d00; background: rgba(255,77,0,0.05); box-shadow: 0 0 15px rgba(255, 77, 0, 0.15); }
         .reward-box.pro { border-color: rgba(168,85,247,0.3); height: 95px; width: 110px; }
         .reward-box.pro.unlocked { background: rgba(168,85,247,0.05); border-color: #a855f7; box-shadow: 0 0 20px rgba(168, 85, 247, 0.25); }
-        .tag-free { background: #333; color: white; font-size: 7px; font-weight: 900; padding: 3px 8px; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); text-transform: uppercase; border-radius: 4px; z-index: 30; }
-        .tag-pro { background: linear-gradient(90deg, #7c3aed, #9333ea); color: white; font-size: 8px; font-weight: 900; padding: 3px 10px; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); text-transform: uppercase; border-radius: 4px; box-shadow: 0 2px 8px rgba(124,58,237,0.4); z-index: 30; }
         
-        .week-btn { border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.02); transition: all 0.2s; border-radius: 6px; }
+        .tag-free { background: #333; color: white; font-size: 7px; font-weight: 900; padding: 2px 6px; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); text-transform: uppercase; border-radius: 2px; z-index: 30; }
+        .tag-pro { background: linear-gradient(90deg, #7c3aed, #9333ea); color: white; font-size: 8px; font-weight: 900; padding: 2px 8px; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); text-transform: uppercase; border-radius: 3px; box-shadow: 0 2px 8px rgba(124,58,237,0.4); z-index: 30; }
+        
+        .week-btn { border: 1px solid #1f1f1f; background: #0a0a0a; transition: all 0.2s; border-radius: 2px; }
         .week-btn.active { background: #ff4d00; color: white; border-color: #ff4d00; font-weight: 900; box-shadow: 0 0 15px rgba(255, 77, 0, 0.2); }
-        
+
+        /* Live Notifications (Top) */
+        .notif-wrapper { transform: translate(-50%, -8rem); opacity: 0; transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); pointer-events: none; will-change: transform, opacity; }
+        .notif-wrapper.show { transform: translate(-50%, 0); opacity: 1; pointer-events: auto; }
+
+        /* Toasts (Side) */
         #toast-container { position: fixed; top: 20px; right: 20px; z-index: 99999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
-        .toast { pointer-events: auto; background: #0a0a0a; border: 1px solid #1f1f1f; color: white; padding: 16px 24px; border-radius: 8px; font-size: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.8); transform: translateX(120%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: flex; align-items: center; gap: 12px; }
+        .toast { pointer-events: auto; background: #0a0a0a; border: 1px solid #1f1f1f; color: white; padding: 16px 24px; border-radius: 4px; font-size: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.8); transform: translateX(120%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: flex; align-items: center; gap: 12px; }
         .toast.show { transform: translateX(0); } 
         .toast.success { border-left: 4px solid #ff4d00; } 
         .toast.error { border-left: 4px solid #dc2626; } 
         .toast.info { border-left: 4px solid #3b82f6; }
         
-        .btn-grind { background: white; color: black; font-weight: 900; text-transform: uppercase; letter-spacing: 0.08em; padding: 14px 28px; font-size: 12px; transition: 0.25s ease; box-shadow: 0 4px 15px rgba(255,255,255,0.05); cursor: pointer; border-radius: 6px; border: none; }
+        /* Buttons */
+        .btn-grind { background: white; color: black; font-weight: 900; font-style: italic; text-transform: uppercase; padding: 14px 28px; font-size: 12px; transition: all 0.25s ease; box-shadow: 0 4px 15px rgba(255,255,255,0.05); cursor: pointer; border-radius: 4px; border: none; }
         .btn-grind:hover:not(:disabled) { background: #ff4d00; color: white; transform: translateY(-2px); box-shadow: 0 10px 30px rgba(255,77,0,0.25); }
-        .btn-grind:disabled { cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn-grind:disabled { background: #1f1f1f; color: #555; cursor: not-allowed; transform: none; box-shadow: none; border-color: #1f1f1f; }
         
-        .btn-pro { background: rgba(168,85,247,0.1); color: #a855f7; font-weight: 900; text-transform: uppercase; letter-spacing: 0.08em; padding: 12px 24px; font-size: 11px; transition: 0.25s ease; cursor: pointer; border-radius: 6px; border: 1px solid rgba(168,85,247,0.3); }
+        .btn-pro { background: #1a0a2e; color: #a855f7; font-weight: 900; font-style: italic; text-transform: uppercase; padding: 12px 24px; font-size: 12px; transition: all 0.25s ease; box-shadow: 0 4px 15px rgba(168,85,247,0.1); cursor: pointer; border-radius: 4px; border: 1px solid rgba(168,85,247,0.3); }
         .btn-pro:hover { background: #a855f7; color: white; box-shadow: 0 10px 30px rgba(168,85,247,0.25); border-color: #a855f7; transform: translateY(-2px); }
         
         @keyframes subtle-pulse { 0%, 100% { opacity: 1; box-shadow: 0 0 10px rgba(255, 77, 0, 0.1); border-color: rgba(255, 77, 0, 0.3); } 50% { opacity: 0.95; box-shadow: 0 0 20px rgba(255, 77, 0, 0.4); border-color: rgba(255, 77, 0, 0.6); } }
-        .btn-bounty { animation: subtle-pulse 3s infinite ease-in-out; background: rgba(255,255,255,0.02); color: white; border: 1px solid rgba(255, 77, 0, 0.3); cursor: pointer; transition: all 0.3s ease; border-radius: 6px; }
-        .btn-bounty:hover { background: rgba(255,77,0,0.1); border-color: #ff4d00; box-shadow: 0 0 25px rgba(255, 77, 0, 0.5); transform: translateY(-2px); }
+        .btn-bounty { animation: subtle-pulse 3s infinite ease-in-out; background: #0a0a0a; color: white; border: 1px solid rgba(255, 77, 0, 0.3); cursor: pointer; transition: all 0.3s ease; border-radius: 4px; }
+        .btn-bounty:hover { background: #111; border-color: #ff4d00; box-shadow: 0 0 25px rgba(255, 77, 0, 0.5); transform: translateY(-2px); }
         
+        /* Overlays & Animations */
+        .completed-overlay { position: absolute; inset: 0; background: rgba(5,5,5,0.8); z-index: 10; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px); opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+        .card.is-completed .completed-overlay { opacity: 1; pointer-events: auto; }
+        
+        .pending-overlay { position: absolute; inset: 0; background: rgba(5,5,5,0.8); z-index: 10; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px); opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+        .card.is-pending .pending-overlay { opacity: 1; pointer-events: auto; }
+
         @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.1) translateY(-5px); text-shadow: 0 0 20px rgba(255,77,0,0.8); color: #ff4d00; } 100% { transform: scale(1) translateY(0); } }
         .animate-pop { animation: pop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         
@@ -107,14 +137,17 @@
         @keyframes pulse-slow { 0%, 100% { opacity: 0.3; transform: scale(0.95); } 50% { opacity: 1; transform: scale(1.05); } }
         .animate-pulse-slow { animation: pulse-slow 4s ease-in-out infinite; }
         
+        .glitch-bg { background-image: radial-gradient(circle at 50% 50%, #1a0a00 0%, #050505 80%); }
         .grecaptcha-badge { filter: invert(1) grayscale(0.2) opacity(0.3); transition: all 0.5s ease !important; bottom: 20px !important; z-index: 100; }
         .grecaptcha-badge:hover { filter: invert(1) grayscale(0) opacity(0.8); }
+
+        /* Intro Animation */
+        #intro-layer { position: fixed; inset: 0; z-index: 999999; background-color: #050505; display: flex; align-items: center; justify-content: center; transition: opacity 0.8s ease; }
+        .word-flash { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 10vw; font-weight: 900; font-style: italic; text-transform: uppercase; white-space: nowrap; opacity: 0; letter-spacing: -0.05em; text-align: center; }
+        @media (min-width: 768px) { .word-flash { font-size: 6vw; } }
+        @keyframes flashInOut { 0% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); filter: blur(4px); } 10% { opacity: 1; transform: translate(-50%, -50%) scale(1); filter: blur(0px); } 90% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); filter: blur(0px); } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.1); filter: blur(4px); } }
         
-        #intro-layer { position: fixed; inset: 0; z-index: 999999; background-color: #030303; display: flex; align-items: center; justify-content: center; transition: opacity 0.8s ease; }
-        .word-flash { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 8vw; font-weight: 900; font-style: italic; text-transform: uppercase; white-space: nowrap; opacity: 0; letter-spacing: -0.02em; text-align: center; }
-        @media (min-width: 768px) { .word-flash { font-size: 5vw; } }
-        @keyframes flashInOut { 0% { opacity: 0; transform: translate(-50%, -50%) scale(0.95); filter: blur(4px); } 10% { opacity: 1; transform: translate(-50%, -50%) scale(1); filter: blur(0px); } 90% { opacity: 1; transform: translate(-50%, -50%) scale(1.02); filter: blur(0px); } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.05); filter: blur(4px); } }
-        
+        /* Legal Pages Styling */
         .legal-content h2 { color: white; font-weight: 900; font-style: italic; text-transform: uppercase; margin-top: 2.5rem; margin-bottom: 0.75rem; letter-spacing: 0.05em; font-size: 1.25rem; }
         .legal-content h3 { color: #d4d4d4; font-weight: 700; margin-top: 1.5rem; margin-bottom: 0.5rem; }
         .legal-content p { margin-bottom: 1rem; color: #a3a3a3; font-size: 0.875rem; line-height: 1.6; }
@@ -126,10 +159,12 @@
     </style>
 </head>
 <body class="flex flex-col relative select-none">
+    
     <div class="grid-overlay"></div>
     
+    <!-- Live Notification Center (Top) -->
     <div id="live-notification-badge" class="notif-wrapper fixed top-6 left-1/2 z-[99999] w-[90%] max-w-sm">
-        <div id="live-notification-box" class="bg-black/90 backdrop-blur-md border border-[#ff4d00]/50 shadow-[0_10px_40px_rgba(255,77,0,0.3)] rounded-full py-3 px-5 flex items-center gap-3">
+        <div id="live-notification-box" class="bg-black/95 backdrop-blur-md border border-[#ff4d00]/50 shadow-[0_10px_40px_rgba(255,77,0,0.3)] rounded-sm py-3 px-5 flex items-center justify-center gap-3">
             <span id="live-notification-ping" class="relative flex h-3 w-3 flex-shrink-0 hidden">
                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#ff4d00] opacity-75"></span>
                 <span class="relative inline-flex rounded-full h-3 w-3 bg-[#ff4d00]"></span>
@@ -138,11 +173,13 @@
         </div>
     </div>
 
+    <!-- Static System Toasts (Right) -->
     <div id="toast-container"></div>
     
+    <!-- XP Level Up HUD -->
     <div id="xp-hud" class="fixed top-0 left-0 right-0 z-[999998] flex justify-center pt-4 px-4 sm:px-6" style="transform: translateY(-150%); transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none; will-change: transform;">
         <div class="absolute top-2 w-full max-w-md h-32 bg-black/60 blur-2xl rounded-full pointer-events-none z-0 gpu-blur"></div>
-        <div class="bg-[#0a0a0a]/95 border border-[#ff4d00]/50 shadow-[0_20px_50px_rgba(0,0,0,0.9),_0_0_30px_rgba(255,77,0,0.3)] rounded-xl p-5 w-full max-w-sm flex flex-col gap-3 relative overflow-hidden backdrop-blur-2xl z-10 pointer-events-auto">
+        <div class="bg-[#0a0a0a]/95 border border-[#ff4d00]/50 shadow-[0_20px_50px_rgba(0,0,0,0.9),_0_0_30px_rgba(255,77,0,0.3)] rounded-sm p-5 w-full max-w-sm flex flex-col gap-3 relative overflow-hidden backdrop-blur-2xl z-10 pointer-events-auto">
             <div class="absolute inset-0 bg-gradient-to-b from-[#ff4d00]/15 to-transparent"></div>
             <div class="relative z-10 flex justify-between items-end">
                 <div>
@@ -153,7 +190,7 @@
                     <span class="text-gray-400 text-[10px] font-bold uppercase tracking-widest italic"><span id="hud-xp-num" class="text-white text-sm">0</span> / <span id="hud-xp-max">1000</span></span>
                 </div>
             </div>
-            <div class="w-full bg-black h-2.5 rounded-full overflow-hidden border border-white/10 relative z-10 shadow-inner">
+            <div class="w-full bg-black h-2.5 rounded-full overflow-hidden border border-[#1f1f1f] relative z-10 shadow-inner">
                 <div id="hud-xp-bar" class="grind-gradient h-full transition-all ease-out relative w-0" style="transition-duration: 1500ms;">
                     <div class="absolute top-0 right-0 bottom-0 w-10 bg-gradient-to-r from-transparent to-white/50"></div>
                 </div>
@@ -163,6 +200,7 @@
     
     <div id="recaptcha-container"></div>
     
+    <!-- App Root -->
     <div id="app" class="flex-1 flex flex-col w-full z-10 relative pb-10">
         <div class="flex-1 flex items-center justify-center min-h-[60vh]">
             <div class="w-16 h-16 border-t-4 border-l-4 border-[#ff4d00] rounded-full animate-spin"></div>
@@ -174,6 +212,7 @@
         import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, updateDoc, arrayUnion, onSnapshot, collection, addDoc, query, where, getDocs, orderBy, limit, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // --- 1. FIREBASE CONFIG ---
         const firebaseConfig = {
             apiKey: "AIzaSyDtwsvmYSONjFufhbJ5I8G_RAMffnh7re0",
             authDomain: "theplot-app.firebaseapp.com",
@@ -187,6 +226,7 @@
         const auth = getAuth(appInit); 
         const db = getFirestore(appInit);
 
+        // --- 2. GLOBAL STATE ---
         let state = {
             user: null, profile: null, prevXp: null, prevLvl: null, bundlePrice: '19.00', view: 'loading', prevView: 'dashboard',
             currentWeekTab: 1, authStep: 'phone', tempPhone: '', tempUploadData: null,
@@ -203,6 +243,7 @@
             renderTimeout = setTimeout(() => { requestAnimationFrame(() => { render(); }); }, 50);
         };
 
+        // --- 3. HELPER FUNCTIONS ---
         const getRelativeTime = (timestamp) => {
             if(!timestamp) return "Gerade eben";
             const diff = Math.floor((Date.now() - timestamp) / 1000);
@@ -216,6 +257,15 @@
         const getWeekYear = (d) => { const date = new Date(d.getTime()); date.setUTCDate(date.getDate() + 4 - (date.getDay()||7)); const yearStart = new Date(Date.UTC(date.getUTCFullYear(),0,1)); return `${date.getUTCFullYear()}-W${Math.ceil(( ( (date - yearStart) / 86400000) + 1)/7)}`; };
         const getPreviousWeekStr = () => { const d = new Date(); d.setDate(d.getDate() - 7); return getWeekYear(d); };
 
+        const getDistanceMeters = (lat1, lon1, lat2, lon2) => {
+            const R = 6371000;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        };
+
+        // --- 4. NOTIFICATION SYSTEMS ---
         window.showLiveNotification = (text, type = 'success', showPing = false) => {
             const notif = document.getElementById('live-notification-badge');
             const box = document.getElementById('live-notification-box');
@@ -225,10 +275,10 @@
             
             textEl.innerHTML = text; 
             if (type === 'error') {
-                box.className = "bg-black/95 backdrop-blur-md border border-red-500 shadow-[0_10px_40px_rgba(239,68,68,0.3)] rounded-full py-3 px-6 flex items-center justify-center gap-3";
+                box.className = "bg-black/95 backdrop-blur-md border border-red-500 shadow-[0_10px_40px_rgba(239,68,68,0.3)] rounded-sm py-3 px-6 flex items-center justify-center gap-3";
                 textEl.className = "text-red-400 text-[11px] font-bold uppercase tracking-widest text-center whitespace-normal break-words leading-snug w-full";
             } else {
-                box.className = "bg-black/95 backdrop-blur-md border border-[#ff4d00]/50 shadow-[0_10px_40px_rgba(255,77,0,0.3)] rounded-full py-3 px-6 flex items-center justify-center gap-3";
+                box.className = "bg-black/95 backdrop-blur-md border border-[#ff4d00]/50 shadow-[0_10px_40px_rgba(255,77,0,0.3)] rounded-sm py-3 px-6 flex items-center justify-center gap-3";
                 textEl.className = "text-white text-[11px] font-bold uppercase tracking-widest text-center whitespace-normal break-words leading-snug w-full";
             }
 
@@ -242,7 +292,20 @@
             window.notificationHideTimeout = setTimeout(() => { notif.classList.remove('show'); }, 4000);
         };
 
-        window.showToast = (msg, type = 'success') => { window.showLiveNotification(msg, type, false); };
+        window.showToast = (msg, type = 'success') => {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div'); 
+            toast.className = `toast ${type}`;
+            const icon = type === 'error' 
+                ? `<svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>` 
+                : `<svg class="w-5 h-5 text-[#ff4d00]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>`;
+            
+            toast.innerHTML = `${icon} <div><div class="font-black text-[10px] uppercase tracking-widest text-gray-400 mb-0.5">System</div><div>${msg}</div></div>`;
+            container.appendChild(toast); 
+            
+            setTimeout(() => toast.classList.add('show'), 10);
+            setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 4000);
+        };
 
         window.logActivity = async (type, text, customAlias = null, customIsPro = null) => {
             try {
@@ -250,40 +313,6 @@
                 const aliasToUse = customAlias || state.profile.alias; const isProToUse = customIsPro !== null ? customIsPro : !!state.profile.hasPremium;
                 await addDoc(collection(db, 'plot_activities'), { alias: aliasToUse, isPro: isProToUse, type: type, text: text, timestamp: Date.now() }).catch(err => {});
             } catch(e) {}
-        };
-
-        const getActiveWeek = () => {
-            if(!state.seasonConfig || !state.seasonConfig.start) return 1;
-            const now = new Date(); const start = new Date(state.seasonConfig.start);
-            if(now < start) return 1;
-            let firstSunday = new Date(start.getFullYear(), start.getMonth(), 1);
-            while (firstSunday.getDay() !== 0) firstSunday.setDate(firstSunday.getDate() + 1);
-            firstSunday.setHours(23, 59, 59, 999);
-            if (now.getTime() <= firstSunday.getTime()) return 1;
-            return Math.max(1, Math.min(2 + Math.floor((now.getTime() - firstSunday.getTime()) / (1000 * 60 * 60 * 24) / 7), 12));
-        };
-
-        const getSeasonStatus = () => {
-            if (!state.seasonConfig) return { status: 'loading' };
-            if (state.seasonConfig.active === false || state.seasonConfig.active === 'false') return { status: 'offline' };
-            const now = new Date(); const start = new Date(state.seasonConfig.start); const end = new Date(state.seasonConfig.end); end.setHours(23, 59, 59, 999);
-            if (now < start) return { status: 'upcoming', date: start }; if (now > end) return { status: 'ended', date: end }; return { status: 'active' };
-        };
-
-        const getSeasonName = () => {
-            const m = new Date().getMonth();
-            if (m >= 2 && m <= 4) return 'Spring';
-            if (m >= 5 && m <= 7) return 'Summer';
-            if (m >= 8 && m <= 10) return 'Fall';
-            return 'Winter';
-        };
-
-        const getDistanceMeters = (lat1, lon1, lat2, lon2) => {
-            const R = 6371000;
-            const dLat = (lat2 - lat1) * Math.PI / 180;
-            const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
-            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
         };
 
         window.triggerXpHud = (gainedXp, oldXp, newXp, oldLvl, newLvl) => {
@@ -310,68 +339,81 @@
             window.hudCloseTimeout = setTimeout(() => { hud.style.transform = 'translateY(-150%)'; hud.style.pointerEvents = 'none'; setTimeout(() => { hudLvl.classList.remove('animate-level-up'); }, 600); }, 5500);
         };
 
-        // DIE NEUE, ROBUSTE DEEP LINK FUNKTION
-        // Wartet, bis alle benötigten Daten (Profil + Missionen) vom Firebase Server da sind,
-        // und öffnet dann erst das Modal. Das verhindert Abstürze!
-        // Store pending deep-link verify ID immediately on page load (before auth)
+        // --- 5. SEASON LOGIC ---
+        const getActiveWeek = () => {
+            if(!state.seasonConfig || !state.seasonConfig.start) return 1;
+            const now = new Date(); const start = new Date(state.seasonConfig.start);
+            if(now < start) return 1;
+            let firstSunday = new Date(start.getFullYear(), start.getMonth(), 1);
+            while (firstSunday.getDay() !== 0) firstSunday.setDate(firstSunday.getDate() + 1);
+            firstSunday.setHours(23, 59, 59, 999);
+            if (now.getTime() <= firstSunday.getTime()) return 1;
+            return Math.max(1, Math.min(2 + Math.floor((now.getTime() - firstSunday.getTime()) / (1000 * 60 * 60 * 24) / 7), 12));
+        };
+
+        const getSeasonStatus = () => {
+            if (!state.seasonConfig) return { status: 'loading' };
+            if (state.seasonConfig.active === false || state.seasonConfig.active === 'false') return { status: 'offline' };
+            const now = new Date(); const start = new Date(state.seasonConfig.start); const end = new Date(state.seasonConfig.end); end.setHours(23, 59, 59, 999);
+            if (now < start) return { status: 'upcoming', date: start }; if (now > end) return { status: 'ended', date: end }; return { status: 'active' };
+        };
+
+        const getSeasonName = () => {
+            const m = new Date().getMonth();
+            if (m >= 2 && m <= 4) return 'Spring';
+            if (m >= 5 && m <= 7) return 'Summer';
+            if (m >= 8 && m <= 10) return 'Fall';
+            return 'Winter';
+        };
+        
+        window.updateCountdown = () => {
+            const el = document.getElementById('season-countdown');
+            if(!el || !state.seasonConfig) return;
+            const distance = new Date(state.seasonConfig.start).getTime() - new Date().getTime();
+            if (distance < 0) {
+                el.innerHTML = "LAUNCHING...";
+                if(window.countdownInterval) clearInterval(window.countdownInterval);
+                setTimeout(() => render(), 2000); 
+                return;
+            }
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            el.innerHTML = `${days}D ${hours.toString().padStart(2, '0')}H ${minutes.toString().padStart(2, '0')}M ${seconds.toString().padStart(2, '0')}S`;
+        };
+
+        // --- 6. DEEP LINKING ---
         const _pendingVerifyId = new URLSearchParams(window.location.search).get('verify');
-        if (_pendingVerifyId) {
-            window.history.replaceState({}, document.title, window.location.pathname);
-            window._pendingVerify = _pendingVerifyId;
-        }
+        if (_pendingVerifyId) { window.history.replaceState({}, document.title, window.location.pathname); window._pendingVerify = _pendingVerifyId; }
 
         const findItemById = (id) => {
             let item = state.habitData.find(h => h.id === id);
-            if (!item) {
-                for (let w in state.weeklyData) {
-                    const m = (state.weeklyData[w].missions || []).find(x => x.id === id);
-                    if (m) { item = m; break; }
-                }
-            }
+            if (!item) { for (let w in state.weeklyData) { const m = (state.weeklyData[w].missions || []).find(x => x.id === id); if (m) { item = m; break; } } }
             return item || null;
         };
 
         const openDeepLinkModal = (verifyId) => {
             window._pendingVerify = null;
-
             const doOpen = () => {
                 const item = findItemById(verifyId);
                 if (item) {
-                    if (item.type === 'instant') {
-                        window.claimInstantMission(item.id, Number(item.xp), item.name);
-                    } else {
-                        window.openVerifyModal(item.id, Number(item.xp), item.type, item.name, item.qr_solution || '');
-                        if (item.type === 'qr') setTimeout(() => window.startQRScanner(), 400);
-                    }
+                    if (item.type === 'instant') window.claimInstantMission(item.id, Number(item.xp), item.name);
+                    else { window.openVerifyModal(item.id, Number(item.xp), item.type, item.name, item.qr_solution || ''); if (item.type === 'qr') setTimeout(() => window.startQRScanner(), 400); }
                 } else {
-                    // ID not found — open scanner, use the raw ID as qrSolution
-                    window.openVerifyModal(verifyId, 0, 'qr', 'Check-In', verifyId);
-                    setTimeout(() => window.startQRScanner(), 400);
+                    window.openVerifyModal(verifyId, 0, 'qr', 'Check-In', verifyId); setTimeout(() => window.startQRScanner(), 400);
                 }
             };
-
-            if (state.view !== 'dashboard') {
-                state.view = 'dashboard';
-                window.scheduleRender();
-                // Wait for dashboard to fully render before opening modal
-                setTimeout(doOpen, 600);
-            } else {
-                // Already on dashboard — open straight away
-                doOpen();
-            }
+            if (state.view !== 'dashboard') { state.view = 'dashboard'; window.scheduleRender(); setTimeout(doOpen, 600); } else { doOpen(); }
         };
 
         const handleDeepLink = () => {
-            const verifyId = window._pendingVerify;
-            if (!verifyId || !state.profile) return;
-            // Data already loaded — open immediately
+            const verifyId = window._pendingVerify; if (!verifyId || !state.profile) return;
             const hasData = state.habitData.length > 0 || Object.keys(state.weeklyData || {}).length > 0;
-            if (hasData) {
-                openDeepLinkModal(verifyId);
-            }
-            // If no data yet — onSnapshot will call handleDeepLink again when data arrives
+            if (hasData) openDeepLinkModal(verifyId);
         };
 
+        // --- 7. DATA LOADING & NOTIFICATIONS ---
         const setupSeasonData = () => {
             onSnapshot(doc(db, 'system', 'grind_season'), (docSnap) => {
                 if (docSnap.exists()) {
@@ -384,7 +426,6 @@
                     state.currentWeekTab = getActiveWeek();
                 }
                 if(state.view === 'dashboard' || state.view === 'paywall') window.scheduleRender();
-                // Fire deep link as soon as season data is ready
                 if (window._pendingVerify) handleDeepLink();
             });
         };
@@ -398,7 +439,7 @@
             isShowingNotification = true;
             const act = notificationQueue.shift();
             const t = act.text.replace(/<[^>]*>?/gm, ''); 
-            window.showLiveNotification(`⚡ <span class="text-[#ff4d00]">${act.alias}</span> ${t}`, 'success', true);
+            window.showLiveNotification(`⚡ <span class="text-[#ff4d00] italic font-black uppercase">${act.alias}</span> ${t}`, 'success', true);
             setTimeout(() => { isShowingNotification = false; processNotificationQueue(); }, 4500); 
         };
 
@@ -407,7 +448,7 @@
             const feedActivities = (state.activities || []).filter(act => act.alias && feedUsersLower.includes(act.alias.toLowerCase())).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0)).slice(0, 10);
             
             if (feedActivities.length === 0) {
-                return `<div class="text-center p-8 text-gray-600 italic text-sm border border-white/5 rounded-xl bg-[#080808]">Deine Crew ist noch leer oder inaktiv. <br><span class="text-[#ff4d00] font-bold" onclick="window.openInviteModal()" style="cursor:pointer">Lade Freunde ein!</span></div>`;
+                return `<div class="text-center p-8 text-gray-600 italic text-sm border border-[#1f1f1f] rounded-sm bg-[#0a0a0a]">Deine Crew ist noch leer oder inaktiv. <br><span class="text-[#ff4d00] font-bold" onclick="window.openInviteModal()" style="cursor:pointer">Lade Freunde ein!</span></div>`;
             }
             
             let html = `<div class="space-y-4 relative before:absolute before:inset-y-0 before:left-[19px] before:w-[2px] before:bg-[#1f1f1f]">`;
@@ -418,7 +459,7 @@
                 else if (act.type === 'REDEEM') { iconSvg = 'M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7'; borderClass = isProUser ? 'border-[#a855f7]' : 'border-[#ff4d00]'; shadowClass = isProUser ? 'shadow-[0_0_10px_rgba(168,85,247,0.3)]' : 'shadow-[0_0_10px_rgba(255,77,0,0.3)]'; } 
                 else if (act.type === 'PRO') { iconSvg = 'M13 10V3L4 14h7v7l9-11h-7z'; colorClass = 'text-[#a855f7]'; borderClass = 'border-[#a855f7]'; shadowClass = 'shadow-[0_0_15px_rgba(168,85,247,0.4)]'; }
                 const nameColorClass = isProUser ? 'text-[#d8b4fe]' : 'text-[#ff4d00]', proBadge = isProUser ? `<span class="ml-2 align-middle bg-[#a855f7]/20 text-[#a855f7] border border-[#a855f7]/30 text-[8px] px-1.5 py-0.5 rounded-sm font-black shadow-[0_0_10px_rgba(168,85,247,0.2)]">PRO</span>` : '', dynamicText = act.text.replace(/text-\[#[a-fA-F0-9]+\]/g, isProUser ? 'text-[#a855f7]' : 'text-[#ff4d00]');
-                html += `<div class="flex gap-4 relative z-10"><div class="w-10 h-10 rounded-full bg-[#0a0a0a] border-2 ${borderClass} flex items-center justify-center flex-shrink-0 ${shadowClass}"><svg class="w-4 h-4 ${colorClass}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${iconSvg}"></path></svg></div><div class="bg-[#080808] border border-[#111] p-4 rounded-xl flex-1 shadow-sm"><p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">${getRelativeTime(act.timestamp)}</p><p class="text-sm font-medium text-gray-300"><span class="${nameColorClass} italic uppercase font-black">${act.alias}</span>${proBadge} <span class="text-gray-400 text-xs">${dynamicText}</span></p></div></div>`;
+                html += `<div class="flex gap-4 relative z-10"><div class="w-10 h-10 rounded-full bg-[#0a0a0a] border-2 ${borderClass} flex items-center justify-center flex-shrink-0 ${shadowClass}"><svg class="w-4 h-4 ${colorClass}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${iconSvg}"></path></svg></div><div class="card p-4 rounded-sm flex-1"><p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">${getRelativeTime(act.timestamp)}</p><p class="text-sm font-medium text-gray-300"><span class="${nameColorClass} italic uppercase font-black">${act.alias}</span>${proBadge} <span class="text-gray-400 text-xs">${dynamicText}</span></p></div></div>`;
             });
             html += `</div>`; return html;
         };
@@ -442,7 +483,7 @@
                         if (['loading', 'auth', 'onboarding'].includes(state.view)) {
                             state.view = 'dashboard'; state.dashboardNeedsScroll = true;
                         }
-                        // Check for unread announcements (stored timestamp in localStorage)
+
                         import('https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js').then(({ getDocs, query: q, collection: col, orderBy: ob, limit: lim }) => {
                             getDocs(q(col(db, 'grind_announcements'), ob('timestamp','desc'), lim(1))).then(snap => {
                                 if (!snap.empty) {
@@ -453,8 +494,8 @@
                                 }
                             }).catch(() => {});
                         }).catch(() => {});
+                        
                         window.scheduleRender();
-                        // Fire deep link once profile is ready (season data may still load)
                         if (window._pendingVerify) handleDeepLink();
                     } else { state.view = 'onboarding'; window.scheduleRender(); }
                 });
@@ -485,9 +526,7 @@
             } else { state.user = null; state.profile = null; state.view = 'auth'; state.authStep = 'phone'; window.scheduleRender(); }
         });
 
-        // Deep link fires from inside onSnapshot callbacks (profile + season data)
-        // Nothing to do here at load time — Firebase isn't ready yet
-
+        // --- 8. MODALS & CREW ---
         window.claimItemById = (mid) => {
             const item = findItemById(mid);
             if (!item) return;
@@ -495,29 +534,31 @@
             else window.openVerifyModal(item.id, Number(item.xp), item.type, item.name, item.qr_solution || '');
         };
 
+        window._h5qr = null;
+
+        window.stopQRScanner = () => {
+            if (!window._h5qr) return;
+            try { window._h5qr.stop().then(() => { try { window._h5qr.clear(); } catch(e){} window._h5qr = null; }).catch(() => { window._h5qr = null; }); } catch(e) { window._h5qr = null; }
+        };
+
         window.closeModal = () => {
+            window.stopQRScanner();
             if(window.stopRedeemHold) window.stopRedeemHold(); 
-            const forceClose = () => { const container = document.getElementById('modal-container'); if(container) { container.classList.remove('opacity-100'); container.classList.add('opacity-0', 'pointer-events-none'); setTimeout(() => container.innerHTML = '', 300); } };
-            if(window.html5QrCode) {
-                try {
-                    if(window.html5QrCode.getState() === 2) { let closed = false; const finish = () => { if(closed) return; closed = true; window.html5QrCode = null; forceClose(); }; window.html5QrCode.stop().then(() => { try { window.html5QrCode.clear(); } catch(e){} finish(); }).catch(finish); setTimeout(finish, 800); return; } 
-                    else { window.html5QrCode.clear(); window.html5QrCode = null; }
-                } catch(e) { window.html5QrCode = null; }
-            }
-            forceClose();
+            const container = document.getElementById('modal-container');
+            if(container) { container.classList.remove('opacity-100'); container.classList.add('opacity-0', 'pointer-events-none'); setTimeout(() => container.innerHTML = '', 300); }
         };
 
         window.openModal = (contentHtml) => {
             let container = document.getElementById('modal-container');
             if(!container) { container = document.createElement('div'); container.id = 'modal-container'; container.className = 'fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300 overflow-y-auto'; document.body.appendChild(container); }
-            container.innerHTML = `<div class="bg-[#0a0a0a] border border-white/10 p-8 rounded-xl max-w-md w-full shadow-[0_20px_50px_rgba(0,0,0,0.7)] transform scale-95 transition-transform duration-300 relative my-auto overflow-hidden"><div class="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-50 pointer-events-none"></div><button type="button" onclick="window.closeModal()" class="absolute top-4 right-4 text-gray-500 hover:text-white z-50"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button><div class="relative z-10">${contentHtml}</div></div>`;
+            container.innerHTML = `<div class="bg-[#0a0a0a] border border-[#1f1f1f] p-8 rounded-sm max-w-md w-full shadow-[0_0_40px_rgba(255,77,0,0.1)] transform scale-95 transition-transform duration-300 relative my-auto overflow-hidden"><button type="button" onclick="window.closeModal()" class="absolute top-4 right-4 text-gray-500 hover:text-white z-50"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button><div class="relative z-10">${contentHtml}</div></div>`;
             setTimeout(() => { container.classList.remove('opacity-0', 'pointer-events-none'); container.classList.add('opacity-100'); container.firstElementChild.classList.remove('scale-95'); container.firstElementChild.classList.add('scale-100'); }, 10);
         };
 
         window.openInviteModal = () => {
             if(!state.profile) return;
             const link = `${window.location.origin}/?crew=${state.profile.crewCode || ''}`; const nextXpBounty = ((state.profile.friends || []).length + 1) * 100;
-            let html = `<p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">Network</p><h3 class="text-2xl font-black italic uppercase tracking-tighter mb-6">Crew Erweitern</h3><div class="bg-[#1f1f1f] p-5 rounded-lg mb-6 border border-white/10 relative overflow-hidden group"><div class="absolute inset-0 bg-gradient-to-r from-[#ff4d00]/10 to-transparent"></div><div class="relative z-10 flex items-center gap-4"><div class="w-10 h-10 rounded-full border border-[#ff4d00]/30 flex items-center justify-center bg-[#0a0a0a]"><svg class="w-5 h-5 text-[#ff4d00]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg></div><div><p class="text-[#ff4d00] font-black italic uppercase tracking-widest text-sm">Bounty Active</p><p class="text-gray-400 text-[10px] font-medium mt-1 leading-relaxed">Jeder Grinder, der joint, bringt dir <span class="text-white font-bold">+${nextXpBounty} XP</span>.</p></div></div></div><div class="bg-[#111] p-5 rounded-lg mb-6 border border-white/5"><p class="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-3">Option 1: Link teilen</p><div class="flex gap-2"><input type="text" readonly value="${link}" class="flex-1 p-3 bg-black border border-[#333] rounded-md text-xs text-gray-400 outline-none truncate selection:bg-[#ff4d00] selection:text-white"><button type="button" onclick="window.shareLink('${link}')" class="bg-[#1f1f1f] border border-gray-700 text-white px-4 rounded-md hover:bg-[#ff4d00] hover:border-[#ff4d00] transition flex-shrink-0" title="Teilen"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg></button></div></div><div class="bg-[#111] p-5 rounded-lg mb-6 border border-white/5"><p class="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-3">Option 2: Code eingeben</p><form onsubmit="window.submitManualCode(event)" class="flex gap-2"><input id="manual_crew_code" type="text" placeholder="CODE..." required class="flex-1 p-3 bg-black border border-[#333] rounded-md text-sm text-white outline-none focus:border-[#ff4d00] uppercase font-bold tracking-widest"><button type="submit" class="bg-white text-black font-black uppercase tracking-widest px-4 rounded-md hover:bg-[#ff4d00] hover:text-white transition text-xs">Add</button></form></div><button type="button" onclick="window.closeModal()" class="w-full bg-[#111] text-gray-400 hover:bg-white hover:text-black font-black italic uppercase py-3 transition text-xs border border-white/5 rounded-lg">Schließen</button>`;
+            let html = `<p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">Network</p><h3 class="text-2xl font-black italic uppercase tracking-tighter mb-6">Crew Erweitern</h3><div class="bg-[#1f1f1f] p-5 rounded-sm mb-6 border border-white/10 relative overflow-hidden group"><div class="absolute inset-0 bg-gradient-to-r from-[#ff4d00]/10 to-transparent"></div><div class="relative z-10 flex items-center gap-4"><div class="w-10 h-10 rounded-full border border-[#ff4d00]/30 flex items-center justify-center bg-[#0a0a0a]"><svg class="w-5 h-5 text-[#ff4d00]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg></div><div><p class="text-[#ff4d00] font-black italic uppercase tracking-widest text-sm">Bounty Active</p><p class="text-gray-400 text-[10px] font-medium mt-1 leading-relaxed">Jeder Grinder, der joint, bringt dir <span class="text-white font-bold">+${nextXpBounty} XP</span>.</p></div></div></div><div class="bg-[#111] p-5 rounded-sm mb-6 border border-white/5"><p class="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-3">Option 1: Link teilen</p><div class="flex gap-2"><input type="text" readonly value="${link}" class="flex-1 p-3 bg-black border border-[#333] rounded-sm text-xs text-gray-400 outline-none truncate selection:bg-[#ff4d00] selection:text-white"><button type="button" onclick="window.shareLink('${link}')" class="bg-[#1f1f1f] border border-gray-700 text-white px-4 rounded-sm hover:bg-[#ff4d00] hover:border-[#ff4d00] transition flex-shrink-0" title="Teilen"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg></button></div></div><div class="bg-[#111] p-5 rounded-sm mb-6 border border-white/5"><p class="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-3">Option 2: Code eingeben</p><form onsubmit="window.submitManualCode(event)" class="flex gap-2"><input id="manual_crew_code" type="text" placeholder="CODE..." required class="flex-1 p-3 bg-black border border-[#333] rounded-sm text-sm text-white outline-none focus:border-[#ff4d00] uppercase font-bold tracking-widest"><button type="submit" class="bg-white text-black font-black uppercase tracking-widest px-4 rounded-sm hover:bg-[#ff4d00] hover:text-white transition text-xs">Add</button></form></div><button type="button" onclick="window.closeModal()" class="w-full bg-[#111] text-gray-400 hover:bg-white hover:text-black font-black italic uppercase py-3 transition text-xs border border-white/5 rounded-sm">Schließen</button>`;
             window.openModal(html);
         };
 
@@ -545,7 +586,7 @@
                 const theirData = snap.docs[0].data(); const theirUid = snap.docs[0].id; const theirAlias = theirData.alias || 'Grinder';
                 if ((state.profile.friends || []).some(f => f.toLowerCase() === theirAlias.toLowerCase())) return window.showToast(`Bereits verbunden.`, "info");
                 const nextXpBounty = ((state.profile.friends || []).length + 1) * 100;
-                let html = `<div class="text-center"><div class="w-16 h-16 bg-[#1f1f1f] rounded-full mx-auto mb-4 border-2 border-[#ff4d00] flex items-center justify-center animate-pulse-slow"><svg class="w-8 h-8 text-[#ff4d00]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg></div><h3 class="text-3xl font-black italic uppercase tracking-tighter mb-2">${theirAlias}</h3><p class="text-gray-400 text-[11px] mb-6 leading-relaxed max-w-[200px] mx-auto">Möchtest du dich mit diesem Grinder verbinden?</p><div class="bg-[#ff4d00]/10 border border-[#ff4d00]/30 py-2 px-4 rounded-md inline-block mb-6 shadow-[0_0_10px_rgba(255,77,0,0.2)]"><p class="text-[#ff4d00] font-black italic uppercase tracking-widest text-sm">+${nextXpBounty} XP BOUNTY</p></div><button type="button" onclick="window.confirmFriend('${theirUid}', '${theirAlias}')" class="w-full btn-grind py-4 mb-3">Akzeptieren</button><button type="button" onclick="window.closeModal()" class="text-xs text-gray-500 uppercase tracking-widest font-bold hover:text-white transition py-2">Abbrechen</button></div>`;
+                let html = `<div class="text-center"><div class="w-16 h-16 bg-[#1f1f1f] rounded-full mx-auto mb-4 border-2 border-[#ff4d00] flex items-center justify-center animate-pulse-slow"><svg class="w-8 h-8 text-[#ff4d00]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg></div><h3 class="text-3xl font-black italic uppercase tracking-tighter mb-2">${theirAlias}</h3><p class="text-gray-400 text-[11px] mb-6 leading-relaxed max-w-[200px] mx-auto">Möchtest du dich mit diesem Grinder verbinden?</p><div class="bg-[#ff4d00]/10 border border-[#ff4d00]/30 py-2 px-4 rounded-sm inline-block mb-6 shadow-[0_0_10px_rgba(255,77,0,0.2)]"><p class="text-[#ff4d00] font-black italic uppercase tracking-widest text-sm">+${nextXpBounty} XP BOUNTY</p></div><button type="button" onclick="window.confirmFriend('${theirUid}', '${theirAlias}')" class="w-full btn-grind py-4 mb-3">Akzeptieren & Verbinden</button><button type="button" onclick="window.closeModal()" class="text-xs text-gray-500 uppercase tracking-widest font-bold hover:text-white transition py-2">Abbrechen</button></div>`;
                 window.openModal(html);
             } catch(e) { window.showToast("Netzwerkfehler.", "error"); }
         };
@@ -569,8 +610,8 @@
                 await updateDoc(doc(db, 'plot_users', state.user.uid), { friends: arrayUnion(theirAlias), xp: newXp, lvl: newLvl });
                 await window.logActivity('MISSION', `hat das Network erweitert (+${myNextXpBounty} XP Bounty).`);
                 if(newLvl > oldLvl) await window.logActivity('LEVEL_UP', `hat <span class="font-bold">Level ${newLvl}</span> erreicht!`);
-                window.closeModal(); window.showToast(`+${myNextXpBounty} XP! Du bist jetzt mit ${theirAlias} verbunden!`, "success");
-            } catch(e) { window.showToast("Fehler.", "error"); }
+                window.closeModal(); window.showToast(`+${myNextXpBounty} XP! Du bist jetzt mit ${theirAlias} in einer Crew!`, "success");
+            } catch(e) { window.showToast("Fehler beim Verbinden.", "error"); }
         };
 
         window.submitShipping = async (lvl, tier) => {
@@ -588,22 +629,12 @@
                 
                 try { 
                     fetch("https://api.web3forms.com/submit", { 
-                        method: "POST", 
-                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, 
-                        body: JSON.stringify({ 
-                            access_key: "3caac5da-214e-4294-9266-ef4dc37e451b",
-                            subject: "Loot: " + itemName, 
-                            from_name: "Grind-App Rewards",
-                            Artikel: itemName, 
-                            Alias: state.profile?.alias || 'Grinder', 
-                            Level: String(lvl), 
-                            Tier: tier.toUpperCase(), 
-                            ...addressData 
-                        }) 
+                        method: "POST", headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, 
+                        body: JSON.stringify({ access_key: "3caac5da-214e-4294-9266-ef4dc37e451b", subject: "Loot Bestellung: " + itemName, from_name: "GRIND. System", Artikel: itemName, Alias: state.profile?.alias || 'Grinder', Level: String(lvl), Tier: tier.toUpperCase(), ...addressData }) 
                     }).catch(e => {}); 
                 } catch(mailErr) {}
 
-                window.logActivity('REDEEM', `hat physischen Reward ('<span class="font-bold">${itemName}</span>') angefordert.`);
+                window.logActivity('REDEEM', `hat physischen Loot ('<span class="font-bold">${itemName}</span>') angefordert.`);
                 window.showToast("Anfrage gesendet!", "success"); window.closeModal();
             } catch(e) { window.showToast("Fehler.", "error"); if(btn) { btn.innerText = "Versand anfordern"; btn.disabled = false; } }
         };
@@ -643,15 +674,6 @@
             } catch(e) { window.showToast("Fehler.", "error"); if(btn) { btn.innerText = "Claim XP"; btn.disabled = false; } }
         };
 
-        window._h5qr = null;
-
-        window.stopQRScanner = () => {
-            if (!window._h5qr) return;
-            try {
-                window._h5qr.stop().then(() => { try { window._h5qr.clear(); } catch(e){} window._h5qr = null; }).catch(() => { window._h5qr = null; });
-            } catch(e) { window._h5qr = null; }
-        };
-
         window.startQRScanner = () => {
             const placeholder = document.getElementById('qr-placeholder');
             const readerEl = document.getElementById('qr-reader');
@@ -660,45 +682,25 @@
             readerEl.style.minHeight = '300px';
 
             const onDecoded = (text) => {
-                window.stopQRScanner();
-                readerEl.classList.add('hidden');
-                placeholder.classList.remove('hidden');
+                window.stopQRScanner(); readerEl.classList.add('hidden'); placeholder.classList.remove('hidden');
                 document.getElementById('verify_code_input').value = text;
-                if (window.currentVerify && window.currentVerify.qrSolution) {
-                    window.checkCode(text);
-                } else {
-                    window.showToast('Code erfasst!', 'success');
-                }
+                if (window.currentVerify && window.currentVerify.qrSolution) { window.checkCode(text); } else { window.showToast('Code erfasst!', 'success'); }
             };
 
             try {
                 window._h5qr = new Html5Qrcode('qr-reader');
                 window._h5qr.start(
                     { facingMode: 'environment' },
-                    {
-                        fps: 10,
-                        qrbox: (w, h) => { const s = Math.floor(Math.min(w, h) * 0.7); return { width: s, height: s }; },
-                        aspectRatio: 1.333,
-                        experimentalFeatures: { useBarCodeDetectorIfSupported: true }
-                    },
-                    onDecoded,
-                    () => {}
+                    { fps: 10, qrbox: (w, h) => { const s = Math.floor(Math.min(w, h) * 0.7); return { width: s, height: s }; }, aspectRatio: 1.333, experimentalFeatures: { useBarCodeDetectorIfSupported: true } },
+                    onDecoded, () => {}
                 ).catch(() => {
                     window.showToast('Kamera Zugriff verweigert.', 'error');
-                    readerEl.classList.add('hidden');
-                    placeholder.classList.remove('hidden');
+                    readerEl.classList.add('hidden'); placeholder.classList.remove('hidden');
                 });
-            } catch(e) {
-                window.showToast('Scanner konnte nicht gestartet werden.', 'error');
-                readerEl.classList.add('hidden');
-                placeholder.classList.remove('hidden');
-            }
+            } catch(e) { window.showToast('Scanner Fehler.', 'error'); readerEl.classList.add('hidden'); placeholder.classList.remove('hidden'); }
         };
 
-        const _origCloseModal = window.closeModal;
-        window.closeModal = () => { window.stopQRScanner(); if(_origCloseModal) _origCloseModal(); };
-
-                window.triggerFileInput = () => document.getElementById('proof_file_input').click();
+        window.triggerFileInput = () => document.getElementById('proof_file_input').click();
         window.handleFileSelect = (e) => {
             const file = e.target.files[0]; if(!file) return; const reader = new FileReader();
             reader.onload = (ev) => { 
@@ -714,11 +716,11 @@
 
         window.openVerifyModal = (mid, xp, type, name, qrSolution = '') => {
             state.tempUploadData = null; window.currentVerify = { mid, xp, name, type, qrSolution };
-            let html = `<p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">Verify Action</p><h3 class="text-2xl font-black italic uppercase tracking-tighter mb-6">${name}</h3>`;
+            let html = `<p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">Verify Operation</p><h3 class="text-2xl font-black italic uppercase tracking-tighter mb-6">${name}</h3>`;
             if(type === 'qr') {
-                html += `<div id="qr-placeholder" onclick="window.startQRScanner()" class="border border-dashed border-white/20 p-8 mb-4 flex flex-col items-center justify-center bg-black/50 rounded-lg hover:border-[#ff4d00] cursor-pointer transition"><svg class="w-12 h-12 text-[#ff4d00] mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg><p class="text-xs text-white font-bold uppercase tracking-widest text-center">Kamera aktivieren</p></div><div id="qr-reader" class="hidden w-full mb-4 rounded-lg overflow-hidden border border-[#1f1f1f]"></div><input id="verify_code_input" type="text" placeholder="Oder Code manuell eingeben" class="w-full p-4 bg-[#0f0f0f] border border-[#1f1f1f] rounded-lg outline-none focus:border-[#ff4d00] text-white text-center text-sm tracking-widest uppercase mb-6">`;
+                html += `<div id="qr-placeholder" onclick="window.startQRScanner()" class="border-2 border-dashed border-[#1f1f1f] p-8 mb-4 flex flex-col items-center justify-center bg-black/50 rounded-sm hover:border-[#ff4d00] cursor-pointer transition"><svg class="w-12 h-12 text-[#ff4d00] mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg><p class="text-xs text-white font-bold uppercase tracking-widest text-center">Kamera aktivieren</p></div><div id="qr-reader" class="hidden w-full mb-4 rounded-sm overflow-hidden border border-[#1f1f1f]"></div><input id="verify_code_input" type="text" placeholder="Oder Code manuell eingeben" class="w-full p-4 bg-[#0f0f0f] border border-[#1f1f1f] rounded-sm outline-none focus:border-[#ff4d00] text-white text-center text-sm tracking-widest uppercase mb-6">`;
             } else {
-                html += `<input type="file" id="proof_file_input" accept="image/*" class="hidden" onchange="window.handleFileSelect(event)"><div onclick="window.triggerFileInput()" class="border border-dashed border-white/20 min-h-[150px] p-2 mb-6 flex flex-col items-center justify-center bg-black/50 rounded-lg hover:border-[#ff4d00] transition cursor-pointer overflow-hidden relative"><div id="upload-placeholder" class="text-center"><svg class="w-12 h-12 text-[#ff4d00] mb-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg><p class="text-xs text-white font-bold uppercase tracking-widest">Beweisfoto hochladen</p></div><img id="upload-preview" class="hidden absolute inset-0 w-full h-full object-cover"></div>`;
+                html += `<input type="file" id="proof_file_input" accept="image/*" class="hidden" onchange="window.handleFileSelect(event)"><div onclick="window.triggerFileInput()" class="border-2 border-dashed border-[#1f1f1f] min-h-[150px] p-2 mb-6 flex flex-col items-center justify-center bg-black/50 rounded-sm hover:border-[#ff4d00] transition cursor-pointer overflow-hidden relative"><div id="upload-placeholder" class="text-center"><svg class="w-12 h-12 text-[#ff4d00] mb-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg><p class="text-xs text-white font-bold uppercase tracking-widest">Beweisfoto hochladen</p></div><img id="upload-preview" class="hidden absolute inset-0 w-full h-full object-cover"></div>`;
             }
             if (type === 'qr' && qrSolution) { html += `<button type="button" onclick="window.checkCode()" class="w-full btn-grind py-4">Code Prüfen</button>`; } else { html += `<button type="button" onclick="window.submitVerification()" class="w-full btn-grind py-4">Senden zur Prüfung</button>`; }
             window.openModal(html);
@@ -728,14 +730,8 @@
             let val = scannedValue || document.getElementById('verify_code_input').value.trim(); 
             if(!window.currentVerify) return; 
             
-            // In-App Scanner filtert korrekterweise die ID aus Deep-Links heraus
             if (val.includes('?verify=')) {
-                try {
-                    const urlObj = new URL(val);
-                    val = urlObj.searchParams.get('verify') || val;
-                } catch(e) {
-                    val = val.split('?verify=')[1] || val;
-                }
+                try { val = new URL(val).searchParams.get('verify') || val; } catch(e) { val = val.split('?verify=')[1] || val; }
             }
 
             const { mid, xp, name, qrSolution } = window.currentVerify; 
@@ -744,7 +740,7 @@
             if (val.toLowerCase() === qrSolution.toLowerCase()) {
                 const btn = document.querySelector('#modal-container button.btn-grind'); if(btn) { btn.innerText = "Verifying..."; btn.disabled = true; }
                 
-                // GEOFENCING: check lat/lng on mission item directly, then fallback to spots
+                // --- GEOFENCING LOGIC ---
                 const habitForGeo = state.habitData.find(h => h.id === mid);
                 let missionForGeo = habitForGeo;
                 if (!missionForGeo?.lat) {
@@ -753,24 +749,20 @@
                         if (found?.lat) { missionForGeo = found; break; }
                     }
                 }
+                
                 if (missionForGeo?.lat && missionForGeo?.lng) {
-                    // Ask permission first with friendly explanation
                     const permResult = await new Promise((res) => {
                         if (!navigator.geolocation) { res('skip'); return; }
                         navigator.permissions?.query({ name: 'geolocation' }).then(p => {
-                            if (p.state === 'denied') res('denied');
-                            else if (p.state === 'granted') res('ok');
-                            else res('prompt'); // 'prompt' = noch nicht gefragt
-                        }).catch(() => res('ok')); // permissions API nicht verfügbar
+                            if (p.state === 'denied') res('denied'); else if (p.state === 'granted') res('ok'); else res('prompt'); 
+                        }).catch(() => res('ok')); 
                     });
                     if (permResult === 'denied') {
                         window.showToast("📍 Standort ist gesperrt. In Browser-Einstellungen freigeben, um vor Ort zu claimen.", "error");
-                        if(btn) { btn.innerText = "Code Prüfen"; btn.disabled = false; }
-                        return;
+                        if(btn) { btn.innerText = "Code Prüfen"; btn.disabled = false; } return;
                     }
-                    if (permResult === 'prompt') {
-                        window.showToast("📍 Bitte Standort einmalig freigeben – nur zur Vor-Ort-Verifikation.", "info");
-                    }
+                    if (permResult === 'prompt') window.showToast("📍 Bitte Standort einmalig freigeben – nur zur Vor-Ort-Verifikation.", "info");
+                    
                     try {
                         await new Promise((resolve, reject) => {
                             navigator.geolocation.getCurrentPosition(
@@ -779,19 +771,17 @@
                                     if (dist > 150) reject(new Error(`📍 Du bist ${Math.round(dist)}m entfernt. Check-in nur vor Ort möglich.`));
                                     else resolve();
                                 },
-                                (err) => {
-                                    if (err.code === 1) reject(new Error("📍 Standort verweigert. Bitte in den Browser-Einstellungen freigeben."));
-                                    else resolve(); // Timeout / unavailable → allow
-                                },
+                                (err) => { if (err.code === 1) reject(new Error("📍 Standort verweigert.")); else resolve(); },
                                 { timeout: 8000, maximumAge: 30000, enableHighAccuracy: true }
                             );
                         });
                     } catch(geoErr) {
                         window.showToast(geoErr.message, "error");
-                        if(btn) { btn.innerText = "Code Prüfen"; btn.disabled = false; }
-                        return;
+                        if(btn) { btn.innerText = "Code Prüfen"; btn.disabled = false; } return;
                     }
                 }
+                // --- END GEOFENCING ---
+
                 try {
                     const habit = state.habitData.find(h => h.id === mid); const oldLvl = state.profile.lvl || 1; let newLvl = oldLvl; let updatePayload = {}; let claimSuccess = false;
                     if (habit) {
@@ -819,7 +809,7 @@
                         await setDoc(doc(db, 'plot_users', state.user.uid), updatePayload, { merge: true }); 
                         const newXpVal = updatePayload.xp || oldXpVal;
                         window.triggerXpHud(newXpVal - oldXpVal, oldXpVal, newXpVal, oldLvl, newLvl);
-                        window.logActivity('MISSION', `hat '<span class="font-bold text-white">${name}</span>' absolviert.`);
+                        window.logActivity('MISSION', `hat die Operation '<span class="font-bold text-white">${name}</span>' absolviert.`);
                         if(newLvl > oldLvl) window.logActivity('LEVEL_UP', `hat <span class="font-bold">Level ${newLvl}</span> erreicht!`);
                     }
                     window.closeModal();
@@ -856,7 +846,7 @@
             try {
                 const reward = state.rewardData.find(r => r.lvl === lvl); const itemName = reward ? reward[tier] : 'Reward'; const currentRedeemed = state.profile.redeemed || [];
                 if(!currentRedeemed.includes(rewardId)) { currentRedeemed.push(rewardId); await setDoc(doc(db, 'plot_users', state.user.uid), { redeemed: currentRedeemed }, { merge: true }); }
-                const container = document.getElementById('redeem-container'); if(container) { container.innerHTML = `<div class="flex flex-col items-center justify-center py-6 animate-pop"><div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mb-4 shadow-[0_0_30px_rgba(34,197,94,0.5)]"><svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></div><h4 class="text-white font-black italic text-xl uppercase tracking-widest text-center">Reward<br>eingelöst</h4></div>`; }
+                const container = document.getElementById('redeem-container'); if(container) { container.innerHTML = `<div class="flex flex-col items-center justify-center py-6 animate-pop"><div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mb-4 shadow-[0_0_30px_rgba(34,197,94,0.5)]"><svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></div><h4 class="text-white font-black italic text-xl uppercase tracking-widest text-center">Ticket<br>eingelöst</h4><p class="text-gray-400 text-xs mt-3 text-center">Dieser Loot wurde erfolgreich<br>abgebucht.</p></div>`; }
                 window.logActivity('REDEEM', `hat '<span class="font-bold">${itemName}</span>' eingelöst.`); window.showToast("Eingelöst!", "success");
             } catch (e) { window.showToast("Fehler.", "error"); window.stopRedeemHold(); } finally { isRedeeming = false; }
         };
@@ -879,85 +869,40 @@
             const isAlreadyRedeemed = (state.profile.redeemed || []).includes(`lvl${lvl}_${tier}`); let contentHtml = '';
             
             if (isAlreadyRedeemed && (type === 'qr' || type === 'shipping' || type === 'xp' || type === 'lvl')) { 
-                contentHtml = `<div class="bg-[#111] p-8 rounded-xl flex flex-col items-center justify-center mb-6 border border-white/5 shadow-inner"><div class="w-12 h-12 rounded-full border-2 border-gray-600 flex items-center justify-center mb-4 opacity-50"><svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div><p class="text-xs text-gray-500 uppercase tracking-widest font-bold text-center">Bereits eingelöst</p></div>`; 
+                contentHtml = `<div class="bg-[#111] p-8 rounded-sm flex flex-col items-center justify-center mb-6 border border-white/5 shadow-inner"><div class="w-12 h-12 rounded-full border-2 border-gray-600 flex items-center justify-center mb-4 opacity-50"><svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div><p class="text-xs text-gray-500 uppercase tracking-widest font-bold text-center">Bereits eingelöst</p></div>`; 
             } else if (type === 'link') { 
-                contentHtml = `<div class="bg-[#1f1f1f] p-6 rounded-xl flex flex-col items-center justify-center mb-6 border ${borderClass}"><p class="text-xs text-gray-400 mb-4 uppercase tracking-widest font-bold">Access Code / Link</p>${info.startsWith('http') ? `<a href="${info}" target="_blank" class="w-full ${bgClass} text-white font-black py-3 px-4 rounded-md text-center uppercase tracking-widest hover:opacity-80 transition">Link öffnen</a>` : `<div class="w-full bg-black text-white font-mono text-xl py-3 px-4 rounded-md text-center select-all border border-white/10">${info}</div>`}</div>`; 
+                contentHtml = `<div class="bg-[#1f1f1f] p-6 rounded-sm flex flex-col items-center justify-center mb-6 border ${borderClass}"><p class="text-xs text-gray-400 mb-4 uppercase tracking-widest font-bold">Access Code / Link</p>${info.startsWith('http') ? `<a href="${info}" target="_blank" class="w-full ${bgClass} text-white font-black py-3 px-4 rounded-sm text-center uppercase tracking-widest hover:opacity-80 transition">Link öffnen</a>` : `<div class="w-full bg-black text-white font-mono text-xl py-3 px-4 rounded-sm text-center select-all border border-white/10">${info}</div>`}</div>`; 
             } else if (type === 'xp' || type === 'lvl') { 
-                contentHtml = `<div class="bg-[#1f1f1f] p-6 rounded-xl flex flex-col mb-6 border ${borderClass} shadow-2xl relative overflow-hidden"><div class="absolute top-0 right-0 bg-[#000] px-2 py-1 text-[8px] font-bold text-gray-500 uppercase tracking-widest rounded-bl-lg">Instant Boost</div><p class="text-[11px] text-gray-300 mb-8 leading-relaxed text-center font-medium">Fügt deinem Account direkt XP/Level hinzu.<br><span class="text-white font-black uppercase tracking-widest block mt-3 text-2xl ${textClass}">+${info} ${type === 'xp' ? 'XP' : 'Level'}</span></p><button type="button" id="boost-claim-btn" onclick="window.claimBoost(${lvl}, '${tier}', '${type}', '${info}')" class="w-full ${bgClass} text-white font-black py-4 px-4 rounded-md text-sm uppercase tracking-widest shadow-[0_0_20px_rgba(255,77,0,0.4)] hover:scale-[1.02] transition">BOOST AKTIVIEREN</button></div>`; 
+                contentHtml = `<div class="bg-[#1f1f1f] p-6 rounded-sm flex flex-col mb-6 border ${borderClass} shadow-2xl relative overflow-hidden"><div class="absolute top-0 right-0 bg-[#000] px-2 py-1 text-[8px] font-bold text-gray-500 uppercase tracking-widest rounded-bl-sm">Instant Boost</div><p class="text-[11px] text-gray-300 mb-8 leading-relaxed text-center font-medium">Fügt deinem Account direkt XP/Level hinzu.<br><span class="text-white font-black uppercase tracking-widest block mt-3 text-2xl ${textClass}">+${info} ${type === 'xp' ? 'XP' : 'Level'}</span></p><button type="button" id="boost-claim-btn" onclick="window.claimBoost(${lvl}, '${tier}', '${type}', '${info}')" class="w-full ${bgClass} text-white font-black py-4 px-4 rounded-sm text-sm uppercase tracking-widest shadow-[0_0_20px_rgba(255,77,0,0.4)] hover:scale-[1.02] transition">BOOST AKTIVIEREN</button></div>`; 
             } else if (type === 'qr') { 
-                contentHtml = `<div id="redeem-container" class="bg-[#1f1f1f] p-6 rounded-xl flex flex-col mb-6 border ${borderClass} shadow-2xl relative overflow-hidden"><div class="absolute top-0 right-0 bg-[#000] px-2 py-1 text-[8px] font-bold text-gray-500 uppercase tracking-widest rounded-bl-lg">One-Time Use</div><p class="text-[11px] text-gray-300 mb-8 leading-relaxed text-center font-medium">${info}<br><span class="text-white font-black uppercase tracking-widest block mt-3 border-t border-white/10 pt-3">Das Personal muss das Einlösen bestätigen!</span></p><div onmousedown="window.startRedeemHold(${lvl}, '${tier}', event)" onmouseup="window.stopRedeemHold()" onmouseleave="window.stopRedeemHold()" ontouchstart="window.startRedeemHold(${lvl}, '${tier}', event)" ontouchend="window.stopRedeemHold()" class="relative w-full h-16 bg-black border border-white/20 rounded-md overflow-hidden cursor-pointer flex items-center justify-center group"><div id="redeem-btn-fill" class="absolute left-0 top-0 bottom-0 w-0 ${bgClass} z-0" style="transition: none;"></div><span id="redeem-btn-text" class="relative z-10 text-white font-black italic uppercase tracking-widest text-sm pointer-events-none drop-shadow-md">Hold to Redeem</span></div></div>`; 
+                contentHtml = `<div id="redeem-container" class="bg-[#1f1f1f] p-6 rounded-sm flex flex-col mb-6 border ${borderClass} shadow-2xl relative overflow-hidden"><div class="absolute top-0 right-0 bg-[#000] px-2 py-1 text-[8px] font-bold text-gray-500 uppercase tracking-widest rounded-bl-sm">One-Time Use</div><p class="text-[11px] text-gray-300 mb-8 leading-relaxed text-center font-medium">${info}<br><span class="text-white font-black uppercase tracking-widest block mt-3 border-t border-white/10 pt-3">Das Personal muss das Einlösen bestätigen!</span></p><div onmousedown="window.startRedeemHold(${lvl}, '${tier}', event)" onmouseup="window.stopRedeemHold()" onmouseleave="window.stopRedeemHold()" ontouchstart="window.startRedeemHold(${lvl}, '${tier}', event)" ontouchend="window.stopRedeemHold()" class="relative w-full h-16 bg-black border border-white/20 rounded-sm overflow-hidden cursor-pointer flex items-center justify-center group"><div id="redeem-btn-fill" class="absolute left-0 top-0 bottom-0 w-0 ${bgClass} z-0" style="transition: none;"></div><span id="redeem-btn-text" class="relative z-10 text-white font-black italic uppercase tracking-widest text-sm pointer-events-none drop-shadow-md">Hold to Redeem</span></div></div>`; 
             } else if (type === 'shipping') {
                 const fieldsArr = (reward[`${tier}_fields`] || 'Adresse oder Info...').split(',').map(s => s.trim()).filter(s => s);
-                let fieldsHtml = fieldsArr.length > 0 ? fieldsArr.map((f, idx) => `<input id="shipping_field_${idx}" type="text" placeholder="${f}" class="w-full p-3 bg-black border border-white/20 rounded-md text-sm text-white outline-none focus:border-white mb-3 shipping-input-field" data-label="${f}">`).join('') : `<input id="shipping_field_0" type="text" placeholder="Adresse oder Info..." class="w-full p-3 bg-black border border-white/20 rounded-md text-sm text-white outline-none focus:border-white mb-3 shipping-input-field" data-label="Eingabe">`;
-                contentHtml = `<div class="bg-[#1f1f1f] p-6 rounded-xl flex flex-col mb-6 border border-white/10 relative"><div class="absolute top-0 right-0 bg-[#000] px-2 py-1 text-[8px] font-bold text-gray-500 uppercase tracking-widest rounded-bl-lg">One-Time Request</div><p class="text-xs text-gray-400 mb-4 leading-relaxed">${info}</p><div class="w-full">${fieldsHtml}</div><button type="button" onclick="window.submitShipping(${lvl}, '${tier}')" class="w-full ${bgClass} text-white font-black py-3 px-4 rounded-md text-xs uppercase tracking-widest hover:opacity-80 transition">Versand anfordern</button></div>`;
+                let fieldsHtml = fieldsArr.length > 0 ? fieldsArr.map((f, idx) => `<input id="shipping_field_${idx}" type="text" placeholder="${f}" class="w-full p-3 bg-black border border-white/20 rounded-sm text-sm text-white outline-none focus:border-white mb-3 shipping-input-field" data-label="${f}">`).join('') : `<input id="shipping_field_0" type="text" placeholder="Adresse oder Info..." class="w-full p-3 bg-black border border-white/20 rounded-sm text-sm text-white outline-none focus:border-white mb-3 shipping-input-field" data-label="Eingabe">`;
+                contentHtml = `<div class="bg-[#1f1f1f] p-6 rounded-sm flex flex-col mb-6 border border-white/10 relative"><div class="absolute top-0 right-0 bg-[#000] px-2 py-1 text-[8px] font-bold text-gray-500 uppercase tracking-widest rounded-bl-sm">One-Time Request</div><p class="text-xs text-gray-400 mb-4 leading-relaxed">${info}</p><div class="w-full">${fieldsHtml}</div><button type="button" onclick="window.submitShipping(${lvl}, '${tier}')" class="w-full ${bgClass} text-white font-black py-3 px-4 rounded-sm text-xs uppercase tracking-widest hover:opacity-80 transition">Versand anfordern</button></div>`;
             }
-            window.openModal(`<p class="${textClass} text-[10px] font-black uppercase tracking-widest mb-1">Premium Reward</p><h3 class="text-2xl font-black italic uppercase tracking-tighter mb-6">${title}</h3>${contentHtml}<button type="button" onclick="window.closeModal()" class="w-full bg-[#111] text-gray-400 hover:bg-white hover:text-black font-black italic uppercase py-3 transition text-xs border border-white/5 rounded-md">Schließen</button>`);
+            window.openModal(`<p class="${textClass} text-[10px] font-black uppercase tracking-widest mb-1">Loot Stash</p><h3 class="text-2xl font-black italic uppercase tracking-tighter mb-6">${title}</h3>${contentHtml}<button type="button" onclick="window.closeModal()" class="w-full bg-[#111] text-gray-400 hover:bg-white hover:text-black font-black italic uppercase py-3 transition text-xs border border-white/5 rounded-sm">Schließen</button>`);
         };
 
         window.openNotifCenter = async () => {
-            // Show loading state immediately
-            window.openModal(`
-                <p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">Von GRIND.</p>
-                <h3 class="text-2xl font-black italic uppercase tracking-tighter mb-6">Mitteilungen</h3>
-                <div class="flex items-center justify-center py-10 text-gray-600 text-xs">Lädt...</div>
-                <button type="button" onclick="window.closeModal()" class="w-full mt-4 bg-[#111] text-gray-400 hover:bg-white hover:text-black font-black italic uppercase py-3 transition text-xs border border-white/5 rounded-lg">Schließen</button>
-            `);
+            window.openModal(`<p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">Von GRIND.</p><h3 class="text-2xl font-black italic uppercase tracking-tighter mb-6">Mitteilungen</h3><div class="flex items-center justify-center py-10 text-gray-600 text-xs">Lädt...</div><button type="button" onclick="window.closeModal()" class="w-full mt-4 bg-[#111] text-gray-400 hover:bg-white hover:text-black font-black italic uppercase py-3 transition text-xs border border-white/5 rounded-sm">Schließen</button>`);
             try {
                 const snap = await getDocs(query(collection(db, 'grind_announcements'), orderBy('timestamp', 'desc'), limit(20)));
                 const announcements = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
-                // Mark all as read
-                const readKey = 'grind_notif_read';
-                const lastRead = parseInt(localStorage.getItem(readKey) || '0');
+                const readKey = 'grind_notif_read'; const lastRead = parseInt(localStorage.getItem(readKey) || '0');
                 if (announcements.length > 0) localStorage.setItem(readKey, String(announcements[0].timestamp || Date.now()));
                 state._notifUnread = 0;
 
-                const typeIcon = (type) => {
-                    if (type === 'drop') return '🎁';
-                    if (type === 'event') return '⚡';
-                    if (type === 'alert') return '🚨';
-                    return '📣';
-                };
-                const typeColor = (type) => {
-                    if (type === 'drop') return 'text-[#a855f7]';
-                    if (type === 'event') return 'text-[#ff4d00]';
-                    if (type === 'alert') return 'text-red-400';
-                    return 'text-white';
-                };
+                const typeIcon = (type) => { if (type === 'drop') return '🎁'; if (type === 'event') return '⚡'; if (type === 'alert') return '🚨'; return '📣'; };
+                const typeColor = (type) => { if (type === 'drop') return 'text-[#a855f7]'; if (type === 'event') return 'text-[#ff4d00]'; if (type === 'alert') return 'text-red-400'; return 'text-white'; };
 
-                const listHtml = announcements.length === 0
-                    ? `<div class="text-center py-10 text-gray-600 text-xs italic">Noch keine Mitteilungen.</div>`
-                    : `<div class="space-y-3 max-h-96 overflow-y-auto no-scrollbar">` + announcements.map(a => {
-                        const isNew = (a.timestamp || 0) > lastRead;
-                        return `<div class="bg-[#0a0a0a] border ${isNew ? 'border-[#ff4d00]/30' : 'border-[#111]'} p-4 rounded-xl relative">
-                            ${isNew ? '<span class="absolute top-3 right-3 w-1.5 h-1.5 bg-[#ff4d00] rounded-full"></span>' : ''}
-                            <div class="flex items-center gap-2 mb-2">
-                                <span class="text-lg">${typeIcon(a.type)}</span>
-                                <span class="text-[9px] font-black uppercase tracking-widest ${typeColor(a.type)}">${a.type || 'update'}</span>
-                                <span class="text-[9px] text-gray-600 font-bold ml-auto">${getRelativeTime(a.timestamp)}</span>
-                            </div>
-                            <p class="text-sm font-black text-white mb-1">${a.title || ''}</p>
-                            <p class="text-xs text-gray-400 leading-relaxed">${a.body || ''}</p>
-                            ${a.cta_label && a.cta_link ? `<a href="${a.cta_link}" target="_blank" class="inline-block mt-3 text-[10px] font-black uppercase tracking-widest text-[#ff4d00] border border-[#ff4d00]/30 px-3 py-1.5 rounded-md hover:bg-[#ff4d00]/10 transition">${a.cta_label} →</a>` : ''}
-                        </div>`;
-                    }).join('') + `</div>`;
+                const listHtml = announcements.length === 0 ? `<div class="text-center py-10 text-gray-600 text-xs italic">Noch keine Mitteilungen.</div>` : `<div class="space-y-3 max-h-96 overflow-y-auto no-scrollbar">` + announcements.map(a => { const isNew = (a.timestamp || 0) > lastRead; return `<div class="bg-[#0a0a0a] border ${isNew ? 'border-[#ff4d00]/30' : 'border-[#111]'} p-4 rounded-sm relative">${isNew ? '<span class="absolute top-3 right-3 w-1.5 h-1.5 bg-[#ff4d00] rounded-full"></span>' : ''}<div class="flex items-center gap-2 mb-2"><span class="text-lg">${typeIcon(a.type)}</span><span class="text-[9px] font-black uppercase tracking-widest ${typeColor(a.type)}">${a.type || 'update'}</span><span class="text-[9px] text-gray-600 font-bold ml-auto">${getRelativeTime(a.timestamp)}</span></div><p class="text-sm font-black text-white mb-1">${a.title || ''}</p><p class="text-xs text-gray-400 leading-relaxed">${a.body || ''}</p>${a.cta_label && a.cta_link ? `<a href="${a.cta_link}" target="_blank" class="inline-block mt-3 text-[10px] font-black uppercase tracking-widest text-[#ff4d00] border border-[#ff4d00]/30 px-3 py-1.5 rounded-sm hover:bg-[#ff4d00]/10 transition">${a.cta_label} →</a>` : ''}</div>`; }).join('') + `</div>`;
 
-                // Re-render modal content
                 const container = document.getElementById('modal-container');
-                if (container) {
-                    const inner = container.querySelector('.relative.z-10');
-                    if (inner) inner.innerHTML = `
-                        <button type="button" onclick="window.closeModal()" class="absolute top-4 right-4 text-gray-500 hover:text-white z-50"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
-                        <p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">Von GRIND.</p>
-                        <h3 class="text-2xl font-black italic uppercase tracking-tighter mb-6">Mitteilungen</h3>
-                        ${listHtml}
-                        <button type="button" onclick="window.closeModal()" class="w-full mt-4 bg-[#111] text-gray-400 hover:bg-white hover:text-black font-black italic uppercase py-3 transition text-xs border border-white/5 rounded-lg">Schließen</button>
-                    `;
-                }
-                window.scheduleRender(); // refresh bell dot
-            } catch(e) {
-                console.error('Announcements load error:', e);
-            }
+                if (container) { const inner = container.querySelector('.relative.z-10'); if (inner) inner.innerHTML = `<button type="button" onclick="window.closeModal()" class="absolute top-4 right-4 text-gray-500 hover:text-white z-50"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button><p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">Von GRIND.</p><h3 class="text-2xl font-black italic uppercase tracking-tighter mb-6">Mitteilungen</h3>${listHtml}<button type="button" onclick="window.closeModal()" class="w-full mt-4 bg-[#111] text-gray-400 hover:bg-white hover:text-black font-black italic uppercase py-3 transition text-xs border border-white/5 rounded-sm">Schließen</button>`; }
+                window.scheduleRender(); 
+            } catch(e) {}
         };
 
         window.setView = (view) => { if (view === 'dashboard' && state.view !== 'dashboard') state.dashboardNeedsScroll = true; state.prevView = state.view; state.view = view; window.scheduleRender(); }; 
@@ -968,24 +913,47 @@
             e.preventDefault(); const btn = document.getElementById('auth_submit_btn');
             if (window.location.protocol === 'file:') return window.showToast("Bitte hosten (lokale Datei blockiert SMS).", "error");
             const fullPhone = document.getElementById('auth_prefix').value + document.getElementById('auth_phone').value.trim().replace(/^0+/, ''); state.tempPhone = fullPhone; btn.disabled = true; btn.innerText = "Transmitting...";
-            const timeout = setTimeout(() => { if(btn.innerText === "Transmitting...") { btn.disabled = false; btn.innerText = "Join Network"; window.showToast("Zeitüberschreitung.", "error"); } }, 10000);
-            try { if (!window.recaptchaVerifier) { window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { size: 'invisible' }); } window.confirmationResult = await signInWithPhoneNumber(auth, fullPhone, window.recaptchaVerifier); clearTimeout(timeout); state.authStep = 'code'; window.showToast("Code gesendet.", "success"); window.scheduleRender(); } catch (err) { clearTimeout(timeout); if(window.recaptchaVerifier) { window.recaptchaVerifier.clear(); window.recaptchaVerifier = null; } window.showToast(err.message, "error"); btn.disabled = false; btn.innerText = "Join Network"; }
+            const timeout = setTimeout(() => { if(btn.innerText === "Transmitting...") { btn.disabled = false; btn.innerText = "Enter The Drop"; window.showToast("Zeitüberschreitung.", "error"); } }, 10000);
+            try { if (!window.recaptchaVerifier) { window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { size: 'invisible' }); } window.confirmationResult = await signInWithPhoneNumber(auth, fullPhone, window.recaptchaVerifier); clearTimeout(timeout); state.authStep = 'code'; window.showToast("Code gesendet.", "success"); window.scheduleRender(); } catch (err) { clearTimeout(timeout); if(window.recaptchaVerifier) { window.recaptchaVerifier.clear(); window.recaptchaVerifier = null; } window.showToast(err.message, "error"); btn.disabled = false; btn.innerText = "Enter The Drop"; }
         };
         
         window.verifyCode = async (e) => { e.preventDefault(); const btn = document.getElementById('verify_submit_btn'); btn.disabled = true; btn.innerText = "Verifying..."; try { await window.confirmationResult.confirm(document.getElementById('auth_code').value); if (window.recaptchaVerifier) { window.recaptchaVerifier.clear(); window.recaptchaVerifier = null; } } catch (err) { window.showToast("Invalid sequence.", "error"); btn.disabled = false; btn.innerText = "Verify Access"; } };
         window.goBackToPhone = () => { state.authStep = 'phone'; window.scheduleRender(); };
 
+        window.startTutorial = () => {
+            let step = 1;
+            const tutorialLayer = document.createElement('div'); tutorialLayer.id = 'tutorial-layer';
+            tutorialLayer.className = 'fixed inset-0 z-[999990] bg-[#050505]/95 backdrop-blur-md flex items-center justify-center p-6 opacity-0 transition-opacity duration-500';
+
+            const updateTutorial = () => {
+                let content = '';
+                if(step === 1) {
+                    content = `<div class="animate-fade-in text-center flex flex-col items-center w-full max-w-sm"><div class="w-20 h-20 bg-[#1f1f1f] rounded-full flex items-center justify-center mb-8 border border-[#ff4d00]/30 shadow-[0_0_30px_rgba(255,77,0,0.2)]"><svg class="w-10 h-10 text-[#ff4d00]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg></div><h2 class="text-[#ff4d00] text-[10px] font-black uppercase tracking-[0.4em] mb-2">Step 01</h2><h3 class="text-4xl font-black italic tracking-tighter mb-4 text-white uppercase">The Grind Track</h3><p class="text-gray-400 text-sm font-medium leading-relaxed mb-10">Jede Aktion bringt dir XP. Fülle den Balken, steige im Level auf und schalte echte Rewards und physischen Loot frei.</p><button onclick="document.getElementById('tutorial-layer').dataset.step = 2" class="w-full btn-grind py-4">Weiter</button></div>`;
+                } else if(step === 2) {
+                    content = `<div class="animate-fade-in text-center flex flex-col items-center w-full max-w-sm"><div class="w-20 h-20 bg-[#1f1f1f] rounded-full flex items-center justify-center mb-8 border border-[#a855f7]/30 shadow-[0_0_30px_rgba(168,85,247,0.2)]"><svg class="w-10 h-10 text-[#a855f7]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg></div><h2 class="text-[#a855f7] text-[10px] font-black uppercase tracking-[0.4em] mb-2">Step 02</h2><h3 class="text-4xl font-black italic tracking-tighter mb-4 text-white uppercase">Operations</h3><p class="text-gray-400 text-sm font-medium leading-relaxed mb-10">Erfülle wöchentliche Missionen und tracke deine täglichen Habits. Scanne QR Codes vor Ort oder lade Beweisfotos hoch.</p><button onclick="document.getElementById('tutorial-layer').dataset.step = 3" class="w-full btn-grind py-4">Weiter</button></div>`;
+                } else if(step === 3) {
+                    content = `<div class="animate-fade-in text-center flex flex-col items-center w-full max-w-sm"><div class="w-20 h-20 bg-[#1f1f1f] rounded-full flex items-center justify-center mb-8 border border-blue-500/30 shadow-[0_0_30px_rgba(59,130,246,0.2)]"><svg class="w-10 h-10 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg></div><h2 class="text-blue-500 text-[10px] font-black uppercase tracking-[0.4em] mb-2">Step 03</h2><h3 class="text-4xl font-black italic tracking-tighter mb-4 text-white uppercase">Crew Bounty</h3><p class="text-gray-400 text-sm font-medium leading-relaxed mb-10">Grinden macht zusammen mehr Bock. Lade deine Freunde ein – jeder neue Member gibt dir und deinem Homie fette XP-Boosts.</p><button onclick="document.getElementById('tutorial-layer').dataset.step = 'close'" class="w-full btn-grind py-4 bg-[#ff4d00] text-white border-[#ff4d00]">Start Grinding</button></div>`;
+                }
+                tutorialLayer.innerHTML = content;
+            };
+
+            document.body.appendChild(tutorialLayer); updateTutorial();
+            const observer = new MutationObserver((mutations) => { mutations.forEach((mutation) => { if (mutation.attributeName === 'data-step') { const newStep = tutorialLayer.dataset.step; if(newStep === 'close') { tutorialLayer.style.opacity = '0'; setTimeout(() => tutorialLayer.remove(), 500); } else { step = parseInt(newStep); updateTutorial(); } } }); });
+            observer.observe(tutorialLayer, { attributes: true }); setTimeout(() => { tutorialLayer.style.opacity = '1'; }, 10);
+        };
+
         window.submitOnboarding = async (e) => {
             e.preventDefault(); const nameInput = document.getElementById('onboard_name').value.trim(); const cityInput = document.getElementById('onboard_city').value;
-            if(!nameInput) return window.showToast("Bitte gib einen Namen ein.", "error"); if(!cityInput || cityInput === "locked") return window.showToast("Bitte wähle deine Stadt.", "error");
+            if(!nameInput) return window.showToast("Bitte gib einen Namen ein.", "error"); if(!cityInput || cityInput === "locked") return window.showToast("Bitte wähle deine Base.", "error");
             const btn = e.target.querySelector('button'); btn.disabled = true; btn.innerText = "Registering...";
-            const layer = document.createElement('div'); layer.id = 'intro-layer'; layer.innerHTML = `<div id="word1" class="word-flash text-gray-500">BUILD ROUTINES.</div><div id="word2" class="word-flash text-white">VISIT PLACES.</div><div id="word3" class="word-flash text-white">UNLOCK REWARDS.</div><div id="word4" class="word-flash"><img src="https://grind-app.de/logo.jpg" class="w-32 h-32 md:w-56 md:h-56 rounded-full border-4 border-[#ff4d00] shadow-[0_0_60px_rgba(255,77,0,0.5)] mx-auto object-cover"></div>`; document.body.appendChild(layer); 
+            
+            const layer = document.createElement('div'); layer.id = 'intro-layer'; layer.innerHTML = `<div id="word1" class="word-flash text-gray-500">DROP IN.</div><div id="word2" class="word-flash text-white">CLEAR MISSIONS.</div><div id="word3" class="word-flash text-white">CLAIM LOOT.</div><div id="word4" class="word-flash"><img src="https://grind-app.de/logo.jpg" class="w-32 h-32 md:w-56 md:h-56 rounded-full border-4 border-[#ff4d00] shadow-[0_0_60px_rgba(255,77,0,0.5)] mx-auto object-cover"></div>`; document.body.appendChild(layer); 
             try {
                 const c = Math.random().toString(36).substring(2, 8).toUpperCase(); state.profile = { xp: 0, lvl: 1, completed: [], redeemed: [], streaks: {}, friends: [], crewCode: c, alias: nameInput, city: cityInput, hasPremium: false };
                 await setDoc(doc(db, 'plot_users', state.user.uid), state.profile);
                 const timing = 700; document.getElementById('word1').style.animation = `flashInOut ${timing}ms forwards`; setTimeout(() => { document.getElementById('word2').style.animation = `flashInOut ${timing}ms forwards`; }, timing); setTimeout(() => { document.getElementById('word3').style.animation = `flashInOut ${timing}ms forwards`; }, timing * 2); setTimeout(() => { document.getElementById('word4').style.animation = `flashInOut ${timing * 1.5}ms forwards`; }, timing * 3);
-                setTimeout(() => { layer.style.opacity = "0"; setTimeout(() => layer.remove(), 800); state.view = 'dashboard'; state.dashboardNeedsScroll = true; window.scheduleRender(); }, timing * 4.2);
-            } catch (err) { layer.remove(); window.showToast("Fehler.", "error"); btn.disabled = false; btn.innerText = "Join Network"; }
+                setTimeout(() => { layer.style.opacity = "0"; setTimeout(() => layer.remove(), 800); window.startTutorial(); state.view = 'dashboard'; state.dashboardNeedsScroll = true; window.scheduleRender(); }, timing * 4.2);
+            } catch (err) { layer.remove(); window.showToast("Fehler.", "error"); btn.disabled = false; btn.innerText = "Confirm Identity"; }
         };
 
         window.generateShareCard = async () => {
@@ -1000,7 +968,7 @@
             ctx.fillStyle = '#ffffff'; ctx.font = 'italic 900 110px "Inter", sans-serif'; ctx.fillText((p.alias || 'STRANGER').toUpperCase(), 540, centerY - 120);
             ctx.fillStyle = '#ff4d00'; ctx.font = '900 65px "Inter", sans-serif'; if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "6px"; ctx.fillText(`LVL ${safeLvl} • ${rankTitle}`, 540, centerY + 10); if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "0px";
             const barW = 800, barH = 8, startX = 540 - (barW / 2), barY = centerY + 160; ctx.fillStyle = '#1f1f1f'; ctx.fillRect(startX, barY, barW, barH); ctx.fillStyle = '#ff4d00'; ctx.fillRect(startX, barY, barW * ((safeXp % 1000) / 1000), barH);
-            ctx.fillStyle = '#777777'; ctx.font = '700 26px "Inter", sans-serif'; if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "4px"; ctx.fillText(`XP: ${safeXp} / ${safeLvl * 1000}   •   ${p.completed?.length || 0} ROUTINES CLEARED`, 540, barY + 70); if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "0px";
+            ctx.fillStyle = '#777777'; ctx.font = '700 26px "Inter", sans-serif'; if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "4px"; ctx.fillText(`XP: ${safeXp} / ${safeLvl * 1000}   •   ${p.completed?.length || 0} OPERATIONS CLEARED`, 540, barY + 70); if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "0px";
             let daysLeftText = `JOIN THE NETWORK • COLOGNE ACTIVE`;
             if (state.seasonConfig && state.seasonConfig.end) { const endDate = new Date(state.seasonConfig.end); endDate.setHours(23, 59, 59, 999); const diffTime = endDate.getTime() - new Date().getTime(); if (diffTime > 0) { const dLeft = Math.floor(diffTime / (1000 * 60 * 60 * 24)); if(dLeft > 0) daysLeftText = `JOIN THE NETWORK • COLOGNE ACTIVE`; else daysLeftText = "JOIN THE NETWORK • COLOGNE ACTIVE"; } else { daysLeftText = "SEASON ENDED"; } }
             ctx.fillStyle = '#333333'; ctx.font = '700 24px "Inter", sans-serif'; if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "8px"; ctx.fillText(daysLeftText, 540, 1800); if (ctx.letterSpacing !== undefined) ctx.letterSpacing = "0px";
@@ -1008,7 +976,7 @@
             canvas.toBlob(async (blob) => {
                 if (!blob) return window.showToast("Fehler.", "error"); const file = new File([blob], fileName, { type: 'image/png' });
                 const fallback = () => { const link = document.createElement('a'); link.download = fileName; link.href = canvas.toDataURL('image/png'); link.click(); window.showToast("Exportiert.", "success"); };
-                if (navigator.canShare && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: 'GRIND.', text: `Join the Network. Cologne Active. Standing: Level ${safeLvl}.` }); } catch (err) { if (err.name !== 'AbortError') fallback(); } } else { fallback(); }
+                if (navigator.canShare && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: 'GRIND.', text: `Join the Hustle. My standing: Level ${safeLvl}.` }); } catch (err) { if (err.name !== 'AbortError') fallback(); } } else { fallback(); }
             }, 'image/png');
         };
 
@@ -1027,19 +995,19 @@
                     <span class="hidden md:inline">•</span>
                     <span class="hover:text-white cursor-pointer transition" onclick="window.setView('agb')">AGB</span>
                 </div>
-                <p class="text-[#1f1f1f] text-[9px] uppercase tracking-widest font-black">© 2026 GRIND<span class="text-brand">.</span> ALL RIGHTS RESERVED.</p>
+                <p class="text-[#1f1f1f] text-[9px] uppercase tracking-widest font-black">© 2026 GRIND<span class="text-brand">.</span> NETWORK. ALL RIGHTS RESERVED.</p>
             </footer>
         `;
 
         function render() {
             const appDiv = document.getElementById('app'); let savedScrollPosition = 0; const existingViewport = document.getElementById('pass-viewport'); if (existingViewport) { savedScrollPosition = existingViewport.scrollLeft; }
             if (state.view === 'loading') { appDiv.innerHTML = `<div class="flex-1 flex items-center justify-center min-h-[60vh] relative z-10"><div class="w-16 h-16 border-t-4 border-l-4 border-[#ff4d00] rounded-full animate-spin"></div></div>`; return; }
+            
             if (state.view === 'dashboard' || state.view === 'paywall') {
                 const sStatus = getSeasonStatus();
                 if (sStatus.status !== 'active' && sStatus.status !== 'loading') {
                     appDiv.innerHTML = `
-                        <div class="flex-1 flex flex-col items-center justify-center p-6 text-center min-h-[90dvh] relative z-20">
-                            <div class="absolute inset-0 radial-glow-orange pointer-events-none -z-10"></div>
+                        <div class="flex-1 flex flex-col items-center justify-center p-6 text-center min-h-[90dvh] relative z-20 glitch-bg">
                             <div class="w-24 h-24 border border-[#ff4d00]/30 rounded-full flex items-center justify-center mb-8 animate-pulse-slow relative">
                                 <div class="absolute inset-0 border-t-2 border-[#ff4d00] rounded-full animate-spin" style="animation-duration: 3s;"></div>
                                 <svg class="w-8 h-8 text-[#ff4d00]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
@@ -1047,7 +1015,7 @@
                             <p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-[0.4em] mb-4">Grind Network</p>
                             <h1 class="text-4xl md:text-6xl font-black italic tracking-tighter mb-6 text-white leading-none">${sStatus.status === 'upcoming' ? 'SEASON INCOMING' : 'SYSTEM OFFLINE'}</h1>
                             <div class="mt-16 flex justify-center relative z-10">
-                                <button type="button" onclick="window.handleLogout()" class="text-[10px] uppercase font-bold text-gray-600 hover:text-white transition tracking-widest border border-gray-800 px-6 py-3 rounded-md bg-[#0a0a0a]">Log out</button>
+                                <button type="button" onclick="window.handleLogout()" class="text-[10px] uppercase font-bold text-gray-600 hover:text-white transition tracking-widest border border-gray-800 px-6 py-3 rounded-sm bg-[#0a0a0a]">Log out</button>
                             </div>
                         </div>
                         ${getFooterHTML()}
@@ -1055,6 +1023,7 @@
                     return;
                 }
             }
+
             if (['impressum', 'datenschutz', 'agb'].includes(state.view)) {
                 let content = ''; let title = '';
                 if(state.view === 'impressum') {
@@ -1071,7 +1040,7 @@
                     <div class="max-w-3xl mx-auto px-6 py-12 w-full relative z-20">
                         <button onclick="window.goBack()" class="text-[#ff4d00] text-[10px] font-bold uppercase tracking-widest mb-10 flex items-center gap-2 hover:text-white transition"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg> Zurück</button>
                         <h1 class="text-3xl md:text-5xl font-black italic uppercase tracking-tighter mb-8">${title}</h1>
-                        <div class="legal-content bg-[#0a0a0a] border border-[#1f1f1f] p-6 md:p-10 rounded-xl shadow-xl">${content}</div>
+                        <div class="legal-content bg-[#0a0a0a] border border-[#1f1f1f] p-6 md:p-10 rounded-sm shadow-xl">${content}</div>
                     </div>
                     ${getFooterHTML()}
                 `;
@@ -1087,24 +1056,23 @@
                 }
                 appDiv.innerHTML = `
                     <div class="flex-1 flex flex-col items-center justify-center p-6 min-h-[80vh] text-center animate-fade-in relative z-20">
-                        <div class="absolute inset-0 radial-glow-purple pointer-events-none -z-10"></div>
                         <div class="w-16 h-16 border-2 border-[#a855f7] rounded-full flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(168,85,247,0.3)] bg-[#0a0a0a] relative z-10">
                             <svg class="w-8 h-8 text-[#a855f7]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                         </div>
                         <h2 class="text-4xl font-black italic tracking-tighter mb-2 relative z-10">GRIND. <span class="text-[#a855f7]">PRO</span></h2>
                         <p class="text-gray-400 font-bold uppercase tracking-widest text-[10px] mb-8 max-w-xs leading-relaxed relative z-10">Unlock exclusive rewards, access limited partner drops and enter the PRO Network.</p>
                         
-                        <div class="bg-[#0a0a0a] border border-[#1f1f1f] p-8 rounded-xl mb-4 w-full max-w-sm shadow-2xl relative overflow-hidden group">
+                        <div class="bg-[#0a0a0a] border border-[#1f1f1f] p-8 rounded-sm mb-4 w-full max-w-sm shadow-2xl relative overflow-hidden group">
                             <div class="absolute inset-0 bg-gradient-to-t from-[#a855f7]/10 to-transparent opacity-50"></div>
                             <div class="relative z-10">
                                 <div class="text-[10px] uppercase tracking-[0.2em] text-gray-500 font-bold mb-1">${getSeasonName()} Season Pass · 3 Monate</div>
                                 <div id="dynamic-price-display" class="text-5xl font-black text-white italic tracking-tighter mb-2">${checkoutPrice.replace('.', ',')} €</div>
                                 <p class="text-[9px] text-gray-600 mb-6 font-bold">= nur ~${(parseFloat(checkoutPrice) / 3).toFixed(2).replace('.', ',')} € / Monat</p>
                                 <div class="grid grid-cols-2 gap-2 mb-6 text-left">
-                                    <div class="bg-black/50 rounded-md p-3 border border-white/5"><p class="text-[8px] text-gray-500 uppercase font-bold mb-1">PRO Rewards</p><p class="text-xs text-white font-bold">Exklusive Drops</p></div>
-                                    <div class="bg-black/50 rounded-md p-3 border border-white/5"><p class="text-[8px] text-gray-500 uppercase font-bold mb-1">Partner Access</p><p class="text-xs text-white font-bold">Premium Deals</p></div>
-                                    <div class="bg-black/50 rounded-md p-3 border border-white/5"><p class="text-[8px] text-gray-500 uppercase font-bold mb-1">PRO Badge</p><p class="text-xs text-white font-bold">Im Crew Feed</p></div>
-                                    <div class="bg-black/50 rounded-md p-3 border border-white/5"><p class="text-[8px] text-gray-500 uppercase font-bold mb-1">12 Wochen</p><p class="text-xs text-white font-bold">Voller Track</p></div>
+                                    <div class="bg-black/50 rounded-sm p-3 border border-white/5"><p class="text-[8px] text-gray-500 uppercase font-bold mb-1">PRO Rewards</p><p class="text-xs text-white font-bold">Exklusive Drops</p></div>
+                                    <div class="bg-black/50 rounded-sm p-3 border border-white/5"><p class="text-[8px] text-gray-500 uppercase font-bold mb-1">Partner Access</p><p class="text-xs text-white font-bold">Premium Deals</p></div>
+                                    <div class="bg-black/50 rounded-sm p-3 border border-white/5"><p class="text-[8px] text-gray-500 uppercase font-bold mb-1">PRO Badge</p><p class="text-xs text-white font-bold">Im Crew Feed</p></div>
+                                    <div class="bg-black/50 rounded-sm p-3 border border-white/5"><p class="text-[8px] text-gray-500 uppercase font-bold mb-1">12 Wochen</p><p class="text-xs text-white font-bold">Voller Track</p></div>
                                 </div>
                                 <div id="paypal-button-container" class="w-full min-h-[150px] relative z-50 flex items-center justify-center"></div>
                             </div>
@@ -1138,21 +1106,21 @@
             if (state.view === 'onboarding') {
                 appDiv.innerHTML = `
                     <div class="flex-1 flex flex-col items-center justify-center p-6 min-h-[80vh] text-center relative z-20">
-                        <div class="absolute inset-0 radial-glow-orange pointer-events-none -z-10"></div>
-                        <h1 class="text-4xl md:text-5xl font-black italic tracking-tighter mb-2 relative z-10">CREATE PROFILE<span class="text-[#ff4d00]">.</span></h1>
-                        <p class="text-gray-500 font-bold uppercase tracking-widest text-[10px] mb-12 max-w-sm leading-relaxed relative z-10">Wähle deine Stadt und trete dem Network bei.</p>
+                        <h1 class="text-4xl md:text-5xl font-black italic tracking-tighter mb-2 relative z-10">IDENTIFICATION<span class="text-[#ff4d00]">.</span></h1>
+                        <p class="text-gray-500 font-bold uppercase tracking-widest text-[10px] mb-12 max-w-sm leading-relaxed relative z-10">Wähle deine Base und trete dem Network bei.</p>
                         <form onsubmit="window.submitOnboarding(event)" class="w-full max-w-sm space-y-4 relative z-10">
-                            <input id="onboard_name" type="text" placeholder="Dein Name" required class="w-full p-4 bg-[#0a0a0a] border border-[#1f1f1f] rounded-lg outline-none focus:border-[#ff4d00] text-white transition text-center text-xl tracking-widest uppercase font-black italic shadow-inner">
+                            <input id="onboard_name" type="text" placeholder="Dein Name" required class="w-full p-4 bg-[#0f0f0f] border border-[#1f1f1f] rounded-sm outline-none focus:border-[#ff4d00] text-white transition text-center text-xl tracking-widest uppercase font-black italic shadow-inner">
                             <div class="relative">
-                                <select id="onboard_city" required class="w-full p-4 bg-[#0a0a0a] border border-[#1f1f1f] rounded-lg outline-none focus:border-[#ff4d00] text-white transition text-center text-lg tracking-widest uppercase font-bold appearance-none cursor-pointer shadow-inner">
-                                    <option value="" disabled selected class="text-gray-600">City wählen</option>
+                                <select id="onboard_city" required class="w-full p-4 bg-[#0f0f0f] border border-[#1f1f1f] rounded-sm outline-none focus:border-[#ff4d00] text-white transition text-center text-lg tracking-widest uppercase font-bold appearance-none cursor-pointer shadow-inner">
+                                    <option value="" disabled selected class="text-gray-600">Base wählen</option>
                                     <option value="Köln">Köln</option>
+                                    <option value="locked" disabled class="text-gray-600">Weitere Städte in Kürze...</option>
                                 </select>
                                 <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                                 </div>
                             </div>
-                            <button type="submit" class="w-full btn-grind py-4 mt-2">Join Network</button>
+                            <button type="submit" class="w-full btn-grind py-4 mt-2">Confirm Identity</button>
                         </form>
                     </div>
                 `; 
@@ -1160,11 +1128,11 @@
             }
             
             if (state.view === 'auth') {
+                const seasonNum = state.seasonConfig?.number || 1;
                 let authHtml = `
                     <div class="flex-1 flex flex-col items-center justify-center p-6 min-h-[80vh] text-center relative z-20">
-                        <div class="absolute inset-0 radial-glow-orange pointer-events-none -z-10"></div>
                         <h1 class="text-6xl md:text-8xl font-black italic tracking-tighter mb-2 relative z-10">GRIND<span class="text-[#ff4d00]">.</span></h1>
-                        <p class="text-gray-500 font-bold uppercase tracking-widest text-xs mb-12 max-w-sm leading-relaxed relative z-10">The Real-World Lifestyle Game</p>
+                        <p class="text-gray-500 font-bold uppercase tracking-widest text-xs mb-12 max-w-sm leading-relaxed relative z-10">Season 0${seasonNum}</p>
                         <div class="w-full max-w-sm relative z-10">
                 `;
                 
@@ -1172,14 +1140,14 @@
                     authHtml += `
                         <form onsubmit="window.sendSMS(event)" class="space-y-4">
                             <div class="flex gap-2">
-                                <select id="auth_prefix" class="w-24 p-4 bg-[#0a0a0a] border border-[#1f1f1f] rounded-lg outline-none focus:border-[#ff4d00] text-gray-400 text-center font-bold appearance-none cursor-pointer shadow-inner">
+                                <select id="auth_prefix" class="w-24 p-4 bg-[#0f0f0f] border border-[#1f1f1f] rounded-sm outline-none focus:border-[#ff4d00] text-gray-400 text-center font-bold appearance-none cursor-pointer shadow-inner">
                                     <option value="+49">🇩🇪 +49</option>
                                     <option value="+43">🇦🇹 +43</option>
                                     <option value="+41">🇨🇭 +41</option>
                                 </select>
-                                <input id="auth_phone" type="tel" placeholder="170 1234567" required class="flex-1 p-4 bg-[#0a0a0a] border border-[#1f1f1f] rounded-lg outline-none focus:border-[#ff4d00] text-white transition text-center text-lg tracking-widest shadow-inner">
+                                <input id="auth_phone" type="tel" placeholder="170 1234567" required class="flex-1 p-4 bg-[#0f0f0f] border border-[#1f1f1f] rounded-sm outline-none focus:border-[#ff4d00] text-white transition text-center text-lg tracking-widest shadow-inner">
                             </div>
-                            <button id="auth_submit_btn" type="submit" class="w-full btn-grind py-4">Join Network</button>
+                            <button id="auth_submit_btn" type="submit" class="w-full btn-grind py-4">Enter The Drop</button>
                         </form>
                     `; 
                 } else { 
@@ -1189,7 +1157,7 @@
                                 <p class="text-gray-500 text-xs uppercase tracking-widest font-bold">Code gesendet an</p>
                                 <p class="text-[#ff4d00] font-black tracking-widest mt-1 text-lg">${state.tempPhone}</p>
                             </div>
-                            <input id="auth_code" type="text" placeholder="123456" required class="w-full p-4 bg-[#0a0a0a] border border-[#1f1f1f] rounded-lg outline-none focus:border-[#ff4d00] text-white transition text-center text-3xl font-mono tracking-[0.3em] shadow-inner">
+                            <input id="auth_code" type="text" placeholder="123456" required class="w-full p-4 bg-[#0f0f0f] border border-[#1f1f1f] rounded-sm outline-none focus:border-[#ff4d00] text-white transition text-center text-3xl font-mono tracking-[0.3em] shadow-inner">
                             <button id="verify_submit_btn" type="submit" class="w-full btn-grind py-4">Verify Access</button>
                             <button type="button" onclick="window.goBackToPhone()" class="w-full text-center mt-4 text-xs text-gray-500 hover:text-white uppercase tracking-widest transition font-bold">Cancel</button>
                         </form>
@@ -1218,26 +1186,38 @@
                 const targetTrackProgress = Math.min(29, safeLvl - 1 + (safeXp % 1000) / 1000); 
                 const oldTrackProgress = state.prevXp !== null ? Math.min(29, (state.prevLvl || 1) - 1 + (state.prevXp % 1000) / 1000) : targetTrackProgress;
 
+                // Week/Season calculation logic (merging text outputs)
+                let weekDaysLeftText = "";
+                const nowForWeek = new Date();
+                const daysUntilSunday = nowForWeek.getDay() === 0 ? 0 : 7 - nowForWeek.getDay();
+                let weekEndDate = new Date(nowForWeek.getFullYear(), nowForWeek.getMonth(), nowForWeek.getDate() + daysUntilSunday, 23, 59, 59, 999);
+                const diffTimeWeek = weekEndDate.getTime() - nowForWeek.getTime();
+                if (diffTimeWeek > 0) {
+                    const dLeftWeek = Math.floor(diffTimeWeek / (1000 * 60 * 60 * 24));
+                    if (dLeftWeek > 0) weekDaysLeftText = `NOCH ${dLeftWeek} TAG${dLeftWeek === 1 ? '' : 'E'} LEFT`;
+                    else weekDaysLeftText = "WOCHE ENDET HEUTE";
+                } else { weekDaysLeftText = "WOCHE ABGELAUFEN"; }
+
                 let html = `
                     <header class="p-6 max-w-6xl mx-auto flex justify-between items-center w-full relative z-20">
                         <div class="text-3xl font-black italic tracking-tighter">GRIND<span class="text-[#ff4d00]">.</span></div>
                         <div class="flex gap-3 items-center">
-                            <button type="button" onclick="window.openNotifCenter()" class="relative text-gray-500 hover:text-[#ff4d00] transition border border-gray-800 hover:border-[#ff4d00] p-1.5 rounded-md bg-[#0a0a0a]" title="Mitteilungen">
+                            <button type="button" onclick="window.openNotifCenter()" class="relative text-gray-500 hover:text-[#ff4d00] transition border border-gray-800 hover:border-[#ff4d00] p-1.5 rounded-sm bg-[#0a0a0a]" title="Mitteilungen">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
-                                ${(state._notifUnread || 0) > 0 ? `<span class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[#ff4d00] rounded-full border border-[#030303] shadow-[0_0_6px_rgba(255,77,0,0.8)]"></span>` : ''}
+                                ${(state._notifUnread || 0) > 0 ? `<span class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[#ff4d00] rounded-full border border-[#050505] shadow-[0_0_6px_rgba(255,77,0,0.8)]"></span>` : ''}
                             </button>
-                            <button type="button" onclick="window.generateShareCard()" class="text-[10px] uppercase font-bold text-gray-400 hover:text-white transition tracking-widest border border-gray-800 hover:border-[#ff4d00] px-3 py-1.5 rounded-md bg-[#0a0a0a]">Export</button>
-                            <button type="button" onclick="window.handleLogout()" class="text-[10px] uppercase font-bold text-gray-500 hover:text-red-500 transition tracking-widest border border-gray-800 px-3 py-1.5 rounded-md bg-[#0a0a0a]">Exit</button>
+                            <button type="button" onclick="window.generateShareCard()" class="text-[10px] uppercase font-bold text-gray-400 hover:text-white transition tracking-widest border border-gray-800 hover:border-[#ff4d00] px-3 py-1.5 rounded-sm bg-[#0a0a0a]">Export</button>
+                            <button type="button" onclick="window.handleLogout()" class="text-[10px] uppercase font-bold text-gray-500 hover:text-red-500 transition tracking-widest border border-gray-800 px-3 py-1.5 rounded-sm bg-[#0a0a0a]">Exit</button>
                         </div>
                     </header>
                 `;
 
                 html += `
                     <main class="max-w-6xl mx-auto px-6 w-full relative z-10 pb-10">
-                        <section class="mb-12 flex flex-col md:flex-row gap-8 items-center bg-[#0a0a0a] p-8 border border-[#1f1f1f] rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative overflow-hidden group">
+                        <section class="mb-12 flex flex-col md:flex-row gap-8 items-center bg-[#0a0a0a] p-8 border border-[#1f1f1f] rounded-sm shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative overflow-hidden group">
                             <div class="absolute inset-0 bg-gradient-to-r from-[#ff4d00]/5 to-transparent opacity-0 group-hover:opacity-100 transition duration-1000"></div>
                             <div class="flex-shrink-0 text-center md:text-left relative z-10">
-                                <div class="inline-flex items-center gap-2 border border-white/10 bg-white/[0.03] px-3 py-1 rounded-full mb-3">
+                                <div class="inline-flex items-center gap-2 border border-white/10 bg-white/[0.03] px-3 py-1 rounded-sm mb-3">
                                     <span class="text-[#ff4d00] text-[8px] font-black uppercase tracking-[0.2em]">Season 0${seasonNum}</span>
                                     <span class="w-1 h-1 rounded-full bg-white/20"></span>
                                     <span class="text-gray-400 text-[8px] font-bold uppercase tracking-[0.2em]">${p.city || 'Köln'}</span>
@@ -1262,7 +1242,7 @@
                     <section class="w-full relative z-10 mb-16">
                         <div class="max-w-6xl mx-auto px-6 flex justify-between items-center mb-6">
                             <div><h3 class="text-2xl font-black italic uppercase tracking-tight">Grind Track <span class="text-[#ff4d00]">${seasonName} S0${seasonNum}</span></h3><p class="text-gray-600 text-[9px] font-bold uppercase tracking-widest mt-1">12 Wochen · 30 Level</p></div>
-                            <div>${hasPremium ? '<span class="bg-[#a855f7]/10 text-[#a855f7] border border-[#a855f7]/30 px-3 py-1.5 rounded-md text-[9px] font-black uppercase tracking-widest shadow-[0_0_10px_rgba(168,85,247,0.2)]">PRO ACTIVE</span>' : '<button type="button" onclick="window.setView(\'paywall\')" class="btn-pro">Get Pro Pass</button>'}</div>
+                            <div>${hasPremium ? '<span class="bg-[#a855f7]/10 text-[#a855f7] border border-[#a855f7]/30 px-3 py-1.5 rounded-sm text-[9px] font-black uppercase tracking-widest shadow-[0_0_10px_rgba(168,85,247,0.2)]">PRO ACTIVE</span>' : '<button type="button" onclick="window.setView(\'paywall\')" class="btn-pro">Get Pro Pass</button>'}</div>
                         </div>
                         <div id="pass-viewport" class="w-full no-scrollbar overflow-x-auto py-8 relative flex items-center min-h-[280px] border-y border-white/5 bg-black/40 shadow-inner">
                             <div class="flex items-center relative w-max" style="min-width: max-content;">
@@ -1282,13 +1262,13 @@
                         <div id="level-node-${i}" class="level-node flex flex-col items-center relative z-10">
                             <div ${isUnlocked && r?.free && !freeClaimed ? `onclick="window.openClaimModal(${i}, 'free')" class="reward-box mb-4 unlocked cursor-pointer hover:scale-105"` : (freeClaimed ? `onclick="window.openClaimModal(${i}, 'free')" class="reward-box mb-4 unlocked opacity-50 cursor-pointer"` : `class="reward-box mb-4 opacity-60 scale-95"`)}>
                                 <span class="tag-free">FREE</span>
-                                ${freeClaimed && r?.free ? `<div class="absolute inset-0 bg-black/40 backdrop-blur-[2px] z-20 flex items-center justify-center rounded-[8px]"><span class="text-green-500 font-black text-xs uppercase italic transform -rotate-12"><svg class="w-6 h-6 drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></span></div>` : ''}
+                                ${freeClaimed && r?.free ? `<div class="absolute inset-0 bg-black/40 backdrop-blur-[2px] z-20 flex items-center justify-center rounded-[4px]"><span class="text-green-500 font-black text-xs uppercase italic transform -rotate-12"><svg class="w-6 h-6 drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></span></div>` : ''}
                                 <span class="text-[10px] font-bold uppercase text-center px-2 text-gray-200 mt-3 relative z-10">${r?.free || '-'}</span>
                             </div>
                             <div id="circle-node-${i}" class="relative w-10 h-10 rounded-full flex items-center justify-center font-black italic text-xs transition-transform duration-300 ${isUnlocked ? 'grind-gradient text-black scale-110 shadow-[0_0_15px_rgba(255,77,0,0.5)]' : 'bg-[#0a0a0a] text-gray-400 border border-[#1f1f1f]'}">${i}</div>
                             <div ${isProUnlocked && r?.pro && !proClaimed ? `onclick="window.openClaimModal(${i}, 'pro')" class="reward-box pro mt-5 unlocked scale-105 cursor-pointer"` : (proClaimed ? `onclick="window.openClaimModal(${i}, 'pro')" class="reward-box pro mt-5 unlocked opacity-50 cursor-pointer"` : `class="reward-box pro mt-5 opacity-70 scale-[0.98] hover:opacity-100"`)}>
                                 <span class="tag-pro italic">PRO</span>
-                                ${proClaimed && r?.pro ? `<div class="absolute inset-0 bg-black/40 backdrop-blur-[2px] z-20 flex items-center justify-center rounded-[8px]"><span class="text-green-500 font-black text-xs uppercase italic transform -rotate-12"><svg class="w-6 h-6 drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></span></div>` : ''}
+                                ${proClaimed && r?.pro ? `<div class="absolute inset-0 bg-black/40 backdrop-blur-[2px] z-20 flex items-center justify-center rounded-[4px]"><span class="text-[#a855f7] font-black text-xs uppercase italic transform -rotate-12"><svg class="w-6 h-6 drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></span></div>` : ''}
                                 <span class="text-[10px] font-bold uppercase text-center px-2 mt-4 relative z-10 ${isProUnlocked ? 'text-[#d8b4fe]' : 'text-purple-300'}">${r?.pro || '-'}</span>
                             </div>
                         </div>
@@ -1308,8 +1288,9 @@
                         <div class="flex flex-col gap-6 mb-10">
                             <div class="flex justify-between items-end border-b border-white/10 pb-4">
                                 <div>
-                                    <p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">${seasonName} Season · W${currentMonthWeek < 10 ? '0' : ''}${currentMonthWeek} / 12</p>
-                                    <h3 class="text-3xl font-black uppercase italic tracking-tight">Wöchentliche Drops</h3>
+                                    <p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">Operations</p>
+                                    <h3 class="text-3xl font-black uppercase italic tracking-tight">${(state.weeklyData[currentMonthWeek] || {title: 'Active Week'}).title}</h3>
+                                    <p class="text-gray-500 text-[10px] font-bold tracking-widest mt-1">${weekDaysLeftText}</p>
                                 </div>
                                 <span class="text-[10px] font-black bg-[#ff4d00] text-white px-3 py-1.5 rounded-sm italic shadow-[0_0_10px_rgba(255,77,0,0.4)]">LIVE</span>
                             </div>
@@ -1323,7 +1304,7 @@
                         const isCurrent = w === currentMonthWeek;
                         const isMissed = w < currentMonthWeek;
                         const isFuture = w > currentMonthWeek;
-                        html += `<button type="button" class="week-btn px-3 py-2 text-[9px] font-black uppercase transition ${isCurrent ? 'active' : (isMissed ? 'opacity-40 cursor-not-allowed' : 'opacity-20 cursor-not-allowed border-dashed')}">W${w < 10 ? '0' : ''}${w}</button>`;
+                        html += `<button type="button" class="week-btn px-3 py-2 text-[9px] font-black uppercase transition ${isCurrent ? 'active' : (isMissed ? 'opacity-40 cursor-not-allowed border-dashed' : 'opacity-20 cursor-not-allowed border-dashed')}">W${w < 10 ? '0' : ''}${w}</button>`;
                     }
                     html += `</div>`;
                 });
@@ -1332,7 +1313,7 @@
                 
                 const currentMissions = state.weeklyData[currentMonthWeek]?.missions || [];
                 if (currentMissions.length === 0) {
-                    html += `<div class="text-center p-8 text-gray-600 italic text-sm">Keine Drops verfügbar.</div>`;
+                    html += `<div class="text-center p-8 text-gray-600 italic text-sm border border-[#1f1f1f] rounded-sm bg-[#0a0a0a]">Der Director bereitet die Operations vor. Stay focused.</div>`;
                 }
                 
                 currentMissions.forEach(m => {
@@ -1342,23 +1323,23 @@
                     
                     let btnText = isCompleted ? 'VERIFIED' : (isPending ? 'WIRD ÜBERPRÜFT ⏳' : (m.type === 'instant' ? 'Claim XP' : 'Verify Action'));
                     
-                    let cardClasses = `mockup p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition interactive border-[#1f1f1f]`;
+                    let cardClasses = `card p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition interactive border-[#1f1f1f]`;
                     let btnClasses = `btn-grind w-full md:w-auto text-[10px] bg-white text-black hover:bg-[#ff4d00] hover:text-white transition`;
                     
                     if (isCompleted) {
-                        cardClasses = `mockup p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition border-[#1f1f1f] opacity-50 grayscale-[30%]`;
-                        btnClasses = `w-full md:w-auto text-[10px] font-black uppercase tracking-widest py-3 px-6 rounded-md bg-[#111] text-gray-500 border border-[#333] cursor-not-allowed`;
+                        cardClasses = `card p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition border-[#1f1f1f] opacity-50 grayscale-[30%]`;
+                        btnClasses = `w-full md:w-auto text-[10px] font-black uppercase tracking-widest py-3 px-6 rounded-sm bg-[#111] text-gray-500 border border-[#333] cursor-not-allowed`;
                     } else if (isPending) {
-                        cardClasses = `mockup p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition border-yellow-500/50 shadow-[0_0_15px_rgba(234,179,8,0.15)]`;
-                        btnClasses = `w-full md:w-auto text-[10px] font-black uppercase tracking-widest py-3 px-6 rounded-md bg-yellow-500/10 text-yellow-500 border border-yellow-500/30 cursor-not-allowed`;
+                        cardClasses = `card p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition border-yellow-500/50 shadow-[0_0_15px_rgba(234,179,8,0.15)]`;
+                        btnClasses = `w-full md:w-auto text-[10px] font-black uppercase tracking-widest py-3 px-6 rounded-sm bg-yellow-500/10 text-yellow-500 border border-yellow-500/30 cursor-not-allowed`;
                     }
                     
                     html += `
                         <div class="${cardClasses}">
                             <div class="pr-6 relative z-10 flex-1">
-                                <h4 class="font-bold text-lg text-white tracking-tight">${m.name}</h4>
+                                <h4 class="font-bold text-lg text-white italic uppercase tracking-tighter">${m.name}</h4>
                                 <p class="text-gray-400 text-xs mt-1 font-medium leading-relaxed">${m.desc}</p>
-                                ${!isCompleted ? `<div class="inline-block mt-3 bg-[#111] border border-white/5 px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest text-gray-400">${badgeText}</div>` : ''}
+                                ${!isCompleted ? `<div class="inline-block mt-3 bg-[#111] border border-white/5 px-3 py-1 rounded-sm text-[8px] font-bold uppercase tracking-widest text-gray-400">${badgeText}</div>` : ''}
                             </div>
                             <div class="text-left md:text-right flex-shrink-0 relative z-10 flex flex-col items-start md:items-end w-full md:w-auto mt-4 md:mt-0">
                                 <span class="block ${isPending ? 'text-yellow-500' : 'text-[#ff4d00]'} font-black text-2xl italic tracking-tighter mb-3">+${m.xp}</span>
@@ -1376,7 +1357,7 @@
                             <div class="flex justify-between items-end border-b border-white/10 pb-4">
                                 <div>
                                     <p class="text-[#ff4d00] text-[10px] font-black uppercase tracking-widest mb-1">Endless Grind</p>
-                                    <h3 class="text-3xl font-black uppercase italic tracking-tight">Core Routines</h3>
+                                    <h3 class="text-3xl font-black uppercase italic tracking-tight">Daily Habits</h3>
                                 </div>
                                 <span class="text-[10px] font-black bg-gray-800 text-gray-400 px-3 py-1.5 rounded-sm italic shadow-[0_0_10px_rgba(0,0,0,0.4)]">REPEATABLE</span>
                             </div>
@@ -1385,7 +1366,7 @@
                 `;
                 
                 if ((state.habitData || []).length === 0) {
-                    html += `<div class="text-center p-8 text-gray-600 italic text-sm border border-white/5 rounded-xl">Keine Routinen aktiv.</div>`;
+                    html += `<div class="text-center p-8 text-gray-600 italic text-sm border border-[#1f1f1f] rounded-sm bg-[#0a0a0a]">Keine Habits aktiv.</div>`;
                 }
                 
                 (state.habitData || []).forEach(m => {
@@ -1430,30 +1411,30 @@
                     const totalXpDisplay = isDoneToday ? m.xp : m.xp + currentBonus;
 
                     let badgeText = m.type === 'qr' ? '📍 Check-in' : (m.type === 'upload' ? '📷 Photo Upload' : '⚡ Action');
-                    let btnText = isDoneToday ? 'VERIFIED' : (isPending ? 'WIRD ÜBERPRÜFT ⏳' : 'Verify Routine');
+                    let btnText = isDoneToday ? 'VERIFIED' : (isPending ? 'WIRD ÜBERPRÜFT ⏳' : 'Verify Habit');
 
-                    let cardClasses = `mockup p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition interactive border-[#1f1f1f]`;
+                    let cardClasses = `card p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition interactive border-[#1f1f1f]`;
                     let btnClasses = `btn-grind w-full md:w-auto text-[10px] bg-white text-black hover:bg-[#ff4d00] hover:text-white transition`;
 
                     if (isDoneToday) {
-                        cardClasses = `mockup p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition border-[#1f1f1f] opacity-50 grayscale-[30%]`;
-                        btnClasses = `w-full md:w-auto text-[10px] font-black uppercase tracking-widest py-3 px-6 rounded-md bg-[#111] text-gray-500 border border-[#333] cursor-not-allowed`;
+                        cardClasses = `card p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition border-[#1f1f1f] opacity-50 grayscale-[30%]`;
+                        btnClasses = `w-full md:w-auto text-[10px] font-black uppercase tracking-widest py-3 px-6 rounded-sm bg-[#111] text-gray-500 border border-[#333] cursor-not-allowed`;
                     } else if (isPending) {
-                        cardClasses = `mockup p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition border-yellow-500/50 shadow-[0_0_15px_rgba(234,179,8,0.15)]`;
-                        btnClasses = `w-full md:w-auto text-[10px] font-black uppercase tracking-widest py-3 px-6 rounded-md bg-yellow-500/10 text-yellow-500 border border-yellow-500/30 cursor-not-allowed`;
+                        cardClasses = `card p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition border-yellow-500/50 shadow-[0_0_15px_rgba(234,179,8,0.15)]`;
+                        btnClasses = `w-full md:w-auto text-[10px] font-black uppercase tracking-widest py-3 px-6 rounded-sm bg-yellow-500/10 text-yellow-500 border border-yellow-500/30 cursor-not-allowed`;
                     }
 
                     html += `
                         <div class="${cardClasses}">
                             <div class="pr-6 relative z-10 flex-1 w-full">
                                 <div class="flex justify-between items-start mb-1">
-                                    <h4 class="font-bold text-lg text-white tracking-tight break-words max-w-[70%]">${m.name}</h4>
-                                    <span class="text-[9px] font-bold text-gray-500 tracking-widest uppercase bg-black px-2 py-1 rounded-sm border border-[#111]">${isWeekly ? 'WEEKLY STREAK' : 'DAILY'}</span>
+                                    <h4 class="font-bold text-lg text-white tracking-tight break-words max-w-[70%] uppercase italic">${m.name}</h4>
+                                    <span class="text-[8px] font-bold text-gray-500 tracking-widest uppercase bg-[#0a0a0a] px-2 py-1 rounded-sm border border-[#1f1f1f]">${isWeekly ? 'WEEKLY STREAK' : 'DAILY'}</span>
                                 </div>
                                 <p class="text-gray-400 text-xs mt-1 font-medium leading-relaxed">${m.desc}</p>
                                 <div class="flex flex-wrap items-center gap-2 mt-4">
-                                    <span class="bg-[#111] border border-white/5 px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest text-gray-400">${badgeText}</span>
-                                    ${m.streakBonus > 0 ? `<span class="border border-[#ff4d00]/30 bg-[#ff4d00]/10 text-[#ff4d00] px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest shadow-[0_0_10px_rgba(255,77,0,0.2)]">🔥 Streak: ${activeStreak} (+${m.streakBonus} XP/${isWeekly?'Woche':'Tag'})</span>` : `<span class="border border-white/5 bg-[#111] text-gray-300 px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest">🔥 Streak: ${activeStreak}</span>`}
+                                    <span class="bg-[#111] border border-white/5 px-3 py-1 rounded-sm text-[8px] font-bold uppercase tracking-widest text-gray-400">${badgeText}</span>
+                                    ${m.streakBonus > 0 ? `<span class="border border-[#ff4d00]/30 bg-[#ff4d00]/10 text-[#ff4d00] px-3 py-1 rounded-sm text-[8px] font-bold uppercase tracking-widest shadow-[0_0_10px_rgba(255,77,0,0.2)]">🔥 Streak: ${activeStreak} (+${m.streakBonus} XP/${isWeekly?'Woche':'Tag'})</span>` : `<span class="border border-white/5 bg-[#111] text-gray-300 px-3 py-1 rounded-sm text-[8px] font-bold uppercase tracking-widest">🔥 Streak: ${activeStreak}</span>`}
                                 </div>
                             </div>
                             <div class="text-left md:text-right flex-shrink-0 relative z-10 flex flex-col items-start md:items-end w-full md:w-auto mt-4 md:mt-0">
@@ -1480,7 +1461,7 @@
                 `;
                 
                 html += `
-                    <div class="mockup p-6 mb-8 border border-[#ff4d00]/20 relative overflow-hidden group">
+                    <div class="card p-6 mb-8 border border-[#ff4d00]/20 relative overflow-hidden group">
                         <div class="absolute inset-0 bg-gradient-to-r from-[#ff4d00]/5 to-transparent"></div>
                         <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
                             <div class="text-center md:text-left flex-1">
@@ -1504,7 +1485,7 @@
                 const feedActivities = (state.activities || []).filter(act => act.alias && feedUsersLower.includes(act.alias.toLowerCase())).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0)).slice(0, 10);
                 
                 if (feedActivities.length === 0) {
-                    html += `<div class="text-center p-8 text-gray-600 italic text-sm border border-white/5 rounded-xl bg-[#080808]">Deine Crew ist noch leer oder inaktiv. <br><span class="text-[#ff4d00] font-bold" onclick="window.openInviteModal()" style="cursor:pointer">Lade Freunde ein!</span></div>`;
+                    html += `<div class="text-center p-8 text-gray-600 italic text-sm border border-[#1f1f1f] rounded-sm bg-[#0a0a0a]">Deine Crew ist noch leer oder inaktiv. <br><span class="text-[#ff4d00] font-bold" onclick="window.openInviteModal()" style="cursor:pointer">Lade Freunde ein!</span></div>`;
                 } else {
                     html += `<div class="space-y-4 relative before:absolute before:inset-y-0 before:left-[19px] before:w-[2px] before:bg-[#1f1f1f]">`;
                     feedActivities.forEach(act => {
@@ -1514,7 +1495,7 @@
                         else if (act.type === 'REDEEM') { iconSvg = 'M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7'; borderClass = isProUser ? 'border-[#a855f7]' : 'border-[#ff4d00]'; shadowClass = isProUser ? 'shadow-[0_0_10px_rgba(168,85,247,0.3)]' : 'shadow-[0_0_10px_rgba(255,77,0,0.3)]'; } 
                         else if (act.type === 'PRO') { iconSvg = 'M13 10V3L4 14h7v7l9-11h-7z'; colorClass = 'text-[#a855f7]'; borderClass = 'border-[#a855f7]'; shadowClass = 'shadow-[0_0_15px_rgba(168,85,247,0.4)]'; }
                         const nameColorClass = isProUser ? 'text-[#d8b4fe]' : 'text-[#ff4d00]', proBadge = isProUser ? `<span class="ml-2 align-middle bg-[#a855f7]/20 text-[#a855f7] border border-[#a855f7]/30 text-[8px] px-1.5 py-0.5 rounded-sm font-black shadow-[0_0_10px_rgba(168,85,247,0.2)]">PRO</span>` : '', dynamicText = act.text.replace(/text-\[#[a-fA-F0-9]+\]/g, isProUser ? 'text-[#a855f7]' : 'text-[#ff4d00]');
-                        html += `<div class="flex gap-4 relative z-10"><div class="w-10 h-10 rounded-full bg-[#0a0a0a] border-2 ${borderClass} flex items-center justify-center flex-shrink-0 ${shadowClass}"><svg class="w-4 h-4 ${colorClass}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${iconSvg}"></path></svg></div><div class="bg-[#080808] border border-[#111] p-4 rounded-xl flex-1 shadow-sm"><p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">${getRelativeTime(act.timestamp)}</p><p class="text-sm font-medium text-gray-300"><span class="${nameColorClass} italic uppercase font-black">${act.alias}</span>${proBadge} <span class="text-gray-400 text-xs">${dynamicText}</span></p></div></div>`;
+                        html += `<div class="flex gap-4 relative z-10"><div class="w-10 h-10 rounded-full bg-[#0a0a0a] border-2 ${borderClass} flex items-center justify-center flex-shrink-0 ${shadowClass}"><svg class="w-4 h-4 ${colorClass}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${iconSvg}"></path></svg></div><div class="card p-4 rounded-sm flex-1 shadow-sm"><p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">${getRelativeTime(act.timestamp)}</p><p class="text-sm font-medium text-gray-300"><span class="${nameColorClass} italic uppercase font-black">${act.alias}</span>${proBadge} <span class="text-gray-400 text-xs">${dynamicText}</span></p></div></div>`;
                     });
                     html += `</div>`;
                 }
@@ -1589,7 +1570,7 @@
     </script>
     
     <div id="install-banner" class="hidden fixed inset-0 bg-black/90 backdrop-blur-md z-[999999] flex flex-col items-center justify-center p-6">
-        <div class="bg-[#0a0a0a] border border-[#ff4d00]/30 p-8 rounded-xl shadow-[0_0_50px_rgba(255,77,0,0.3)] w-full max-w-md text-center relative animate-pop">
+        <div class="bg-[#0a0a0a] border border-[#ff4d00]/30 p-8 rounded-sm shadow-[0_0_50px_rgba(255,77,0,0.3)] w-full max-w-md text-center relative animate-pop">
             <button onclick="closeInstallBanner()" class="absolute top-4 right-4 text-gray-500 hover:text-white transition">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
@@ -1597,8 +1578,8 @@
                 <img src="https://grind-app.de/logo.jpg" class="w-full h-full rounded-full object-cover" alt="Logo">
             </div>
             <h3 class="text-3xl font-black italic uppercase tracking-tighter mb-2">Install App</h3>
-            <p class="text-gray-400 text-xs font-medium leading-relaxed mb-8">Füge GRIND. zu deinem Home-Bildschirm hinzu.</p>
-            <div class="bg-black/50 border border-white/10 p-5 rounded-lg flex flex-col gap-5 text-left mb-8">
+            <p class="text-gray-400 text-xs font-medium leading-relaxed mb-8">Füge GRIND. zu deinem Home-Bildschirm hinzu, um direkt und im schnellen Fullscreen auf den Tracker zuzugreifen.</p>
+            <div class="bg-black/50 border border-white/10 p-5 rounded-sm flex flex-col gap-5 text-left mb-8">
                 <div class="flex items-center gap-4 text-sm text-gray-300">
                     <span class="w-6 h-6 rounded-full bg-[#1f1f1f] text-[#ff4d00] flex items-center justify-center font-black text-xs flex-shrink-0">1</span>
                     <span id="step1-text">Tippe auf das Teilen-Symbol</span>
@@ -1629,7 +1610,7 @@
         
         if (isIos && !isInStandaloneMode() && !localStorage.getItem('grind_install_dismissed')) { 
             const s = document.getElementById('step1-text'); 
-            if (isChrome) s.innerText = 'Tippe oben rechts auf'; 
+            if (isChrome) s.innerText = 'Tippe (meist oben rechts) auf'; 
             else if (isSafari) s.innerText = 'Tippe unten auf'; 
             setTimeout(() => document.getElementById('install-banner').classList.remove('hidden'), 2000); 
         }
