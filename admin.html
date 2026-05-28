@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -407,6 +406,47 @@
             const updatedHabits = state.habitData.filter(h => h.id !== habitId);
             await setDoc(doc(db, 'system', 'grind_season'), { habitData: updatedHabits }, { merge: true });
             window.showToast("Routine entfernt.", "success");
+        };
+
+        // --- ADD LOCAL SPOTS FUNCTIONS HERE ---
+        window.addSpot = async (e) => {
+            const icon = document.getElementById('new_spot_icon').value.trim() || '📍';
+            const name = document.getElementById('new_spot_name').value.trim();
+            const subtitle = document.getElementById('new_spot_subtitle').value.trim();
+            const latVal = document.getElementById('new_spot_lat').value;
+            const lngVal = document.getElementById('new_spot_lng').value;
+            const xp = parseInt(document.getElementById('new_spot_xp').value) || 0;
+            const theme = document.getElementById('new_spot_theme').value;
+
+            let color = '#ffffff';
+            if (theme === 'orange') color = '#ff4d00';
+            else if (theme === 'blue') color = '#3b82f6';
+            else if (theme === 'purple') color = '#a855f7';
+
+            const newSpot = { 
+                id: 'spot_' + Date.now(), 
+                icon, name, subtitle, xp, theme, color,
+                lat: latVal ? parseFloat(latVal) : null,
+                lng: lngVal ? parseFloat(lngVal) : null
+            };
+
+            const updatedSpots = JSON.parse(JSON.stringify(state.activeSpots || []));
+            updatedSpots.push(newSpot);
+            
+            try {
+                await setDoc(doc(db, 'system', 'grind_season'), { activeSpots: updatedSpots }, { merge: true });
+                window.showToast("Local Spot live geschaltet.", "success");
+                e.target.reset();
+            } catch(err) { window.showToast("Fehler beim Speichern.", "error"); }
+        };
+
+        window.deleteSpot = async (spotId) => {
+            if(!confirm("Spot wirklich löschen?")) return;
+            const updatedSpots = (state.activeSpots || []).filter(s => s.id !== spotId);
+            try {
+                await setDoc(doc(db, 'system', 'grind_season'), { activeSpots: updatedSpots }, { merge: true });
+                window.showToast("Spot entfernt.", "success");
+            } catch(e) { window.showToast("Fehler beim Löschen.", "error"); }
         };
 
         // --- ANNOUNCEMENTS ---
@@ -916,7 +956,7 @@
                             
                             
                             
-                                                            <!-- ACTIVE SPOTS MANAGER -->
+                                                        <!-- ACTIVE SPOTS MANAGER -->
                                 <div class="card p-6 rounded-sm border-white/20 shadow-[0_0_15px_rgba(255,255,255,0.05)]">
                                     <div class="flex justify-between items-center mb-6">
                                         <h3 class="text-lg font-black uppercase tracking-widest text-white">Local Spots Manager</h3>
