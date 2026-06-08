@@ -525,7 +525,7 @@
 
                 const payload = { 
                     contents: [{ parts: [{ text: `Erstelle Grind-App Inhalte basierend auf diesem User-Input: "${input}"` }] }], 
-                    systemInstruction: { parts: [{ text: "Du bist der Operations Director einer Health & Hustle App. Erstelle passend zum Prompt Operations (wöchentlich), Habits (täglich) oder Loots (Belohnungen). Du kannst von allem mehrere generieren. Nutze exakt die Enums im JSON Schema. XP Ops: 300-1000. Base XP Habits: 50-200. Levels für Loots: 1-30." }] }, 
+                    systemInstruction: { parts: [{ text: "Du bist der Operations Director einer Health & Hustle App. Erstelle passend zum Prompt Operations, Habits, Loots ODER 'Flash Drops'. Flash Drops sind extreme Kurzzeit-Missionen (2-4h). Berücksichtige Wetter-Metaphern oder Aktivitäts-Spikes. Nutze exakt die Enums im JSON Schema. XP Ops: 300-1000. Flash Drops: 1500 XP. Levels für Loots: 1-30." }] }, 
                     generationConfig: { responseMimeType: "application/json", responseSchema: schema } 
                 };
                 
