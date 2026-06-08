@@ -42,99 +42,66 @@
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script src="https://www.paypal.com/sdk/js?client-id=AboxAT2qskA0lY5-23Kj2tu_qY3bOK57rq_LbhtE_cdVOBT37fSHGacBKjgl-zx1XcJM9AZql96OCwc8&currency=EUR"></script>
     
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,900;1,900&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg: #e0e5ec;
-            --light-shadow: #ffffff;
-            --dark-shadow: #a3b1c6;
-            --text-main: #4d5461;
-            --accent: #2d3436;
-        }
         body { 
             font-family: 'Inter', sans-serif; 
-            background-color: var(--bg); 
-            color: var(--text-main); 
+            background-color: #050505; 
+            color: #ffffff; 
             overflow-x: hidden; 
             scroll-behavior: smooth; 
-            background-image: none;
+            background-image: radial-gradient(circle at 50% 0%, #1a0a00 0%, #050505 60%);
             min-height: 100vh;
             overscroll-behavior-y: none;
         }
 
-        h1, h2, h3 { font-family: 'Inter', sans-serif; font-weight: 900; letter-spacing: -0.02em; color: var(--accent); }
-        
-        .grid-overlay { display: none; }
-        
-        .grind-gradient { background: var(--accent); }
-        .text-brand { color: var(--accent); }
-        
-        /* Soft Neumorphic Minimal Cards */
-        .card { 
-            background: var(--bg); 
-            border: 1px solid rgba(255,255,255,0.4); 
-            border-radius: 24px; 
-            box-shadow: 9px 9px 16px var(--dark-shadow), -9px -9px 16px var(--light-shadow); 
-            transition: all 0.3s ease; 
-        }
-        .card.interactive:hover { 
-            transform: translateY(-2px); 
-            box-shadow: 12px 12px 20px var(--dark-shadow), -12px -12px 20px var(--light-shadow); 
-        }
-        
-        /* Neumorphic Reward Nodes */
-        .reward-box { 
-            width: 100px; height: 85px; 
-            border-radius: 20px; 
-            background: var(--bg); 
-            box-shadow: 6px 6px 12px var(--dark-shadow), -6px -6px 12px var(--light-shadow); 
-            border: none; 
-            transition: all 0.3s ease; 
-        }
-        .reward-box.unlocked { 
-            box-shadow: inset 4px 4px 8px var(--dark-shadow), inset -4px -4px 8px var(--light-shadow); 
-            background: #e6e9ef;
-        }
-        .reward-box.pro { height: 95px; width: 110px; }
-        .reward-box.pro.unlocked { box-shadow: inset 4px 4px 10px rgba(168,85,247,0.15), inset -4px -4px 10px var(--light-shadow); }
-        
-        .tag-free { background: #3a3a34; color: #f1efeb; font-size: 8px; font-weight: 900; padding: 4px 10px; border-radius: 30px; letter-spacing: 0.1em; top: -12px; border: 1px solid #1a1a17; }
-        .tag-pro { background: #a855f7; color: white; font-size: 8px; font-weight: 900; padding: 4px 12px; border-radius: 30px; bottom: -12px; border: 1px solid #1a1a17; }
-        
-        /* Buttons - Swiss Brutalism meets Luxury */
-        .btn-grind { 
-            background: var(--bg); 
-            color: var(--accent); 
-            font-weight: 800; 
-            border: none; 
-            box-shadow: 6px 6px 12px var(--dark-shadow), -6px -6px 12px var(--light-shadow); 
-            border-radius: 12px; 
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            transition: all 0.2s ease;
-        }
-        .btn-grind:active { 
-            box-shadow: inset 4px 4px 8px var(--dark-shadow), inset -4px -4px 8px var(--light-shadow);
-            transform: scale(0.98);
-        }
-        .btn-grind:hover:not(:disabled) { 
-            transform: translate(2px, 2px); 
-            box-shadow: 0px 0px 0px #C5A059; 
-            background: #C5A059; 
-            color: white; 
-        }
-        .btn-grind:disabled { background: #2a2a26; color: #555; border-color: #1a1a17; box-shadow: none; }
+        h1, h2, h3, h4 { word-spacing: 0.13em; }
 
-        .week-btn { border-radius: 10px; border: none; background: var(--bg); box-shadow: 3px 3px 6px var(--dark-shadow), -3px -3px 6px var(--light-shadow); color: var(--text-main); }
-        .week-btn.active { background: var(--bg); color: var(--accent); box-shadow: inset 3px 3px 6px var(--dark-shadow), inset -3px -3px 6px var(--light-shadow); font-weight: 900; }
+        /* Cyberpunk Grid Overlay */
+        .grid-overlay { 
+            position: fixed; inset: 0; opacity: 0.08; background-size: 60px 60px; 
+            background-image: linear-gradient(to right, rgba(255,255,255,0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.08) 1px, transparent 1px); 
+            transform: perspective(500px) rotateX(60deg) translateZ(0); pointer-events: none; z-index: 0; 
+        }
+        
+        .grind-gradient { background: linear-gradient(90deg, #ff4d00, #ff8800); }
+        .text-brand { color: #ff4d00; } 
+        
+        /* Cards & Components */
+        .card { background: rgba(15, 15, 15, 0.7); backdrop-filter: blur(10px); border: 1px solid #1f1f1f; transition: all 0.3s ease, filter 0.3s ease; border-radius: 4px; }
+        .card.interactive:hover { border-color: #ff4d00; box-shadow: 0 0 20px rgba(255, 77, 0, 0.1); transform: translateY(-2px); filter: drop-shadow(0 0 8px rgba(255, 77, 0, 0.4)); }
+        
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; scroll-behavior: smooth; }
+        
+        /* Level Nodes */
+        .level-node { min-width: 140px; width: 140px; position: relative; }
+        .reward-box { width: 100px; height: 85px; border: 1px solid #1f1f1f; background: rgba(10, 10, 10, 0.7); display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; z-index: 10; border-radius: 4px; transition: all 0.3s ease, filter 0.3s; backdrop-filter: blur(10px); }
+        .reward-box:hover { filter: drop-shadow(0 0 10px rgba(255, 77, 0, 0.3)); }
+        .reward-box.unlocked { border-color: #ff4d00; background: rgba(255,77,0,0.05); box-shadow: 0 0 15px rgba(255, 77, 0, 0.15); }
+        .reward-box.pro { border-color: rgba(168,85,247,0.3); height: 95px; width: 110px; }
+        .reward-box.pro.unlocked { background: rgba(168,85,247,0.05); border-color: #a855f7; box-shadow: 0 0 20px rgba(168, 85, 247, 0.25); }
+        
+        .tag-free { background: #333; color: white; font-size: 7px; font-weight: 900; padding: 2px 6px; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); text-transform: uppercase; border-radius: 2px; z-index: 30; }
+        .tag-pro { background: linear-gradient(90deg, #7c3aed, #9333ea); color: white; font-size: 8px; font-weight: 900; padding: 2px 8px; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); text-transform: uppercase; border-radius: 3px; box-shadow: 0 2px 8px rgba(124,58,237,0.4); z-index: 30; }
+        
+        .week-btn { border: 1px solid #1f1f1f; background: #0a0a0a; transition: all 0.2s; border-radius: 2px; }
+        .week-btn.active { background: #ff4d00; color: white; border-color: #ff4d00; font-weight: 900; box-shadow: 0 0 15px rgba(255, 77, 0, 0.2); }
 
-        .toast { background: #1a1a17; border: 2px solid #C5A059; border-radius: 12px; }
-        .toast.success { border-left: 8px solid #C5A059; } 
-        .toast.error { border-left: 8px solid #dc2626; } 
+        /* Live Notifications (Top) */
+        .notif-wrapper { transform: translate(-50%, -8rem); opacity: 0; transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); pointer-events: none; will-change: transform, opacity; }
+        .notif-wrapper.show { transform: translate(-50%, 0); opacity: 1; pointer-events: auto; }
+
+        /* Toasts (Side) */
+        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 99999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+        .toast { pointer-events: auto; background: #0a0a0a; border: 1px solid #1f1f1f; color: white; padding: 16px 24px; border-radius: 4px; font-size: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.8); transform: translateX(120%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: flex; align-items: center; gap: 12px; }
+        .toast.show { transform: translateX(0); } 
+        .toast.success { border-left: 4px solid #ff4d00; } 
+        .toast.error { border-left: 4px solid #dc2626; } 
+        .toast.info { border-left: 4px solid #3b82f6; }
         
         /* Buttons */
         .btn-grind { background: white; color: black; font-weight: 900; font-style: italic; text-transform: uppercase; padding: 14px 28px; font-size: 12px; transition: all 0.25s ease; box-shadow: 0 4px 15px rgba(255,255,255,0.05); cursor: pointer; border-radius: 4px; border: none; }
-        .btn-grind:hover:not(:disabled) { background: #C5A059; color: white; transform: translateY(-2px); box-shadow: 0 10px 30px rgba(255,77,0,0.25); }
+        .btn-grind:hover:not(:disabled) { background: #ff4d00; color: white; transform: translateY(-2px); box-shadow: 0 10px 30px rgba(255,77,0,0.25); }
         .btn-grind:disabled { background: #1f1f1f; color: #555; cursor: not-allowed; transform: none; box-shadow: none; border-color: #1f1f1f; }
         
         .btn-pro { background: #1a0a2e; color: #a855f7; font-weight: 900; font-style: italic; text-transform: uppercase; padding: 12px 24px; font-size: 12px; transition: all 0.25s ease; box-shadow: 0 4px 15px rgba(168,85,247,0.1); cursor: pointer; border-radius: 4px; border: 1px solid rgba(168,85,247,0.3); }
@@ -176,8 +143,8 @@
         .grecaptcha-badge:hover { filter: invert(1) grayscale(0) opacity(0.8); }
 
         /* Intro Animation */
-        #intro-layer { position: fixed; inset: 0; z-index: 999999; background-color: var(--bg); display: flex; align-items: center; justify-content: center; transition: opacity 0.8s ease; }
-        .word-flash { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 10vw; font-weight: 900; text-transform: uppercase; white-space: nowrap; opacity: 0; letter-spacing: -0.05em; text-align: center; color: var(--accent); text-shadow: 2px 2px 4px var(--dark-shadow); }
+        #intro-layer { position: fixed; inset: 0; z-index: 999999; background-color: #050505; display: flex; align-items: center; justify-content: center; transition: opacity 0.8s ease; }
+        .word-flash { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 10vw; font-weight: 900; font-style: italic; text-transform: uppercase; white-space: nowrap; opacity: 0; letter-spacing: -0.05em; text-align: center; }
         @media (min-width: 768px) { .word-flash { font-size: 6vw; } }
         @keyframes flashInOut { 0% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); filter: blur(4px); } 10% { opacity: 1; transform: translate(-50%, -50%) scale(1); filter: blur(0px); } 90% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); filter: blur(0px); } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.1); filter: blur(4px); } }
         
@@ -198,7 +165,7 @@
     
     <!-- Live Notification Center (Top) -->
     <div id="live-notification-badge" class="notif-wrapper fixed top-6 left-1/2 z-[99999] w-[90%] max-w-sm">
-        <div id="live-notification-box" class="bg-black/95 backdrop-blur-md border border-[#C5A059]/50 shadow-[0_10px_40px_rgba(255,77,0,0.3)] rounded-xl py-3 px-5 flex items-center justify-center gap-3">
+        <div id="live-notification-box" class="bg-black/95 backdrop-blur-md border border-[#ff4d00]/50 shadow-[0_10px_40px_rgba(255,77,0,0.3)] rounded-sm py-3 px-5 flex items-center justify-center gap-3">
             <span id="live-notification-ping" class="relative flex h-3 w-3 flex-shrink-0 hidden">
                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#ff4d00] opacity-75"></span>
                 <span class="relative inline-flex rounded-full h-3 w-3 bg-[#ff4d00]"></span>
@@ -213,11 +180,11 @@
     <!-- XP Level Up HUD -->
     <div id="xp-hud" class="fixed top-0 left-0 right-0 z-[999998] flex justify-center pt-4 px-4 sm:px-6" style="transform: translateY(-150%); transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none; will-change: transform;">
         <div class="absolute top-2 w-full max-w-md h-32 bg-black/60 blur-2xl rounded-full pointer-events-none z-0 gpu-blur"></div>
-        <div class="bg-[#0a0a0a]/95 border border-[#ff4d00]/50 shadow-[10px_10px_0px_#000,0_0_40px_rgba(197,160,89,0.2)] rounded-sm p-5 w-full max-w-sm flex flex-col gap-3 relative overflow-hidden backdrop-blur-2xl z-10 pointer-events-auto">
+        <div class="bg-[#0a0a0a]/95 border border-[#ff4d00]/50 shadow-[0_20px_50px_rgba(0,0,0,0.9),_0_0_30px_rgba(255,77,0,0.3)] rounded-sm p-5 w-full max-w-sm flex flex-col gap-3 relative overflow-hidden backdrop-blur-2xl z-10 pointer-events-auto">
             <div class="absolute inset-0 bg-gradient-to-b from-[#ff4d00]/15 to-transparent"></div>
             <div class="relative z-10 flex justify-between items-end">
                 <div>
-                    <p class="text-[#C5A059] text-[9px] font-black uppercase tracking-[0.3em] mb-1 drop-shadow-md">Network Sync</p>
+                    <p class="text-[#ff4d00] text-[9px] font-black uppercase tracking-[0.3em] mb-1 drop-shadow-md">Network Sync</p>
                     <h4 class="text-white font-black italic text-2xl leading-none">LVL <span id="hud-lvl" class="inline-block">1</span></h4>
                 </div>
                 <div class="text-right">
@@ -237,7 +204,7 @@
     <!-- App Root -->
     <div id="app" class="flex-1 flex flex-col w-full z-10 relative pb-10">
         <div class="flex-1 flex items-center justify-center min-h-[60vh]">
-            <div class="w-16 h-16 border-t-4 border-l-4 border-[#ff4d00] rounded-xl animate-spin shadow-[0_0_20px_#C5A059]"></div>
+            <div class="w-16 h-16 border-t-4 border-l-4 border-[#ff4d00] rounded-full animate-spin"></div>
         </div>
     </div>
     
