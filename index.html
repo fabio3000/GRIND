@@ -234,6 +234,12 @@
         };
 
         const RANKS = ["Rookie", "Grinder", "Hustler", "Athlete", "Machine", "Legend"];
+        const LEAGUES = ["Bronze", "Silver", "Gold", "Platinum", "Diamond", "Legend"];
+        const ARCHETYPES = {
+            athlete: { name: "The Athlete", bonus: "Fitness Ops (1.2x XP)" },
+            hustler: { name: "The Hustler", bonus: "Work & Productivity (1.2x XP)" },
+            zen: { name: "The Zen Master", bonus: "Habits & Recovery (1.2x XP)" }
+        };
         let holdTimer = null, holdProgress = 0, isRedeeming = false;
         window.currentVerify = null; window.countdownInterval = null;
 
@@ -639,9 +645,32 @@
             } catch(e) { window.showToast("Fehler.", "error"); if(btn) { btn.innerText = "Versand anfordern"; btn.disabled = false; } }
         };
 
+        window.syncHealthSteps = async () => {
+            if (!("PermissionStatus" in window)) { window.showToast("Web Health API nicht unterstützt.", "info"); }
+            window.showToast("Synchronisiere Fitness-Daten...", "info");
+            setTimeout(async () => {
+                const mockSteps = 8400; 
+                const xpGain = Math.floor(mockSteps / 100);
+                const oldXp = state.profile.xp || 0;
+                const newXp = oldXp + xpGain;
+                const newLvl = Math.floor(newXp / 1000) + 1;
+                await setDoc(doc(db, 'plot_users', state.user.uid), { xp: newXp, lvl: newLvl, "healthSync.steps": mockSteps, "healthSync.lastSync": Date.now() }, { merge: true });
+                window.showToast(`Auto-Sync: +${xpGain} XP für deine Schritte!`, "success");
+                window.triggerXpHud(xpGain, oldXp, newXp, state.profile.lvl, newLvl);
+            }, 1500);
+        };
+
         window.claimInstantMission = async (mid, xp, name) => {
             const btn = document.getElementById(`btn-${mid}`); if(btn) { btn.innerText = "Claiming..."; btn.disabled = true; }
             try {
+                let finalXpBase = xp;
+                const p = state.profile;
+                if (p.archetype === 'athlete' && name.toLowerCase().includes('run')) finalXpBase *= 1.2;
+                if (p.archetype === 'hustler' && name.toLowerCase().includes('work')) finalXpBase *= 1.2;
+                if (p.archetype === 'zen' && name.toLowerCase().includes('medit')) finalXpBase *= 1.2;
+                if (p.perks?.includes('bonus_10')) finalXpBase *= 1.1;
+                xp = Math.floor(finalXpBase);
+
                 const habit = state.habitData.find(h => h.id === mid); const isRepeatable = !!habit; const oldLvl = state.profile.lvl || 1; let newLvl = oldLvl; let updatePayload = {}; let claimSuccess = false;
                 if (isRepeatable) {
                     const freq = habit.frequency || 'daily'; const isWeekly = freq === 'weekly' || freq === 'weekly_streak'; const isDailyStreak = freq === 'daily_streak'; const timeKey = new Date().toISOString().split('T')[0];
@@ -1046,7 +1075,13 @@
             
             const layer = document.createElement('div'); layer.id = 'intro-layer'; layer.innerHTML = `<div id="word1" class="word-flash text-gray-500">DROP IN.</div><div id="word2" class="word-flash text-white">CLEAR MISSIONS.</div><div id="word3" class="word-flash text-white">CLAIM LOOT.</div><div id="word4" class="word-flash"><img src="https://grind-app.de/logo.jpg" class="w-32 h-32 md:w-56 md:h-56 rounded-full border-4 border-[#ff4d00] shadow-[0_0_60px_rgba(255,77,0,0.5)] mx-auto object-cover"></div>`; document.body.appendChild(layer); 
             try {
-                const c = Math.random().toString(36).substring(2, 8).toUpperCase(); state.profile = { xp: 0, lvl: 1, completed: [], redeemed: [], streaks: {}, friends: [], crewCode: c, alias: nameInput, city: cityInput, hasPremium: false };
+                const c = Math.random().toString(36).substring(2, 8).toUpperCase(); 
+                const archType = document.getElementById('onboard_archetype').value || 'athlete';
+                state.profile = { 
+                    xp: 0, lvl: 1, completed: [], redeemed: [], streaks: {}, friends: [], crewCode: c, 
+                    alias: nameInput, city: cityInput, hasPremium: false, archetype: archType, perks: [], 
+                    healthSync: { lastSync: 0, steps: 0, bonusClaimed: false } 
+                };
                 await setDoc(doc(db, 'plot_users', state.user.uid), state.profile);
                 const timing = 700; document.getElementById('word1').style.animation = `flashInOut ${timing}ms forwards`; setTimeout(() => { document.getElementById('word2').style.animation = `flashInOut ${timing}ms forwards`; }, timing); setTimeout(() => { document.getElementById('word3').style.animation = `flashInOut ${timing}ms forwards`; }, timing * 2); setTimeout(() => { document.getElementById('word4').style.animation = `flashInOut ${timing * 1.5}ms forwards`; }, timing * 3);
                 setTimeout(() => { layer.style.opacity = "0"; setTimeout(() => layer.remove(), 800); window.startTutorial(); state.view = 'dashboard'; state.dashboardNeedsScroll = true; window.scheduleRender(); }, timing * 4.2);
@@ -1329,6 +1364,15 @@
                                 </div>
                                 <div class="w-full bg-black h-3 rounded-full overflow-hidden border border-white/5 relative shadow-inner">
                                     <div id="top-xp-bar" class="grind-gradient h-full transition-all ease-out xp-bar-glow" style="width: ${oldXpProgress}%; transition-duration: 2500ms;"></div>
+                                </div>
+                                <div class="flex justify-between mt-4">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-[9px] font-black px-2 py-1 bg-[#1f1f1f] text-white rounded-sm">${LEAGUES[Math.min(5, Math.floor(safeLvl/5))].toUpperCase()} LEAGUE</span>
+                                        <span class="text-[9px] font-black px-2 py-1 bg-[#a855f7]/20 text-[#a855f7] rounded-sm">${(ARCHETYPES[p.archetype] || ARCHETYPES.athlete).name}</span>
+                                    </div>
+                                    <button onclick="window.syncHealthSteps()" class="text-[9px] font-black px-2 py-1 bg-green-500/10 text-green-500 border border-green-500/30 rounded-sm flex items-center gap-1">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> HEALTH SYNC
+                                    </button>
                                 </div>
                             </div>
                         </section>
@@ -1632,6 +1676,16 @@
                     </div>
                 `;
                 
+                html += `
+                    <div class="card p-6 mb-8 border border-blue-500/20 bg-blue-500/5">
+                        <p class="text-blue-500 text-[10px] font-black uppercase tracking-widest mb-1">Crew Objective</p>
+                        <h4 class="text-lg font-black italic uppercase text-white">Team Miles: 100km</h4>
+                        <div class="w-full bg-black h-2 rounded-full mt-3 overflow-hidden border border-white/5">
+                            <div class="bg-blue-500 h-full" style="width: 65%"></div>
+                        </div>
+                        <p class="text-[9px] text-gray-500 mt-2 font-bold uppercase tracking-widest">65.2 / 100.0 KM GESAMMELT • 3 TAGE ÜBRIG</p>
+                    </div>
+                `;
                 html += `<div id="live-feed-content">`;
                 const friendsList = p.friends || []; 
                 const feedUsersLower = friendsList.map(u => (u || '').toLowerCase());
