@@ -525,7 +525,7 @@
 
                 const payload = { 
                     contents: [{ parts: [{ text: `Erstelle Grind-App Inhalte basierend auf diesem User-Input: "${input}"` }] }], 
-                    systemInstruction: { parts: [{ text: "Du bist der Operations Director einer Health & Hustle App. Erstelle passend zum Prompt Operations, Habits, Loots ODER 'Flash Drops'. Flash Drops sind extreme Kurzzeit-Missionen (2-4h). Berücksichtige Wetter-Metaphern oder Aktivitäts-Spikes. Nutze exakt die Enums im JSON Schema. XP Ops: 300-1000. Flash Drops: 1500 XP. Levels für Loots: 1-30." }] }, 
+                    systemInstruction: { parts: [{ text: "Du bist der Operations Director einer Health & Hustle App. Erstelle passend zum Prompt Operations (wöchentlich), Habits (täglich) oder Loots (Belohnungen). Du kannst von allem mehrere generieren. Nutze exakt die Enums im JSON Schema. XP Ops: 300-1000. Base XP Habits: 50-200. Levels für Loots: 1-30." }] }, 
                     generationConfig: { responseMimeType: "application/json", responseSchema: schema } 
                 };
                 
@@ -754,7 +754,6 @@
                         <button type="button" onclick="window.setAdminTab('control')" class="admin-tab ${state.adminTab === 'control' ? 'active' : ''}">Season Control</button>
                         <button type="button" onclick="window.setAdminTab('proofs')" class="admin-tab ${state.adminTab === 'proofs' ? 'active' : ''}">Pending Proofs <span class="bg-[#ff4d00]/20 text-[#ff4d00] px-1.5 py-0.5 rounded-sm ml-1">${state.pendingProofs.length}</span></button>
                         <button type="button" onclick="window.setAdminTab('announcements')" class="admin-tab ${state.adminTab === 'announcements' ? 'active' : ''}">📣 Mitteilungen</button>
-                        <button type="button" onclick="window.setAdminTab('leagues')" class="admin-tab ${state.adminTab === 'leagues' ? 'active' : ''}">🏆 Leagues & Crews</button>
                     </div>
                 `;
 
@@ -1139,26 +1138,6 @@
 
                 }
 
-                if (state.adminTab === 'leagues') {
-                    html += `
-                        <div class="max-w-2xl mx-auto space-y-6">
-                            <div class="card p-7 rounded-xl">
-                                <h3 class="text-lg font-black uppercase tracking-widest text-[#ff4d00] mb-4">Crew Goals & League Manager</h3>
-                                <div class="space-y-4">
-                                    <div class="p-4 bg-black rounded-sm border border-white/5">
-                                        <label class="block text-[10px] font-bold text-gray-500 uppercase mb-2">Active Crew Objective</label>
-                                        <input class="w-full p-2 bg-[#0a0a0a] border border-[#1f1f1f] text-sm text-white mb-2" value="Gemeinsam 100km laufen">
-                                        <div class="flex gap-2">
-                                            <input type="number" class="w-1/2 p-2 bg-[#0a0a0a] border border-[#1f1f1f] text-sm text-white" value="100">
-                                            <select class="w-1/2 p-2 bg-[#0a0a0a] border border-[#1f1f1f] text-sm text-white"><option>Kilometer</option><option>XP</option></select>
-                                        </div>
-                                    </div>
-                                    <button class="w-full btn-grind py-3">Update Global Objective</button>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }
                 html += `</main>`; appDiv.innerHTML = html;
             }
         }
