@@ -67,15 +67,16 @@
         .text-brand { color: #ff4d00; } 
         
         /* Cards & Components */
-        .card { background: #0f0f0f; border: 1px solid #1f1f1f; transition: all 0.3s ease; border-radius: 4px; }
-        .card.interactive:hover { border-color: #ff4d00; box-shadow: 0 0 20px rgba(255, 77, 0, 0.1); transform: translateY(-2px); }
+        .card { background: rgba(15, 15, 15, 0.7); backdrop-filter: blur(10px); border: 1px solid #1f1f1f; transition: all 0.3s ease, filter 0.3s ease; border-radius: 4px; }
+        .card.interactive:hover { border-color: #ff4d00; box-shadow: 0 0 20px rgba(255, 77, 0, 0.1); transform: translateY(-2px); filter: drop-shadow(0 0 8px rgba(255, 77, 0, 0.4)); }
         
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; scroll-behavior: smooth; }
         
         /* Level Nodes */
         .level-node { min-width: 140px; width: 140px; position: relative; }
-        .reward-box { width: 100px; height: 85px; border: 1px solid #1f1f1f; background: rgba(10,10,10,0.8); display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; z-index: 10; border-radius: 4px; transition: all 0.3s ease; backdrop-filter: blur(5px); }
+        .reward-box { width: 100px; height: 85px; border: 1px solid #1f1f1f; background: rgba(10, 10, 10, 0.7); display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; z-index: 10; border-radius: 4px; transition: all 0.3s ease, filter 0.3s; backdrop-filter: blur(10px); }
+        .reward-box:hover { filter: drop-shadow(0 0 10px rgba(255, 77, 0, 0.3)); }
         .reward-box.unlocked { border-color: #ff4d00; background: rgba(255,77,0,0.05); box-shadow: 0 0 15px rgba(255, 77, 0, 0.15); }
         .reward-box.pro { border-color: rgba(168,85,247,0.3); height: 95px; width: 110px; }
         .reward-box.pro.unlocked { background: rgba(168,85,247,0.05); border-color: #a855f7; box-shadow: 0 0 20px rgba(168, 85, 247, 0.25); }
@@ -1476,7 +1477,7 @@
                     
                     let btnText = isCompleted ? 'VERIFIED' : (isPending ? 'WIRD ÜBERPRÜFT ⏳' : (m.type === 'instant' ? 'Claim XP' : 'Verify Action'));
                     
-                    let cardClasses = `card p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition interactive border-[#1f1f1f]`;
+                    let cardClasses = `card p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition interactive border-[#1f1f1f] group`;
                     let btnClasses = `btn-grind w-full md:w-auto text-[10px] bg-white text-black hover:bg-[#ff4d00] hover:text-white transition`;
                     
                     if (isCompleted) {
@@ -1495,7 +1496,7 @@
                                 ${!isCompleted ? `<div class="inline-block mt-3 bg-[#111] border border-white/5 px-3 py-1 rounded-sm text-[8px] font-bold uppercase tracking-widest text-gray-400">${badgeText}</div>` : ''}
                             </div>
                             <div class="text-left md:text-right flex-shrink-0 relative z-10 flex flex-col items-start md:items-end w-full md:w-auto mt-4 md:mt-0">
-                                <span class="block ${isPending ? 'text-yellow-500' : 'text-[#ff4d00]'} font-black text-2xl italic tracking-tighter mb-3">+${m.xp}</span>
+                                <span class="block ${isPending ? 'text-yellow-500' : 'text-[#ff4d00]'} font-black text-2xl italic tracking-tighter mb-3 transform transition-transform group-hover:translate-x-2 group-hover:scale-110">+${m.xp}</span>
                                 <button type="button" id="btn-${m.id}" onclick="window.claimItemById('${m.id}')" class="${btnClasses}" ${(isCompleted || isPending) ? 'disabled' : ''}>${btnText}</button>
                             </div>
                         </div>
@@ -1566,7 +1567,7 @@
                     let badgeText = m.type === 'qr' ? '📍 Check-in' : (m.type === 'upload' ? '📷 Photo Upload' : '⚡ Action');
                     let btnText = isDoneToday ? 'VERIFIED' : (isPending ? 'WIRD ÜBERPRÜFT ⏳' : 'Verify Habit');
 
-                    let cardClasses = `card p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition interactive border-[#1f1f1f]`;
+                    let cardClasses = `card p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition interactive border-[#1f1f1f] group`;
                     let btnClasses = `btn-grind w-full md:w-auto text-[10px] bg-white text-black hover:bg-[#ff4d00] hover:text-white transition`;
 
                     if (isDoneToday) {
@@ -1591,7 +1592,7 @@
                                 </div>
                             </div>
                             <div class="text-left md:text-right flex-shrink-0 relative z-10 flex flex-col items-start md:items-end w-full md:w-auto mt-4 md:mt-0">
-                                <span class="block ${isPending ? 'text-yellow-500' : 'text-white'} font-black text-2xl italic tracking-tighter mb-3">+${totalXpDisplay}</span>
+                                <span class="block ${isPending ? 'text-yellow-500' : 'text-white'} font-black text-2xl italic tracking-tighter mb-3 transform transition-transform group-hover:translate-x-2 group-hover:scale-110">+${totalXpDisplay}</span>
                                 <button type="button" onclick="window.claimItemById('${m.id}')" class="${btnClasses}" ${(isDoneToday || isPending) ? 'disabled' : ''}>${btnText}</button>
                             </div>
                         </div>
