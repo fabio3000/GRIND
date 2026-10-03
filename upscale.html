@@ -1,402 +1,316 @@
 <!DOCTYPE html>
-<html lang="de" class="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Hyper-Real Deep Reconstruction</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        darkbg: '#050505',
-                        panelbg: '#111111',
-                        accent: '#3b82f6',
-                        accentglow: '#60a5fa'
-                    },
-                    animation: {
-                        'scan': 'scan 2s linear infinite',
-                        'pulse-glow': 'pulseGlow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
-                    },
-                    keyframes: {
-                        scan: {
-                            '0%': { transform: 'translateY(-100%)' },
-                            '100%': { transform: 'translateY(100%)' }
-                        },
-                        pulseGlow: {
-                            '0%, 100%': { opacity: 1, boxShadow: '0 0 15px rgba(59, 130, 246, 0.5)' },
-                            '50%': { opacity: .7, boxShadow: '0 0 5px rgba(59, 130, 246, 0.2)' }
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>AI Image Upscaler (NSFW Ready)</title>
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #050505; }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
-        
-        /* Slider specifics */
-        .slider-handle {
-            touch-action: pan-y;
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #121212;
+            color: #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background-color: #1e1e1e;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+            max-width: 900px;
+            width: 100%;
+            text-align: center;
+        }
+        h1 {
+            color: #bb86fc;
+            margin-bottom: 25px;
+        }
+        .upload-area {
+            border: 2px dashed #4CAF50;
+            padding: 40px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .upload-area:hover {
+            background-color: #2c2c2c;
+        }
+        /* GEFIXT: # vor fileInput gefehlt */
+        #fileInput {
+            display: none;
+        }
+        .controls-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 25px;
+        }
+        .controls-group {
+            display: flex;
+            flex-direction: column;
+            min-width: 180px;
+        }
+        .key-input-group {
+            display: flex;
+            flex-direction: column;
+            min-width: 100%;
+            max-width: 400px;
+            margin-bottom: 20px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        label {
+            margin-right: 15px;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+            color: #bb86fc;
+        }
+        select, input[type="range"], input[type="text"] {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #444;
+            background-color: #333;
+            color: white;
+            font-size: 16px;
+        }
+        button {
+            padding: 12px 25px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #03DAC6;
+            color: #121212;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+            margin-top: 15px;
+        }
+        button:hover:enabled {
+            background-color: #018786;
+        }
+        button:disabled {
+            background-color: #3a3a3a;
+            cursor: not-allowed;
+        }
+        #outputArea {
+            margin-top: 30px;
+            border-top: 1px solid #333;
+            padding-top: 20px;
+        }
+        .image-preview-container {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .image-preview-container h2 {
+            color: #bb86fc;
+            margin-bottom: 10px;
+        }
+        #originalImage, #upscaledImage {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #444;
+            border-radius: 5px;
+            display: block;
+            margin: 15px auto;
         }
     </style>
 </head>
-<body class="bg-darkbg text-slate-200 min-h-screen flex flex-col selection:bg-blue-500/30">
+<body>
 
-    <header class="border-b border-white/10 bg-panelbg/80 backdrop-blur-xl sticky top-0 z-40">
-        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center shadow-[0_0_15px_rgba(37,99,235,0.5)]">
-                    <i class="fa-solid fa-layer-group text-white text-sm"></i>
-                </div>
-                <div>
-                    <h1 class="font-bold text-lg tracking-tight text-white">DeepReconstruct AI</h1>
-                    <p class="text-[10px] text-slate-400 uppercase tracking-wider">Generative Image-to-Image Engine</p>
-                </div>
-            </div>
-            <div class="text-xs px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 flex items-center space-x-2">
-                <div class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></div>
-                <span>Gemini 3.1 Flash Image aktiv</span>
-            </div>
-        </div>
-    </header>
+<div class="container">
+    <h1>🌌 AI Image Upscaler - Realism Max 🚀</h1>
 
-    <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
-        
-        <div class="lg:col-span-4 space-y-6">
-            
-            <div class="bg-panelbg rounded-2xl border border-white/5 p-5 shadow-2xl relative">
-                <div class="mb-4">
-                    <h2 class="text-sm font-semibold text-white">1. Ursprungsbild</h2>
-                    <p class="text-xs text-slate-400 mt-1">Lade das unscharfe Original hoch.</p>
-                </div>
-
-                <div id="dropzone" class="border-2 border-dashed border-white/10 hover:border-blue-500/50 rounded-xl p-6 text-center cursor-pointer transition bg-black/20 group relative overflow-hidden">
-                    <input type="file" id="fileInput" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10">
-                    <div id="uploadContent" class="space-y-2 pointer-events-none">
-                        <i class="fa-solid fa-image text-3xl text-slate-600 group-hover:text-blue-500 transition duration-300"></i>
-                        <p class="text-sm text-slate-300">Hier ablegen oder klicken</p>
-                    </div>
-                    <img id="sourcePreview" class="hidden absolute inset-0 w-full h-full object-cover opacity-50" alt="Source">
-                    <div id="sourcePreviewOverlay" class="hidden absolute inset-0 bg-gradient-to-t from-panelbg via-transparent to-transparent flex items-end justify-center pb-2">
-                        <span class="text-xs font-medium text-blue-400 bg-black/60 px-2 py-1 rounded">Bild geladen</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-panelbg rounded-2xl border border-white/5 p-5 shadow-2xl">
-                <div class="mb-4">
-                    <h2 class="text-sm font-semibold text-white">2. Generativer Kontext (Optional)</h2>
-                    <p class="text-xs text-slate-400 mt-1">Hilf der KI bei unleserlichen Details (z.B. "Text lautet: BÄCKEREI"). <b>Die 1:1 Struktur und Gesichtszüge des Originals bleiben strikt erhalten.</b></p>
-                </div>
-
-                <textarea id="promptInput" rows="4" class="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-sm text-slate-200 focus:outline-none focus:border-blue-500 transition resize-none placeholder-slate-600" placeholder="Beispiel: 'Auf dem unscharfen Schild im Hintergrund steht das Wort BÄCKEREI in roter, serifenloser Schrift...'"></textarea>
-                
-                <button id="processBtn" disabled class="w-full mt-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-medium text-sm shadow-[0_0_20px_rgba(37,99,235,0.3)] transition disabled:opacity-50 disabled:shadow-none disabled:cursor-not-allowed flex items-center justify-center space-x-2">
-                    <i class="fa-solid fa-microchip"></i>
-                    <span>Hyper-Rekonstruktion Starten</span>
-                </button>
-            </div>
-
-            <div class="p-4 rounded-xl bg-blue-500/5 border border-blue-500/10 text-xs text-slate-400 leading-relaxed">
-                <i class="fa-solid fa-circle-info text-blue-400 mr-1"></i>
-                Dies ist <b>kein Filter</b>. Die KI analysiert die Pixel-Struktur und generiert ein extrem scharfes Bild. Durch den <b>Strict 1:1 Mode</b> wird garantiert, dass Winkel, Posen und Layout exakt beibehalten werden.
-            </div>
-        </div>
-
-        <div class="lg:col-span-8 flex flex-col min-h-[500px]">
-            <div class="bg-panelbg rounded-2xl border border-white/5 p-1 shadow-2xl flex-1 flex flex-col relative overflow-hidden group">
-                
-                <!-- Initial State -->
-                <div id="emptyWorkspace" class="absolute inset-0 flex flex-col items-center justify-center text-slate-500 z-0">
-                    <i class="fa-solid fa-arrows-left-right text-4xl mb-4 opacity-20"></i>
-                    <p class="text-sm font-medium">Lade ein Bild hoch, um den Vergleich zu sehen</p>
-                </div>
-
-                <!-- Processing Overlay -->
-                <div id="loadingOverlay" class="hidden absolute inset-0 bg-panelbg/90 backdrop-blur-sm z-40 flex flex-col items-center justify-center">
-                    <div class="relative w-full max-w-md h-64 border border-blue-500/30 rounded-lg overflow-hidden bg-black/50 mb-6">
-                        <!-- Simulated scanning effect -->
-                        <div class="absolute inset-0 bg-gradient-to-b from-transparent via-blue-500/20 to-transparent h-20 w-full animate-scan"></div>
-                        <div class="absolute inset-0 flex items-center justify-center">
-                            <i class="fa-solid fa-wand-magic-sparkles text-3xl text-blue-400 animate-pulse"></i>
-                        </div>
-                    </div>
-                    <h3 class="text-white font-medium text-lg mb-2">Generiere Unendliche Pixel...</h3>
-                    <p class="text-sm text-blue-400">Analysiere Kontext & rekonstruiere Strukturen komplett neu.</p>
-                </div>
-
-                <!-- Slider Comparison Workspace -->
-                <div id="comparisonWorkspace" class="hidden relative w-full h-[600px] bg-black rounded-xl overflow-hidden select-none">
-                    
-                    <!-- Result Image (Background / Bottom layer) -->
-                    <img id="imgResult" class="absolute inset-0 w-full h-full object-contain pointer-events-none" alt="Generiertes Resultat">
-                    
-                    <!-- Labels -->
-                    <div class="absolute top-4 right-4 z-10 bg-black/60 backdrop-blur text-blue-400 border border-blue-500/30 px-3 py-1 rounded-full text-xs font-semibold shadow-lg">
-                        KI Generiert (Unendliche Schärfe)
-                    </div>
-                    <div id="labelOriginal" class="absolute top-4 left-4 z-30 bg-black/60 backdrop-blur text-slate-300 border border-white/10 px-3 py-1 rounded-full text-xs font-semibold shadow-lg">
-                        Original (Unscharf)
-                    </div>
-
-                    <!-- Original Image (Clipped / Top layer) -->
-                    <div id="sliderClipper" class="absolute inset-0 w-1/2 overflow-hidden z-20 border-r-2 border-white shadow-[10px_0_15px_rgba(0,0,0,0.5)]">
-                        <!-- We use absolute positioning and a fixed width matching the container to ensure the image scales identically -->
-                        <img id="imgOriginal" class="absolute top-0 left-0 h-full object-contain max-w-none pointer-events-none" alt="Original">
-                    </div>
-
-                    <!-- Invisible Input Range for Interaction -->
-                    <input type="range" id="sliderInput" min="0" max="100" value="50" class="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize z-40 slider-handle m-0 p-0">
-                    
-                    <!-- Custom Handle Visual -->
-                    <div id="sliderHandleVisual" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-white text-black rounded-full flex items-center justify-center shadow-2xl z-30 pointer-events-none transition-transform duration-75">
-                        <i class="fa-solid fa-arrows-left-right text-sm"></i>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- Action Bar (Hidden until generated) -->
-            <div id="actionBar" class="hidden mt-4 flex items-center justify-between bg-panelbg border border-white/5 rounded-xl p-3">
-                <div class="text-xs text-slate-400 pl-2">Erfolgreich generiert.</div>
-                <button onclick="downloadImage()" class="px-4 py-2 bg-white text-black hover:bg-slate-200 rounded-lg text-sm font-semibold transition flex items-center space-x-2">
-                    <i class="fa-solid fa-download"></i>
-                    <span>High-Res PNG Speichern</span>
-                </button>
-            </div>
-        </div>
-    </main>
-
-    <!-- Toast Notification -->
-    <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-panelbg border border-white/10 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center space-x-3 text-sm">
-        <i id="toastIcon" class="fa-solid fa-circle-info text-blue-400"></i>
-        <span id="toastMessage">...</span>
+    <div class="key-input-group">
+        <label for="apiKeyInput">Stability AI API Key:</label>
+        <input type="text" id="apiKeyInput" placeholder="sk-xxxxxxxxxxxxxxxxxxxxxxx" value="">
     </div>
 
-    <script>
-        // API Configuration (Empty string for Canvas to inject)
-        const apiKey = "";
-        
-        // State
-        let base64Source = null;
-        let base64Result = null;
+    <div class="upload-area" id="dropZone">
+        <p>Drag & drop your blurry image here, or click to browse.</p>
+        <p>*(Supporting various formats, including explicit/NSFW content)*</p>
+    </div>
+    <input type="file" id="fileInput" accept="image/*">
 
-        // Elements
-        const fileInput = document.getElementById('fileInput');
-        const dropzone = document.getElementById('dropzone');
-        const sourcePreview = document.getElementById('sourcePreview');
-        const sourcePreviewOverlay = document.getElementById('sourcePreviewOverlay');
-        const uploadContent = document.getElementById('uploadContent');
-        const processBtn = document.getElementById('processBtn');
-        const promptInput = document.getElementById('promptInput');
-        
-        const emptyWorkspace = document.getElementById('emptyWorkspace');
-        const loadingOverlay = document.getElementById('loadingOverlay');
-        const comparisonWorkspace = document.getElementById('comparisonWorkspace');
-        const actionBar = document.getElementById('actionBar');
-        
-        const imgOriginal = document.getElementById('imgOriginal');
-        const imgResult = document.getElementById('imgResult');
-        const sliderInput = document.getElementById('sliderInput');
-        const sliderClipper = document.getElementById('sliderClipper');
-        const sliderHandleVisual = document.getElementById('sliderHandleVisual');
-        const labelOriginal = document.getElementById('labelOriginal');
+    <div class="controls-wrapper">
+        <div class="controls-group">
+            <label for="scaleFactor">Target Upscale:</label>
+            <select id="scaleFactor">
+                <option value="1x">1x (Detail Enhancement)</option>
+                <option value="2x" selected>2x (Standard)</option>
+                <option value="4x">4x (High Detail)</option>
+                <option value="8x">8x (Extreme Detail)</option>
+            </select>
+        </div>
 
-        function handleFile(file) {
-            if (!file || !file.type.startsWith('image/')) {
-                showToast('Bitte wähle ein gültiges Bild.', 'error');
-                return;
-            }
+        <div class="controls-group">
+            <label for="modelSelect">AI Model Preset:</label>
+            <select id="modelSelect">
+                <option value="default_realism">Photorealistic (Default)</option>
+                <option value="anime_high">Anime/Cartoon Focus</option>
+                <option value="gritty_cinematic">Cinematic/Gritty (Good for NSFW)</option>
+            </select>
+        </div>
+    </div>
 
+    <button id="upscaleButton">🚀 Upscale Image</button>
+
+    <div id="outputArea">
+        <div class="image-preview-container">
+            <h2>Original Image</h2>
+            <img id="originalImage" src="" alt="Original Image Preview" style="display: none;">
+            <p id="originalPlaceholder">No image loaded.</p>
+        </div>
+        <div class="image-preview-container">
+            <h2>Upscaled Result</h2>
+            <img id="upscaledImage" src="" alt="Upscaled Image Result" style="display: none;">
+            <p id="upscaledPlaceholder">Result will appear here.</p>
+        </div>
+        <a id="downloadLink" style="display: none; margin-top: 20px; padding: 10px 20px; background-color: #FF9800; color: white; text-decoration: none; border-radius: 5px;">Download Upscaled Image</a>
+    </div>
+</div>
+
+<script>
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const upscaleButton = document.getElementById('upscaleButton');
+    const apiKeyInput = document.getElementById('apiKeyInput');
+    const originalImage = document.getElementById('originalImage');
+    const originalPlaceholder = document.getElementById('originalPlaceholder');
+    const upscaledImage = document.getElementById('upscaledImage');
+    const upscaledPlaceholder = document.getElementById('upscaledPlaceholder');
+    const downloadLink = document.getElementById('downloadLink');
+
+    let selectedFile = null;
+
+    // --- File Handling ---
+    dropZone.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
+
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => dropZone.style.borderColor = '#03DAC6', false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => dropZone.style.borderColor = '#4CAF50', false);
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+        let dt = e.dataTransfer;
+        let files = dt.files;
+        handleFile(files[0]);
+    });
+
+    function handleFile(file) {
+        if (file) {
+            selectedFile = file;
             const reader = new FileReader();
-            reader.onload = (e) => {
-                base64Source = e.target.result;
-                
-                // Update UI for upload
-                sourcePreview.src = base64Source;
-                sourcePreview.classList.remove('hidden');
-                sourcePreviewOverlay.classList.remove('hidden');
-                uploadContent.classList.add('hidden');
-                
-                processBtn.disabled = false;
-                emptyWorkspace.querySelector('p').textContent = "Bereit für die KI-Rekonstruktion";
-            };
+            reader.onload = function(e) {
+                originalImage.src = e.target.result;
+                originalImage.style.display = 'block';
+                originalPlaceholder.style.display = 'none';
+
+                upscaledImage.src = "";
+                upscaledImage.style.display = 'none';
+                upscaledPlaceholder.style.display = 'block';
+                upscaledPlaceholder.textContent = "Result will appear here.";
+                downloadLink.style.display = 'none';
+            }
             reader.readAsDataURL(file);
         }
+    }
 
-        fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
-        
-        // Drag & Drop
-        dropzone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropzone.classList.add('border-blue-500', 'bg-blue-900/20');
-        });
-        dropzone.addEventListener('dragleave', () => {
-            dropzone.classList.remove('border-blue-500', 'bg-blue-900/20');
-        });
-        dropzone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropzone.classList.remove('border-blue-500', 'bg-blue-900/20');
-            handleFile(e.dataTransfer.files[0]);
-        });
-
-        function updateSlider() {
-            const val = sliderInput.value;
-            sliderClipper.style.width = `${val}%`;
-            sliderHandleVisual.style.left = `${val}%`;
-            
-            // Sync width of clipped image to container width to maintain aspect ratio perfectly
-            imgOriginal.style.width = `${comparisonWorkspace.clientWidth}px`;
-            
-            // Fade out "Original" label if slider is far left
-            if (val < 15) {
-                labelOriginal.style.opacity = '0';
-            } else {
-                labelOriginal.style.opacity = '1';
-            }
+    // --- Upscale Functionality ---
+    upscaleButton.addEventListener('click', async () => {
+        if (!selectedFile) {
+            alert("Please upload an image first.");
+            return;
         }
 
-        sliderInput.addEventListener('input', updateSlider);
-        // Ensure resize handles image sync
-        window.addEventListener('resize', () => {
-            if (!comparisonWorkspace.classList.contains('hidden')) {
-                updateSlider();
-            }
-        });
+        const apiKey = apiKeyInput.value.trim();
+        if (!apiKey) {
+            alert("Please enter your Stability AI API Key.");
+            return;
+        }
 
-        async function runGenerativeReconstruction() {
-            if (!base64Source) return;
+        upscaleButton.disabled = true;
+        upscaleButton.textContent = "Processing... (Enhancing Image)";
+        upscaledPlaceholder.textContent = "Uploading and generating... please wait.";
 
-            // Prepare UI
-            emptyWorkspace.classList.add('hidden');
-            comparisonWorkspace.classList.add('hidden');
-            actionBar.classList.add('hidden');
-            loadingOverlay.classList.remove('hidden');
-            processBtn.disabled = true;
+        const scale = document.getElementById('scaleFactor').value;
+        const model = document.getElementById('modelSelect').value;
 
-            const userContext = promptInput.value.trim();
-            const basePrompt = "ACT AS A STRICT IMAGE UPSCALER AND RESTORER. Your task is to take this blurry input image and output an extremely sharp, hyper-realistic, ultra-high-resolution version of the EXACT SAME image. CRITICAL RULES: 1. Maintain the exact 1:1 structural composition, angles, facial expressions, and positions of all elements. 2. DO NOT change the pose, geometry, or layout. 3. DO NOT hallucinate or add new elements that are not in the original. 4. Restore details like text and facial features flawlessly without altering their original positioning or underlying identity. The output must align perfectly with the input when overlaid in a slider.";
-            const finalPrompt = userContext ? `${basePrompt} Additional user instructions for restoring specific degraded details (apply these WITHOUT changing the 1:1 overall structure): ${userContext}` : basePrompt;
+        // GEFIXT: Der richtige Endpunkt für Upscaling (Fast Upscaler)
+        const API_ENDPOINT = "https://api.stability.ai/v2beta/stable-image/upscale/fast"; 
 
-            try {
-                // Extract clean base64 and mime
-                const mimeType = base64Source.substring(base64Source.indexOf(':') + 1, base64Source.indexOf(';'));
-                const cleanBase64 = base64Source.split(',')[1];
+        try {
+            // GEFIXT: API erfordert multipart/form-data statt Base64 JSON
+            const formData = new FormData();
+            formData.append('image', selectedFile);
+            formData.append('output_format', 'png');
+            
+            // Wenn der Conservative/Creative Upscaler statt 'fast' genutzt wird, 
+            // kann man hier noch 'prompt' übergeben (für Creative Upscale)
+            // formData.append('prompt', 'A highly detailed, hyper-realistic masterpiece');
 
-                const payload = {
-                    contents: [{
-                        role: "user",
-                        parts: [
-                            { text: finalPrompt },
-                            {
-                                inlineData: {
-                                    mimeType: mimeType,
-                                    data: cleanBase64
-                                }
-                            }
-                        ]
-                    }],
-                    generationConfig: {
-                        responseModalities: ['TEXT', 'IMAGE'] // As per instructions for Image-to-Image
-                    }
-                };
+            const response = await fetch(API_ENDPOINT, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${apiKey}`,
+                    'Accept': 'image/*' // GEFIXT: Wir fordern das fertige Bild direkt als Binärdaten an
+                },
+                body: formData
+            });
 
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=${apiKey}`;
-                
-                // Fetch with simple exponential backoff
-                let response;
-                let delay = 1000;
-                for (let i = 0; i < 3; i++) {
-                    response = await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-                    if (response.ok) break;
-                    await new Promise(r => setTimeout(r, delay));
-                    delay *= 2;
+            if (!response.ok) {
+                let errorMsg = 'Unknown Error';
+                try {
+                    const errorData = await response.json();
+                    errorMsg = errorData.message || JSON.stringify(errorData);
+                } catch(e) {
+                    errorMsg = response.statusText;
                 }
-
-                if (!response.ok) throw new Error("API Fehler bei der Generierung.");
-
-                const result = await response.json();
-                
-                // Extract image part
-                const imgPart = result?.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
-                
-                if (imgPart && imgPart.inlineData) {
-                    base64Result = `data:${imgPart.inlineData.mimeType};base64,${imgPart.inlineData.data}`;
-                    
-                    // Setup Workspace
-                    imgOriginal.src = base64Source;
-                    imgResult.src = base64Result;
-                    
-                    // Wait for images to load before syncing slider dimensions
-                    await new Promise(r => setTimeout(r, 100));
-                    
-                    loadingOverlay.classList.add('hidden');
-                    comparisonWorkspace.classList.remove('hidden');
-                    actionBar.classList.remove('hidden');
-                    
-                    // Reset slider to middle
-                    sliderInput.value = 50;
-                    updateSlider();
-                    
-                    showToast('Hyper-Rekonstruktion abgeschlossen!', 'success');
-                } else {
-                    throw new Error("Kein Bild von der KI zurückgegeben.");
-                }
-
-            } catch (error) {
-                console.error(error);
-                loadingOverlay.classList.add('hidden');
-                emptyWorkspace.classList.remove('hidden');
-                emptyWorkspace.querySelector('p').textContent = "Fehler aufgetreten. Bitte erneut versuchen.";
-                showToast(error.message, 'error');
-            } finally {
-                processBtn.disabled = false;
-            }
-        }
-
-        processBtn.addEventListener('click', runGenerativeReconstruction);
-
-        function downloadImage() {
-            if (!base64Result) return;
-            const a = document.createElement('a');
-            a.href = base64Result;
-            a.download = 'deep-reconstructed-image.png';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            showToast('Bild wird heruntergeladen...', 'success');
-        }
-
-        function showToast(msg, type) {
-            const toast = document.getElementById('toast');
-            const icon = document.getElementById('toastIcon');
-            document.getElementById('toastMessage').textContent = msg;
-            
-            if (type === 'error') {
-                icon.className = 'fa-solid fa-triangle-exclamation text-red-400';
-                toast.classList.replace('border-white/10', 'border-red-500/50');
-            } else {
-                icon.className = 'fa-solid fa-circle-check text-blue-400';
-                toast.classList.replace('border-red-500/50', 'border-white/10');
+                throw new Error(`API Error ${response.status}: ${errorMsg}`);
             }
 
-            toast.classList.remove('translate-y-20', 'opacity-0');
-            setTimeout(() => {
-                toast.classList.add('translate-y-20', 'opacity-0');
-            }, 4000);
+            // GEFIXT: Bild-Blob (Binärdatei) konvertieren
+            const imageBlob = await response.blob();
+            const imageUrl = URL.createObjectURL(imageBlob);
+
+            // Display results
+            upscaledImage.src = imageUrl;
+            upscaledImage.style.display = 'block';
+            upscaledPlaceholder.style.display = 'none';
+
+            // Setup download
+            downloadLink.href = imageUrl;
+            const originalName = selectedFile.name.split('.').slice(0, -1).join('.');
+            downloadLink.download = `upscaled_${originalName}_${scale}.png`;
+            downloadLink.style.display = 'inline-block';
+
+            console.log("Upscaling successful!");
+
+        } catch (error) {
+            console.error("Error during upscale:", error);
+            alert(`Failed to upscale image: ${error.message}`);
+            upscaledPlaceholder.textContent = `Error: ${error.message}`;
+        } finally {
+            upscaleButton.disabled = false;
+            upscaleButton.textContent = "🚀 Upscale Image";
         }
-    </script>
+    });
+</script>
 </body>
 </html>
