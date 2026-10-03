@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="de" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Cloud 4K Image Restoration & Detail Synthesizer</title>
+    <title>AI Hyper-Real Deep Reconstruction</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -11,333 +11,392 @@
             theme: {
                 extend: {
                     colors: {
-                        darker: '#060913',
-                        darkcard: '#0f172a',
+                        darkbg: '#050505',
+                        panelbg: '#111111',
+                        accent: '#3b82f6',
+                        accentglow: '#60a5fa'
+                    },
+                    animation: {
+                        'scan': 'scan 2s linear infinite',
+                        'pulse-glow': 'pulseGlow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+                    },
+                    keyframes: {
+                        scan: {
+                            '0%': { transform: 'translateY(-100%)' },
+                            '100%': { transform: 'translateY(100%)' }
+                        },
+                        pulseGlow: {
+                            '0%, 100%': { opacity: 1, boxShadow: '0 0 15px rgba(59, 130, 246, 0.5)' },
+                            '50%': { opacity: .7, boxShadow: '0 0 5px rgba(59, 130, 246, 0.2)' }
+                        }
                     }
                 }
             }
         }
     </script>
-    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
-        .slider-clip {
-            clip-path: polygon(0 0, 50% 0, 50% 100%, 0 100%);
-            transition: clip-path 0.05s ease-out;
-        }
-        input[type="range"]::-webkit-slider-thumb {
-            background: #8b5cf6;
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #050505; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+        
+        /* Slider specifics */
+        .slider-handle {
+            touch-action: pan-y;
         }
     </style>
 </head>
-<body class="bg-darker text-slate-100 min-h-screen flex flex-col selection:bg-purple-500 selection:text-white">
+<body class="bg-darkbg text-slate-200 min-h-screen flex flex-col selection:bg-blue-500/30">
 
-    <header class="border-b border-slate-800 bg-darkcard/60 backdrop-blur sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+    <header class="border-b border-white/10 bg-panelbg/80 backdrop-blur-xl sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
             <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-purple-500/30">
-                    <i class="fa-solid fa-cloud-arrow-up text-white"></i>
+                <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center shadow-[0_0_15px_rgba(37,99,235,0.5)]">
+                    <i class="fa-solid fa-layer-group text-white text-sm"></i>
                 </div>
                 <div>
-                    <h1 class="font-bold text-lg tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">Cloud AI 4K Restorer</h1>
-                    <p class="text-xs text-purple-400">Generative Diffusion Restoration for Blurry 4K Images</p>
+                    <h1 class="font-bold text-lg tracking-tight text-white">DeepReconstruct AI</h1>
+                    <p class="text-[10px] text-slate-400 uppercase tracking-wider">Generative Image-to-Image Engine</p>
                 </div>
             </div>
-            <div class="flex items-center space-x-3">
-                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span>
-                    Cloud Neural API Ready
-                </span>
+            <div class="text-xs px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 flex items-center space-x-2">
+                <div class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></div>
+                <span>Gemini 3.1 Flash Image aktiv</span>
             </div>
         </div>
     </header>
 
-    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
         
-        <!-- Left Panel: Controls & Upload -->
         <div class="lg:col-span-4 space-y-6">
             
-            <!-- Upload Box -->
-            <div id="drop-zone" class="border-2 border-dashed border-slate-700 hover:border-purple-500 bg-slate-900/60 rounded-2xl p-6 text-center cursor-pointer transition-all duration-300 relative group overflow-hidden shadow-xl">
-                <input type="file" id="file-input" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer z-10">
-                <div class="absolute inset-0 bg-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                <div class="w-14 h-14 mx-auto rounded-full bg-slate-800 flex items-center justify-center mb-4 text-purple-400 group-hover:scale-110 transition-transform shadow-inner">
-                    <i class="fa-solid fa-image text-xl"></i>
+            <div class="bg-panelbg rounded-2xl border border-white/5 p-5 shadow-2xl relative">
+                <div class="mb-4">
+                    <h2 class="text-sm font-semibold text-white">1. Ursprungsbild</h2>
+                    <p class="text-xs text-slate-400 mt-1">Lade das unscharfe Original hoch.</p>
                 </div>
-                <h3 class="font-semibold text-slate-200 mb-1">Upload Blurry 4K Image</h3>
-                <p class="text-xs text-slate-400 mb-3">Fix unfocused, muddy, or blurry 4K/HD photos</p>
-                <span class="inline-block text-[10px] bg-slate-800 text-slate-300 px-3 py-1 rounded-full border border-slate-700">PNG, JPG, WEBP (Max 50MB)</span>
+
+                <div id="dropzone" class="border-2 border-dashed border-white/10 hover:border-blue-500/50 rounded-xl p-6 text-center cursor-pointer transition bg-black/20 group relative overflow-hidden">
+                    <input type="file" id="fileInput" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10">
+                    <div id="uploadContent" class="space-y-2 pointer-events-none">
+                        <i class="fa-solid fa-image text-3xl text-slate-600 group-hover:text-blue-500 transition duration-300"></i>
+                        <p class="text-sm text-slate-300">Hier ablegen oder klicken</p>
+                    </div>
+                    <img id="sourcePreview" class="hidden absolute inset-0 w-full h-full object-cover opacity-50" alt="Source">
+                    <div id="sourcePreviewOverlay" class="hidden absolute inset-0 bg-gradient-to-t from-panelbg via-transparent to-transparent flex items-end justify-center pb-2">
+                        <span class="text-xs font-medium text-blue-400 bg-black/60 px-2 py-1 rounded">Bild geladen</span>
+                    </div>
+                </div>
             </div>
 
-            <!-- Cloud AI Restoration Settings -->
-            <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-5">
-                <h2 class="font-semibold text-sm tracking-wide uppercase text-slate-400 flex items-center gap-2">
-                    <i class="fa-solid fa-cloud text-purple-400"></i> Cloud Generative AI Settings
-                </h2>
-
-                <!-- Restoration Model -->
-                <div>
-                    <label class="block text-xs font-medium text-slate-300 mb-2">Cloud AI Restoration Model</label>
-                    <select id="ai-model" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-purple-500">
-                        <option value="diffusion-sharp" selected>Cloud Diffusion Deblur & Texture Generator (Best for Blurry 4K)</option>
-                        <option value="face-restore">Advanced Facial & Feature Hallucination (CodeFormer / GFPGAN)</option>
-                        <option value="general-clean">General Photographic Super-Resolution & Noise Removal</option>
-                    </select>
+            <div class="bg-panelbg rounded-2xl border border-white/5 p-5 shadow-2xl">
+                <div class="mb-4">
+                    <h2 class="text-sm font-semibold text-white">2. Generativer Kontext (Optional)</h2>
+                    <p class="text-xs text-slate-400 mt-1">Hilf der KI bei unleserlichen Details (z.B. "Text lautet: BÄCKEREI"). <b>Die 1:1 Struktur und Gesichtszüge des Originals bleiben strikt erhalten.</b></p>
                 </div>
 
-                <!-- Denoise & Sharpening Slider -->
-                <div>
-                    <div class="flex justify-between text-xs font-medium text-slate-300 mb-2">
-                        <span>AI Hallucination & Clarity Strength</span>
-                        <span id="strength-val" class="text-purple-400">0.85</span>
-                    </div>
-                    <input type="range" id="strength-slider" min="0.2" max="1.0" step="0.05" value="0.85" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer">
-                    <p class="text-[10px] text-slate-500 mt-1">Controls how powerfully the cloud AI replaces blurry pixels with crisp, synthetic 4K edges.</p>
-                </div>
-
-                <!-- Custom Prompt / Context -->
-                <div>
-                    <label class="block text-xs font-medium text-slate-300 mb-1">AI Prompt Context (Optional)</label>
-                    <input type="text" id="ai-prompt" placeholder="e.g., hyper-realistic portrait, extremely sharp details, 4k" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-purple-500">
-                </div>
-
-                <div class="pt-2 border-t border-slate-800 text-xs text-slate-400 leading-relaxed">
-                    <i class="fa-solid fa-circle-info text-purple-400 mr-1"></i> The cloud neural network analyzes the blurry shapes in your image and reconstructs high-frequency details (eyes, textures, text, edges) so it looks genuinely crisp with zero pixelation.
-                </div>
-
-                <!-- Process Button -->
-                <button id="process-btn" disabled class="w-full py-3.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-xl shadow-lg shadow-purple-600/25 transition-all flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-wand-magic-sparkles"></i> Restore Blurry 4K via Cloud AI
+                <textarea id="promptInput" rows="4" class="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-sm text-slate-200 focus:outline-none focus:border-blue-500 transition resize-none placeholder-slate-600" placeholder="Beispiel: 'Auf dem unscharfen Schild im Hintergrund steht das Wort BÄCKEREI in roter, serifenloser Schrift...'"></textarea>
+                
+                <button id="processBtn" disabled class="w-full mt-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-medium text-sm shadow-[0_0_20px_rgba(37,99,235,0.3)] transition disabled:opacity-50 disabled:shadow-none disabled:cursor-not-allowed flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-microchip"></i>
+                    <span>Hyper-Rekonstruktion Starten</span>
                 </button>
             </div>
 
+            <div class="p-4 rounded-xl bg-blue-500/5 border border-blue-500/10 text-xs text-slate-400 leading-relaxed">
+                <i class="fa-solid fa-circle-info text-blue-400 mr-1"></i>
+                Dies ist <b>kein Filter</b>. Die KI analysiert die Pixel-Struktur und generiert ein extrem scharfes Bild. Durch den <b>Strict 1:1 Mode</b> wird garantiert, dass Winkel, Posen und Layout exakt beibehalten werden.
+            </div>
         </div>
 
-        <!-- Right Panel: Preview & Comparison -->
-        <div class="lg:col-span-8 flex flex-col space-y-6">
-            
-            <!-- Viewer Container -->
-            <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl flex-1 flex flex-col items-center justify-center min-h-[440px] relative overflow-hidden">
+        <div class="lg:col-span-8 flex flex-col min-h-[500px]">
+            <div class="bg-panelbg rounded-2xl border border-white/5 p-1 shadow-2xl flex-1 flex flex-col relative overflow-hidden group">
                 
-                <!-- Empty State -->
-                <div id="empty-state" class="text-center py-16">
-                    <div class="w-20 h-20 mx-auto rounded-2xl bg-slate-800/80 flex items-center justify-center text-slate-500 mb-4 shadow-inner">
-                        <i class="fa-regular fa-image text-3xl"></i>
-                    </div>
-                    <h3 class="text-lg font-medium text-slate-300 mb-1">No Image Loaded</h3>
-                    <p class="text-sm text-slate-500 max-w-sm mx-auto">Upload a blurry 4K or HD image to restore crystal-clear textures using cloud generative AI.</p>
+                <!-- Initial State -->
+                <div id="emptyWorkspace" class="absolute inset-0 flex flex-col items-center justify-center text-slate-500 z-0">
+                    <i class="fa-solid fa-arrows-left-right text-4xl mb-4 opacity-20"></i>
+                    <p class="text-sm font-medium">Lade ein Bild hoch, um den Vergleich zu sehen</p>
                 </div>
 
-                <!-- Processing Spinner Overlay -->
-                <div id="loading-overlay" class="absolute inset-0 bg-darker/95 backdrop-blur-md z-30 flex flex-col items-center justify-center hidden">
-                    <div class="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-                    <h4 id="loading-title" class="font-semibold text-slate-200 text-lg">Connecting to Cloud AI Cluster...</h4>
-                    <p id="progress-status" class="text-xs text-slate-400 mt-1">De-blurring and synthesizing crystal clear 4K details...</p>
-                </div>
-
-                <!-- Comparison Viewer -->
-                <div id="viewer-container" class="w-full relative hidden rounded-xl overflow-hidden shadow-2xl bg-black border border-slate-800 select-none max-h-[600px] flex items-center justify-center">
-                    
-                    <!-- After Image (Cloud AI Restored) -->
-                    <div class="relative w-full overflow-hidden flex items-center justify-center">
-                        <canvas id="canvas-restored" class="max-w-full max-h-[550px] object-contain block mx-auto"></canvas>
-                        <span class="absolute bottom-3 right-3 bg-black/70 backdrop-blur text-xs font-semibold px-2.5 py-1 rounded-md text-purple-400 border border-purple-500/30 z-20">Cloud AI Restored (Crystal Clear)</span>
-                    </div>
-
-                    <!-- Before Image (Original Blurry) -->
-                    <div id="before-wrapper" class="absolute inset-0 overflow-hidden slider-clip flex items-center justify-center pointer-events-none">
-                        <canvas id="canvas-original" class="max-w-full max-h-[550px] object-contain block mx-auto"></canvas>
-                        <span class="absolute bottom-3 left-3 bg-black/70 backdrop-blur text-xs font-semibold px-2.5 py-1 rounded-md text-slate-300 border border-slate-700 z-20">Original (Blurry 4K)</span>
-                    </div>
-
-                    <!-- Split Slider Handle -->
-                    <input type="range" id="slider-split" min="0" max="100" value="50" class="absolute inset-x-0 w-full top-0 bottom-0 opacity-0 cursor-ew-resize z-45 h-full m-0">
-                    
-                    <div id="slider-divider" class="absolute top-0 bottom-0 w-0.5 bg-purple-500 z-40 pointer-events-none" style="left: 50%;">
-                        <div class="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-purple-600 border-2 border-white shadow-lg flex items-center justify-center text-white text-xs">
-                            <i class="fa-solid fa-arrows-left-right"></i>
+                <!-- Processing Overlay -->
+                <div id="loadingOverlay" class="hidden absolute inset-0 bg-panelbg/90 backdrop-blur-sm z-40 flex flex-col items-center justify-center">
+                    <div class="relative w-full max-w-md h-64 border border-blue-500/30 rounded-lg overflow-hidden bg-black/50 mb-6">
+                        <!-- Simulated scanning effect -->
+                        <div class="absolute inset-0 bg-gradient-to-b from-transparent via-blue-500/20 to-transparent h-20 w-full animate-scan"></div>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <i class="fa-solid fa-wand-magic-sparkles text-3xl text-blue-400 animate-pulse"></i>
                         </div>
                     </div>
+                    <h3 class="text-white font-medium text-lg mb-2">Generiere Unendliche Pixel...</h3>
+                    <p class="text-sm text-blue-400">Analysiere Kontext & rekonstruiere Strukturen komplett neu.</p>
+                </div>
+
+                <!-- Slider Comparison Workspace -->
+                <div id="comparisonWorkspace" class="hidden relative w-full h-[600px] bg-black rounded-xl overflow-hidden select-none">
+                    
+                    <!-- Result Image (Background / Bottom layer) -->
+                    <img id="imgResult" class="absolute inset-0 w-full h-full object-contain pointer-events-none" alt="Generiertes Resultat">
+                    
+                    <!-- Labels -->
+                    <div class="absolute top-4 right-4 z-10 bg-black/60 backdrop-blur text-blue-400 border border-blue-500/30 px-3 py-1 rounded-full text-xs font-semibold shadow-lg">
+                        KI Generiert (Unendliche Schärfe)
+                    </div>
+                    <div id="labelOriginal" class="absolute top-4 left-4 z-30 bg-black/60 backdrop-blur text-slate-300 border border-white/10 px-3 py-1 rounded-full text-xs font-semibold shadow-lg">
+                        Original (Unscharf)
+                    </div>
+
+                    <!-- Original Image (Clipped / Top layer) -->
+                    <div id="sliderClipper" class="absolute inset-0 w-1/2 overflow-hidden z-20 border-r-2 border-white shadow-[10px_0_15px_rgba(0,0,0,0.5)]">
+                        <!-- We use absolute positioning and a fixed width matching the container to ensure the image scales identically -->
+                        <img id="imgOriginal" class="absolute top-0 left-0 h-full object-contain max-w-none pointer-events-none" alt="Original">
+                    </div>
+
+                    <!-- Invisible Input Range for Interaction -->
+                    <input type="range" id="sliderInput" min="0" max="100" value="50" class="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize z-40 slider-handle m-0 p-0">
+                    
+                    <!-- Custom Handle Visual -->
+                    <div id="sliderHandleVisual" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-white text-black rounded-full flex items-center justify-center shadow-2xl z-30 pointer-events-none transition-transform duration-75">
+                        <i class="fa-solid fa-arrows-left-right text-sm"></i>
+                    </div>
                 </div>
 
             </div>
 
-            <!-- File Info & Actions Bar -->
-            <div id="action-bar" class="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4 hidden">
-                <div class="flex items-center space-x-4 w-full sm:w-auto">
-                    <div class="w-12 h-12 rounded-xl bg-slate-800 flex items-center justify-center text-purple-400 flex-shrink-0">
-                        <i class="fa-solid fa-file-image text-lg"></i>
-                    </div>
-                    <div class="overflow-hidden">
-                        <h4 id="file-name" class="font-medium text-sm text-slate-200 truncate max-w-[200px]">blurry-photo.jpg</h4>
-                        <p id="file-specs" class="text-xs text-slate-400">Resolution: 3840x2160 • Restored via Cloud Diffusion</p>
-                    </div>
-                </div>
-
-                <div class="flex items-center space-x-3 w-full sm:w-auto justify-end">
-                    <button id="download-btn" class="w-full sm:w-auto px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl shadow-lg shadow-emerald-600/25 transition-all flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-download"></i> Download Restored 4K Image
-                    </button>
-                </div>
+            <!-- Action Bar (Hidden until generated) -->
+            <div id="actionBar" class="hidden mt-4 flex items-center justify-between bg-panelbg border border-white/5 rounded-xl p-3">
+                <div class="text-xs text-slate-400 pl-2">Erfolgreich generiert.</div>
+                <button onclick="downloadImage()" class="px-4 py-2 bg-white text-black hover:bg-slate-200 rounded-lg text-sm font-semibold transition flex items-center space-x-2">
+                    <i class="fa-solid fa-download"></i>
+                    <span>High-Res PNG Speichern</span>
+                </button>
             </div>
-
         </div>
-
     </main>
 
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-panelbg border border-white/10 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center space-x-3 text-sm">
+        <i id="toastIcon" class="fa-solid fa-circle-info text-blue-400"></i>
+        <span id="toastMessage">...</span>
+    </div>
+
     <script>
-        // DOM Elements
-        const fileInput = document.getElementById('file-input');
-        const dropZone = document.getElementById('drop-zone');
-        const processBtn = document.getElementById('process-btn');
-        const emptyState = document.getElementById('empty-state');
-        const loadingOverlay = document.getElementById('loading-overlay');
-        const loadingTitle = document.getElementById('loading-title');
-        const progressStatus = document.getElementById('progress-status');
-        const viewerContainer = document.getElementById('viewer-container');
-        const actionBar = document.getElementById('action-bar');
-        const canvasOriginal = document.getElementById('canvas-original');
-        const canvasRestored = document.getElementById('canvas-restored');
-        const beforeWrapper = document.getElementById('before-wrapper');
-        const sliderSplit = document.getElementById('slider-split');
-        const sliderDivider = document.getElementById('slider-divider');
-        const fileNameEl = document.getElementById('file-name');
-        const fileSpecsEl = document.getElementById('file-specs');
-        const downloadBtn = document.getElementById('download-btn');
-        const strengthSlider = document.getElementById('strength-slider');
-        const strengthVal = document.getElementById('strength-val');
+        // API Configuration (Empty string for Canvas to inject)
+        const apiKey = "";
+        
+        // State
+        let base64Source = null;
+        let base64Result = null;
 
-        let currentImage = null;
-        let originalFileName = "restored-4k.jpg";
-
-        strengthSlider.addEventListener('input', (e) => {
-            strengthVal.textContent = e.target.value;
-        });
-
-        // Drag and drop events
-        ['dragenter', 'dragover'].forEach(eventName => {
-            dropZone.addEventListener(eventName, (e) => { e.preventDefault(); dropZone.classList.add('border-purple-500', 'bg-purple-500/10'); }, false);
-        });
-        ['dragleave', 'drop'].forEach(eventName => {
-            dropZone.addEventListener(eventName, (e) => { e.preventDefault(); dropZone.classList.remove('border-purple-500', 'bg-purple-500/10'); }, false);
-        });
-        dropZone.addEventListener('drop', (e) => {
-            const dt = e.dataTransfer;
-            const files = dt.files;
-            if (files.length) handleFile(files[0]);
-        });
-        fileInput.addEventListener('change', (e) => {
-            if (e.target.files.length) handleFile(e.target.files[0]);
-        });
+        // Elements
+        const fileInput = document.getElementById('fileInput');
+        const dropzone = document.getElementById('dropzone');
+        const sourcePreview = document.getElementById('sourcePreview');
+        const sourcePreviewOverlay = document.getElementById('sourcePreviewOverlay');
+        const uploadContent = document.getElementById('uploadContent');
+        const processBtn = document.getElementById('processBtn');
+        const promptInput = document.getElementById('promptInput');
+        
+        const emptyWorkspace = document.getElementById('emptyWorkspace');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const comparisonWorkspace = document.getElementById('comparisonWorkspace');
+        const actionBar = document.getElementById('actionBar');
+        
+        const imgOriginal = document.getElementById('imgOriginal');
+        const imgResult = document.getElementById('imgResult');
+        const sliderInput = document.getElementById('sliderInput');
+        const sliderClipper = document.getElementById('sliderClipper');
+        const sliderHandleVisual = document.getElementById('sliderHandleVisual');
+        const labelOriginal = document.getElementById('labelOriginal');
 
         function handleFile(file) {
-            if (!file.type.startsWith('image/')) {
-                alert('Please upload a valid image file.');
+            if (!file || !file.type.startsWith('image/')) {
+                showToast('Bitte wähle ein gültiges Bild.', 'error');
                 return;
             }
-            originalFileName = file.name;
+
             const reader = new FileReader();
-            reader.onload = function(event) {
-                const img = new Image();
-                img.onload = function() {
-                    currentImage = img;
-                    setupOriginalCanvas(img);
-                    emptyState.classList.add('hidden');
-                    viewerContainer.classList.remove('hidden');
-                    actionBar.classList.remove('hidden');
-                    processBtn.removeAttribute('disabled');
-                    fileSpecsEl.textContent = `Resolution: ${img.width}x${img.height} • Restored via Cloud Diffusion`;
-                    fileNameEl.textContent = file.name;
-                    // Automatically trigger cloud AI restoration simulation
-                    runCloudRestoration();
-                }
-                img.src = event.target.result;
-            }
+            reader.onload = (e) => {
+                base64Source = e.target.result;
+                
+                // Update UI for upload
+                sourcePreview.src = base64Source;
+                sourcePreview.classList.remove('hidden');
+                sourcePreviewOverlay.classList.remove('hidden');
+                uploadContent.classList.add('hidden');
+                
+                processBtn.disabled = false;
+                emptyWorkspace.querySelector('p').textContent = "Bereit für die KI-Rekonstruktion";
+            };
             reader.readAsDataURL(file);
         }
 
-        function setupOriginalCanvas(img) {
-            canvasOriginal.width = img.width;
-            canvasOriginal.height = img.height;
-            const ctx1 = canvasOriginal.getContext('2d');
-            ctx1.drawImage(img, 0, 0);
-        }
-
-        // Split comparison slider interaction
-        sliderSplit.addEventListener('input', (e) => {
-            const val = e.target.value;
-            beforeWrapper.style.clipPath = `polygon(0 0, ${val}% 0, ${val}% 100%, 0 100%)`;
-            sliderDivider.style.left = `${val}%`;
+        fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
+        
+        // Drag & Drop
+        dropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropzone.classList.add('border-blue-500', 'bg-blue-900/20');
+        });
+        dropzone.addEventListener('dragleave', () => {
+            dropzone.classList.remove('border-blue-500', 'bg-blue-900/20');
+        });
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('border-blue-500', 'bg-blue-900/20');
+            handleFile(e.dataTransfer.files[0]);
         });
 
-        processBtn.addEventListener('click', runCloudRestoration);
-
-        async function runCloudRestoration() {
-            if (!currentImage) return;
-
-            loadingOverlay.classList.remove('hidden');
-            loadingTitle.textContent = "Connecting to Cloud AI Cluster...";
+        function updateSlider() {
+            const val = sliderInput.value;
+            sliderClipper.style.width = `${val}%`;
+            sliderHandleVisual.style.left = `${val}%`;
             
-            const steps = [
-                { title: "Uploading 4K Image to Cloud Neural Node...", progress: "Transferring image payload securely to cloud diffusion workers..." },
-                { title: "Executing Generative De-blurring AI...", progress: "Removing blur blur kernel & hallucinating crystal-clear high-frequency textures..." },
-                { title: "Synthesizing Sharp Edges & Finalizing 4K...", progress: "Reconstructing natural pixel structures and eliminating blur..." }
-            ];
-
-            for (let i = 0; i < steps.length; i++) {
-                loadingTitle.textContent = steps[i].title;
-                progressStatus.textContent = steps[i].progress;
-                await new Promise(r => setTimeout(r, 700));
+            // Sync width of clipped image to container width to maintain aspect ratio perfectly
+            imgOriginal.style.width = `${comparisonWorkspace.clientWidth}px`;
+            
+            // Fade out "Original" label if slider is far left
+            if (val < 15) {
+                labelOriginal.style.opacity = '0';
+            } else {
+                labelOriginal.style.opacity = '1';
             }
-
-            const w = currentImage.width;
-            const h = currentImage.height;
-
-            canvasRestored.width = w;
-            canvasRestored.height = h;
-            const ctx = canvasRestored.getContext('2d');
-            ctx.drawImage(currentImage, 0, 0);
-
-            // Cloud AI Generative Deblur & Deconvolution simulation
-            // Applies sophisticated multi-pass frequency enhancement to completely remove blur and synthesize sharp details
-            const strength = parseFloat(strengthSlider.value);
-            const imgData = ctx.getImageData(0, 0, w, h);
-            const d = imgData.data;
-            const copy = new Uint8ClampedArray(d);
-
-            // High-precision deblur filter to reconstruct sharp edges from blurry input
-            for (let y = 1; y < h - 1; y++) {
-                for (let x = 1; x < w - 1; x++) {
-                    const idx = (y * w + x) * 4;
-                    for (let c = 0; c < 3; c++) {
-                        const top = copy[((y-1)*w + x)*4 + c];
-                        const bottom = copy[((y+1)*w + x)*4 + c];
-                        const left = copy[(y*w + (x-1))*4 + c];
-                        const right = copy[(y*w + (x+1))*4 + c];
-                        const avg = (top + bottom + left + right) / 4;
-                        const val = copy[idx + c];
-                        
-                        // Generative detail sharpening formula
-                        const enhanced = val + (val - avg) * (strength * 2.2);
-                        d[idx + c] = Math.min(255, Math.max(0, enhanced));
-                    }
-                }
-            }
-            ctx.putImageData(imgData, 0, 0);
-
-            loadingOverlay.classList.add('hidden');
         }
 
-        // Download restored 4K image
-        downloadBtn.addEventListener('click', () => {
-            const link = document.createElement('a');
-            link.download = `cloud-ai-restored-${originalFileName}`;
-            link.href = canvasRestored.toDataURL('image/jpeg', 0.98);
-            link.click();
+        sliderInput.addEventListener('input', updateSlider);
+        // Ensure resize handles image sync
+        window.addEventListener('resize', () => {
+            if (!comparisonWorkspace.classList.contains('hidden')) {
+                updateSlider();
+            }
         });
+
+        async function runGenerativeReconstruction() {
+            if (!base64Source) return;
+
+            // Prepare UI
+            emptyWorkspace.classList.add('hidden');
+            comparisonWorkspace.classList.add('hidden');
+            actionBar.classList.add('hidden');
+            loadingOverlay.classList.remove('hidden');
+            processBtn.disabled = true;
+
+            const userContext = promptInput.value.trim();
+            const basePrompt = "ACT AS A STRICT IMAGE UPSCALER AND RESTORER. Your task is to take this blurry input image and output an extremely sharp, hyper-realistic, ultra-high-resolution version of the EXACT SAME image. CRITICAL RULES: 1. Maintain the exact 1:1 structural composition, angles, facial expressions, and positions of all elements. 2. DO NOT change the pose, geometry, or layout. 3. DO NOT hallucinate or add new elements that are not in the original. 4. Restore details like text and facial features flawlessly without altering their original positioning or underlying identity. The output must align perfectly with the input when overlaid in a slider.";
+            const finalPrompt = userContext ? `${basePrompt} Additional user instructions for restoring specific degraded details (apply these WITHOUT changing the 1:1 overall structure): ${userContext}` : basePrompt;
+
+            try {
+                // Extract clean base64 and mime
+                const mimeType = base64Source.substring(base64Source.indexOf(':') + 1, base64Source.indexOf(';'));
+                const cleanBase64 = base64Source.split(',')[1];
+
+                const payload = {
+                    contents: [{
+                        role: "user",
+                        parts: [
+                            { text: finalPrompt },
+                            {
+                                inlineData: {
+                                    mimeType: mimeType,
+                                    data: cleanBase64
+                                }
+                            }
+                        ]
+                    }],
+                    generationConfig: {
+                        responseModalities: ['TEXT', 'IMAGE'] // As per instructions for Image-to-Image
+                    }
+                };
+
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=${apiKey}`;
+                
+                // Fetch with simple exponential backoff
+                let response;
+                let delay = 1000;
+                for (let i = 0; i < 3; i++) {
+                    response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (response.ok) break;
+                    await new Promise(r => setTimeout(r, delay));
+                    delay *= 2;
+                }
+
+                if (!response.ok) throw new Error("API Fehler bei der Generierung.");
+
+                const result = await response.json();
+                
+                // Extract image part
+                const imgPart = result?.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
+                
+                if (imgPart && imgPart.inlineData) {
+                    base64Result = `data:${imgPart.inlineData.mimeType};base64,${imgPart.inlineData.data}`;
+                    
+                    // Setup Workspace
+                    imgOriginal.src = base64Source;
+                    imgResult.src = base64Result;
+                    
+                    // Wait for images to load before syncing slider dimensions
+                    await new Promise(r => setTimeout(r, 100));
+                    
+                    loadingOverlay.classList.add('hidden');
+                    comparisonWorkspace.classList.remove('hidden');
+                    actionBar.classList.remove('hidden');
+                    
+                    // Reset slider to middle
+                    sliderInput.value = 50;
+                    updateSlider();
+                    
+                    showToast('Hyper-Rekonstruktion abgeschlossen!', 'success');
+                } else {
+                    throw new Error("Kein Bild von der KI zurückgegeben.");
+                }
+
+            } catch (error) {
+                console.error(error);
+                loadingOverlay.classList.add('hidden');
+                emptyWorkspace.classList.remove('hidden');
+                emptyWorkspace.querySelector('p').textContent = "Fehler aufgetreten. Bitte erneut versuchen.";
+                showToast(error.message, 'error');
+            } finally {
+                processBtn.disabled = false;
+            }
+        }
+
+        processBtn.addEventListener('click', runGenerativeReconstruction);
+
+        function downloadImage() {
+            if (!base64Result) return;
+            const a = document.createElement('a');
+            a.href = base64Result;
+            a.download = 'deep-reconstructed-image.png';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            showToast('Bild wird heruntergeladen...', 'success');
+        }
+
+        function showToast(msg, type) {
+            const toast = document.getElementById('toast');
+            const icon = document.getElementById('toastIcon');
+            document.getElementById('toastMessage').textContent = msg;
+            
+            if (type === 'error') {
+                icon.className = 'fa-solid fa-triangle-exclamation text-red-400';
+                toast.classList.replace('border-white/10', 'border-red-500/50');
+            } else {
+                icon.className = 'fa-solid fa-circle-check text-blue-400';
+                toast.classList.replace('border-red-500/50', 'border-white/10');
+            }
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 4000);
+        }
     </script>
 </body>
 </html>
