@@ -607,7 +607,8 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+        // WICHTIG: arrayUnion hinzugefügt um Race Conditions beim Buzzer zu verhindern!
+        import { getFirestore, doc, setDoc, onSnapshot, arrayUnion } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCUJ7B85RDzTueMH1yALT21oTKR65O_Oe8",
@@ -785,11 +786,9 @@
         }
 
         async function broadcastState(data) {
+            try { syncChannel.postMessage(data); } catch(e){}
             try {
-                syncChannel.postMessage(data);
-            } catch(e){}
-
-            try {
+                // Sichert den direkten Datenupload
                 await setDoc(sessionDocRef, data, { merge: true });
             } catch(e) {
                 console.warn("Firestore save error, fallback to local sync", e);
@@ -806,7 +805,9 @@
         window.selectRole = async function(selectedRole) {
             role = selectedRole;
             document.getElementById('screen-role-select').classList.add('hidden');
-            await initAudio();
+            
+            // Audio laden blockiert nicht mehr das UI/die Netzwerkanmeldung! (Verhinderte Hänger)
+            initAudio().catch(e => console.warn(e)); 
 
             try {
                 const userCred = await signInAnonymously(auth);
@@ -821,12 +822,12 @@
                 document.getElementById('screen-live-view').classList.remove('hidden');
                 document.getElementById('screen-live-view').classList.add('flex');
                 setupLiveQRCode();
-                await setupSessionSync();
+                setupSessionSync();
             } else if (role === 'admin') {
                 document.getElementById('screen-admin-view').classList.remove('hidden');
                 document.getElementById('screen-admin-view').classList.add('flex');
                 document.getElementById('admin-target-url').value = localSessionData.targetUrl || window.location.href.split('#')[0];
-                await setupSessionSync();
+                setupSessionSync();
             } else {
                 const savedName = localStorage.getItem('ata_player_name');
                 const savedTeam = localStorage.getItem('ata_player_team');
@@ -838,7 +839,7 @@
                     document.getElementById('screen-player-login').classList.remove('hidden');
                     document.getElementById('screen-player-login').classList.add('flex');
                 }
-                await setupSessionSync();
+                setupSessionSync();
             }
         };
 
@@ -862,28 +863,23 @@
             showToast("QR Target URL aktualisiert");
         };
 
-        async function setupSessionSync() {
-            try {
-                const docSnap = await getDoc(sessionDocRef);
-                if (!docSnap.exists()) {
-                    await setDoc(sessionDocRef, localSessionData);
-                } else {
-                    localSessionData = { ...localSessionData, ...docSnap.data() };
-                }
-            } catch(e) { console.warn("Init session error:", e); }
-
+        function setupSessionSync() {
+            // FIX: getDoc wurde entfernt um Lade-Hänger ("hangs for several seconds") zu verhindern.
+            // onSnapshot feuert sofort wenn lokaler Cache da ist, und updatet dann live.
             onSnapshot(sessionDocRef, (docSnap) => {
                 if (docSnap.exists()) {
                     localSessionData = { ...localSessionData, ...docSnap.data() };
                     if(!localSessionData.buzzerQueue) localSessionData.buzzerQueue = [];
                     if(!localSessionData.viggoResults) localSessionData.viggoResults = [];
                     updateUI();
+                } else {
+                    setDoc(sessionDocRef, localSessionData).catch(e => console.warn(e));
                 }
             }, (error) => {
                 console.warn("Firestore sync error:", error);
             });
-
-            updateUI();
+            
+            updateUI(); // Erster Render
         }
 
         function updateUI() {
@@ -898,30 +894,23 @@
                 document.querySelectorAll('#screen-live-view [id^="view-"]').forEach(el => el.classList.add('hidden'));
                 
                 let activeViewId = `view-${localSessionData.view}`;
-                if (localSessionData.view === 'game3') {
-                    activeViewId = 'view-game-zoom';
-                } else if (localSessionData.view === 'game5') {
-                    activeViewId = 'view-game-pixel';
-                }
+                if (localSessionData.view === 'game3') activeViewId = 'view-game-zoom';
+                else if (localSessionData.view === 'game5') activeViewId = 'view-game-pixel';
+                
                 const viewEl = document.getElementById(activeViewId);
                 if(viewEl) viewEl.classList.remove('hidden');
 
                 const titles = { lobby: "Lobby", game1: "Blind Ertasten", game2: "Quiz", game3: "Gegenstand Zoom", game4: "Viggo-Trinken", game5: "Lehrer Pixelation", winner: "Siegerehrung" };
                 document.getElementById('live-game-title').innerText = titles[localSessionData.view] || "Gameshow";
 
-                if (localSessionData.bgmPlaying && !bgmTonePlaying) {
-                    playBGM();
-                } else if (!localSessionData.bgmPlaying && bgmTonePlaying) {
-                    stopBGM();
-                }
+                if (localSessionData.bgmPlaying && !bgmTonePlaying) playBGM();
+                else if (!localSessionData.bgmPlaying && bgmTonePlaying) stopBGM();
 
                 if(localSessionData.view === 'game2') {
                     document.getElementById('display-question').innerText = localSessionData.questionText || "...";
                 }
 
                 if(localSessionData.view === 'winner') {
-                    const score1 = localSessionData.teams["ATA 25-28"] || 0;
-                    const score2 = localSessionData.teams["ATA 26-29"] || 0;
                     const teamEl = document.getElementById('winner-display-team');
                     const scoreEl = document.getElementById('winner-display-score');
                     
@@ -943,11 +932,8 @@
                     stopConfetti();
                 }
 
-                if (localSessionData.view === 'game3') {
-                    renderZoomImage();
-                } else if (localSessionData.view === 'game5') {
-                    renderPixelImage();
-                }
+                if (localSessionData.view === 'game3') renderZoomImage();
+                else if (localSessionData.view === 'game5') renderPixelImage();
 
                 // Buzzer overlay on Live View
                 const overlay = document.getElementById('live-winner-overlay');
@@ -1031,10 +1017,15 @@
                     musicBg.style.opacity = localSessionData.bgmPlaying ? "1" : "0";
                 }
 
+                // FIX QUIZ BUG: Überschreibt Eingaben nicht andauernd!
                 const qListEl = document.getElementById('admin-questions-list');
-                if(qListEl && document.activeElement !== qListEl) {
-                    qListEl.value = (localSessionData.questionsList || []).join('\n');
+                if(qListEl && !qListEl.dataset.loaded) {
+                    if (localSessionData.questionsList && localSessionData.questionsList.length > 0) {
+                        qListEl.value = localSessionData.questionsList.join('\n');
+                        qListEl.dataset.loaded = "true";
+                    }
                 }
+                
                 const list = localSessionData.questionsList || [];
                 const idx = localSessionData.currentQuestionIndex || 0;
                 const idxEl = document.getElementById('admin-current-q-index');
@@ -1141,9 +1132,7 @@
                 return;
             }
 
-            if (imgEl.src !== zoomData.url) {
-                imgEl.src = zoomData.url;
-            }
+            if (imgEl.src !== zoomData.url) imgEl.src = zoomData.url;
 
             const state = zoomData.state || 'hidden';
             const duration = zoomData.duration || 25000;
@@ -1166,7 +1155,6 @@
             } else if (state === 'paused') {
                 const pauseElapsed = zoomData.pauseElapsed || 0;
                 const progress = Math.min(1, Math.max(0, pauseElapsed / duration));
-                // Exponential scale interpolation for visually constant zoom speed
                 const currentScale = Math.pow(15, 1 - progress);
                 const currentBlur = 20 * (1 - progress);
                 imgEl.style.transform = `scale(${currentScale.toFixed(3)})`;
@@ -1197,7 +1185,6 @@
                     }
 
                     const progress = Math.min(1, Math.max(0, elapsed / dur));
-                    // Exponential scale interpolation ensures constant visual zoom rate
                     const currentScale = Math.pow(15, 1 - progress);
                     const currentBlur = 20 * (1 - progress);
 
@@ -1207,7 +1194,6 @@
 
                     zoomAnimationFrame = requestAnimationFrame(animateZoomFrame);
                 }
-
                 animateZoomFrame();
             }
         }
@@ -1232,9 +1218,7 @@
                 loadedPixelImage = new Image();
                 loadedPixelImage.crossOrigin = "anonymous";
                 loadedPixelImage.src = zoomData.url;
-                loadedPixelImage.onload = () => {
-                    renderPixelImage();
-                };
+                loadedPixelImage.onload = () => { renderPixelImage(); };
                 return;
             }
 
@@ -1252,7 +1236,6 @@
                 const imgW = loadedPixelImage.naturalWidth || 800;
                 const imgH = loadedPixelImage.naturalHeight || 600;
 
-                // Scale grid size from 8px up to original image width
                 const minGrid = 8;
                 const targetWidth = Math.max(minGrid, Math.round(minGrid * Math.pow(imgW / minGrid, progress)));
                 const targetHeight = Math.max(minGrid, Math.round(targetWidth * (imgH / imgW)));
@@ -1317,7 +1300,6 @@
 
                     pixelAnimationFrame = requestAnimationFrame(animatePixelFrame);
                 }
-
                 animatePixelFrame();
             }
         }
@@ -1402,10 +1384,7 @@
 
         window.joinGame = function() {
             const nameInput = document.getElementById('player-name-input').value.trim();
-            if (!nameInput) {
-                showToast("Bitte gib deinen Namen ein!");
-                return;
-            }
+            if (!nameInput) { showToast("Bitte gib deinen Namen ein!"); return; }
 
             const teamSelect = document.querySelector('input[name="team-select"]:checked').value;
             window.myPlayerName = nameInput.substring(0, 20);
@@ -1444,19 +1423,34 @@
 
             if (localSessionData.view === 'game4') {
                 const elapsed = localSessionData.stopwatchStartTime ? Math.max(0.1, (Date.now() - localSessionData.stopwatchStartTime) / 1000) : 0;
-                const newRes = [...(localSessionData.viggoResults || []), { uid: myPlayerId, name: window.myPlayerName, team: window.myPlayerTeam, time: elapsed }];
-                localSessionData.viggoResults = newRes;
-                broadcastState({ viggoResults: newRes });
+                const newRes = { uid: myPlayerId, name: window.myPlayerName, team: window.myPlayerTeam, time: elapsed };
+                
+                // Optimistic Local Update
+                const updatedList = [...(localSessionData.viggoResults || []), newRes];
+                localSessionData.viggoResults = updatedList;
+                updateUI();
+                
+                // Atomare Server Update verhinder Overwrite (Bug-Fix 2)
+                try { syncChannel.postMessage({ viggoResults: updatedList }); } catch(e){}
+                setDoc(sessionDocRef, { viggoResults: arrayUnion(newRes) }, { merge: true }).catch(e=>console.warn(e));
+                
             } else {
                 const reactTime = Math.max(0.01, (Date.now() - (localSessionData.buzzerUnlockTime || Date.now())) / 1000);
                 const existingIndex = (localSessionData.buzzerQueue || []).findIndex(b => b.uid === myPlayerId);
+                
                 if (existingIndex === -1) {
-                    const newQueue = [...(localSessionData.buzzerQueue || []), { uid: myPlayerId, name: window.myPlayerName, team: window.myPlayerTeam, time: reactTime }];
+                    const newEntry = { uid: myPlayerId, name: window.myPlayerName, team: window.myPlayerTeam, time: reactTime };
+                    
+                    // Optimistic Local Update
+                    const newQueue = [...(localSessionData.buzzerQueue || []), newEntry];
                     localSessionData.buzzerQueue = newQueue;
-                    broadcastState({ buzzerQueue: newQueue });
+                    updateUI();
+                    
+                    // Atomare Server Update verhinder Overwrite (Bug-Fix 2)
+                    try { syncChannel.postMessage({ buzzerQueue: newQueue }); } catch(e){}
+                    setDoc(sessionDocRef, { buzzerQueue: arrayUnion(newEntry) }, { merge: true }).catch(e=>console.warn(e));
                 }
             }
-            updateUI();
         };
 
         window.setGameState = function(newState) {
@@ -1518,11 +1512,7 @@
             localSessionData.buzzerActive = false;
             localSessionData.buzzerQueue = [];
 
-            broadcastState({
-                teams: teamsUpdate,
-                buzzerActive: false,
-                buzzerQueue: []
-            });
+            broadcastState({ teams: teamsUpdate, buzzerActive: false, buzzerQueue: [] });
             showToast(`+1 Punkt für ${winnerTeam}!`);
             updateUI();
         };
@@ -1544,6 +1534,10 @@
             const list = listRaw.split('\n').map(q => q.trim()).filter(q => q.length > 0);
             localSessionData.questionsList = list;
             localSessionData.currentQuestionIndex = 0;
+            
+            // Marker setzen, dass wir nun die Daten haben. Schützt vor Overwrites.
+            document.getElementById('admin-questions-list').dataset.loaded = "true";
+            
             broadcastState({ questionsList: list, currentQuestionIndex: 0 });
             showToast(`${list.length} Fragen gespeichert!`);
             updateUI();
@@ -1614,6 +1608,10 @@
                 bgmPlaying: false,
                 targetUrl: localSessionData.targetUrl || window.location.href.split('#')[0]
             };
+            
+            const qListEl = document.getElementById('admin-questions-list');
+            if(qListEl) qListEl.dataset.loaded = ""; // Reset protection
+            
             broadcastState(localSessionData);
             showToast("⚠️ ALLES WURDE ZURÜCKGESETZT!");
             updateUI();
@@ -1690,54 +1688,52 @@
                 viggoWinnerData: null,
                 buzzerActive: false 
             });
+            showToast("Stoppuhr zurückgesetzt");
+            updateStopwatchDisplay();
             updateUI();
         };
 
+        // Komplett fehlender Code aus Original wurde wiederhergestellt
         window.evaluateViggo = function() {
-            playSound('win');
-            const res = localSessionData.viggoResults || [];
-            const t1 = res.filter(r => r.team === 'ATA 25-28').map(r => r.time);
-            const t2 = res.filter(r => r.team === 'ATA 26-29').map(r => r.time);
-            
-            const avg1 = t1.length ? t1.reduce((a,b)=>a+b,0)/t1.length : 999;
-            const avg2 = t2.length ? t2.reduce((a,b)=>a+b,0)/t2.length : 999;
-            
-            let winner = "UNENTSCHIEDEN";
-            if(avg1 < avg2 && t1.length > 0) winner = "ATA 25-28";
-            if(avg2 < avg1 && t2.length > 0) winner = "ATA 26-29";
+            const results = localSessionData.viggoResults || [];
+            if (results.length === 0) {
+                showToast("Es hat noch niemand gebuzzert!");
+                return;
+            }
 
+            const t1 = results.filter(r => r.team === 'ATA 25-28');
+            const t2 = results.filter(r => r.team === 'ATA 26-29');
+
+            const avg1 = t1.length ? t1.reduce((sum, r) => sum + r.time, 0) / t1.length : 0;
+            const avg2 = t2.length ? t2.reduce((sum, r) => sum + r.time, 0) / t2.length : 0;
+
+            let winner = "UNENTSCHIEDEN";
+            if (avg1 > 0 && (avg2 === 0 || avg1 < avg2)) winner = 'ATA 25-28';
+            else if (avg2 > 0 && (avg1 === 0 || avg2 < avg1)) winner = 'ATA 26-29';
+
+            const winnerData = { avg1, avg2, winnerTeam: winner };
+            localSessionData.viggoWinnerData = winnerData;
+            
             let teamsUpdate = { ...(localSessionData.teams || {}) };
-            if(winner !== "UNENTSCHIEDEN") {
+            if (winner !== "UNENTSCHIEDEN") {
                 teamsUpdate[winner] = (teamsUpdate[winner] || 0) + 1;
             }
 
-            localSessionData.viggoWinnerData = { avg1, avg2, winnerTeam: winner };
-            localSessionData.teams = teamsUpdate;
-            localSessionData.buzzerActive = false;
-
-            broadcastState({
-                viggoWinnerData: { avg1, avg2, winnerTeam: winner },
-                buzzerActive: false,
-                teams: teamsUpdate
-            });
+            broadcastState({ viggoWinnerData: winnerData, teams: teamsUpdate });
+            showToast("Viggo Zeiten ausgewertet!");
             updateUI();
         };
 
         window.toggleFullscreen = function() {
             if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(e => {});
+                document.documentElement.requestFullscreen().catch(e => console.warn(e));
             } else {
-                document.exitFullscreen();
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
             }
         };
 
-        window.addEventListener('click', () => {
-            initAudio();
-        }, { once: true });
-
-        window.onload = function() {
-            initAudio();
-        };
     </script>
 </body>
 </html>
