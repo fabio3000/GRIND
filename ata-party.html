@@ -17,8 +17,6 @@
             --neon-pink: #ec4899;
             --neon-green: #84cc16;
             --dark-bg: #0f172a;
-            --team1-color: #3b82f6; 
-            --team2-color: #10b981; 
         }
         body {
             font-family: 'Inter', sans-serif;
@@ -33,6 +31,7 @@
         
         .neon-text-blue { text-shadow: 0 0 5px var(--neon-blue), 0 0 10px var(--neon-blue); }
         .neon-text-pink { text-shadow: 0 0 5px var(--neon-pink), 0 0 10px var(--neon-pink); }
+        .neon-text-green { text-shadow: 0 0 10px var(--neon-green), 0 0 20px var(--neon-green); }
         
         .zoom-image-container {
             overflow: hidden;
@@ -50,10 +49,9 @@
             object-fit: cover;
             transform-origin: center center;
         }
-        /* Neue Zoom Logik */
-        .zoom-hidden { transform: scale(15) !important; transition: none !important; }
-        .zoom-transition { transform: scale(1) !important; transition: transform 30s linear !important; }
-        .zoom-revealed { transform: scale(1) !important; transition: none !important; }
+        .zoom-hidden { transform: scale(15) !important; filter: blur(15px); transition: none !important; }
+        .zoom-transition { transform: scale(1) !important; filter: blur(0px); transition: transform 30s linear, filter 30s linear !important; }
+        .zoom-revealed { transform: scale(1) !important; filter: blur(0px); transition: none !important; }
 
         .buzzer-btn {
             background: radial-gradient(circle, #ff4d4d 0%, #cc0000 100%);
@@ -78,37 +76,42 @@
         }
         .animate-pulse-glow { animation: pulse-glow 2s infinite ease-in-out; }
 
-        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: var(--dark-bg); }
         ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
     </style>
 </head>
 <body class="h-screen w-screen flex flex-col items-center justify-center relative">
 
-    <div id="screen-role-select" class="w-full h-full flex flex-col items-center justify-center p-6 space-y-8 z-10">
-        <h1 class="text-4xl md:text-6xl gameshow-font neon-text-blue text-center mb-4">
-            <i class="fa-solid fa-heart-pulse mr-4 text-pink-500"></i>ATA Gameshow
-        </h1>
-        <p class="text-xl text-gray-300 mb-8 text-center max-w-md">Willkommen zur Party! Wähle deine Rolle:</p>
+    <!-- ROLE SELECT SCREEN -->
+    <div id="screen-role-select" class="w-full h-full flex flex-col items-center justify-between p-8 z-10">
+        <div class="text-center mt-6">
+            <h1 class="text-4xl md:text-6xl gameshow-font neon-text-blue mb-2">
+                <i class="fa-solid fa-heart-pulse mr-4 text-pink-500"></i>ATA Gameshow
+            </h1>
+            <p class="text-xl text-gray-300">Willkommen zur Welcome Party!</p>
+        </div>
         
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-5xl">
-            <button onclick="selectRole('live')" class="bg-gray-800 border-2 border-cyan-500 rounded-3xl p-8 hover:bg-gray-700 transition flex flex-col items-center justify-center gap-4 shadow-[0_0_15px_rgba(6,182,212,0.4)] group">
-                <i class="fa-solid fa-desktop text-5xl text-cyan-500 group-hover:scale-110 transition"></i>
-                <span class="gameshow-font text-2xl font-bold text-white">Live Beamer</span>
+        <!-- Big Player Button in Center -->
+        <div class="w-full max-w-md flex flex-col items-center justify-center my-auto">
+            <button onclick="selectRole('player')" class="w-full bg-pink-600 border-4 border-pink-400 rounded-3xl p-10 hover:bg-pink-500 transition flex flex-col items-center justify-center gap-6 shadow-[0_0_40px_rgba(236,72,153,0.6)] group transform hover:scale-105">
+                <i class="fa-solid fa-mobile-screen-button text-7xl text-white group-hover:animate-bounce"></i>
+                <span class="gameshow-font text-3xl font-black text-white tracking-wider">ALS SPIELER BEITRETEN</span>
             </button>
-            <button onclick="selectRole('admin')" class="bg-gray-800 border-2 border-purple-500 rounded-3xl p-8 hover:bg-gray-700 transition flex flex-col items-center justify-center gap-4 shadow-[0_0_15px_rgba(168,85,247,0.4)] group">
-                <i class="fa-solid fa-sliders text-5xl text-purple-500 group-hover:scale-110 transition"></i>
-                <span class="gameshow-font text-2xl font-bold text-white">Admin Panel</span>
+        </div>
+
+        <!-- Tiny Host / Admin Controls at Bottom -->
+        <div class="flex gap-4 opacity-40 hover:opacity-100 transition duration-300 mb-2">
+            <button onclick="selectRole('live')" class="bg-gray-800 border border-cyan-500/50 rounded-xl px-4 py-2 text-xs text-cyan-400 font-bold hover:bg-gray-700">
+                <i class="fa-solid fa-desktop mr-1"></i> Live Beamer
             </button>
-            <button onclick="selectRole('player')" class="bg-gray-800 border-2 border-pink-500 rounded-3xl p-8 hover:bg-gray-700 transition flex flex-col items-center justify-center gap-4 shadow-[0_0_15px_rgba(236,72,153,0.4)] group">
-                <i class="fa-solid fa-mobile-screen-button text-5xl text-pink-500 group-hover:scale-110 transition"></i>
-                <span class="gameshow-font text-2xl font-bold text-white">Spieler</span>
+            <button onclick="selectRole('admin')" class="bg-gray-800 border border-purple-500/50 rounded-xl px-4 py-2 text-xs text-purple-400 font-bold hover:bg-gray-700">
+                <i class="fa-solid fa-sliders mr-1"></i> Admin Panel
             </button>
         </div>
     </div>
 
+    <!-- PLAYER LOGIN -->
     <div id="screen-player-login" class="hidden w-full h-full flex-col items-center justify-center p-6 z-10">
         <div class="bg-gray-800 p-8 rounded-3xl border-2 border-pink-500 shadow-[0_0_20px_rgba(236,72,153,0.3)] max-w-md w-full flex flex-col gap-6">
             <h2 class="text-3xl gameshow-font text-center text-pink-500"><i class="fa-solid fa-user-nurse mr-2"></i>Anmeldung</h2>
@@ -142,6 +145,7 @@
         </div>
     </div>
 
+    <!-- PLAYER MAIN -->
     <div id="screen-player-main" class="hidden w-full h-full flex-col p-4 z-10 relative">
         <div class="absolute top-4 left-4 right-4 flex justify-between items-center bg-gray-800/80 p-4 rounded-2xl border border-gray-700 backdrop-blur">
             <div class="flex flex-col">
@@ -164,8 +168,8 @@
         </div>
     </div>
 
+    <!-- LIVE BEAMER VIEW -->
     <div id="screen-live-view" class="hidden w-full h-full flex-col z-10 relative bg-black">
-        <!-- Top HUD -->
         <div class="w-full bg-gray-900/90 border-b border-gray-800 p-6 flex justify-between items-center h-[12%] shadow-2xl relative z-30">
             <div class="flex items-center gap-4">
                 <div class="flex flex-col items-start">
@@ -176,7 +180,7 @@
                     <span id="live-score-team1" class="text-4xl gameshow-font font-black text-white">0</span>
                 </div>
             </div>
-            <h2 id="live-game-title" class="text-4xl md:text-5xl gameshow-font text-white text-center absolute left-1/2 transform -translate-x-1/2">Lobby</h2>
+            <h2 id="live-game-title" class="text-3xl md:text-4xl gameshow-font text-white text-center absolute left-1/2 transform -translate-x-1/2">Lobby</h2>
             <div class="flex items-center gap-4">
                 <div class="bg-green-900/50 border-2 border-green-500 rounded-xl px-6 py-2">
                     <span id="live-score-team2" class="text-4xl gameshow-font font-black text-white">0</span>
@@ -190,37 +194,38 @@
 
         <div class="w-full h-[88%] relative flex items-center justify-center overflow-hidden">
             
-            <!-- OVERLAY: Queue Winner -->
+            <!-- OVERLAY: Queue Winner / Active Player -->
             <div id="live-winner-overlay" class="absolute inset-0 bg-black/95 z-50 hidden flex-col items-center justify-center backdrop-blur-md transition-all">
                 <div class="animate-bounce mb-8">
                     <i class="fa-solid fa-microphone-lines text-7xl text-yellow-500"></i>
                 </div>
                 <h3 class="text-4xl text-gray-300 mb-2 uppercase tracking-widest">Am Buzzer:</h3>
-                <div id="live-winner-name" class="text-[7rem] leading-none gameshow-font text-white font-black text-center px-4 mb-4 drop-shadow-[0_0_30px_rgba(255,255,255,0.5)]">NAME</div>
+                <div id="live-winner-name" class="text-[6rem] leading-none gameshow-font text-white font-black text-center px-4 mb-4 drop-shadow-[0_0_30px_rgba(255,255,255,0.5)]">NAME</div>
                 <div id="live-winner-team" class="text-4xl font-bold px-8 py-3 rounded-2xl mb-6">TEAM</div>
                 <div class="text-2xl text-gray-400 font-mono bg-gray-800 px-6 py-3 rounded-lg border border-gray-600">
                     <i class="fa-solid fa-stopwatch mr-3"></i><span id="live-winner-time">0.00</span>s
                 </div>
+                <div id="live-queue-indicator" class="mt-6 text-xl text-yellow-400 font-bold hidden"></div>
             </div>
 
             <!-- VIEWS -->
             <div id="view-lobby" class="w-full h-full flex flex-col items-center justify-center text-center">
-                <h2 class="text-5xl mb-8 text-white font-bold">Scannen um beizutreten!</h2>
+                <h2 class="text-5xl mb-8 text-white font-bold">QR-Code scannen & mitmachen!</h2>
                 <div class="bg-white p-6 rounded-3xl mb-8 shadow-[0_0_50px_rgba(255,255,255,0.2)]">
                     <div id="qrcode" class="w-64 h-64 flex items-center justify-center"></div>
                 </div>
-                <p class="text-3xl text-gray-400 animate-pulse">Warten auf Spieler...</p>
+                <p class="text-2xl text-gray-400 font-mono mb-4">grind-app.de/ata-party.html</p>
                 <button onclick="toggleFullscreen()" class="absolute bottom-4 right-4 bg-gray-800/50 hover:bg-gray-700 px-4 py-2 rounded text-sm text-gray-400"><i class="fa-solid fa-expand"></i> Vollbild</button>
             </div>
 
             <div id="view-game1" class="hidden w-full h-full flex flex-col items-center justify-center">
                 <i class="fa-solid fa-box-open text-[12rem] text-cyan-500 animate-pulse-glow mb-12"></i>
-                <h2 class="text-[6rem] gameshow-font text-white text-center uppercase tracking-widest drop-shadow-2xl">Blind Ertasten!</h2>
+                <h2 class="text-[5rem] gameshow-font text-white text-center uppercase tracking-widest drop-shadow-2xl">Blind Ertasten!</h2>
             </div>
 
             <div id="view-game2" class="hidden w-full h-full flex flex-col items-center justify-center px-12 text-center">
                 <i class="fa-solid fa-circle-question text-6xl text-pink-500 mb-12 opacity-50"></i>
-                <h2 id="display-question" class="text-6xl md:text-8xl font-bold leading-tight text-white max-w-6xl">...</h2>
+                <h2 id="display-question" class="text-5xl md:text-7xl font-bold leading-tight text-white max-w-6xl">...</h2>
             </div>
 
             <div id="view-game-zoom" class="hidden w-full h-full flex flex-col items-center justify-center p-12">
@@ -236,7 +241,7 @@
                     <div id="stopwatch-display" class="text-[8rem] gameshow-font neon-text-green tabular-nums leading-none">00.0</div>
                 </div>
                 
-                <h2 class="text-4xl text-white font-bold mb-8">Wer ist fertig?</h2>
+                <h2 class="text-4xl text-white font-bold mb-8">Wer hat getrunken? (Buzzern!)</h2>
                 <div class="w-full max-w-6xl grid grid-cols-2 gap-12 px-8">
                     <div class="bg-blue-900/30 border border-blue-500/50 rounded-2xl p-6">
                         <h3 class="text-2xl font-bold text-blue-400 mb-4 border-b border-blue-500/30 pb-2">ATA 25-28</h3>
@@ -248,7 +253,6 @@
                     </div>
                 </div>
                 
-                <!-- Viggo Result Overlay -->
                 <div id="viggo-result-overlay" class="absolute inset-0 bg-black/95 z-40 hidden flex-col items-center justify-center backdrop-blur-md">
                     <h2 class="text-6xl font-bold text-yellow-500 mb-8"><i class="fa-solid fa-trophy mr-4"></i>Auswertung</h2>
                     <div class="flex gap-16 text-center">
@@ -268,6 +272,7 @@
         </div>
     </div>
 
+    <!-- ADMIN VIEW -->
     <div id="screen-admin-view" class="hidden w-full h-full bg-gray-900 flex-col z-10 relative">
         <div class="w-full bg-purple-900/40 border-b border-purple-500/30 p-4 flex justify-between items-center shadow-lg">
             <h2 class="text-2xl font-bold text-purple-400"><i class="fa-solid fa-sliders mr-2"></i>Admin Dashboard</h2>
@@ -278,7 +283,6 @@
         </div>
 
         <div class="flex flex-1 overflow-hidden">
-            <!-- Sidebar -->
             <div class="w-64 bg-gray-800 border-r border-gray-700 flex flex-col p-4 gap-2 overflow-y-auto">
                 <h3 class="text-gray-400 uppercase text-xs font-bold mb-2">Szene wechseln</h3>
                 <button onclick="setGameState('lobby')" class="w-full text-left px-4 py-3 rounded-lg bg-gray-700 hover:bg-purple-600 transition font-bold"><i class="fa-solid fa-house w-6"></i> 1. Lobby</button>
@@ -286,43 +290,39 @@
                 <button onclick="setGameState('game2')" class="w-full text-left px-4 py-3 rounded-lg bg-gray-700 hover:bg-purple-600 transition font-bold"><i class="fa-solid fa-question w-6"></i> 3. Quiz</button>
                 <button onclick="setGameState('game3')" class="w-full text-left px-4 py-3 rounded-lg bg-gray-700 hover:bg-purple-600 transition font-bold"><i class="fa-solid fa-magnifying-glass w-6"></i> 4. Gegenstand Zoom</button>
                 <button onclick="setGameState('game4')" class="w-full text-left px-4 py-3 rounded-lg bg-gray-700 hover:bg-purple-600 transition font-bold"><i class="fa-solid fa-syringe w-6"></i> 5. Viggo-Trinken</button>
-                <button onclick="setGameState('game5')" class="w-full text-left px-4 py-3 rounded-lg bg-gray-700 hover:bg-purple-600 transition font-bold"><i class="fa-solid fa-user-tie w-6"></i> 6. Lehrer Erraten</button>
+                <button onclick="setGameState('game5')" class="w-full text-left px-4 py-3 rounded-lg bg-gray-700 hover:bg-purple-600 transition font-bold"><i class="fa-solid fa-user-tie w-6"></i> 6. Lehrer Zoom</button>
             </div>
 
-            <!-- Admin Controls -->
             <div class="flex-1 p-6 flex flex-col gap-6 overflow-y-auto">
                 
-                <!-- Buzzer Control Master Panel -->
                 <div id="admin-panel-buzzer" class="bg-gray-800 rounded-2xl border border-gray-600 p-6 shadow-xl relative">
-                    <h3 class="text-xl font-bold text-white mb-4"><i class="fa-solid fa-hand-pointer mr-2"></i>Buzzer Steuerung (Queue)</h3>
+                    <h3 class="text-xl font-bold text-white mb-4"><i class="fa-solid fa-hand-pointer mr-2"></i>Buzzer Steuerung & Warteschlange</h3>
                     
                     <div id="admin-buzzer-controls" class="flex items-center gap-4">
                         <button onclick="activateBuzzer()" id="btn-unlock-buzzer" class="flex-1 bg-green-600 hover:bg-green-500 text-white font-bold py-4 rounded-xl text-xl shadow-lg transition"><i class="fa-solid fa-unlock mr-2"></i>Buzzer Freigeben</button>
                         <button onclick="resetBuzzer()" class="flex-1 bg-red-600 hover:bg-red-500 text-white font-bold py-4 rounded-xl text-xl shadow-lg transition"><i class="fa-solid fa-lock mr-2"></i>Sperren / Reset</button>
                     </div>
                     
-                    <!-- Queue Panel (When buzzed) -->
                     <div id="admin-decision-panel" class="hidden mt-4 bg-gray-900 border-2 border-yellow-500 rounded-xl p-6 flex-col items-center">
-                        <div class="text-yellow-500 font-black tracking-widest uppercase mb-2 animate-pulse">AKTUELER SPIELER</div>
+                        <div class="text-yellow-500 font-black tracking-widest uppercase mb-2 animate-pulse">AM BUZZER (1. PLATZ)</div>
                         <div class="flex items-center gap-4 mb-2">
                             <span id="admin-winner-name" class="text-4xl font-bold text-white">Name</span>
                             <span id="admin-winner-team" class="text-xl px-3 py-1 rounded bg-gray-700 text-white font-bold">Team</span>
                         </div>
                         <div class="text-gray-400 font-mono mb-4">Reaktionszeit: <span id="admin-winner-time" class="text-white font-bold">0.00</span>s</div>
-                        <div id="admin-queue-count" class="text-sm text-yellow-600 font-bold mb-6 hidden">+ 1 weitere Person in Warteschlange</div>
+                        <div id="admin-queue-count" class="text-sm text-yellow-400 font-bold mb-6">Warteschlange leer</div>
                         
                         <div class="flex w-full gap-4">
                             <button onclick="approveAnswer()" class="flex-1 bg-green-500 hover:bg-green-400 text-black font-black py-4 rounded-xl text-xl shadow-[0_0_15px_rgba(34,197,94,0.5)]">
                                 <i class="fa-solid fa-check mr-2"></i> RICHTIG (+1 Pkt & Reset)
                             </button>
                             <button onclick="denyAnswer()" class="flex-1 bg-red-500 hover:bg-red-400 text-white font-black py-4 rounded-xl text-xl shadow-[0_0_15px_rgba(239,68,68,0.5)]">
-                                <i class="fa-solid fa-xmark mr-2"></i> FALSCH (Nächster Spieler)
+                                <i class="fa-solid fa-xmark mr-2"></i> FALSCH (Nächster rückt vor)
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <!-- Viggo Control Master Panel (Only Game 4) -->
                 <div id="admin-panel-viggo" class="bg-gray-800 rounded-2xl border border-gray-600 p-6 shadow-xl hidden">
                     <h3 class="text-xl font-bold text-white mb-4"><i class="fa-solid fa-syringe mr-2"></i>Viggo-Trinken Steuerung</h3>
                     <div class="flex gap-4 mb-4">
@@ -331,7 +331,7 @@
                         <button onclick="resetStopwatch()" class="flex-1 bg-red-600 hover:bg-red-500 py-4 rounded-xl font-bold text-xl"><i class="fa-solid fa-rotate-left mr-2"></i>Reset</button>
                     </div>
                     <button onclick="evaluateViggo()" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-bold text-xl shadow-[0_0_15px_rgba(59,130,246,0.5)]">
-                        <i class="fa-solid fa-calculator mr-2"></i> Ergebnisse Auswerten & Punkte verteilen
+                        <i class="fa-solid fa-calculator mr-2"></i> Auswerten & Punkte verteilen
                     </button>
                 </div>
 
@@ -346,10 +346,10 @@
                         <h3 class="font-bold text-gray-300 mb-4"><i class="fa-solid fa-magnifying-glass mr-2"></i>Zoom (Gegenstand/Lehrer)</h3>
                         <input type="text" id="admin-image-url" placeholder="Bild-URL einfügen (https://...)" class="w-full bg-gray-900 border border-gray-600 rounded-lg p-3 text-white text-sm mb-4">
                         <div class="flex gap-2 mb-2">
-                            <button onclick="setZoomImage()" class="flex-1 bg-purple-600 hover:bg-purple-500 py-2 rounded-lg font-bold text-sm">1. Bild Setzen (Versteckt)</button>
-                            <button onclick="startZoom()" class="flex-1 bg-yellow-600 hover:bg-yellow-500 py-2 rounded-lg font-bold text-sm text-black">2. Zoom Starten</button>
+                            <button onclick="setZoomImageAndStart()" class="flex-1 bg-purple-600 hover:bg-purple-500 py-2 rounded-lg font-bold text-sm">1. Sofort rangezoomt starten</button>
+                            <button onclick="startZoom()" class="flex-1 bg-yellow-600 hover:bg-yellow-500 py-2 rounded-lg font-bold text-sm text-black">2. Zoom laufen lassen</button>
                         </div>
-                        <button onclick="revealZoom()" class="w-full bg-green-600 hover:bg-green-500 py-2 rounded-lg font-bold text-sm">3. Sofort Auflösen (Ganzes Bild)</button>
+                        <button onclick="revealZoom()" class="w-full bg-green-600 hover:bg-green-500 py-2 rounded-lg font-bold text-sm">3. Sofort ganz auflösen</button>
                     </div>
                 </div>
             </div>
@@ -359,9 +359,8 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
-        // Konfiguration - BITTE UNBEDINGT IN FIREBASE "ANONYME ANMELDUNG" & "FIRESTORE IM TESTMODUS" AKTIVIEREN
         const firebaseConfig = {
             apiKey: "AIzaSyCUJ7B85RDzTueMH1yALT21oTKR65O_Oe8",
             authDomain: "ata-party.firebaseapp.com",
@@ -378,28 +377,28 @@
         let currentUser = null;
         let role = null;
         let myPlayerId = null;
-        const SESSION_ID = 'ata_welcome_party_v4'; // Neue ID für neue DB-Struktur
+        const SESSION_ID = 'ata_welcome_party_v5';
         const sessionDocRef = doc(db, 'games', SESSION_ID);
 
         let localSessionData = {
             view: 'lobby',
             buzzerActive: false,
             buzzerUnlockTime: 0,
-            buzzerQueue: [], // Array für Reihenfolge
-            viggoResults: [], // Array für Viggo-Trinken
+            buzzerQueue: [],
+            viggoResults: [],
             teams: { "ATA 25-28": 0, "ATA 26-29": 0 },
             questionText: "Willkommen beim Quiz!",
             zoom: { url: "", state: "hidden" },
             stopwatchRunning: false,
             stopwatchTime: 0,
-            viggoWinnerData: null // Speichert Auswertungsergebnis
+            viggoWinnerData: null
         };
 
         let localStopwatchInterval;
         let qrCodeInstance = null;
-        let lastBuzzerUid = null; // Um Sound nicht doppelt abzuspielen
+        let lastBuzzerUid = null;
 
-        // --- AUDIO ENGINE (Tone.js) ---
+        // Audio Engine
         let synthBuzzer, synthCorrect, synthWrong, synthWin;
         async function initAudio() {
             try {
@@ -409,12 +408,10 @@
                 synthCorrect.volume.value = -5;
                 synthWrong = new Tone.Synth({ oscillator: { type: "sawtooth" } }).toDestination();
                 synthWin = new Tone.PolySynth(Tone.Synth).toDestination();
-                console.log("Audio initialized");
-            } catch(e) { console.warn("Audio start failed", e); }
+            } catch(e) {}
         }
 
         function playSound(type) {
-            if(!synthBuzzer) return;
             try {
                 if(type === 'buzzer') synthBuzzer.triggerAttackRelease("C3", "8n");
                 if(type === 'correct') {
@@ -428,18 +425,16 @@
             } catch(e){}
         }
 
-        // --- SETUP & AUTH ---
         window.selectRole = async function(selectedRole) {
             role = selectedRole;
             document.getElementById('screen-role-select').classList.add('hidden');
-            
-            await initAudio(); // Start Audio Context on user click
+            await initAudio();
 
             try {
                 const userCred = await signInAnonymously(auth);
                 currentUser = userCred.user;
             } catch (error) {
-                alert("Auth Fehler. Ist die Anonyme Anmeldung in Firebase aktiv?\n" + error.message);
+                alert("Auth Fehler. Bitte Anonyme Anmeldung in Firebase aktivieren!\n" + error.message);
                 window.location.reload(); return;
             }
 
@@ -459,28 +454,25 @@
         };
 
         function setupLiveQRCode() {
-            const currentUrl = window.location.href.split('?')[0];
             const qrContainer = document.getElementById("qrcode");
             qrContainer.innerHTML = '';
             qrCodeInstance = new QRCode(qrContainer, {
-                text: currentUrl, width: 256, height: 256,
+                text: "https://grind-app.de/ata-party.html", width: 256, height: 256,
                 colorDark : "#0f172a", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H
             });
         }
 
         async function setupSessionSync() {
-            if (role === 'admin') {
-                try {
-                    const docSnap = await getDoc(sessionDocRef);
-                    if (!docSnap.exists()) await setDoc(sessionDocRef, localSessionData);
-                } catch(e) {}
-            }
+            try {
+                const docSnap = await getDoc(sessionDocRef);
+                if (!docSnap.exists()) {
+                    await setDoc(sessionDocRef, localSessionData);
+                }
+            } catch(e) { console.error("Init session error:", e); }
 
             onSnapshot(sessionDocRef, (docSnap) => {
                 if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    // Ensure arrays exist
-                    localSessionData = { ...localSessionData, ...data };
+                    localSessionData = { ...localSessionData, ...docSnap.data() };
                     if(!localSessionData.buzzerQueue) localSessionData.buzzerQueue = [];
                     if(!localSessionData.viggoResults) localSessionData.viggoResults = [];
                     updateUI();
@@ -488,7 +480,6 @@
             });
         }
 
-        // --- UI UPDATER ---
         function updateUI() {
             const score1 = localSessionData.teams["ATA 25-28"] || 0;
             const score2 = localSessionData.teams["ATA 26-29"] || 0;
@@ -498,7 +489,6 @@
                 document.getElementById('live-score-team1').innerText = score1;
                 document.getElementById('live-score-team2').innerText = score2;
                 
-                // Views
                 document.querySelectorAll('#screen-live-view [id^="view-"]').forEach(el => el.classList.add('hidden'));
                 const activeViewId = `view-${localSessionData.view.replace('game3', 'game-zoom').replace('game5', 'game-zoom')}`;
                 const viewEl = document.getElementById(activeViewId);
@@ -509,7 +499,6 @@
 
                 if(localSessionData.view === 'game2') document.getElementById('display-question').innerText = localSessionData.questionText;
 
-                // Zoom Logic
                 if (localSessionData.view === 'game3' || localSessionData.view === 'game5') {
                     const imgEl = document.getElementById('zoom-img-element');
                     if (imgEl.src !== localSessionData.zoom.url && localSessionData.zoom.url) imgEl.src = localSessionData.zoom.url;
@@ -519,7 +508,6 @@
                     else if (localSessionData.zoom.state === 'revealed') imgEl.className = 'zoom-image zoom-revealed';
                 }
 
-                // Buzzer Overlay (Only for non-Viggo games)
                 const overlay = document.getElementById('live-winner-overlay');
                 if (currentBuzzer && localSessionData.view !== 'game4') {
                     document.getElementById('live-winner-name').innerText = currentBuzzer.name;
@@ -527,6 +515,15 @@
                     teamEl.innerText = currentBuzzer.team;
                     teamEl.className = `text-4xl font-bold px-8 py-3 rounded-2xl mb-6 ${currentBuzzer.team === 'ATA 25-28' ? 'bg-blue-600 text-white' : 'bg-green-600 text-white'}`;
                     document.getElementById('live-winner-time').innerText = currentBuzzer.time.toFixed(2);
+                    
+                    const qIndicator = document.getElementById('live-queue-indicator');
+                    if (localSessionData.buzzerQueue.length > 1) {
+                        qIndicator.innerText = `+ ${localSessionData.buzzerQueue.length - 1} weitere Person(en) in der Warteschlange`;
+                        qIndicator.classList.remove('hidden');
+                    } else {
+                        qIndicator.classList.add('hidden');
+                    }
+
                     overlay.classList.remove('hidden'); overlay.classList.add('flex');
                     
                     if (lastBuzzerUid !== currentBuzzer.uid) {
@@ -538,17 +535,14 @@
                     lastBuzzerUid = null;
                 }
 
-                // Game 4: Viggo Logic
                 if(localSessionData.view === 'game4') {
                     document.getElementById('stopwatch-display').innerText = (localSessionData.stopwatchTime / 10).toFixed(1).padStart(4, '0');
-                    
-                    // Populate Lists
                     const list1 = document.getElementById('viggo-list-team1');
                     const list2 = document.getElementById('viggo-list-team2');
                     list1.innerHTML = ''; list2.innerHTML = '';
                     
                     localSessionData.viggoResults.forEach((res, index) => {
-                        const html = `<div class="bg-gray-800/80 p-3 rounded-lg flex justify-between items-center border border-gray-600 animate-[pulse_0.5s_ease-out]">
+                        const html = `<div class="bg-gray-800/80 p-3 rounded-lg flex justify-between items-center border border-gray-600">
                             <span class="font-bold text-white text-xl">${index+1}. ${res.name}</span>
                             <span class="font-mono text-yellow-400">${res.time.toFixed(1)}s</span>
                         </div>`;
@@ -556,7 +550,6 @@
                         else list2.innerHTML += html;
                     });
 
-                    // Result Overlay
                     const resOverlay = document.getElementById('viggo-result-overlay');
                     if(localSessionData.viggoWinnerData) {
                         resOverlay.classList.remove('hidden'); resOverlay.classList.add('flex');
@@ -574,7 +567,6 @@
                 document.getElementById('admin-score-team1').innerText = score1;
                 document.getElementById('admin-score-team2').innerText = score2;
 
-                // Panel Switching based on game mode
                 if (localSessionData.view === 'game4') {
                     document.getElementById('admin-panel-buzzer').classList.add('hidden');
                     document.getElementById('admin-panel-viggo').classList.remove('hidden');
@@ -583,7 +575,6 @@
                     document.getElementById('admin-panel-viggo').classList.add('hidden');
                 }
 
-                // Buzzer Controls
                 const unlockBtn = document.getElementById('btn-unlock-buzzer');
                 const decisionPanel = document.getElementById('admin-decision-panel');
 
@@ -596,11 +587,11 @@
                     document.getElementById('admin-winner-time').innerText = currentBuzzer.time.toFixed(2);
                     
                     const qCount = document.getElementById('admin-queue-count');
-                    if (localSessionData.buzzerQueue.length > 1) {
-                        qCount.innerText = `+ ${localSessionData.buzzerQueue.length - 1} weitere in Warteschlange`;
-                        qCount.classList.remove('hidden');
+                    const qLength = localSessionData.buzzerQueue.length;
+                    if (qLength > 1) {
+                        qCount.innerText = `+ ${qLength - 1} weitere Person(en) in Warteschlange`;
                     } else {
-                        qCount.classList.add('hidden');
+                        qCount.innerText = "Warteschlange leer";
                     }
                 } else {
                     decisionPanel.classList.add('hidden'); decisionPanel.classList.remove('flex');
@@ -627,17 +618,16 @@
                 const statusText = document.getElementById('buzzer-status-text');
                 buzzerBtn.classList.remove('active-press');
 
-                // Check if I am in queue or results
                 const inQueue = localSessionData.buzzerQueue.find(b => b.uid === myPlayerId);
                 const inViggo = localSessionData.viggoResults.find(b => b.uid === myPlayerId);
 
                 if (inQueue || inViggo) {
                     buzzerBtn.classList.add('disabled'); buzzerBtn.disabled = true;
-                    statusText.innerText = "EINGELOGGT!";
+                    statusText.innerText = "GEBUZZERT!";
                     statusText.className = "absolute top-0 text-3xl font-black text-center w-full uppercase tracking-widest text-pink-500 animate-bounce";
                 } else if (localSessionData.buzzerActive) {
                     buzzerBtn.classList.remove('disabled'); buzzerBtn.disabled = false;
-                    statusText.innerText = "BEREIT!";
+                    statusText.innerText = "DRÜCKEN!";
                     statusText.className = "absolute top-0 text-4xl font-black text-center w-full uppercase tracking-widest text-green-500 animate-pulse drop-shadow-[0_0_10px_rgba(34,197,94,0.8)]";
                 } else {
                     buzzerBtn.classList.add('disabled'); buzzerBtn.disabled = true;
@@ -647,7 +637,6 @@
             }
         }
 
-        // --- PLAYER ACTIONS ---
         window.joinGame = async function() {
             const btn = document.getElementById('join-btn');
             const errorEl = document.getElementById('player-error');
@@ -661,26 +650,18 @@
             window.myPlayerName = nameInput.substring(0, 20);
             window.myPlayerTeam = teamSelect;
 
-            btn.innerText = "Verbinde mit Server...";
+            btn.innerText = "Verbinde...";
             btn.disabled = true;
 
-            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 8000));
             try {
-                // Test Write to verify DB access
-                await Promise.race([
-                    updateDoc(sessionDocRef, { ping: Date.now() }),
-                    timeoutPromise
-                ]);
-
+                await setDoc(sessionDocRef, { lastJoined: window.myPlayerName }, { merge: true });
                 document.getElementById('screen-player-login').classList.add('hidden');
                 document.getElementById('screen-player-login').classList.remove('flex');
                 document.getElementById('screen-player-main').classList.remove('hidden');
                 document.getElementById('screen-player-main').classList.add('flex');
-                
             } catch (e) {
                 btn.innerText = "Beitreten"; btn.disabled = false;
-                let msg = "Datenbank antwortet nicht.\n\nFehler: " + e.message;
-                errorEl.innerText = msg;
+                errorEl.innerText = "Fehler: " + e.message;
                 errorEl.classList.remove('hidden');
             }
         };
@@ -694,41 +675,36 @@
 
             try {
                 if (localSessionData.view === 'game4') {
-                    // Viggo Mode
                     const time = localSessionData.stopwatchTime / 10;
-                    await updateDoc(sessionDocRef, {
-                        viggoResults: arrayUnion({ uid: myPlayerId, name: window.myPlayerName, team: window.myPlayerTeam, time: time })
-                    });
+                    const newRes = [...localSessionData.viggoResults, { uid: myPlayerId, name: window.myPlayerName, team: window.myPlayerTeam, time: time }];
+                    await setDoc(sessionDocRef, { viggoResults: newRes }, { merge: true });
                 } else {
-                    // Normal Queue Mode
                     const reactTime = Math.max(0.01, (Date.now() - localSessionData.buzzerUnlockTime) / 1000);
-                    await updateDoc(sessionDocRef, {
-                        buzzerQueue: arrayUnion({ uid: myPlayerId, name: window.myPlayerName, team: window.myPlayerTeam, time: reactTime })
-                    });
+                    const newQueue = [...localSessionData.buzzerQueue, { uid: myPlayerId, name: window.myPlayerName, team: window.myPlayerTeam, time: reactTime }];
+                    await setDoc(sessionDocRef, { buzzerQueue: newQueue }, { merge: true });
                 }
-            } catch (e) { console.error("Buzzer failed:", e); }
+            } catch (e) { console.error("Buzzer error:", e); }
         };
 
-        // --- ADMIN ACTIONS ---
         window.setGameState = async function(newState) {
-            await updateDoc(sessionDocRef, { 
+            await setDoc(sessionDocRef, { 
                 view: newState,
                 buzzerActive: false,
                 buzzerQueue: [],
                 viggoWinnerData: null
-            });
+            }, { merge: true });
         };
 
         window.activateBuzzer = async function() {
-            await updateDoc(sessionDocRef, {
+            await setDoc(sessionDocRef, {
                 buzzerActive: true,
                 buzzerQueue: [],
                 buzzerUnlockTime: Date.now()
-            });
+            }, { merge: true });
         };
 
         window.resetBuzzer = async function() {
-            await updateDoc(sessionDocRef, { buzzerActive: false, buzzerQueue: [] });
+            await setDoc(sessionDocRef, { buzzerActive: false, buzzerQueue: [] }, { merge: true });
         };
 
         window.approveAnswer = async function() {
@@ -737,52 +713,53 @@
             const winnerTeam = localSessionData.buzzerQueue[0].team;
             const currentScore = localSessionData.teams[winnerTeam] || 0;
             
-            await updateDoc(sessionDocRef, {
-                [`teams.${winnerTeam}`]: currentScore + 1,
+            let teamsUpdate = { ...localSessionData.teams };
+            teamsUpdate[winnerTeam] = currentScore + 1;
+
+            await setDoc(sessionDocRef, {
+                teams: teamsUpdate,
                 buzzerActive: false,
-                buzzerQueue: [] // Clear all
-            });
+                buzzerQueue: []
+            }, { merge: true });
         };
 
         window.denyAnswer = async function() {
             if(localSessionData.buzzerQueue.length === 0) return;
             playSound('wrong');
-            const failedPlayer = localSessionData.buzzerQueue[0];
-            // Remove the first player from the queue, let the next one show up
-            await updateDoc(sessionDocRef, {
-                buzzerQueue: arrayRemove(failedPlayer)
-            });
+            // Remove first element from queue, so the next person pops up immediately
+            const updatedQueue = [...localSessionData.buzzerQueue];
+            updatedQueue.shift();
+
+            await setDoc(sessionDocRef, {
+                buzzerQueue: updatedQueue
+            }, { merge: true });
         };
 
-        // Zoom Controls
-        window.setZoomImage = async function() {
+        window.setZoomImageAndStart = async function() {
             const url = document.getElementById('admin-image-url').value;
-            await updateDoc(sessionDocRef, { zoom: { url: url, state: 'hidden' } });
+            await setDoc(sessionDocRef, { zoom: { url: url, state: 'hidden' } }, { merge: true });
         };
         window.startZoom = async function() {
-            await updateDoc(sessionDocRef, { 'zoom.state': 'zooming' });
+            await setDoc(sessionDocRef, { 'zoom.state': 'zooming' }, { merge: true });
         };
         window.revealZoom = async function() {
-            await updateDoc(sessionDocRef, { 'zoom.state': 'revealed' });
+            await setDoc(sessionDocRef, { 'zoom.state': 'revealed' }, { merge: true });
         };
 
-        // Quiz Question
         window.updateQuestion = async function() {
             const text = document.getElementById('admin-question-input').value;
-            await updateDoc(sessionDocRef, { questionText: text });
+            await setDoc(sessionDocRef, { questionText: text }, { merge: true });
         };
 
-        // Stopwatch & Viggo
         window.startStopwatch = async function() {
             if(localStopwatchInterval) clearInterval(localStopwatchInterval);
-            // Reset state and unlock buzzer immediately
-            await updateDoc(sessionDocRef, { 
+            await setDoc(sessionDocRef, { 
                 stopwatchTime: 0, 
                 stopwatchRunning: true, 
                 viggoResults: [],
                 viggoWinnerData: null,
                 buzzerActive: true 
-            });
+            }, { merge: true });
             
             let time = 0;
             localStopwatchInterval = setInterval(() => {
@@ -790,24 +767,24 @@
                 if(role === 'live' || role === 'admin') {
                      document.getElementById('stopwatch-display').innerText = (time / 10).toFixed(1).padStart(4, '0');
                 }
-                if (time % 10 === 0) updateDoc(sessionDocRef, { stopwatchTime: time }); // Sync every second
+                if (time % 10 === 0) setDoc(sessionDocRef, { stopwatchTime: time }, { merge: true });
             }, 100);
         };
 
         window.stopStopwatch = async function() {
             clearInterval(localStopwatchInterval);
-            await updateDoc(sessionDocRef, { stopwatchRunning: false, buzzerActive: false });
+            await setDoc(sessionDocRef, { stopwatchRunning: false, buzzerActive: false }, { merge: true });
         };
 
         window.resetStopwatch = async function() {
             clearInterval(localStopwatchInterval);
-            await updateDoc(sessionDocRef, { 
+            await setDoc(sessionDocRef, { 
                 stopwatchRunning: false, 
                 stopwatchTime: 0, 
                 viggoResults: [],
                 viggoWinnerData: null,
                 buzzerActive: false 
-            });
+            }, { merge: true });
             document.getElementById('stopwatch-display').innerText = "00.0";
         };
 
@@ -824,16 +801,16 @@
             if(avg1 < avg2 && t1.length > 0) winner = "ATA 25-28";
             if(avg2 < avg1 && t2.length > 0) winner = "ATA 26-29";
 
-            const payload = {
-                viggoWinnerData: { avg1, avg2, winnerTeam: winner },
-                buzzerActive: false
-            };
-            
+            let teamsUpdate = { ...localSessionData.teams };
             if(winner !== "UNENTSCHIEDEN") {
-                payload[`teams.${winner}`] = (localSessionData.teams[winner] || 0) + 1;
+                teamsUpdate[winner] = (teamsUpdate[winner] || 0) + 1;
             }
 
-            await updateDoc(sessionDocRef, payload);
+            await setDoc(sessionDocRef, {
+                viggoWinnerData: { avg1, avg2, winnerTeam: winner },
+                buzzerActive: false,
+                teams: teamsUpdate
+            }, { merge: true });
         };
 
         window.toggleFullscreen = function() {
