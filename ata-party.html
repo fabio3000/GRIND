@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ATA Welcome Party Gameshow</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <style>
+        :root {
+            --neon-blue: #06b6d4;
+            --neon-pink: #ec4899;
+            --neon-green: #84cc16;
+            --dark-bg: #0f172a;
+            --team1-color: #3b82f6; /* Blue for ATA 25-28 */
+            --team2-color: #10b981; /* Green for ATA 26-29 */
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--dark-bg);
+            color: white;
+            overflow-x: hidden;
+            touch-action: manipulation;
+        }
+        h1, h2, h3, .gameshow-font {
+            font-family: 'Orbitron', sans-serif;
+        }
+        
+        .neon-text-blue { text-shadow: 0 0 5px var(--neon-blue), 0 0 10px var(--neon-blue); }
+        .neon-text-pink { text-shadow: 0 0 5px var(--neon-pink), 0 0 10px var(--neon-pink); }
+        
+        .team1-text { color: var(--team1-color); text-shadow: 0 0 10px var(--team1-color); }
+        .team2-text { color: var(--team2-color); text-shadow: 0 0 10px var(--team2-color); }
+
+        .ecg-line {
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent 0%, var(--neon-green) 50%, transparent 100%);
+            position: absolute;
+            top: 0;
+            left: -100%;
+            animation: ecg-sweep 3s infinite linear;
+        }
+        @keyframes ecg-sweep {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        @keyframes pulse-glow {
+            0% { transform: scale(1); filter: drop-shadow(0 0 10px var(--neon-blue)); }
+            50% { transform: scale(1.1); filter: drop-shadow(0 0 30px var(--neon-pink)); }
+            100% { transform: scale(1); filter: drop-shadow(0 0 10px var(--neon-blue)); }
+        }
+        .animate-pulse-glow { animation: pulse-glow 2s infinite ease-in-out; }
+
+        .zoom-image-container {
+            overflow: hidden;
+            border-radius: 1rem;
+            position: relative;
+            box-shadow: 0 0 30px rgba(0,0,0,0.8);
+        }
+        .zoom-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scale(10);
+            transform-origin: center center;
+            transition: transform 20s linear;
+        }
+        .zoom-image.zooming-out {
+            transform: scale(1);
+        }
+
+        .buzzer-btn {
+            background: radial-gradient(circle, #ff4d4d 0%, #cc0000 100%);
+            box-shadow: 0 15px 0 #990000, 0 20px 25px rgba(0,0,0,0.5);
+            transition: all 0.1s;
+        }
+        .buzzer-btn:active, .buzzer-btn.active-press {
+            transform: translateY(15px);
+            box-shadow: 0 0px 0 #990000, 0 5px 10px rgba(0,0,0,0.5);
+        }
+        .buzzer-btn.disabled {
+            background: radial-gradient(circle, #555 0%, #333 100%);
+            box-shadow: 0 15px 0 #222;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Custom Scrollbar for Admin Panel */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--dark-bg); }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+    </style>
+</head>
+<body class="h-screen w-screen flex flex-col items-center justify-center relative">
+
+    <div class="fixed top-0 w-full h-1 z-50 overflow-hidden opacity-50 pointer-events-none">
+        <div class="ecg-line"></div>
+    </div>
+
+    <div id="screen-role-select" class="w-full h-full flex flex-col items-center justify-center p-6 space-y-8 z-10">
+        <h1 class="text-4xl md:text-6xl gameshow-font neon-text-blue text-center mb-4">
+            <i class="fa-solid fa-heart-pulse mr-4 text-pink-500"></i>ATA Gameshow
+        </h1>
+        <p class="text-xl text-gray-300 mb-8 text-center max-w-md">Willkommen zur Party! Wähle deine Rolle:</p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-5xl">
+            <!-- Beamer Live Role -->
+            <button onclick="selectRole('live')" class="bg-gray-800 border-2 border-cyan-500 rounded-3xl p-8 hover:bg-gray-700 transition flex flex-col items-center justify-center gap-4 shadow-[0_0_15px_rgba(6,182,212,0.4)] group">
+                <i class="fa-solid fa-desktop text-5xl text-cyan-500 group-hover:scale-110 transition"></i>
+                <span class="gameshow-font text-2xl font-bold text-white">Live Beamer</span>
+                <span class="text-sm text-gray-400 text-center">Vollbild-Anzeige für die Leinwand. Keine Steuerung.</span>
+            </button>
+            
+            <!-- Admin Role -->
+            <button onclick="selectRole('admin')" class="bg-gray-800 border-2 border-purple-500 rounded-3xl p-8 hover:bg-gray-700 transition flex flex-col items-center justify-center gap-4 shadow-[0_0_15px_rgba(168,85,247,0.4)] group">
+                <i class="fa-solid fa-sliders text-5xl text-purple-500 group-hover:scale-110 transition"></i>
+                <span class="gameshow-font text-2xl font-bold text-white">Admin Panel</span>
+                <span class="text-sm text-gray-400 text-center">Spiele steuern, Buzzer freigeben & Punkte vergeben.</span>
+            </button>
+
+            <!-- Player Role -->
+            <button onclick="selectRole('player')" class="bg-gray-800 border-2 border-pink-500 rounded-3xl p-8 hover:bg-gray-700 transition flex flex-col items-center justify-center gap-4 shadow-[0_0_15px_rgba(236,72,153,0.4)] group">
+                <i class="fa-solid fa-mobile-screen-button text-5xl text-pink-500 group-hover:scale-110 transition"></i>
+                <span class="gameshow-font text-2xl font-bold text-white">Spieler</span>
+                <span class="text-sm text-gray-400 text-center">Handy-Buzzer aktivieren und Team beitreten.</span>
+            </button>
+        </div>
+    </div>
+
+    <div id="screen-player-login" class="hidden w-full h-full flex-col items-center justify-center p-6 z-10">
+        <div class="bg-gray-800 p-8 rounded-3xl border-2 border-pink-500 shadow-[0_0_20px_rgba(236,72,153,0.3)] max-w-md w-full flex flex-col gap-6">
+            <h2 class="text-3xl gameshow-font text-center text-pink-500"><i class="fa-solid fa-user-nurse mr-2"></i>Anmeldung</h2>
+            
+            <div class="flex flex-col gap-2">
+                <label class="text-gray-300 font-bold">Dein Name / Spitzname</label>
+                <input type="text" id="player-name-input" class="w-full bg-gray-900 border border-gray-600 rounded-xl p-4 text-xl text-white focus:outline-none focus:border-pink-500" placeholder="Z.B. Dr. House">
+            </div>
+
+            <div class="flex flex-col gap-2 mt-2">
+                <label class="text-gray-300 font-bold">Wähle dein Team</label>
+                <div class="grid grid-cols-2 gap-4">
+                    <label class="cursor-pointer">
+                        <input type="radio" name="team-select" value="ATA 25-28" class="peer hidden" checked>
+                        <div class="rounded-xl border-2 border-gray-600 p-4 text-center peer-checked:border-blue-500 peer-checked:bg-blue-500/20 transition">
+                            <div class="font-bold text-blue-400">ATA 25-28</div>
+                            <div class="text-xs text-gray-400">Mittelkurs</div>
+                        </div>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="team-select" value="ATA 26-29" class="peer hidden">
+                        <div class="rounded-xl border-2 border-gray-600 p-4 text-center peer-checked:border-green-500 peer-checked:bg-green-500/20 transition">
+                            <div class="font-bold text-green-400">ATA 26-29</div>
+                            <div class="text-xs text-gray-400">Unterkurs</div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <button onclick="joinGame()" id="join-btn" class="w-full mt-4 bg-pink-600 hover:bg-pink-500 text-white font-bold py-4 rounded-xl text-xl transition shadow-[0_0_15px_rgba(236,72,153,0.5)]">
+                Beitreten
+            </button>
+            <div id="player-error" class="hidden w-full"></div>
+        </div>
+    </div>
+
+    <div id="screen-player-main" class="hidden w-full h-full flex-col p-4 z-10 relative">
+        <div class="absolute top-4 left-4 right-4 flex justify-between items-center bg-gray-800/80 p-4 rounded-2xl border border-gray-700 backdrop-blur">
+            <div class="flex flex-col">
+                <span id="player-display-name" class="text-xl font-bold text-white">Name</span>
+                <span id="player-display-team" class="text-sm font-bold">Team</span>
+            </div>
+            <div class="text-right flex flex-col items-end">
+                <span class="text-xs text-gray-400 uppercase tracking-widest">Team Punkte</span>
+                <span id="player-display-score" class="text-2xl font-black gameshow-font text-white">0</span>
+            </div>
+        </div>
+        
+        <div class="flex-1 flex flex-col items-center justify-center mt-20 relative">
+            <div id="buzzer-status-text" class="absolute top-0 text-3xl font-black text-center w-full uppercase tracking-widest text-gray-500">
+                Warten...
+            </div>
+            <button id="main-buzzer" onclick="hitBuzzer()" class="buzzer-btn disabled w-64 h-64 md:w-80 md:h-80 rounded-full flex items-center justify-center text-5xl md:text-6xl font-black text-white/90 select-none outline-none mt-12">
+                BUZZ!
+            </button>
+        </div>
+    </div>
+
+    <div id="screen-live-view" class="hidden w-full h-full flex-col z-10 relative bg-black">
+        <!-- Top HUD for Live View -->
+        <div class="w-full bg-gray-900/90 border-b border-gray-800 p-6 flex justify-between items-center h-[12%] shadow-2xl relative z-30">
+            <!-- Team 1 Score -->
+            <div class="flex items-center gap-4">
+                <div class="flex flex-col items-start">
+                    <span class="text-gray-400 font-bold uppercase tracking-widest text-sm">Team Mittelkurs</span>
+                    <span class="text-2xl font-black text-blue-400">ATA 25-28</span>
+                </div>
+                <div class="bg-blue-900/50 border-2 border-blue-500 rounded-xl px-6 py-2">
+                    <span id="live-score-team1" class="text-4xl gameshow-font font-black text-white">0</span>
+                </div>
+            </div>
+
+            <!-- Central Title -->
+            <h2 id="live-game-title" class="text-4xl md:text-5xl gameshow-font text-white text-center absolute left-1/2 transform -translate-x-1/2">
+                Lobby
+            </h2>
+
+            <!-- Team 2 Score -->
+            <div class="flex items-center gap-4">
+                <div class="bg-green-900/50 border-2 border-green-500 rounded-xl px-6 py-2">
+                    <span id="live-score-team2" class="text-4xl gameshow-font font-black text-white">0</span>
+                </div>
+                <div class="flex flex-col items-end">
+                    <span class="text-gray-400 font-bold uppercase tracking-widest text-sm">Team Unterkurs</span>
+                    <span class="text-2xl font-black text-green-400">ATA 26-29</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Live Content Area -->
+        <div class="w-full h-[88%] relative flex items-center justify-center overflow-hidden">
+            
+            <!-- OVERLAY: Winner Announcement -->
+            <div id="live-winner-overlay" class="absolute inset-0 bg-black/90 z-50 hidden flex-col items-center justify-center backdrop-blur-sm">
+                <div class="animate-bounce mb-8">
+                    <i class="fa-solid fa-bell text-7xl text-yellow-500"></i>
+                </div>
+                <h3 class="text-5xl text-gray-300 mb-6 uppercase tracking-widest">Gebuzzert hat</h3>
+                <div id="live-winner-name" class="text-[8rem] leading-none gameshow-font text-white font-black text-center px-4 mb-4 drop-shadow-[0_0_30px_rgba(255,255,255,0.5)]">
+                    NAME
+                </div>
+                <div id="live-winner-team" class="text-5xl font-bold px-8 py-4 rounded-2xl mb-8">
+                    TEAM
+                </div>
+                <div class="text-3xl text-gray-400 font-mono bg-gray-800 px-6 py-3 rounded-lg border border-gray-600">
+                    <i class="fa-solid fa-stopwatch mr-3"></i><span id="live-winner-time">0.00</span> Sekunden
+                </div>
+            </div>
+
+            <!-- VIEWS -->
+            <div id="view-lobby" class="w-full h-full flex flex-col items-center justify-center text-center">
+                <h2 class="text-5xl mb-8 text-white font-bold">Scannen um beizutreten!</h2>
+                <div class="bg-white p-6 rounded-3xl mb-8 shadow-[0_0_50px_rgba(255,255,255,0.2)]">
+                    <div id="qrcode" class="w-64 h-64 flex items-center justify-center"></div>
+                </div>
+                <p class="text-3xl text-gray-400 animate-pulse">Warten auf Spieler...</p>
+                <div class="mt-8 text-xl text-gray-500 font-mono" id="lobby-url-display"></div>
+                <button onclick="toggleFullscreen()" class="absolute bottom-4 right-4 bg-gray-800/50 hover:bg-gray-700 px-4 py-2 rounded text-sm text-gray-400"><i class="fa-solid fa-expand"></i> Vollbild</button>
+            </div>
+
+            <div id="view-game1" class="hidden w-full h-full flex flex-col items-center justify-center">
+                <i class="fa-solid fa-box-open text-[12rem] text-cyan-500 animate-pulse-glow mb-12"></i>
+                <h2 class="text-[6rem] gameshow-font text-white text-center uppercase tracking-widest drop-shadow-2xl">Blind Ertasten!</h2>
+            </div>
+
+            <div id="view-game2" class="hidden w-full h-full flex flex-col items-center justify-center px-12 text-center">
+                <i class="fa-solid fa-circle-question text-6xl text-pink-500 mb-12 opacity-50"></i>
+                <h2 id="display-question" class="text-6xl md:text-8xl font-bold leading-tight text-white max-w-6xl">...</h2>
+            </div>
+
+            <!-- Used for Game 3 (Gegenstand) and Game 5 (Lehrer) -->
+            <div id="view-game-zoom" class="hidden w-full h-full flex flex-col items-center justify-center p-12">
+                <div class="zoom-image-container w-full h-full max-h-[80vh] border-8 border-gray-800 bg-black">
+                    <img id="zoom-img-element" src="" class="zoom-image" alt="Zoom Object">
+                </div>
+            </div>
+
+            <div id="view-game4" class="hidden w-full h-full flex flex-col items-center justify-center">
+                <i class="fa-solid fa-syringe text-[10rem] text-green-500 mb-12 animate-bounce"></i>
+                <h2 class="text-[5rem] mb-8 text-white font-bold">Viggo-Wetttrinken</h2>
+                <div id="stopwatch-display" class="text-[12rem] gameshow-font neon-text-green tabular-nums leading-none">00.0</div>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="screen-admin-view" class="hidden w-full h-full bg-gray-900 flex-col z-10 relative">
+        <div class="w-full bg-purple-900/40 border-b border-purple-500/30 p-4 flex justify-between items-center shadow-lg">
+            <h2 class="text-2xl font-bold text-purple-400"><i class="fa-solid fa-sliders mr-2"></i>Admin Dashboard</h2>
+            <div class="flex items-center gap-6">
+                <div class="flex gap-4">
+                    <span class="text-blue-400 font-bold">ATA 25-28: <span id="admin-score-team1" class="text-white text-xl">0</span></span>
+                    <span class="text-green-400 font-bold">ATA 26-29: <span id="admin-score-team2" class="text-white text-xl">0</span></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex flex-1 overflow-hidden">
+            <!-- Sidebar: Game Selection -->
+            <div class="w-64 bg-gray-800 border-r border-gray-700 flex flex-col p-4 gap-2 overflow-y-auto">
+                <h3 class="text-gray-400 uppercase text-xs font-bold mb-2 tracking-wider">Szene wechseln</h3>
+                <button onclick="setGameState('lobby')" class="admin-nav-btn w-full text-left px-4 py-3 rounded-lg bg-gray-700 hover:bg-purple-600 transition font-bold"><i class="fa-solid fa-house w-6"></i> 1. Lobby</button>
+                <button onclick="setGameState('game1')" class="admin-nav-btn w-full text-left px-4 py-3 rounded-lg bg-gray-700 hover:bg-purple-600 transition font-bold"><i class="fa-solid fa-box w-6"></i> 2. Blind Ertasten</button>
+                <button onclick="setGameState('game2')" class="admin-nav-btn w-full text-left px-4 py-3 rounded-lg bg-gray-700 hover:bg-purple-600 transition font-bold"><i class="fa-solid fa-question w-6"></i> 3. Quiz</button>
+                <button onclick="setGameState('game3')" class="admin-nav-btn w-full text-left px-4 py-3 rounded-lg bg-gray-700 hover:bg-purple-600 transition font-bold"><i class="fa-solid fa-magnifying-glass w-6"></i> 4. Gegenstand Zoom</button>
+                <button onclick="setGameState('game4')" class="admin-nav-btn w-full text-left px-4 py-3 rounded-lg bg-gray-700 hover:bg-purple-600 transition font-bold"><i class="fa-solid fa-syringe w-6"></i> 5. Viggo-Trinken</button>
+                <button onclick="setGameState('game5')" class="admin-nav-btn w-full text-left px-4 py-3 rounded-lg bg-gray-700 hover:bg-purple-600 transition font-bold"><i class="fa-solid fa-user-tie w-6"></i> 6. Lehrer Erraten</button>
+            </div>
+
+            <!-- Main Content Area: Controls -->
+            <div class="flex-1 p-6 flex flex-col gap-6 overflow-y-auto">
+                
+                <!-- Buzzer Control Master Panel -->
+                <div class="bg-gray-800 rounded-2xl border border-gray-600 p-6 shadow-xl relative overflow-hidden">
+                    <h3 class="text-xl font-bold text-white mb-4"><i class="fa-solid fa-hand-pointer mr-2"></i>Buzzer Steuerung</h3>
+                    
+                    <!-- Base Controls (When waiting for buzz) -->
+                    <div id="admin-buzzer-controls" class="flex items-center gap-4">
+                        <button onclick="activateBuzzer()" id="btn-unlock-buzzer" class="flex-1 bg-green-600 hover:bg-green-500 text-white font-bold py-4 rounded-xl text-xl shadow-lg transition"><i class="fa-solid fa-unlock mr-2"></i>Buzzer Freigeben</button>
+                        <button onclick="resetBuzzer()" class="flex-1 bg-red-600 hover:bg-red-500 text-white font-bold py-4 rounded-xl text-xl shadow-lg transition"><i class="fa-solid fa-lock mr-2"></i>Sperren / Reset</button>
+                    </div>
+                    
+                    <!-- Alert/Decision Panel (When someone buzzed) -->
+                    <div id="admin-decision-panel" class="hidden mt-4 bg-gray-900 border-2 border-yellow-500 rounded-xl p-6 flex-col items-center">
+                        <div class="text-yellow-500 font-black tracking-widest uppercase mb-2 animate-pulse">GEBUZZERT!</div>
+                        <div class="flex items-center gap-4 mb-2">
+                            <span id="admin-winner-name" class="text-4xl font-bold text-white">Name</span>
+                            <span id="admin-winner-team" class="text-xl px-3 py-1 rounded bg-gray-700 text-white font-bold">Team</span>
+                        </div>
+                        <div class="text-gray-400 font-mono mb-6">Reaktionszeit: <span id="admin-winner-time" class="text-white font-bold">0.00</span>s</div>
+                        
+                        <div class="flex w-full gap-4">
+                            <button onclick="approveAnswer()" class="flex-1 bg-green-500 hover:bg-green-400 text-black font-black py-4 rounded-xl text-xl shadow-[0_0_15px_rgba(34,197,94,0.5)]">
+                                <i class="fa-solid fa-check mr-2"></i> RICHTIG (+1 Punkt)
+                            </button>
+                            <button onclick="denyAnswer()" class="flex-1 bg-red-500 hover:bg-red-400 text-white font-black py-4 rounded-xl text-xl shadow-[0_0_15px_rgba(239,68,68,0.5)]">
+                                <i class="fa-solid fa-xmark mr-2"></i> FALSCH (Wieder Freigeben)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contextual Game Controls -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Quiz Controls -->
+                    <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700">
+                        <h3 class="font-bold text-gray-300 mb-4"><i class="fa-solid fa-question-circle mr-2"></i>Quiz Steuerung</h3>
+                        <textarea id="admin-question-input" rows="3" placeholder="Frage hier eingeben..." class="w-full bg-gray-900 border border-gray-600 rounded-lg p-3 text-white mb-4"></textarea>
+                        <button onclick="updateQuestion()" class="w-full bg-blue-600 hover:bg-blue-500 py-3 rounded-lg font-bold">Auf Leinwand anzeigen</button>
+                    </div>
+
+                    <!-- Zoom Controls -->
+                    <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700">
+                        <h3 class="font-bold text-gray-300 mb-4"><i class="fa-solid fa-magnifying-glass mr-2"></i>Zoom (Gegenstand/Lehrer)</h3>
+                        <input type="text" id="admin-image-url" placeholder="Bild-URL einfügen (https://...)" class="w-full bg-gray-900 border border-gray-600 rounded-lg p-3 text-white text-sm mb-4" value="https://images.unsplash.com/photo-1583324113626-70df0f4deaab?auto=format&fit=crop&q=80&w=1000">
+                        <div class="flex gap-2">
+                            <button onclick="startZoom()" class="flex-1 bg-yellow-600 hover:bg-yellow-500 py-3 rounded-lg font-bold"><i class="fa-solid fa-play mr-2"></i>Zoom Starten</button>
+                            <button onclick="resetZoom()" class="bg-gray-600 hover:bg-gray-500 px-6 py-3 rounded-lg"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+                        </div>
+                    </div>
+
+                    <!-- Stopwatch Controls -->
+                    <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700">
+                        <h3 class="font-bold text-gray-300 mb-4"><i class="fa-solid fa-stopwatch mr-2"></i>Viggo-Trinken Timer</h3>
+                        <div class="flex gap-2">
+                            <button onclick="startStopwatch()" class="flex-1 bg-green-600 hover:bg-green-500 py-3 rounded-lg font-bold">Start</button>
+                            <button onclick="stopStopwatch()" class="flex-1 bg-yellow-600 hover:bg-yellow-500 py-3 rounded-lg font-bold">Stop</button>
+                            <button onclick="resetStopwatch()" class="flex-1 bg-red-600 hover:bg-red-500 py-3 rounded-lg font-bold">Reset</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Admin Player List Info -->
+                <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700 mt-auto">
+                    <div class="flex justify-between text-gray-400 text-sm">
+                        <span>Verbundene Spieler: <strong id="admin-player-count" class="text-white">0</strong></span>
+                        <span class="text-green-500"><i class="fa-solid fa-circle text-[8px] mr-1"></i>System Online</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCUJ7B85RDzTueMH1yALT21oTKR65O_Oe8",
+            authDomain: "ata-party.firebaseapp.com",
+            projectId: "ata-party",
+            storageBucket: "ata-party.firebasestorage.app",
+            messagingSenderId: "855919930448",
+            appId: "1:855919930448:web:59d3f9cdb838ca2dfcb555"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null;
+        let role = null;
+        let myPlayerId = null;
+        const SESSION_ID = 'ata_welcome_party_v2';
+        const sessionDocRef = doc(db, 'games', SESSION_ID);
+
+        let localSessionData = {
+            view: 'lobby',
+            buzzer: {
+                active: false,
+                winnerId: null,
+                winnerName: null,
+                winnerTeam: null,
+                unlockTime: 0,
+                reactionTime: 0
+            },
+            teams: {
+                "ATA 25-28": 0,
+                "ATA 26-29": 0
+            },
+            questionText: "Willkommen beim Quiz!",
+            zoomActive: false,
+            imageUrl: "",
+            stopwatchRunning: false,
+            stopwatchTime: 0,
+            players: {}
+        };
+
+        let localStopwatchInterval;
+        let qrCodeInstance = null;
+
+        // Authentication & Role Setup
+        async function authenticate() {
+            try {
+                const userCred = await signInAnonymously(auth);
+                currentUser = userCred.user;
+                return true;
+            } catch (error) {
+                console.error("Auth error:", error);
+                alert("Fehler bei der Anmeldung: " + error.message);
+                window.location.reload();
+                return false;
+            }
+        }
+
+        window.selectRole = async function(selectedRole) {
+            role = selectedRole;
+            document.getElementById('screen-role-select').classList.add('hidden');
+            
+            const authSuccess = await authenticate();
+            if (!authSuccess) return;
+
+            if (role === 'live') {
+                document.getElementById('screen-live-view').classList.remove('hidden');
+                document.getElementById('screen-live-view').classList.add('flex');
+                setupLiveQRCode();
+                await setupSessionSync();
+            } else if (role === 'admin') {
+                document.getElementById('screen-admin-view').classList.remove('hidden');
+                document.getElementById('screen-admin-view').classList.add('flex');
+                await setupSessionSync();
+            } else {
+                document.getElementById('screen-player-login').classList.remove('hidden');
+                document.getElementById('screen-player-login').classList.add('flex');
+            }
+        };
+
+        function setupLiveQRCode() {
+            const currentUrl = window.location.href.split('?')[0]; // Clean URL
+            document.getElementById('lobby-url-display').innerText = currentUrl;
+            
+            const qrContainer = document.getElementById("qrcode");
+            qrContainer.innerHTML = '';
+            
+            qrCodeInstance = new QRCode(qrContainer, {
+                text: currentUrl,
+                width: 256,
+                height: 256,
+                colorDark : "#0f172a",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+        }
+
+        // Database Sync
+        async function setupSessionSync() {
+            if (role === 'admin') {
+                try {
+                    const docSnap = await getDoc(sessionDocRef);
+                    if (!docSnap.exists()) {
+                        await setDoc(sessionDocRef, localSessionData);
+                    }
+                } catch(e) {
+                    console.error("Fehler beim Erstellen der DB:", e);
+                }
+            }
+
+            onSnapshot(sessionDocRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    localSessionData = docSnap.data();
+                    if (!localSessionData.players) localSessionData.players = {};
+                    if (!localSessionData.teams) localSessionData.teams = {"ATA 25-28": 0, "ATA 26-29": 0};
+                    if (!localSessionData.buzzer) localSessionData.buzzer = {active: false, winnerId: null};
+                    updateUI();
+                }
+            });
+        }
+
+        // UI Updates based on State
+        function updateUI() {
+            // Update Teams Scores globally
+            const score1 = localSessionData.teams["ATA 25-28"] || 0;
+            const score2 = localSessionData.teams["ATA 26-29"] || 0;
+
+            if (role === 'live') {
+                document.getElementById('live-score-team1').innerText = score1;
+                document.getElementById('live-score-team2').innerText = score2;
+                
+                // Hide all views, show active
+                document.querySelectorAll('#screen-live-view [id^="view-"]').forEach(el => el.classList.add('hidden'));
+                const activeViewId = `view-${localSessionData.view.replace('game3', 'game-zoom').replace('game5', 'game-zoom')}`;
+                const viewEl = document.getElementById(activeViewId);
+                if(viewEl) viewEl.classList.remove('hidden');
+
+                // Titles
+                const titles = { lobby: "Willkommen", game1: "Blind Ertasten", game2: "Quiz", game3: "Gegenstand Erraten", game4: "Viggo-Trinken", game5: "Lehrer Erraten" };
+                document.getElementById('live-game-title').innerText = titles[localSessionData.view] || "Gameshow";
+
+                // Quiz text
+                if(localSessionData.view === 'game2') {
+                    document.getElementById('display-question').innerText = localSessionData.questionText;
+                }
+
+                // Zoom Logic
+                if (localSessionData.view === 'game3' || localSessionData.view === 'game5') {
+                    const imgEl = document.getElementById('zoom-img-element');
+                    if (localSessionData.imageUrl && imgEl.src !== localSessionData.imageUrl) {
+                        imgEl.src = localSessionData.imageUrl;
+                    }
+                    if (localSessionData.zoomActive) {
+                        imgEl.classList.add('zooming-out');
+                    } else if (!localSessionData.buzzer.winnerId) {
+                         imgEl.classList.remove('zooming-out');
+                         imgEl.style.transform = ''; // reset
+                    }
+                }
+
+                // Winner Overlay
+                const overlay = document.getElementById('live-winner-overlay');
+                if (localSessionData.buzzer.winnerId) {
+                    document.getElementById('live-winner-name').innerText = localSessionData.buzzer.winnerName;
+                    const teamName = localSessionData.buzzer.winnerTeam;
+                    const teamEl = document.getElementById('live-winner-team');
+                    teamEl.innerText = teamName;
+                    teamEl.className = `text-5xl font-bold px-8 py-4 rounded-2xl mb-8 ${teamName === 'ATA 25-28' ? 'bg-blue-600 text-white' : 'bg-green-600 text-white'}`;
+                    document.getElementById('live-winner-time').innerText = parseFloat(localSessionData.buzzer.reactionTime).toFixed(2);
+                    
+                    overlay.classList.remove('hidden');
+                    overlay.classList.add('flex');
+
+                    // Freeze zoom
+                    if (localSessionData.view === 'game3' || localSessionData.view === 'game5') {
+                        const imgEl = document.getElementById('zoom-img-element');
+                        if (localSessionData.zoomActive && !imgEl.style.transform) {
+                            const computedStyle = window.getComputedStyle(imgEl);
+                            imgEl.style.transform = computedStyle.getPropertyValue('transform');
+                        }
+                    }
+                } else {
+                    overlay.classList.add('hidden');
+                    overlay.classList.remove('flex');
+                }
+
+                // Stopwatch Display handling
+                if(localSessionData.view === 'game4') {
+                     document.getElementById('stopwatch-display').innerText = (localSessionData.stopwatchTime / 10).toFixed(1).padStart(4, '0');
+                }
+
+            } else if (role === 'admin') {
+                document.getElementById('admin-score-team1').innerText = score1;
+                document.getElementById('admin-score-team2').innerText = score2;
+                document.getElementById('admin-player-count').innerText = Object.keys(localSessionData.players || {}).length;
+
+                const b = localSessionData.buzzer;
+                const unlockBtn = document.getElementById('btn-unlock-buzzer');
+                const decisionPanel = document.getElementById('admin-decision-panel');
+
+                if (b.winnerId) {
+                    // Someone buzzed
+                    unlockBtn.className = "flex-1 bg-gray-600 text-gray-400 font-bold py-4 rounded-xl text-xl cursor-not-allowed";
+                    decisionPanel.classList.remove('hidden');
+                    decisionPanel.classList.add('flex');
+                    document.getElementById('admin-winner-name').innerText = b.winnerName;
+                    document.getElementById('admin-winner-team').innerText = b.winnerTeam;
+                    document.getElementById('admin-winner-team').className = `text-xl px-3 py-1 rounded font-bold ${b.winnerTeam === 'ATA 25-28' ? 'bg-blue-600 text-white' : 'bg-green-600 text-white'}`;
+                    document.getElementById('admin-winner-time').innerText = parseFloat(b.reactionTime).toFixed(2);
+                } else {
+                    decisionPanel.classList.add('hidden');
+                    decisionPanel.classList.remove('flex');
+                    if (b.active) {
+                        unlockBtn.className = "flex-1 bg-green-400 text-black font-black py-4 rounded-xl text-xl shadow-[0_0_20px_rgba(74,222,128,0.6)] animate-pulse";
+                        unlockBtn.innerHTML = "<i class='fa-solid fa-lock-open mr-2'></i> Buzzer ist SCHARF";
+                    } else {
+                        unlockBtn.className = "flex-1 bg-green-600 hover:bg-green-500 text-white font-bold py-4 rounded-xl text-xl shadow-lg transition";
+                        unlockBtn.innerHTML = "<i class='fa-solid fa-unlock mr-2'></i> Buzzer Freigeben";
+                    }
+                }
+
+            } else if (role === 'player') {
+                const myData = localSessionData.players[myPlayerId];
+                if (myData) {
+                    document.getElementById('player-display-name').innerText = myData.name;
+                    document.getElementById('player-display-team').innerText = myData.team;
+                    document.getElementById('player-display-team').className = `text-sm font-bold ${myData.team === 'ATA 25-28' ? 'text-blue-400' : 'text-green-400'}`;
+                    document.getElementById('player-display-score').innerText = myData.team === 'ATA 25-28' ? score1 : score2;
+                }
+
+                const buzzerBtn = document.getElementById('main-buzzer');
+                const statusText = document.getElementById('buzzer-status-text');
+
+                buzzerBtn.classList.remove('active-press');
+
+                if (localSessionData.buzzer.winnerId) {
+                    buzzerBtn.classList.add('disabled');
+                    buzzerBtn.disabled = true;
+                    if (localSessionData.buzzer.winnerId === myPlayerId) {
+                        statusText.innerText = "DU HAST GEBUZZERT!";
+                        statusText.className = "absolute top-0 text-2xl font-black text-center w-full uppercase tracking-widest text-pink-500 animate-bounce";
+                    } else {
+                        statusText.innerText = `${localSessionData.buzzer.winnerName} war schneller!`;
+                        statusText.className = "absolute top-0 text-xl font-bold text-center w-full uppercase text-gray-400";
+                    }
+                } else if (localSessionData.buzzer.active) {
+                    buzzerBtn.classList.remove('disabled');
+                    buzzerBtn.disabled = false;
+                    statusText.innerText = "BEREIT!";
+                    statusText.className = "absolute top-0 text-4xl font-black text-center w-full uppercase tracking-widest text-green-500 animate-pulse drop-shadow-[0_0_10px_rgba(34,197,94,0.8)]";
+                } else {
+                    buzzerBtn.classList.add('disabled');
+                    buzzerBtn.disabled = true;
+                    statusText.innerText = "Gesperrt";
+                    statusText.className = "absolute top-0 text-3xl font-bold text-center w-full uppercase tracking-widest text-gray-600";
+                }
+            }
+        }
+
+        // Player Actions
+        window.joinGame = async function() {
+            const btn = document.getElementById('join-btn');
+            const errorEl = document.getElementById('player-error');
+            errorEl.classList.add('hidden');
+            
+            const nameInput = document.getElementById('player-name-input').value.trim();
+            if (!nameInput) {
+                alert("Bitte Namen eingeben!");
+                return;
+            }
+
+            const teamSelect = document.querySelector('input[name="team-select"]:checked').value;
+
+            try {
+                const safeName = nameInput.substring(0, 20);
+                myPlayerId = currentUser.uid;
+
+                btn.innerText = "Verbinde...";
+                btn.disabled = true;
+
+                await setDoc(sessionDocRef, {
+                    players: {
+                        [myPlayerId]: { name: safeName, team: teamSelect }
+                    }
+                }, { merge: true });
+
+                document.getElementById('screen-player-login').classList.add('hidden');
+                document.getElementById('screen-player-login').classList.remove('flex');
+                document.getElementById('screen-player-main').classList.remove('hidden');
+                document.getElementById('screen-player-main').classList.add('flex');
+                
+                await setupSessionSync();
+                
+                btn.innerText = "Beitreten";
+                btn.disabled = false;
+
+            } catch (e) {
+                console.error("Error joining:", e);
+                btn.innerText = "Beitreten";
+                btn.disabled = false;
+                errorEl.innerHTML = `<div class="bg-red-900 border border-red-500 p-3 rounded text-white mt-4 text-sm">${e.message}</div>`;
+                errorEl.classList.remove('hidden');
+                errorEl.classList.add('block');
+            }
+        };
+
+        window.hitBuzzer = async function() {
+            if (!localSessionData.buzzer.active || localSessionData.buzzer.winnerId) return;
+
+            const btn = document.getElementById('main-buzzer');
+            btn.classList.add('active-press');
+            
+            if (navigator.vibrate) navigator.vibrate([100, 50, 100]); 
+
+            const reactTime = (Date.now() - localSessionData.buzzer.unlockTime) / 1000;
+            const safeReactTime = reactTime < 0 ? 0.01 : reactTime; // Fallback for clock differences
+
+            try {
+                await updateDoc(sessionDocRef, {
+                    'buzzer.active': false,
+                    'buzzer.winnerId': myPlayerId,
+                    'buzzer.winnerName': localSessionData.players[myPlayerId].name,
+                    'buzzer.winnerTeam': localSessionData.players[myPlayerId].team,
+                    'buzzer.reactionTime': safeReactTime
+                });
+            } catch (e) {
+                console.error("Buzzer failed:", e);
+            }
+        };
+
+        // Admin Actions
+        window.setGameState = async function(newState) {
+            await updateDoc(sessionDocRef, { 
+                view: newState,
+                'buzzer.active': false,
+                'buzzer.winnerId': null,
+                zoomActive: false
+            });
+            const imgEl = document.getElementById('zoom-img-element');
+            if(imgEl) imgEl.style.transform = '';
+        };
+
+        window.activateBuzzer = async function() {
+            await updateDoc(sessionDocRef, {
+                'buzzer.active': true,
+                'buzzer.winnerId': null,
+                'buzzer.winnerName': null,
+                'buzzer.winnerTeam': null,
+                'buzzer.unlockTime': Date.now()
+            });
+        };
+
+        window.resetBuzzer = async function() {
+            await updateDoc(sessionDocRef, {
+                'buzzer.active': false,
+                'buzzer.winnerId': null
+            });
+        };
+
+        window.approveAnswer = async function() {
+            const winnerTeam = localSessionData.buzzer.winnerTeam;
+            if (!winnerTeam) return;
+            
+            const currentScore = localSessionData.teams[winnerTeam] || 0;
+            
+            await updateDoc(sessionDocRef, {
+                [`teams.${winnerTeam}`]: currentScore + 1,
+                'buzzer.active': false,
+                'buzzer.winnerId': null
+            });
+        };
+
+        window.denyAnswer = async function() {
+            // Falsch = reset and unlock for others
+            await updateDoc(sessionDocRef, {
+                'buzzer.active': true,
+                'buzzer.winnerId': null,
+                'buzzer.unlockTime': Date.now()
+            });
+        };
+
+        window.updateQuestion = async function() {
+            const text = document.getElementById('admin-question-input').value;
+            await updateDoc(sessionDocRef, { questionText: text });
+        };
+
+        window.startZoom = async function() {
+            const url = document.getElementById('admin-image-url').value;
+            await updateDoc(sessionDocRef, { 
+                imageUrl: url,
+                zoomActive: false 
+            });
+            setTimeout(async () => {
+                await updateDoc(sessionDocRef, { zoomActive: true });
+            }, 100);
+        };
+
+        window.resetZoom = async function() {
+            await updateDoc(sessionDocRef, { zoomActive: false });
+        };
+
+        // Admin Stopwatch (Centralized sync)
+        window.startStopwatch = async function() {
+            if(localStopwatchInterval) clearInterval(localStopwatchInterval);
+            let time = localSessionData.stopwatchTime || 0;
+            localStopwatchInterval = setInterval(() => {
+                time++;
+                // Update local display immediately for smoothness
+                if(role === 'live') {
+                     document.getElementById('stopwatch-display').innerText = (time / 10).toFixed(1).padStart(4, '0');
+                }
+                // Sync to DB every second to avoid spamming
+                if (time % 10 === 0) {
+                     updateDoc(sessionDocRef, { stopwatchTime: time });
+                }
+            }, 100);
+            await updateDoc(sessionDocRef, { stopwatchRunning: true });
+        };
+
+        window.stopStopwatch = async function() {
+            clearInterval(localStopwatchInterval);
+            // Sync final time
+            const el = document.getElementById('stopwatch-display');
+            if(el) {
+                const finalTime = Math.floor(parseFloat(el.innerText) * 10);
+                await updateDoc(sessionDocRef, { stopwatchRunning: false, stopwatchTime: finalTime });
+            }
+        };
+
+        window.resetStopwatch = async function() {
+            clearInterval(localStopwatchInterval);
+            await updateDoc(sessionDocRef, { stopwatchRunning: false, stopwatchTime: 0 });
+        };
+
+        window.toggleFullscreen = function() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => console.log(err));
+            } else {
+                document.exitFullscreen();
+            }
+        };
+    </script>
+</body>
+</html>
