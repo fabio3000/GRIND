@@ -24,6 +24,8 @@
             color: white;
             overflow-x: hidden;
             touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
         }
         h1, h2, h3, .gameshow-font {
             font-family: 'Orbitron', sans-serif;
@@ -40,72 +42,110 @@
             box-shadow: 0 0 30px rgba(0,0,0,0.8);
             width: 100%;
             height: 100%;
-            max-height: 80vh;
+            max-height: 75vh;
             background: black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .zoom-image {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: contain;
             transform-origin: center center;
+            will-change: transform, filter;
         }
-        .zoom-hidden { transform: scale(15) !important; filter: blur(15px); transition: none !important; }
-        .zoom-transition { transform: scale(1) !important; filter: blur(0px); transition: transform 30s linear, filter 30s linear !important; }
+        .zoom-hidden { transform: scale(15) !important; filter: blur(20px); transition: none !important; }
+        .zoom-transition { transform: scale(1) !important; filter: blur(0px); transition: transform 25s linear, filter 25s linear !important; }
         .zoom-revealed { transform: scale(1) !important; filter: blur(0px); transition: none !important; }
 
         .buzzer-btn {
             background: radial-gradient(circle, #ff4d4d 0%, #cc0000 100%);
             box-shadow: 0 15px 0 #990000, 0 20px 25px rgba(0,0,0,0.5);
-            transition: all 0.1s;
+            transition: all 0.1s ease-out;
+            cursor: pointer;
         }
         .buzzer-btn:active, .buzzer-btn.active-press {
-            transform: translateY(15px);
-            box-shadow: 0 0px 0 #990000, 0 5px 10px rgba(0,0,0,0.5);
+            transform: translateY(12px);
+            box-shadow: 0 3px 0 #990000, 0 5px 10px rgba(0,0,0,0.5);
         }
         .buzzer-btn.disabled {
-            background: radial-gradient(circle, #555 0%, #333 100%);
-            box-shadow: 0 15px 0 #222;
+            background: radial-gradient(circle, #475569 0%, #1e293b 100%);
+            box-shadow: 0 10px 0 #0f172a;
             cursor: not-allowed;
             transform: none;
+            opacity: 0.6;
         }
 
         @keyframes pulse-glow {
             0% { transform: scale(1); filter: drop-shadow(0 0 10px var(--neon-blue)); }
-            50% { transform: scale(1.1); filter: drop-shadow(0 0 30px var(--neon-pink)); }
+            50% { transform: scale(1.05); filter: drop-shadow(0 0 25px var(--neon-pink)); }
             100% { transform: scale(1); filter: drop-shadow(0 0 10px var(--neon-blue)); }
         }
-        .animate-pulse-glow { animation: pulse-glow 2s infinite ease-in-out; }
+        .animate-pulse-glow { animation: pulse-glow 2.5s infinite ease-in-out; }
 
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: var(--dark-bg); }
         ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+
+        /* Toast notification */
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-col;
+            gap: 10px;
+            pointer-events: none;
+        }
+        .toast {
+            background: #1e293b;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 12px;
+            border-left: 4px solid var(--neon-blue);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            font-size: 14px;
+            font-weight: 600;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.3s ease;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
     </style>
 </head>
-<body class="h-screen w-screen flex flex-col items-center justify-center relative">
+<body class="h-screen w-screen flex flex-col items-center justify-center relative bg-slate-900 text-white select-none">
+
+    <!-- Toast Notifications Container -->
+    <div id="toast-container"></div>
 
     <!-- ROLE SELECT SCREEN -->
-    <div id="screen-role-select" class="w-full h-full flex flex-col items-center justify-between p-8 z-10">
-        <div class="text-center mt-6">
-            <h1 class="text-4xl md:text-6xl gameshow-font neon-text-blue mb-2">
-                <i class="fa-solid fa-heart-pulse mr-4 text-pink-500"></i>ATA Gameshow
+    <div id="screen-role-select" class="w-full h-full flex flex-col items-center justify-between p-6 z-10">
+        <div class="text-center mt-4">
+            <h1 class="text-4xl md:text-6xl gameshow-font neon-text-blue mb-2 flex items-center justify-center gap-3">
+                <i class="fa-solid fa-heart-pulse text-pink-500"></i> ATA Gameshow
             </h1>
-            <p class="text-xl text-gray-300">Willkommen zur Welcome Party!</p>
+            <p class="text-lg md:text-xl text-gray-300 font-semibold">Willkommen zur Welcome Party!</p>
         </div>
         
         <!-- Big Player Button in Center -->
         <div class="w-full max-w-md flex flex-col items-center justify-center my-auto">
-            <button onclick="selectRole('player')" class="w-full bg-pink-600 border-4 border-pink-400 rounded-3xl p-10 hover:bg-pink-500 transition flex flex-col items-center justify-center gap-6 shadow-[0_0_40px_rgba(236,72,153,0.6)] group transform hover:scale-105">
-                <i class="fa-solid fa-mobile-screen-button text-7xl text-white group-hover:animate-bounce"></i>
-                <span class="gameshow-font text-3xl font-black text-white tracking-wider">ALS SPIELER BEITRETEN</span>
+            <button onclick="selectRole('player')" class="w-full bg-pink-600 hover:bg-pink-500 border-4 border-pink-400 rounded-3xl p-8 hover:scale-105 active:scale-95 transition flex flex-col items-center justify-center gap-4 shadow-[0_0_40px_rgba(236,72,153,0.5)] group">
+                <i class="fa-solid fa-mobile-screen-button text-6xl text-white group-hover:animate-bounce"></i>
+                <span class="gameshow-font text-2xl md:text-3xl font-black text-white tracking-wider">ALS SPIELER BEITRETEN</span>
             </button>
         </div>
 
         <!-- Tiny Host / Admin Controls at Bottom -->
-        <div class="flex gap-4 opacity-40 hover:opacity-100 transition duration-300 mb-2">
-            <button onclick="selectRole('live')" class="bg-gray-800 border border-cyan-500/50 rounded-xl px-4 py-2 text-xs text-cyan-400 font-bold hover:bg-gray-700">
+        <div class="flex flex-wrap justify-center gap-4 opacity-70 hover:opacity-100 transition duration-300 mb-2">
+            <button onclick="selectRole('live')" class="bg-gray-800 border border-cyan-500/50 rounded-xl px-5 py-2.5 text-xs text-cyan-400 font-bold hover:bg-cyan-950 transition">
                 <i class="fa-solid fa-desktop mr-1"></i> Live Beamer
             </button>
-            <button onclick="selectRole('admin')" class="bg-gray-800 border border-purple-500/50 rounded-xl px-4 py-2 text-xs text-purple-400 font-bold hover:bg-gray-700">
+            <button onclick="selectRole('admin')" class="bg-gray-800 border border-purple-500/50 rounded-xl px-5 py-2.5 text-xs text-purple-400 font-bold hover:bg-purple-950 transition">
                 <i class="fa-solid fa-sliders mr-1"></i> Admin Panel
             </button>
         </div>
@@ -113,54 +153,60 @@
 
     <!-- PLAYER LOGIN -->
     <div id="screen-player-login" class="hidden w-full h-full flex-col items-center justify-center p-6 z-10">
-        <div class="bg-gray-800 p-8 rounded-3xl border-2 border-pink-500 shadow-[0_0_20px_rgba(236,72,153,0.3)] max-w-md w-full flex flex-col gap-6">
-            <h2 class="text-3xl gameshow-font text-center text-pink-500"><i class="fa-solid fa-user-nurse mr-2"></i>Anmeldung</h2>
+        <div class="bg-gray-800 p-8 rounded-3xl border-2 border-pink-500 shadow-[0_0_30px_rgba(236,72,153,0.3)] max-w-md w-full flex flex-col gap-6">
+            <h2 class="text-3xl gameshow-font text-center text-pink-500 flex items-center justify-center gap-3">
+                <i class="fa-solid fa-user-nurse"></i> Anmeldung
+            </h2>
             <div class="flex flex-col gap-2">
-                <label class="text-gray-300 font-bold">Dein Name</label>
-                <input type="text" id="player-name-input" class="w-full bg-gray-900 border border-gray-600 rounded-xl p-4 text-xl text-white focus:outline-none focus:border-pink-500" placeholder="Z.B. Dr. House">
+                <label for="player-name-input" class="text-gray-300 font-bold text-sm uppercase tracking-wider">Dein Name</label>
+                <input type="text" id="player-name-input" class="w-full bg-gray-900 border border-gray-600 rounded-xl p-4 text-xl text-white focus:outline-none focus:border-pink-500 transition" placeholder="Z.B. Dr. House">
             </div>
-            <div class="flex flex-col gap-2 mt-2">
-                <label class="text-gray-300 font-bold">Wähle dein Team</label>
+            <div class="flex flex-col gap-2">
+                <label class="text-gray-300 font-bold text-sm uppercase tracking-wider">Wähle dein Team</label>
                 <div class="grid grid-cols-2 gap-4">
                     <label class="cursor-pointer">
                         <input type="radio" name="team-select" value="ATA 25-28" class="peer hidden" checked>
-                        <div class="rounded-xl border-2 border-gray-600 p-4 text-center peer-checked:border-blue-500 peer-checked:bg-blue-500/20 transition">
-                            <div class="font-bold text-blue-400">ATA 25-28</div>
-                            <div class="text-xs text-gray-400">Mittelkurs</div>
+                        <div class="rounded-xl border-2 border-gray-600 p-4 text-center peer-checked:border-blue-500 peer-checked:bg-blue-500/20 peer-checked:text-blue-400 transition">
+                            <div class="font-bold text-lg">ATA 25-28</div>
+                            <div class="text-xs text-gray-400 mt-1">Mittelkurs</div>
                         </div>
                     </label>
                     <label class="cursor-pointer">
                         <input type="radio" name="team-select" value="ATA 26-29" class="peer hidden">
-                        <div class="rounded-xl border-2 border-gray-600 p-4 text-center peer-checked:border-green-500 peer-checked:bg-green-500/20 transition">
-                            <div class="font-bold text-green-400">ATA 26-29</div>
-                            <div class="text-xs text-gray-400">Unterkurs</div>
+                        <div class="rounded-xl border-2 border-gray-600 p-4 text-center peer-checked:border-green-500 peer-checked:bg-green-500/20 peer-checked:text-green-400 transition">
+                            <div class="font-bold text-lg">ATA 26-29</div>
+                            <div class="text-xs text-gray-400 mt-1">Unterkurs</div>
                         </div>
                     </label>
                 </div>
             </div>
-            <button onclick="joinGame()" id="join-btn" class="w-full mt-4 bg-pink-600 hover:bg-pink-500 text-white font-bold py-4 rounded-xl text-xl transition">
-                Beitreten
+            <button onclick="joinGame()" id="join-btn" class="w-full mt-2 bg-pink-600 hover:bg-pink-500 active:scale-95 text-white font-bold py-4 rounded-xl text-xl transition shadow-lg">
+                Spiel Beitreten
             </button>
-            <div id="player-error" class="hidden w-full bg-red-900 border border-red-500 p-4 rounded-xl text-white mt-4 text-sm font-mono whitespace-pre-wrap"></div>
+            <div id="player-error" class="hidden w-full bg-red-900/80 border border-red-500 p-4 rounded-xl text-white text-sm font-mono whitespace-pre-wrap"></div>
         </div>
     </div>
 
     <!-- PLAYER MAIN -->
     <div id="screen-player-main" class="hidden w-full h-full flex-col p-4 z-10 relative">
-        <div class="absolute top-4 left-4 right-4 flex justify-between items-center bg-gray-800/80 p-4 rounded-2xl border border-gray-700 backdrop-blur">
+        <div class="absolute top-4 left-4 right-4 flex justify-between items-center bg-gray-800/90 p-4 rounded-2xl border border-gray-700 backdrop-blur shadow-lg">
             <div class="flex flex-col">
                 <span id="player-display-name" class="text-xl font-bold text-white">Name</span>
-                <span id="player-display-team" class="text-sm font-bold">Team</span>
+                <span id="player-display-team" class="text-xs font-bold uppercase tracking-wider">Team</span>
             </div>
             <div class="text-right flex flex-col items-end">
-                <span class="text-xs text-gray-400 uppercase tracking-widest">Team Punkte</span>
+                <span class="text-[10px] text-gray-400 uppercase tracking-widest">Team Punkte</span>
                 <span id="player-display-score" class="text-2xl font-black gameshow-font text-white">0</span>
             </div>
         </div>
+
+        <button onclick="logoutPlayer()" class="absolute bottom-4 left-4 text-xs text-gray-400 hover:text-white bg-gray-800/80 px-3 py-2 rounded-lg border border-gray-700">
+            <i class="fa-solid fa-arrow-right-from-bracket mr-1"></i> Team/Name ändern
+        </button>
         
-        <div class="flex-1 flex flex-col items-center justify-center mt-20 relative">
-            <div id="buzzer-status-text" class="absolute top-0 text-2xl md:text-3xl font-black text-center w-full uppercase tracking-widest text-gray-500 px-4">
-                Warten...
+        <div class="flex-1 flex flex-col items-center justify-center mt-16 relative">
+            <div id="buzzer-status-text" class="absolute top-4 text-2xl md:text-3xl font-black text-center w-full uppercase tracking-widest text-gray-500 px-4">
+                Warten auf Freigabe...
             </div>
             <button id="main-buzzer" onclick="hitBuzzer()" class="buzzer-btn disabled w-64 h-64 md:w-80 md:h-80 rounded-full flex items-center justify-center text-5xl md:text-6xl font-black text-white/90 select-none outline-none mt-12">
                 BUZZ!
@@ -169,103 +215,117 @@
     </div>
 
     <!-- LIVE BEAMER VIEW -->
-    <div id="screen-live-view" class="hidden w-full h-full flex-col z-10 relative bg-black">
+    <div id="screen-live-view" class="hidden w-full h-full flex-col z-10 relative bg-black overflow-hidden">
         <div class="w-full bg-gray-900/90 border-b border-gray-800 p-6 flex justify-between items-center h-[12%] shadow-2xl relative z-30">
             <div class="flex items-center gap-4">
                 <div class="flex flex-col items-start">
-                    <span class="text-gray-400 font-bold uppercase tracking-widest text-sm">Team Mittelkurs</span>
-                    <span class="text-2xl font-black text-blue-400">ATA 25-28</span>
+                    <span class="text-gray-400 font-bold uppercase tracking-widest text-xs">Team Mittelkurs</span>
+                    <span class="text-xl md:text-2xl font-black text-blue-400">ATA 25-28</span>
                 </div>
-                <div class="bg-blue-900/50 border-2 border-blue-500 rounded-xl px-6 py-2">
-                    <span id="live-score-team1" class="text-4xl gameshow-font font-black text-white">0</span>
+                <div class="bg-blue-900/50 border-2 border-blue-500 rounded-xl px-6 py-2 shadow-[0_0_15px_rgba(59,130,246,0.3)]">
+                    <span id="live-score-team1" class="text-3xl md:text-4xl gameshow-font font-black text-white">0</span>
                 </div>
             </div>
-            <h2 id="live-game-title" class="text-3xl md:text-4xl gameshow-font text-white text-center absolute left-1/2 transform -translate-x-1/2">Lobby</h2>
+            <h2 id="live-game-title" class="text-2xl md:text-4xl gameshow-font text-white text-center absolute left-1/2 transform -translate-x-1/2 neon-text-blue">Lobby</h2>
             <div class="flex items-center gap-4">
-                <div class="bg-green-900/50 border-2 border-green-500 rounded-xl px-6 py-2">
-                    <span id="live-score-team2" class="text-4xl gameshow-font font-black text-white">0</span>
+                <div class="bg-green-900/50 border-2 border-green-500 rounded-xl px-6 py-2 shadow-[0_0_15px_rgba(34,197,94,0.3)]">
+                    <span id="live-score-team2" class="text-3xl md:text-4xl gameshow-font font-black text-white">0</span>
                 </div>
                 <div class="flex flex-col items-end">
-                    <span class="text-gray-400 font-bold uppercase tracking-widest text-sm">Team Unterkurs</span>
-                    <span class="text-2xl font-black text-green-400">ATA 26-29</span>
+                    <span class="text-gray-400 font-bold uppercase tracking-widest text-xs">Team Unterkurs</span>
+                    <span class="text-xl md:text-2xl font-black text-green-400">ATA 26-29</span>
                 </div>
             </div>
         </div>
 
-        <div class="w-full h-[88%] relative flex items-center justify-center overflow-hidden">
+        <div class="w-full h-[88%] relative flex items-center justify-center overflow-hidden p-6">
             
-            <!-- OVERLAY: Queue Winner / Active Player -->
+            <!-- OVERLAY: Active Buzzer Player -->
             <div id="live-winner-overlay" class="absolute inset-0 bg-black/95 z-50 hidden flex-col items-center justify-center backdrop-blur-md transition-all">
-                <div class="animate-bounce mb-8">
-                    <i class="fa-solid fa-microphone-lines text-7xl text-yellow-500"></i>
+                <div class="animate-bounce mb-6">
+                    <i class="fa-solid fa-microphone-lines text-7xl text-yellow-400 drop-shadow-[0_0_20px_rgba(250,204,21,0.8)]"></i>
                 </div>
-                <h3 class="text-4xl text-gray-300 mb-2 uppercase tracking-widest">Am Buzzer:</h3>
-                <div id="live-winner-name" class="text-[6rem] leading-none gameshow-font text-white font-black text-center px-4 mb-4 drop-shadow-[0_0_30px_rgba(255,255,255,0.5)]">NAME</div>
-                <div id="live-winner-team" class="text-4xl font-bold px-8 py-3 rounded-2xl mb-6">TEAM</div>
-                <div class="text-2xl text-gray-400 font-mono bg-gray-800 px-6 py-3 rounded-lg border border-gray-600">
-                    <i class="fa-solid fa-stopwatch mr-3"></i><span id="live-winner-time">0.00</span>s
+                <h3 class="text-3xl text-gray-300 mb-2 uppercase tracking-widest font-semibold">Am Buzzer:</h3>
+                <div id="live-winner-name" class="text-6xl md:text-8xl leading-none gameshow-font text-white font-black text-center px-4 mb-4 drop-shadow-[0_0_30px_rgba(255,255,255,0.6)]">NAME</div>
+                <div id="live-winner-team" class="text-3xl font-bold px-8 py-3 rounded-2xl mb-4">TEAM</div>
+                <div class="text-2xl text-gray-300 font-mono bg-gray-800 px-6 py-3 rounded-xl border border-gray-600">
+                    <i class="fa-solid fa-stopwatch mr-3 text-pink-500"></i>Reaktionszeit: <span id="live-winner-time" class="text-white font-bold">0.00</span>s
                 </div>
-                <div id="live-queue-indicator" class="mt-6 text-xl text-yellow-400 font-bold hidden"></div>
+                <div id="live-queue-indicator" class="mt-6 text-xl text-yellow-400 font-bold hidden bg-yellow-950/80 border border-yellow-500/50 px-6 py-2 rounded-full"></div>
             </div>
 
             <!-- VIEWS -->
             <div id="view-lobby" class="w-full h-full flex flex-col items-center justify-center text-center">
-                <h2 class="text-5xl mb-8 text-white font-bold">QR-Code scannen & mitmachen!</h2>
-                <div class="bg-white p-6 rounded-3xl mb-8 shadow-[0_0_50px_rgba(255,255,255,0.2)]">
+                <h2 class="text-4xl md:text-5xl mb-6 text-white font-bold gameshow-font">QR-Code scannen & mitmachen!</h2>
+                <div class="bg-white p-6 rounded-3xl mb-6 shadow-[0_0_50px_rgba(255,255,255,0.2)]">
                     <div id="qrcode" class="w-64 h-64 flex items-center justify-center"></div>
                 </div>
-                <p class="text-2xl text-gray-400 font-mono mb-4">https://grind-app.de/ata-party.html</p>
-                <button onclick="toggleFullscreen()" class="absolute bottom-4 right-4 bg-gray-800/50 hover:bg-gray-700 px-4 py-2 rounded text-sm text-gray-400"><i class="fa-solid fa-expand"></i> Vollbild</button>
+                <p id="live-app-url-display" class="text-xl md:text-2xl text-cyan-400 font-mono mb-4 bg-gray-900/80 px-6 py-2 rounded-xl border border-cyan-500/30">
+                    https://...
+                </p>
+                <button onclick="toggleFullscreen()" class="absolute bottom-4 right-4 bg-gray-800/80 hover:bg-gray-700 px-4 py-2 rounded-xl text-xs text-gray-300 border border-gray-600">
+                    <i class="fa-solid fa-expand mr-1"></i> Vollbild Toggle
+                </button>
             </div>
 
             <div id="view-game1" class="hidden w-full h-full flex flex-col items-center justify-center">
-                <i class="fa-solid fa-box-open text-[12rem] text-cyan-500 animate-pulse-glow mb-12"></i>
-                <h2 class="text-[5rem] gameshow-font text-white text-center uppercase tracking-widest drop-shadow-2xl">Blind Ertasten!</h2>
+                <i class="fa-solid fa-box-open text-[10rem] text-cyan-400 animate-pulse-glow mb-8"></i>
+                <h2 class="text-5xl md:text-7xl gameshow-font text-white text-center uppercase tracking-widest drop-shadow-2xl">Blind Ertasten!</h2>
             </div>
 
-            <div id="view-game2" class="hidden w-full h-full flex flex-col items-center justify-center px-12 text-center">
-                <i class="fa-solid fa-circle-question text-6xl text-pink-500 mb-12 opacity-50"></i>
-                <h2 id="display-question" class="text-5xl md:text-7xl font-bold leading-tight text-white max-w-6xl">...</h2>
+            <div id="view-game2" class="hidden w-full h-full flex flex-col items-center justify-center px-8 text-center">
+                <i class="fa-solid fa-circle-question text-6xl text-pink-500 mb-8 opacity-60"></i>
+                <h2 id="display-question" class="text-4xl md:text-6xl font-bold leading-relaxed text-white max-w-5xl bg-gray-900/60 p-8 rounded-3xl border border-gray-700/80 shadow-2xl">
+                    ...
+                </h2>
             </div>
 
-            <div id="view-game-zoom" class="hidden w-full h-full flex flex-col items-center justify-center p-12">
+            <div id="view-game-zoom" class="hidden w-full h-full flex flex-col items-center justify-center p-4">
                 <div class="zoom-image-container">
                     <img id="zoom-img-element" src="" class="zoom-image zoom-hidden" alt="Zoom Object">
                 </div>
             </div>
 
-            <!-- Viggo Leaderboard -->
-            <div id="view-game4" class="hidden w-full h-full flex flex-col items-center justify-start pt-12">
-                <div class="flex items-center justify-center gap-8 mb-8">
-                    <i class="fa-solid fa-syringe text-[6rem] text-green-500 animate-bounce"></i>
-                    <div id="stopwatch-display" class="text-[8rem] gameshow-font neon-text-green tabular-nums leading-none">00.0</div>
+            <!-- Viggo Leaderboard View -->
+            <div id="view-game4" class="hidden w-full h-full flex flex-col items-center justify-start pt-6">
+                <div class="flex items-center justify-center gap-8 mb-6">
+                    <i class="fa-solid fa-syringe text-6xl text-green-500 animate-bounce"></i>
+                    <div id="stopwatch-display" class="text-7xl md:text-8xl gameshow-font neon-text-green tabular-nums leading-none">00.0s</div>
                 </div>
                 
-                <h2 class="text-4xl text-white font-bold mb-8">Wer hat getrunken? (Buzzern!)</h2>
-                <div class="w-full max-w-6xl grid grid-cols-2 gap-12 px-8">
+                <h2 class="text-3xl text-white font-bold mb-6 uppercase tracking-wider">Wer hat getrunken? (Buzzern!)</h2>
+                <div class="w-full max-w-5xl grid grid-cols-2 gap-8 px-4">
                     <div class="bg-blue-900/30 border border-blue-500/50 rounded-2xl p-6">
-                        <h3 class="text-2xl font-bold text-blue-400 mb-4 border-b border-blue-500/30 pb-2">ATA 25-28</h3>
-                        <div id="viggo-list-team1" class="flex flex-col gap-2"></div>
+                        <h3 class="text-xl font-bold text-blue-400 mb-4 border-b border-blue-500/30 pb-2 flex justify-between">
+                            <span>ATA 25-28</span>
+                            <span class="text-xs font-normal text-gray-400">Mittelkurs</span>
+                        </h3>
+                        <div id="viggo-list-team1" class="flex flex-col gap-2 max-h-60 overflow-y-auto pr-1"></div>
                     </div>
                     <div class="bg-green-900/30 border border-green-500/50 rounded-2xl p-6">
-                        <h3 class="text-2xl font-bold text-green-400 mb-4 border-b border-green-500/30 pb-2">ATA 26-29</h3>
-                        <div id="viggo-list-team2" class="flex flex-col gap-2"></div>
+                        <h3 class="text-xl font-bold text-green-400 mb-4 border-b border-green-500/30 pb-2 flex justify-between">
+                            <span>ATA 26-29</span>
+                            <span class="text-xs font-normal text-gray-400">Unterkurs</span>
+                        </h3>
+                        <div id="viggo-list-team2" class="flex flex-col gap-2 max-h-60 overflow-y-auto pr-1"></div>
                     </div>
                 </div>
                 
                 <div id="viggo-result-overlay" class="absolute inset-0 bg-black/95 z-40 hidden flex-col items-center justify-center backdrop-blur-md">
-                    <h2 class="text-6xl font-bold text-yellow-500 mb-8"><i class="fa-solid fa-trophy mr-4"></i>Auswertung</h2>
-                    <div class="flex gap-16 text-center">
-                        <div>
-                            <div class="text-2xl text-blue-400 font-bold mb-2">Ø ATA 25-28</div>
-                            <div id="viggo-avg-team1" class="text-6xl font-black text-white">0.0s</div>
+                    <h2 class="text-5xl font-bold text-yellow-400 mb-8 flex items-center gap-4">
+                        <i class="fa-solid fa-trophy text-yellow-400"></i> Auswertung
+                    </h2>
+                    <div class="flex gap-12 text-center">
+                        <div class="bg-blue-950/80 border border-blue-500/50 p-6 rounded-2xl min-w-[200px]">
+                            <div class="text-xl text-blue-400 font-bold mb-2">Ø ATA 25-28</div>
+                            <div id="viggo-avg-team1" class="text-5xl font-black text-white">0.0s</div>
                         </div>
-                        <div>
-                            <div class="text-2xl text-green-400 font-bold mb-2">Ø ATA 26-29</div>
-                            <div id="viggo-avg-team2" class="text-6xl font-black text-white">0.0s</div>
+                        <div class="bg-green-950/80 border border-green-500/50 p-6 rounded-2xl min-w-[200px]">
+                            <div class="text-xl text-green-400 font-bold mb-2">Ø ATA 26-29</div>
+                            <div id="viggo-avg-team2" class="text-5xl font-black text-white">0.0s</div>
                         </div>
                     </div>
-                    <div id="viggo-winner-text" class="mt-12 text-5xl font-black px-8 py-4 rounded-xl"></div>
+                    <div id="viggo-winner-text" class="mt-10 text-4xl font-black px-8 py-4 rounded-2xl border"></div>
                 </div>
             </div>
 
@@ -274,84 +334,170 @@
 
     <!-- ADMIN VIEW -->
     <div id="screen-admin-view" class="hidden w-full h-full bg-gray-900 flex-col z-10 relative">
-        <div class="w-full bg-purple-900/40 border-b border-purple-500/30 p-4 flex justify-between items-center shadow-lg">
-            <h2 class="text-2xl font-bold text-purple-400"><i class="fa-solid fa-sliders mr-2"></i>Admin Dashboard</h2>
+        <div class="w-full bg-purple-950/80 border-b border-purple-500/30 p-4 flex justify-between items-center shadow-lg">
+            <h2 class="text-xl font-bold text-purple-400 flex items-center gap-2">
+                <i class="fa-solid fa-sliders"></i> Admin Dashboard
+            </h2>
+            
             <div class="flex items-center gap-6">
-                <span class="text-blue-400 font-bold">ATA 25-28: <span id="admin-score-team1" class="text-white text-xl">0</span></span>
-                <span class="text-green-400 font-bold">ATA 26-29: <span id="admin-score-team2" class="text-white text-xl">0</span></span>
+                <!-- Team 1 Score Controls -->
+                <div class="flex items-center gap-2 bg-gray-800/80 px-3 py-1.5 rounded-xl border border-blue-500/40">
+                    <span class="text-blue-400 font-bold text-sm">ATA 25-28:</span>
+                    <span id="admin-score-team1" class="text-white text-xl font-bold min-w-[24px] text-center">0</span>
+                    <button onclick="adjustScore('ATA 25-28', 1)" class="bg-blue-600 hover:bg-blue-500 text-white w-7 h-7 rounded-lg font-bold text-sm flex items-center justify-center">+</button>
+                    <button onclick="adjustScore('ATA 25-28', -1)" class="bg-gray-700 hover:bg-gray-600 text-white w-7 h-7 rounded-lg font-bold text-sm flex items-center justify-center">-</button>
+                </div>
+
+                <!-- Team 2 Score Controls -->
+                <div class="flex items-center gap-2 bg-gray-800/80 px-3 py-1.5 rounded-xl border border-green-500/40">
+                    <span class="text-green-400 font-bold text-sm">ATA 26-29:</span>
+                    <span id="admin-score-team2" class="text-white text-xl font-bold min-w-[24px] text-center">0</span>
+                    <button onclick="adjustScore('ATA 26-29', 1)" class="bg-green-600 hover:bg-green-500 text-white w-7 h-7 rounded-lg font-bold text-sm flex items-center justify-center">+</button>
+                    <button onclick="adjustScore('ATA 26-29', -1)" class="bg-gray-700 hover:bg-gray-600 text-white w-7 h-7 rounded-lg font-bold text-sm flex items-center justify-center">-</button>
+                </div>
+
+                <div id="net-status-badge" class="text-xs px-2.5 py-1 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-500/40">
+                    Connected
+                </div>
             </div>
         </div>
 
         <div class="flex flex-1 overflow-hidden">
-            <div class="w-64 bg-gray-800 border-r border-gray-700 flex flex-col p-4 gap-2 overflow-y-auto">
-                <h3 class="text-gray-400 uppercase text-xs font-bold mb-2">Szene wechseln</h3>
-                <button onclick="setGameState('lobby')" class="w-full text-left px-4 py-3 rounded-lg bg-gray-700 hover:bg-purple-600 transition font-bold"><i class="fa-solid fa-house w-6"></i> 1. Lobby</button>
-                <button onclick="setGameState('game1')" class="w-full text-left px-4 py-3 rounded-lg bg-gray-700 hover:bg-purple-600 transition font-bold"><i class="fa-solid fa-box w-6"></i> 2. Blind Ertasten</button>
-                <button onclick="setGameState('game2')" class="w-full text-left px-4 py-3 rounded-lg bg-gray-700 hover:bg-purple-600 transition font-bold"><i class="fa-solid fa-question w-6"></i> 3. Quiz</button>
-                <button onclick="setGameState('game3')" class="w-full text-left px-4 py-3 rounded-lg bg-gray-700 hover:bg-purple-600 transition font-bold"><i class="fa-solid fa-magnifying-glass w-6"></i> 4. Gegenstand Zoom</button>
-                <button onclick="setGameState('game4')" class="w-full text-left px-4 py-3 rounded-lg bg-gray-700 hover:bg-purple-600 transition font-bold"><i class="fa-solid fa-syringe w-6"></i> 5. Viggo-Trinken</button>
-                <button onclick="setGameState('game5')" class="w-full text-left px-4 py-3 rounded-lg bg-gray-700 hover:bg-purple-600 transition font-bold"><i class="fa-solid fa-user-tie w-6"></i> 6. Lehrer Zoom</button>
+            <!-- Sidebar Navigation -->
+            <div class="w-64 bg-gray-800/90 border-r border-gray-700 flex flex-col p-4 gap-2 overflow-y-auto">
+                <h3 class="text-gray-400 uppercase text-[10px] font-bold tracking-wider mb-2">Szene auf Leinwand</h3>
+                <button id="btn-scene-lobby" onclick="setGameState('lobby')" class="w-full text-left px-4 py-3 rounded-xl bg-gray-700 hover:bg-purple-600 transition font-bold text-sm flex items-center gap-3">
+                    <i class="fa-solid fa-house text-purple-400 w-5"></i> 1. Lobby & QR
+                </button>
+                <button id="btn-scene-game1" onclick="setGameState('game1')" class="w-full text-left px-4 py-3 rounded-xl bg-gray-700 hover:bg-purple-600 transition font-bold text-sm flex items-center gap-3">
+                    <i class="fa-solid fa-box text-purple-400 w-5"></i> 2. Blind Ertasten
+                </button>
+                <button id="btn-scene-game2" onclick="setGameState('game2')" class="w-full text-left px-4 py-3 rounded-xl bg-gray-700 hover:bg-purple-600 transition font-bold text-sm flex items-center gap-3">
+                    <i class="fa-solid fa-question text-purple-400 w-5"></i> 3. Quiz Question
+                </button>
+                <button id="btn-scene-game3" onclick="setGameState('game3')" class="w-full text-left px-4 py-3 rounded-xl bg-gray-700 hover:bg-purple-600 transition font-bold text-sm flex items-center gap-3">
+                    <i class="fa-solid fa-magnifying-glass text-purple-400 w-5"></i> 4. Gegenstand Zoom
+                </button>
+                <button id="btn-scene-game4" onclick="setGameState('game4')" class="w-full text-left px-4 py-3 rounded-xl bg-gray-700 hover:bg-purple-600 transition font-bold text-sm flex items-center gap-3">
+                    <i class="fa-solid fa-syringe text-purple-400 w-5"></i> 5. Viggo-Trinken
+                </button>
+                <button id="btn-scene-game5" onclick="setGameState('game5')" class="w-full text-left px-4 py-3 rounded-xl bg-gray-700 hover:bg-purple-600 transition font-bold text-sm flex items-center gap-3">
+                    <i class="fa-solid fa-user-tie text-purple-400 w-5"></i> 6. Lehrer Zoom
+                </button>
+
+                <div class="mt-auto pt-4 border-t border-gray-700">
+                    <button onclick="testAudio()" class="w-full text-xs text-gray-400 hover:text-white bg-gray-700/50 py-2 rounded-lg border border-gray-600">
+                        <i class="fa-solid fa-volume-high mr-1"></i> Sound Test
+                    </button>
+                </div>
             </div>
 
+            <!-- Admin Controls Content Area -->
             <div class="flex-1 p-6 flex flex-col gap-6 overflow-y-auto">
                 
-                <div id="admin-panel-buzzer" class="bg-gray-800 rounded-2xl border border-gray-600 p-6 shadow-xl relative">
-                    <h3 class="text-xl font-bold text-white mb-4"><i class="fa-solid fa-hand-pointer mr-2"></i>Buzzer Steuerung & Warteschlange</h3>
+                <!-- BUZZER CONTROL PANEL -->
+                <div id="admin-panel-buzzer" class="bg-gray-800 rounded-2xl border border-gray-700 p-6 shadow-xl relative">
+                    <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-hand-pointer text-pink-500"></i> Buzzer Steuerung & Warteschlange
+                    </h3>
                     
                     <div id="admin-buzzer-controls" class="flex items-center gap-4">
-                        <button onclick="activateBuzzer()" id="btn-unlock-buzzer" class="flex-1 bg-green-600 hover:bg-green-500 text-white font-bold py-4 rounded-xl text-xl shadow-lg transition"><i class="fa-solid fa-unlock mr-2"></i>Buzzer Freigeben</button>
-                        <button onclick="resetBuzzer()" class="flex-1 bg-red-600 hover:bg-red-500 text-white font-bold py-4 rounded-xl text-xl shadow-lg transition"><i class="fa-solid fa-lock mr-2"></i>Sperren / Reset</button>
+                        <button onclick="activateBuzzer()" id="btn-unlock-buzzer" class="flex-1 bg-green-600 hover:bg-green-500 active:scale-95 text-white font-bold py-4 rounded-xl text-lg shadow-lg transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-unlock"></i> Buzzer Freigeben
+                        </button>
+                        <button onclick="resetBuzzer()" class="flex-1 bg-red-600 hover:bg-red-500 active:scale-95 text-white font-bold py-4 rounded-xl text-lg shadow-lg transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-lock"></i> Sperren / Reset
+                        </button>
                     </div>
                     
-                    <div id="admin-decision-panel" class="hidden mt-4 bg-gray-900 border-2 border-yellow-500 rounded-xl p-6 flex-col items-center">
-                        <div class="text-yellow-500 font-black tracking-widest uppercase mb-2 animate-pulse">AM BUZZER (1. PLATZ)</div>
+                    <div id="admin-decision-panel" class="hidden mt-4 bg-gray-900 border-2 border-yellow-500 rounded-2xl p-6 flex-col items-center">
+                        <div class="text-yellow-400 font-black tracking-widest uppercase text-xs mb-2 animate-pulse">AM BUZZER (1. PLATZ)</div>
                         <div class="flex items-center gap-4 mb-2">
-                            <span id="admin-winner-name" class="text-4xl font-bold text-white">Name</span>
-                            <span id="admin-winner-team" class="text-xl px-3 py-1 rounded bg-gray-700 text-white font-bold">Team</span>
+                            <span id="admin-winner-name" class="text-3xl font-bold text-white">Name</span>
+                            <span id="admin-winner-team" class="text-sm px-3 py-1 rounded-lg bg-gray-700 text-white font-bold">Team</span>
                         </div>
-                        <div class="text-gray-400 font-mono mb-4">Reaktionszeit: <span id="admin-winner-time" class="text-white font-bold">0.00</span>s</div>
-                        <div id="admin-queue-count" class="text-sm text-yellow-400 font-bold mb-6">Warteschlange leer</div>
+                        <div class="text-gray-400 font-mono text-sm mb-4">
+                            Reaktionszeit: <span id="admin-winner-time" class="text-white font-bold">0.00</span>s
+                        </div>
+                        <div id="admin-queue-count" class="text-xs text-yellow-400 font-bold mb-6">Warteschlange leer</div>
                         
                         <div class="flex w-full gap-4">
-                            <button onclick="approveAnswer()" class="flex-1 bg-green-500 hover:bg-green-400 text-black font-black py-4 rounded-xl text-xl shadow-[0_0_15px_rgba(34,197,94,0.5)]">
-                                <i class="fa-solid fa-check mr-2"></i> RICHTIG (+1 Pkt & Reset)
+                            <button onclick="approveAnswer()" class="flex-1 bg-green-500 hover:bg-green-400 text-black font-black py-4 rounded-xl text-lg shadow-[0_0_15px_rgba(34,197,94,0.4)] transition">
+                                <i class="fa-solid fa-check mr-2"></i> RICHTIG (+1 Pkt)
                             </button>
-                            <button onclick="denyAnswer()" class="flex-1 bg-red-500 hover:bg-red-400 text-white font-black py-4 rounded-xl text-xl shadow-[0_0_15px_rgba(239,68,68,0.5)]">
-                                <i class="fa-solid fa-xmark mr-2"></i> FALSCH (Nächster rückt vor)
+                            <button onclick="denyAnswer()" class="flex-1 bg-red-500 hover:bg-red-400 text-white font-black py-4 rounded-xl text-lg shadow-[0_0_15px_rgba(239,68,68,0.4)] transition">
+                                <i class="fa-solid fa-xmark mr-2"></i> FALSCH (Nächster)
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <div id="admin-panel-viggo" class="bg-gray-800 rounded-2xl border border-gray-600 p-6 shadow-xl hidden">
-                    <h3 class="text-xl font-bold text-white mb-4"><i class="fa-solid fa-syringe mr-2"></i>Viggo-Trinken Steuerung</h3>
+                <!-- VIGGO CONTROL PANEL -->
+                <div id="admin-panel-viggo" class="bg-gray-800 rounded-2xl border border-gray-700 p-6 shadow-xl hidden">
+                    <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-syringe text-green-500"></i> Viggo-Trinken Steuerung
+                    </h3>
                     <div class="flex gap-4 mb-4">
-                        <button onclick="startStopwatch()" class="flex-1 bg-green-600 hover:bg-green-500 py-4 rounded-xl font-bold text-xl"><i class="fa-solid fa-play mr-2"></i>Uhr Starten (Buzzer frei)</button>
-                        <button onclick="stopStopwatch()" class="flex-1 bg-yellow-600 hover:bg-yellow-500 py-4 rounded-xl font-bold text-xl text-black"><i class="fa-solid fa-stop mr-2"></i>Stop</button>
-                        <button onclick="resetStopwatch()" class="flex-1 bg-red-600 hover:bg-red-500 py-4 rounded-xl font-bold text-xl"><i class="fa-solid fa-rotate-left mr-2"></i>Reset</button>
+                        <button onclick="startStopwatch()" class="flex-1 bg-green-600 hover:bg-green-500 py-4 rounded-xl font-bold text-lg text-white shadow-lg transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-play"></i> Uhr Starten (Buzzer frei)
+                        </button>
+                        <button onclick="stopStopwatch()" class="flex-1 bg-yellow-500 hover:bg-yellow-400 py-4 rounded-xl font-bold text-lg text-black shadow-lg transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-stop"></i> Stop
+                        </button>
+                        <button onclick="resetStopwatch()" class="flex-1 bg-red-600 hover:bg-red-500 py-4 rounded-xl font-bold text-lg text-white shadow-lg transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-rotate-left"></i> Reset
+                        </button>
                     </div>
-                    <button onclick="evaluateViggo()" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-bold text-xl shadow-[0_0_15px_rgba(59,130,246,0.5)]">
-                        <i class="fa-solid fa-calculator mr-2"></i> Auswerten & Punkte verteilen
+                    <button onclick="evaluateViggo()" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-xl font-bold text-lg shadow-[0_0_15px_rgba(59,130,246,0.4)] transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-calculator"></i> Auswerten & Punkte verteilen
                     </button>
                 </div>
 
+                <!-- OTHER GAME CONTROLS -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Quiz Control -->
                     <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700">
-                        <h3 class="font-bold text-gray-300 mb-4"><i class="fa-solid fa-question-circle mr-2"></i>Quiz Steuerung</h3>
-                        <textarea id="admin-question-input" rows="2" placeholder="Frage hier eingeben..." class="w-full bg-gray-900 border border-gray-600 rounded-lg p-3 text-white mb-4"></textarea>
-                        <button onclick="updateQuestion()" class="w-full bg-blue-600 hover:bg-blue-500 py-3 rounded-lg font-bold">Auf Leinwand anzeigen</button>
+                        <h3 class="font-bold text-gray-200 mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-question-circle text-pink-400"></i> Quiz Steuerung
+                        </h3>
+                        <textarea id="admin-question-input" rows="2" placeholder="Frage hier eingeben..." class="w-full bg-gray-900 border border-gray-600 rounded-xl p-3 text-white text-sm mb-3 focus:outline-none focus:border-purple-500"></textarea>
+                        <button onclick="updateQuestion()" class="w-full bg-purple-600 hover:bg-purple-500 py-3 rounded-xl font-bold text-sm transition">
+                            Auf Leinwand anzeigen
+                        </button>
                     </div>
 
+                    <!-- Zoom Control -->
                     <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700">
-                        <h3 class="font-bold text-gray-300 mb-4"><i class="fa-solid fa-magnifying-glass mr-2"></i>Zoom (Gegenstand/Lehrer)</h3>
-                        <input type="text" id="admin-image-url" placeholder="Bild-URL einfügen (https://...)" class="w-full bg-gray-900 border border-gray-600 rounded-lg p-3 text-white text-sm mb-4">
+                        <h3 class="font-bold text-gray-200 mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-magnifying-glass text-cyan-400"></i> Zoom Bild Controls
+                        </h3>
+                        <input type="text" id="admin-image-url" placeholder="Bild-URL (https://...)" class="w-full bg-gray-900 border border-gray-600 rounded-xl p-3 text-white text-xs mb-3 focus:outline-none focus:border-cyan-500">
+                        
                         <div class="flex gap-2 mb-2">
-                            <button onclick="setZoomImageAndStart()" class="flex-1 bg-purple-600 hover:bg-purple-500 py-2 rounded-lg font-bold text-sm">1. Sofort rangezoomt starten</button>
-                            <button onclick="startZoom()" class="flex-1 bg-yellow-600 hover:bg-yellow-500 py-2 rounded-lg font-bold text-sm text-black">2. Zoom laufen lassen</button>
+                            <button onclick="setZoomImageAndStart()" class="flex-1 bg-purple-600 hover:bg-purple-500 py-2.5 rounded-xl font-bold text-xs">
+                                1. Setzen & Zoom-Start
+                            </button>
+                            <button onclick="startZoom()" class="flex-1 bg-yellow-500 hover:bg-yellow-400 text-black py-2.5 rounded-xl font-bold text-xs">
+                                2. Zoom Animation
+                            </button>
                         </div>
-                        <button onclick="revealZoom()" class="w-full bg-green-600 hover:bg-green-500 py-2 rounded-lg font-bold text-sm">3. Sofort ganz auflösen</button>
+                        <button onclick="revealZoom()" class="w-full bg-green-600 hover:bg-green-500 py-2.5 rounded-xl font-bold text-xs mb-3">
+                            3. Bild auflösen
+                        </button>
+                        
+                        <div id="admin-zoom-preview-container" class="w-full h-24 bg-gray-900 rounded-lg overflow-hidden border border-gray-700 flex items-center justify-center">
+                            <img id="admin-zoom-preview" src="" class="max-h-full object-contain hidden" alt="Preview">
+                            <span id="admin-zoom-preview-placeholder" class="text-xs text-gray-500">Kein Bild geladen</span>
+                        </div>
                     </div>
                 </div>
+
+                <!-- URL & Settings Box -->
+                <div class="bg-gray-800 p-4 rounded-2xl border border-gray-700 text-xs flex items-center justify-between">
+                    <span class="text-gray-400">QR Code URL Target:</span>
+                    <input type="text" id="admin-target-url" onchange="updateQrTargetUrl(this.value)" class="bg-gray-900 border border-gray-600 rounded px-3 py-1 text-cyan-400 text-xs w-2/3">
+                </div>
+
             </div>
         </div>
     </div>
@@ -376,9 +522,14 @@
 
         let currentUser = null;
         let role = null;
-        let myPlayerId = null;
+        let myPlayerId = localStorage.getItem('ata_player_id') || ('user_' + Math.random().toString(36).substr(2, 9));
+        localStorage.setItem('ata_player_id', myPlayerId);
+
         const SESSION_ID = 'ata_welcome_party_v5';
         const sessionDocRef = doc(db, 'games', SESSION_ID);
+
+        // BroadcastChannel for instant local offline tab sync fallback
+        const syncChannel = new BroadcastChannel('ata_party_bc_channel');
 
         let localSessionData = {
             view: 'lobby',
@@ -390,40 +541,88 @@
             questionText: "Willkommen beim Quiz!",
             zoom: { url: "", state: "hidden" },
             stopwatchRunning: false,
+            stopwatchStartTime: 0,
             stopwatchTime: 0,
-            viggoWinnerData: null
+            viggoWinnerData: null,
+            targetUrl: window.location.href.split('#')[0]
         };
 
-        let localStopwatchInterval;
+        let stopwatchAnimationFrame = null;
         let qrCodeInstance = null;
         let lastBuzzerUid = null;
 
-        // Audio Engine
         let synthBuzzer, synthCorrect, synthWrong, synthWin;
+        let audioUnlocked = false;
+
         async function initAudio() {
+            if (audioUnlocked) return;
             try {
                 await Tone.start();
-                synthBuzzer = new Tone.Synth({ oscillator: { type: "square" }, envelope: { attack: 0.05, decay: 0.2, sustain: 0.5, release: 1 } }).toDestination();
+                audioUnlocked = true;
+                synthBuzzer = new Tone.Synth({ oscillator: { type: "square" }, envelope: { attack: 0.02, decay: 0.2, sustain: 0.2, release: 0.5 } }).toDestination();
                 synthCorrect = new Tone.PolySynth(Tone.Synth).toDestination();
-                synthCorrect.volume.value = -5;
-                synthWrong = new Tone.Synth({ oscillator: { type: "sawtooth" } }).toDestination();
+                synthCorrect.volume.value = -4;
+                synthWrong = new Tone.Synth({ oscillator: { type: "sawtooth" }, envelope: { attack: 0.05, decay: 0.3, sustain: 0, release: 0.2 } }).toDestination();
                 synthWin = new Tone.PolySynth(Tone.Synth).toDestination();
-            } catch(e) {}
+            } catch(e) {
+                console.warn("Tone JS Audio lock", e);
+            }
         }
 
         function playSound(type) {
+            if (!audioUnlocked) initAudio();
             try {
-                if(type === 'buzzer') synthBuzzer.triggerAttackRelease("C3", "8n");
-                if(type === 'correct') {
+                if(type === 'buzzer' && synthBuzzer) synthBuzzer.triggerAttackRelease("C3", "8n");
+                if(type === 'correct' && synthCorrect) {
                     const now = Tone.now();
                     synthCorrect.triggerAttackRelease("C4", "8n", now);
                     synthCorrect.triggerAttackRelease("E4", "8n", now + 0.1);
                     synthCorrect.triggerAttackRelease("G4", "4n", now + 0.2);
                 }
-                if(type === 'wrong') synthWrong.triggerAttackRelease("G2", "4n");
-                if(type === 'win') synthWin.triggerAttackRelease(["C4", "E4", "G4", "C5"], "2n");
+                if(type === 'wrong' && synthWrong) synthWrong.triggerAttackRelease("G2", "4n");
+                if(type === 'win' && synthWin) synthWin.triggerAttackRelease(["C4", "E4", "G4", "C5"], "2n");
             } catch(e){}
         }
+
+        window.testAudio = function() {
+            initAudio();
+            playSound('correct');
+            showToast("Sound test abgespielt!");
+        };
+
+        function showToast(msg) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerText = msg;
+            container.appendChild(toast);
+            setTimeout(() => toast.classList.add('show'), 10);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        async function broadcastState(data) {
+            // 1. Send via local BroadcastChannel for zero-latency multi-tab updates
+            try {
+                syncChannel.postMessage(data);
+            } catch(e){}
+
+            // 2. Persist to Firestore
+            try {
+                await setDoc(sessionDocRef, data, { merge: true });
+            } catch(e) {
+                console.warn("Firestore save error, fallback to local sync", e);
+            }
+        }
+
+        syncChannel.onmessage = (event) => {
+            if (event.data) {
+                localSessionData = { ...localSessionData, ...event.data };
+                updateUI();
+            }
+        };
 
         window.selectRole = async function(selectedRole) {
             role = selectedRole;
@@ -433,10 +632,10 @@
             try {
                 const userCred = await signInAnonymously(auth);
                 currentUser = userCred.user;
-                myPlayerId = currentUser.uid;
+                if (!myPlayerId) myPlayerId = currentUser.uid;
             } catch (error) {
-                alert("Auth Fehler. Bitte Anonyme Anmeldung in Firebase aktivieren!\n" + error.message);
-                window.location.reload(); return;
+                console.warn("Firebase auth warning, running in local fallback mode:", error);
+                showToast("Lokaler Netzwerkmodus aktiv.");
             }
 
             if (role === 'live') {
@@ -447,29 +646,53 @@
             } else if (role === 'admin') {
                 document.getElementById('screen-admin-view').classList.remove('hidden');
                 document.getElementById('screen-admin-view').classList.add('flex');
+                document.getElementById('admin-target-url').value = localSessionData.targetUrl || window.location.href.split('#')[0];
                 await setupSessionSync();
             } else {
-                document.getElementById('screen-player-login').classList.remove('hidden');
-                document.getElementById('screen-player-login').classList.add('flex');
+                // Auto restore player login from localStorage
+                const savedName = localStorage.getItem('ata_player_name');
+                const savedTeam = localStorage.getItem('ata_player_team');
+                if (savedName && savedTeam) {
+                    window.myPlayerName = savedName;
+                    window.myPlayerTeam = savedTeam;
+                    showPlayerMainView();
+                } else {
+                    document.getElementById('screen-player-login').classList.remove('hidden');
+                    document.getElementById('screen-player-login').classList.add('flex');
+                }
+                await setupSessionSync();
             }
         };
 
         function setupLiveQRCode() {
             const qrContainer = document.getElementById("qrcode");
             qrContainer.innerHTML = '';
-            qrCodeInstance = new QRCode(qrContainer, {
-                text: "https://grind-app.de/ata-party.html", width: 256, height: 256,
-                colorDark : "#0f172a", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H
-            });
+            const targetUrl = localSessionData.targetUrl || window.location.href.split('#')[0];
+            document.getElementById('live-app-url-display').innerText = targetUrl;
+            
+            try {
+                qrCodeInstance = new QRCode(qrContainer, {
+                    text: targetUrl, width: 256, height: 256,
+                    colorDark : "#0f172a", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H
+                });
+            } catch(e){}
         }
+
+        window.updateQrTargetUrl = function(newUrl) {
+            localSessionData.targetUrl = newUrl;
+            broadcastState({ targetUrl: newUrl });
+            showToast("QR Target URL aktualisiert");
+        };
 
         async function setupSessionSync() {
             try {
                 const docSnap = await getDoc(sessionDocRef);
                 if (!docSnap.exists()) {
                     await setDoc(sessionDocRef, localSessionData);
+                } else {
+                    localSessionData = { ...localSessionData, ...docSnap.data() };
                 }
-            } catch(e) { console.error("Init session error:", e); }
+            } catch(e) { console.warn("Init session error:", e); }
 
             onSnapshot(sessionDocRef, (docSnap) => {
                 if (docSnap.exists()) {
@@ -479,45 +702,57 @@
                     updateUI();
                 }
             }, (error) => {
-                console.error("Firestore sync error:", error);
+                console.warn("Firestore sync error:", error);
             });
+
+            updateUI();
         }
 
         function updateUI() {
-            const score1 = localSessionData.teams["ATA 25-28"] || 0;
-            const score2 = localSessionData.teams["ATA 26-29"] || 0;
-            const currentBuzzer = localSessionData.buzzerQueue.length > 0 ? localSessionData.buzzerQueue[0] : null;
+            const score1 = (localSessionData.teams && localSessionData.teams["ATA 25-28"]) || 0;
+            const score2 = (localSessionData.teams && localSessionData.teams["ATA 26-29"]) || 0;
+            const currentBuzzer = (localSessionData.buzzerQueue && localSessionData.buzzerQueue.length > 0) ? localSessionData.buzzerQueue[0] : null;
 
             if (role === 'live') {
                 document.getElementById('live-score-team1').innerText = score1;
                 document.getElementById('live-score-team2').innerText = score2;
                 
+                // Hide all views first
                 document.querySelectorAll('#screen-live-view [id^="view-"]').forEach(el => el.classList.add('hidden'));
-                const activeViewId = `view-${localSessionData.view.replace('game3', 'game-zoom').replace('game5', 'game-zoom')}`;
+                
+                // Map scene name to view container
+                let activeViewId = `view-${localSessionData.view}`;
+                if (localSessionData.view === 'game3' || localSessionData.view === 'game5') {
+                    activeViewId = 'view-game-zoom';
+                }
                 const viewEl = document.getElementById(activeViewId);
                 if(viewEl) viewEl.classList.remove('hidden');
 
                 const titles = { lobby: "Lobby", game1: "Blind Ertasten", game2: "Quiz", game3: "Gegenstand Zoom", game4: "Viggo-Trinken", game5: "Lehrer Zoom" };
                 document.getElementById('live-game-title').innerText = titles[localSessionData.view] || "Gameshow";
 
-                if(localSessionData.view === 'game2') document.getElementById('display-question').innerText = localSessionData.questionText;
+                if(localSessionData.view === 'game2') {
+                    document.getElementById('display-question').innerText = localSessionData.questionText || "...";
+                }
 
                 if (localSessionData.view === 'game3' || localSessionData.view === 'game5') {
                     const imgEl = document.getElementById('zoom-img-element');
-                    if (imgEl.src !== localSessionData.zoom.url && localSessionData.zoom.url) imgEl.src = localSessionData.zoom.url;
-                    
-                    if (localSessionData.zoom.state === 'hidden') imgEl.className = 'zoom-image zoom-hidden';
-                    else if (localSessionData.zoom.state === 'zooming') imgEl.className = 'zoom-image zoom-transition';
-                    else if (localSessionData.zoom.state === 'revealed') imgEl.className = 'zoom-image zoom-revealed';
+                    if (imgEl && localSessionData.zoom && localSessionData.zoom.url) {
+                        if (imgEl.src !== localSessionData.zoom.url) imgEl.src = localSessionData.zoom.url;
+                        if (localSessionData.zoom.state === 'hidden') imgEl.className = 'zoom-image zoom-hidden';
+                        else if (localSessionData.zoom.state === 'zooming') imgEl.className = 'zoom-image zoom-transition';
+                        else if (localSessionData.zoom.state === 'revealed') imgEl.className = 'zoom-image zoom-revealed';
+                    }
                 }
 
+                // Buzzer overlay on Live View
                 const overlay = document.getElementById('live-winner-overlay');
                 if (currentBuzzer && localSessionData.view !== 'game4') {
                     document.getElementById('live-winner-name').innerText = currentBuzzer.name;
                     const teamEl = document.getElementById('live-winner-team');
                     teamEl.innerText = currentBuzzer.team;
-                    teamEl.className = `text-4xl font-bold px-8 py-3 rounded-2xl mb-6 ${currentBuzzer.team === 'ATA 25-28' ? 'bg-blue-600 text-white' : 'bg-green-600 text-white'}`;
-                    document.getElementById('live-winner-time').innerText = currentBuzzer.time.toFixed(2);
+                    teamEl.className = `text-3xl font-bold px-8 py-3 rounded-2xl mb-4 ${currentBuzzer.team === 'ATA 25-28' ? 'bg-blue-600 text-white shadow-[0_0_20px_rgba(37,99,235,0.6)]' : 'bg-green-600 text-white shadow-[0_0_20px_rgba(22,163,74,0.6)]'}`;
+                    document.getElementById('live-winner-time').innerText = (currentBuzzer.time || 0).toFixed(2);
                     
                     const qIndicator = document.getElementById('live-queue-indicator');
                     if (localSessionData.buzzerQueue.length > 1) {
@@ -538,16 +773,17 @@
                     lastBuzzerUid = null;
                 }
 
+                // Viggo game view
                 if(localSessionData.view === 'game4') {
-                    document.getElementById('stopwatch-display').innerText = (localSessionData.stopwatchTime / 10).toFixed(1).padStart(4, '0');
+                    updateStopwatchDisplay();
                     const list1 = document.getElementById('viggo-list-team1');
                     const list2 = document.getElementById('viggo-list-team2');
                     list1.innerHTML = ''; list2.innerHTML = '';
                     
-                    localSessionData.viggoResults.forEach((res, index) => {
-                        const html = `<div class="bg-gray-800/80 p-3 rounded-lg flex justify-between items-center border border-gray-600">
-                            <span class="font-bold text-white text-xl">${index+1}. ${res.name}</span>
-                            <span class="font-mono text-yellow-400">${res.time.toFixed(1)}s</span>
+                    (localSessionData.viggoResults || []).forEach((res, index) => {
+                        const html = `<div class="bg-gray-800/90 p-3 rounded-xl flex justify-between items-center border border-gray-700 shadow">
+                            <span class="font-bold text-white text-lg">${index+1}. ${res.name}</span>
+                            <span class="font-mono text-yellow-400 font-bold">${res.time.toFixed(1)}s</span>
                         </div>`;
                         if(res.team === 'ATA 25-28') list1.innerHTML += html;
                         else list2.innerHTML += html;
@@ -556,11 +792,12 @@
                     const resOverlay = document.getElementById('viggo-result-overlay');
                     if(localSessionData.viggoWinnerData) {
                         resOverlay.classList.remove('hidden'); resOverlay.classList.add('flex');
-                        document.getElementById('viggo-avg-team1').innerText = localSessionData.viggoWinnerData.avg1.toFixed(1) + 's';
-                        document.getElementById('viggo-avg-team2').innerText = localSessionData.viggoWinnerData.avg2.toFixed(1) + 's';
+                        document.getElementById('viggo-avg-team1').innerText = (localSessionData.viggoWinnerData.avg1 || 0).toFixed(1) + 's';
+                        document.getElementById('viggo-avg-team2').innerText = (localSessionData.viggoWinnerData.avg2 || 0).toFixed(1) + 's';
                         const winnerText = document.getElementById('viggo-winner-text');
-                        winnerText.innerText = `Punkt für ${localSessionData.viggoWinnerData.winnerTeam}!`;
-                        winnerText.className = `mt-12 text-5xl font-black px-8 py-4 rounded-xl ${localSessionData.viggoWinnerData.winnerTeam === 'ATA 25-28' ? 'bg-blue-600 text-white' : (localSessionData.viggoWinnerData.winnerTeam === 'ATA 26-29' ? 'bg-green-600 text-white' : 'bg-gray-600 text-white')}`;
+                        const wTeam = localSessionData.viggoWinnerData.winnerTeam;
+                        winnerText.innerText = wTeam === "UNENTSCHIEDEN" ? "Unentschieden!" : `Punkt für ${wTeam}!`;
+                        winnerText.className = `mt-10 text-4xl font-black px-8 py-4 rounded-2xl border ${wTeam === 'ATA 25-28' ? 'bg-blue-600 text-white border-blue-400' : (wTeam === 'ATA 26-29' ? 'bg-green-600 text-white border-green-400' : 'bg-gray-700 text-white border-gray-500')}`;
                     } else {
                         resOverlay.classList.add('hidden'); resOverlay.classList.remove('flex');
                     }
@@ -569,6 +806,18 @@
             } else if (role === 'admin') {
                 document.getElementById('admin-score-team1').innerText = score1;
                 document.getElementById('admin-score-team2').innerText = score2;
+
+                // Highlight active scene button in sidebar
+                ['lobby', 'game1', 'game2', 'game3', 'game4', 'game5'].forEach(sc => {
+                    const btn = document.getElementById(`btn-scene-${sc}`);
+                    if (btn) {
+                        if (localSessionData.view === sc) {
+                            btn.className = "w-full text-left px-4 py-3 rounded-xl bg-purple-600 text-white font-bold text-sm flex items-center gap-3 shadow-lg border border-purple-400";
+                        } else {
+                            btn.className = "w-full text-left px-4 py-3 rounded-xl bg-gray-700/80 hover:bg-gray-700 text-gray-300 font-bold text-sm flex items-center gap-3 transition";
+                        }
+                    }
+                });
 
                 if (localSessionData.view === 'game4') {
                     document.getElementById('admin-panel-buzzer').classList.add('hidden');
@@ -582,29 +831,40 @@
                 const decisionPanel = document.getElementById('admin-decision-panel');
 
                 if (currentBuzzer && localSessionData.view !== 'game4') {
-                    unlockBtn.className = "flex-1 bg-gray-600 text-gray-400 font-bold py-4 rounded-xl text-xl cursor-not-allowed";
+                    unlockBtn.disabled = true;
+                    unlockBtn.className = "flex-1 bg-gray-700 text-gray-500 font-bold py-4 rounded-xl text-lg cursor-not-allowed border border-gray-600 flex items-center justify-center gap-2";
                     decisionPanel.classList.remove('hidden'); decisionPanel.classList.add('flex');
                     document.getElementById('admin-winner-name').innerText = currentBuzzer.name;
                     document.getElementById('admin-winner-team').innerText = currentBuzzer.team;
-                    document.getElementById('admin-winner-team').className = `text-xl px-3 py-1 rounded font-bold ${currentBuzzer.team === 'ATA 25-28' ? 'bg-blue-600 text-white' : 'bg-green-600 text-white'}`;
-                    document.getElementById('admin-winner-time').innerText = currentBuzzer.time.toFixed(2);
+                    document.getElementById('admin-winner-team').className = `text-sm px-3 py-1 rounded-lg font-bold ${currentBuzzer.team === 'ATA 25-28' ? 'bg-blue-600 text-white' : 'bg-green-600 text-white'}`;
+                    document.getElementById('admin-winner-time').innerText = (currentBuzzer.time || 0).toFixed(2);
                     
                     const qCount = document.getElementById('admin-queue-count');
                     const qLength = localSessionData.buzzerQueue.length;
                     if (qLength > 1) {
-                        qCount.innerText = `+ ${qLength - 1} weitere Person(en) in Warteschlange`;
+                        qCount.innerText = `+ ${qLength - 1} weitere Person(en) in der Warteschlange`;
                     } else {
                         qCount.innerText = "Warteschlange leer";
                     }
                 } else {
                     decisionPanel.classList.add('hidden'); decisionPanel.classList.remove('flex');
+                    unlockBtn.disabled = false;
                     if (localSessionData.buzzerActive) {
-                        unlockBtn.className = "flex-1 bg-green-400 text-black font-black py-4 rounded-xl text-xl shadow-[0_0_20px_rgba(74,222,128,0.6)] animate-pulse";
-                        unlockBtn.innerHTML = "<i class='fa-solid fa-lock-open mr-2'></i> Buzzer ist SCHARF";
+                        unlockBtn.className = "flex-1 bg-green-500 text-black font-black py-4 rounded-xl text-lg shadow-[0_0_20px_rgba(74,222,128,0.6)] animate-pulse flex items-center justify-center gap-2";
+                        unlockBtn.innerHTML = "<i class='fa-solid fa-lock-open'></i> BUZZER IST SCHARF!";
                     } else {
-                        unlockBtn.className = "flex-1 bg-green-600 hover:bg-green-500 text-white font-bold py-4 rounded-xl text-xl shadow-lg transition";
-                        unlockBtn.innerHTML = "<i class='fa-solid fa-unlock mr-2'></i> Buzzer Freigeben";
+                        unlockBtn.className = "flex-1 bg-green-600 hover:bg-green-500 text-white font-bold py-4 rounded-xl text-lg shadow-lg transition flex items-center justify-center gap-2";
+                        unlockBtn.innerHTML = "<i class='fa-solid fa-unlock'></i> Buzzer Freigeben";
                     }
+                }
+
+                // Update Zoom Preview in Admin
+                if (localSessionData.zoom && localSessionData.zoom.url) {
+                    const prevImg = document.getElementById('admin-zoom-preview');
+                    const prevPlaceholder = document.getElementById('admin-zoom-preview-placeholder');
+                    prevImg.src = localSessionData.zoom.url;
+                    prevImg.classList.remove('hidden');
+                    prevPlaceholder.classList.add('hidden');
                 }
 
             } else if (role === 'player') {
@@ -613,7 +873,7 @@
                 if(myName) {
                     document.getElementById('player-display-name').innerText = myName;
                     document.getElementById('player-display-team').innerText = myTeam;
-                    document.getElementById('player-display-team').className = `text-sm font-bold ${myTeam === 'ATA 25-28' ? 'text-blue-400' : 'text-green-400'}`;
+                    document.getElementById('player-display-team').className = `text-xs font-bold uppercase tracking-wider ${myTeam === 'ATA 25-28' ? 'text-blue-400' : 'text-green-400'}`;
                     document.getElementById('player-display-score').innerText = myTeam === 'ATA 25-28' ? score1 : score2;
                 }
 
@@ -621,182 +881,274 @@
                 const statusText = document.getElementById('buzzer-status-text');
                 buzzerBtn.classList.remove('active-press');
 
-                const inQueue = localSessionData.buzzerQueue.find(b => b.uid === myPlayerId);
-                const inViggo = localSessionData.viggoResults.find(b => b.uid === myPlayerId);
+                const inQueue = (localSessionData.buzzerQueue || []).find(b => b.uid === myPlayerId);
+                const inViggo = (localSessionData.viggoResults || []).find(b => b.uid === myPlayerId);
 
                 if (inQueue || inViggo) {
                     buzzerBtn.classList.add('disabled'); buzzerBtn.disabled = true;
                     statusText.innerText = "GEBUZZERT!";
-                    statusText.className = "absolute top-0 text-3xl font-black text-center w-full uppercase tracking-widest text-pink-500 animate-bounce";
+                    statusText.className = "absolute top-4 text-3xl font-black text-center w-full uppercase tracking-widest text-pink-500 animate-bounce";
                 } else if (localSessionData.buzzerActive) {
                     buzzerBtn.classList.remove('disabled'); buzzerBtn.disabled = false;
                     statusText.innerText = "DRÜCKEN!";
-                    statusText.className = "absolute top-0 text-4xl font-black text-center w-full uppercase tracking-widest text-green-500 animate-pulse drop-shadow-[0_0_10px_rgba(34,197,94,0.8)]";
+                    statusText.className = "absolute top-4 text-4xl font-black text-center w-full uppercase tracking-widest text-green-400 animate-pulse drop-shadow-[0_0_10px_rgba(74,222,128,0.8)]";
                 } else {
                     buzzerBtn.classList.add('disabled'); buzzerBtn.disabled = true;
                     statusText.innerText = "Gesperrt";
-                    statusText.className = "absolute top-0 text-3xl font-bold text-center w-full uppercase tracking-widest text-gray-600";
+                    statusText.className = "absolute top-4 text-2xl font-bold text-center w-full uppercase tracking-widest text-gray-500";
                 }
             }
         }
 
-        window.joinGame = async function() {
-            const btn = document.getElementById('join-btn');
-            const errorEl = document.getElementById('player-error');
-            errorEl.classList.add('hidden');
-            
+        window.joinGame = function() {
             const nameInput = document.getElementById('player-name-input').value.trim();
-            if (!nameInput) { alert("Bitte Namen eingeben!"); return; }
+            if (!nameInput) {
+                showToast("Bitte gib deinen Namen ein!");
+                return;
+            }
 
             const teamSelect = document.querySelector('input[name="team-select"]:checked').value;
             window.myPlayerName = nameInput.substring(0, 20);
             window.myPlayerTeam = teamSelect;
 
-            btn.innerText = "Verbinde...";
-            btn.disabled = true;
+            localStorage.setItem('ata_player_name', window.myPlayerName);
+            localStorage.setItem('ata_player_team', window.myPlayerTeam);
 
-            try {
-                const docSnap = await getDoc(sessionDocRef);
-                if (!docSnap.exists()) {
-                    await setDoc(sessionDocRef, localSessionData);
-                }
-
-                document.getElementById('screen-player-login').classList.add('hidden');
-                document.getElementById('screen-player-login').classList.remove('flex');
-                document.getElementById('screen-player-main').classList.remove('hidden');
-                document.getElementById('screen-player-main').classList.add('flex');
-                updateUI();
-            } catch (e) {
-                btn.innerText = "Beitreten"; btn.disabled = false;
-                errorEl.innerText = "Fehler: " + e.message;
-                errorEl.classList.remove('hidden');
-            }
+            showPlayerMainView();
         };
 
-        window.hitBuzzer = async function() {
+        function showPlayerMainView() {
+            document.getElementById('screen-player-login').classList.add('hidden');
+            document.getElementById('screen-player-login').classList.remove('flex');
+            document.getElementById('screen-player-main').classList.remove('hidden');
+            document.getElementById('screen-player-main').classList.add('flex');
+            updateUI();
+        }
+
+        window.logoutPlayer = function() {
+            localStorage.removeItem('ata_player_name');
+            localStorage.removeItem('ata_player_team');
+            document.getElementById('screen-player-main').classList.add('hidden');
+            document.getElementById('screen-player-main').classList.remove('flex');
+            document.getElementById('screen-player-login').classList.remove('hidden');
+            document.getElementById('screen-player-login').classList.add('flex');
+        };
+
+        window.hitBuzzer = function() {
             if (!localSessionData.buzzerActive) return;
 
             const btn = document.getElementById('main-buzzer');
             btn.classList.add('active-press');
             if (navigator.vibrate) navigator.vibrate([100, 50, 100]); 
+            playSound('buzzer');
 
-            try {
-                if (localSessionData.view === 'game4') {
-                    const time = localSessionData.stopwatchTime / 10;
-                    const newRes = [...localSessionData.viggoResults, { uid: myPlayerId, name: window.myPlayerName, team: window.myPlayerTeam, time: time }];
-                    await setDoc(sessionDocRef, { viggoResults: newRes }, { merge: true });
-                } else {
-                    const reactTime = Math.max(0.01, (Date.now() - localSessionData.buzzerUnlockTime) / 1000);
-                    const newQueue = [...localSessionData.buzzerQueue, { uid: myPlayerId, name: window.myPlayerName, team: window.myPlayerTeam, time: reactTime }];
-                    await setDoc(sessionDocRef, { buzzerQueue: newQueue }, { merge: true });
+            if (localSessionData.view === 'game4') {
+                const elapsed = localSessionData.stopwatchStartTime ? Math.max(0.1, (Date.now() - localSessionData.stopwatchStartTime) / 1000) : 0;
+                const newRes = [...(localSessionData.viggoResults || []), { uid: myPlayerId, name: window.myPlayerName, team: window.myPlayerTeam, time: elapsed }];
+                localSessionData.viggoResults = newRes;
+                broadcastState({ viggoResults: newRes });
+            } else {
+                const reactTime = Math.max(0.01, (Date.now() - (localSessionData.buzzerUnlockTime || Date.now())) / 1000);
+                // Prevent duplicate entries for same UID
+                const existingIndex = (localSessionData.buzzerQueue || []).findIndex(b => b.uid === myPlayerId);
+                if (existingIndex === -1) {
+                    const newQueue = [...(localSessionData.buzzerQueue || []), { uid: myPlayerId, name: window.myPlayerName, team: window.myPlayerTeam, time: reactTime }];
+                    localSessionData.buzzerQueue = newQueue;
+                    broadcastState({ buzzerQueue: newQueue });
                 }
-            } catch (e) { console.error("Buzzer error:", e); }
+            }
+            updateUI();
         };
 
-        window.setGameState = async function(newState) {
-            await setDoc(sessionDocRef, { 
+        window.setGameState = function(newState) {
+            localSessionData.view = newState;
+            localSessionData.buzzerActive = false;
+            localSessionData.buzzerQueue = [];
+            localSessionData.viggoWinnerData = null;
+            broadcastState({
                 view: newState,
                 buzzerActive: false,
                 buzzerQueue: [],
                 viggoWinnerData: null
-            }, { merge: true });
+            });
+            updateUI();
         };
 
-        window.activateBuzzer = async function() {
-            await setDoc(sessionDocRef, {
+        window.activateBuzzer = function() {
+            initAudio();
+            localSessionData.buzzerActive = true;
+            localSessionData.buzzerQueue = [];
+            localSessionData.buzzerUnlockTime = Date.now();
+            broadcastState({
                 buzzerActive: true,
                 buzzerQueue: [],
                 buzzerUnlockTime: Date.now()
-            }, { merge: true });
+            });
+            showToast("Buzzer ist JETZT SCHARF!");
+            updateUI();
         };
 
-        window.resetBuzzer = async function() {
-            await setDoc(sessionDocRef, { buzzerActive: false, buzzerQueue: [] }, { merge: true });
+        window.resetBuzzer = function() {
+            localSessionData.buzzerActive = false;
+            localSessionData.buzzerQueue = [];
+            broadcastState({ buzzerActive: false, buzzerQueue: [] });
+            showToast("Buzzer gesperrt & zurückgesetzt");
+            updateUI();
         };
 
-        window.approveAnswer = async function() {
-            if(localSessionData.buzzerQueue.length === 0) return;
+        window.adjustScore = function(team, amount) {
+            const current = (localSessionData.teams && localSessionData.teams[team]) || 0;
+            const updated = Math.max(0, current + amount);
+            let teamsUpdate = { ...(localSessionData.teams || {}) };
+            teamsUpdate[team] = updated;
+            localSessionData.teams = teamsUpdate;
+            broadcastState({ teams: teamsUpdate });
+            updateUI();
+        };
+
+        window.approveAnswer = function() {
+            if(!localSessionData.buzzerQueue || localSessionData.buzzerQueue.length === 0) return;
             playSound('correct');
             const winnerTeam = localSessionData.buzzerQueue[0].team;
-            const currentScore = localSessionData.teams[winnerTeam] || 0;
+            const currentScore = (localSessionData.teams && localSessionData.teams[winnerTeam]) || 0;
             
-            let teamsUpdate = { ...localSessionData.teams };
+            let teamsUpdate = { ...(localSessionData.teams || {}) };
             teamsUpdate[winnerTeam] = currentScore + 1;
 
-            await setDoc(sessionDocRef, {
+            localSessionData.teams = teamsUpdate;
+            localSessionData.buzzerActive = false;
+            localSessionData.buzzerQueue = [];
+
+            broadcastState({
                 teams: teamsUpdate,
                 buzzerActive: false,
                 buzzerQueue: []
-            }, { merge: true });
+            });
+            showToast(`+1 Punkt für ${winnerTeam}!`);
+            updateUI();
         };
 
-        window.denyAnswer = async function() {
-            if(localSessionData.buzzerQueue.length === 0) return;
+        window.denyAnswer = function() {
+            if(!localSessionData.buzzerQueue || localSessionData.buzzerQueue.length === 0) return;
             playSound('wrong');
             const updatedQueue = [...localSessionData.buzzerQueue];
             updatedQueue.shift();
 
-            await setDoc(sessionDocRef, {
-                buzzerQueue: updatedQueue
-            }, { merge: true });
+            localSessionData.buzzerQueue = updatedQueue;
+            broadcastState({ buzzerQueue: updatedQueue });
+            showToast("Falsch! Nächste Person am Buzzer.");
+            updateUI();
         };
 
-        window.setZoomImageAndStart = async function() {
-            const url = document.getElementById('admin-image-url').value;
-            await setDoc(sessionDocRef, { zoom: { url: url, state: 'hidden' } }, { merge: true });
-        };
-        window.startZoom = async function() {
-            await setDoc(sessionDocRef, { 'zoom.state': 'zooming' }, { merge: true });
-        };
-        window.revealZoom = async function() {
-            await setDoc(sessionDocRef, { 'zoom.state': 'revealed' }, { merge: true });
+        window.setZoomImageAndStart = function() {
+            const url = document.getElementById('admin-image-url').value.trim();
+            if (!url) { showToast("Bitte erst eine Bild-URL eingeben!"); return; }
+            localSessionData.zoom = { url: url, state: 'hidden' };
+            broadcastState({ zoom: { url: url, state: 'hidden' } });
+            showToast("Bild geladen & fokussiert!");
+            updateUI();
         };
 
-        window.updateQuestion = async function() {
-            const text = document.getElementById('admin-question-input').value;
-            await setDoc(sessionDocRef, { questionText: text }, { merge: true });
+        window.startZoom = function() {
+            localSessionData.zoom.state = 'zooming';
+            broadcastState({ 'zoom.state': 'zooming' });
+            showToast("Zoom gestartet (25s)...");
+            updateUI();
         };
 
-        window.startStopwatch = async function() {
-            if(localStopwatchInterval) clearInterval(localStopwatchInterval);
-            await setDoc(sessionDocRef, { 
-                stopwatchTime: 0, 
+        window.revealZoom = function() {
+            localSessionData.zoom.state = 'revealed';
+            broadcastState({ 'zoom.state': 'revealed' });
+            showToast("Bild komplett aufgelöst!");
+            updateUI();
+        };
+
+        window.updateQuestion = function() {
+            const text = document.getElementById('admin-question-input').value.trim();
+            if(!text) return;
+            localSessionData.questionText = text;
+            broadcastState({ questionText: text });
+            showToast("Frage auf Leinwand gezeigt!");
+            updateUI();
+        };
+
+        function updateStopwatchDisplay() {
+            const display = document.getElementById('stopwatch-display');
+            if (!display) return;
+            
+            if (localSessionData.stopwatchRunning && localSessionData.stopwatchStartTime) {
+                const elapsed = (Date.now() - localSessionData.stopwatchStartTime) / 1000;
+                display.innerText = elapsed.toFixed(1).padStart(4, '0') + 's';
+                stopwatchAnimationFrame = requestAnimationFrame(updateStopwatchDisplay);
+            } else {
+                const val = (localSessionData.stopwatchTime || 0) / 10;
+                display.innerText = val.toFixed(1).padStart(4, '0') + 's';
+            }
+        }
+
+        window.startStopwatch = function() {
+            if (stopwatchAnimationFrame) cancelAnimationFrame(stopwatchAnimationFrame);
+            const now = Date.now();
+            localSessionData.stopwatchRunning = true;
+            localSessionData.stopwatchStartTime = now;
+            localSessionData.stopwatchTime = 0;
+            localSessionData.viggoResults = [];
+            localSessionData.viggoWinnerData = null;
+            localSessionData.buzzerActive = true;
+
+            broadcastState({ 
                 stopwatchRunning: true, 
+                stopwatchStartTime: now,
+                stopwatchTime: 0, 
                 viggoResults: [],
                 viggoWinnerData: null,
                 buzzerActive: true 
-            }, { merge: true });
+            });
+            showToast("Stoppuhr gestartet & Buzzer frei!");
+            updateStopwatchDisplay();
+            updateUI();
+        };
+
+        window.stopStopwatch = function() {
+            if (stopwatchAnimationFrame) cancelAnimationFrame(stopwatchAnimationFrame);
+            const finalTime = localSessionData.stopwatchStartTime ? Math.floor((Date.now() - localSessionData.stopwatchStartTime) / 100) : localSessionData.stopwatchTime;
             
-            let time = 0;
-            localStopwatchInterval = setInterval(() => {
-                time++;
-                if(role === 'live' || role === 'admin') {
-                     document.getElementById('stopwatch-display').innerText = (time / 10).toFixed(1).padStart(4, '0');
-                }
-                if (time % 10 === 0) setDoc(sessionDocRef, { stopwatchTime: time }, { merge: true });
-            }, 100);
-        };
+            localSessionData.stopwatchRunning = false;
+            localSessionData.stopwatchTime = finalTime;
+            localSessionData.buzzerActive = false;
 
-        window.stopStopwatch = async function() {
-            clearInterval(localStopwatchInterval);
-            await setDoc(sessionDocRef, { stopwatchRunning: false, buzzerActive: false }, { merge: true });
-        };
-
-        window.resetStopwatch = async function() {
-            clearInterval(localStopwatchInterval);
-            await setDoc(sessionDocRef, { 
+            broadcastState({ 
                 stopwatchRunning: false, 
+                stopwatchTime: finalTime, 
+                buzzerActive: false 
+            });
+            showToast("Stoppuhr angehalten.");
+            updateUI();
+        };
+
+        window.resetStopwatch = function() {
+            if (stopwatchAnimationFrame) cancelAnimationFrame(stopwatchAnimationFrame);
+            localSessionData.stopwatchRunning = false;
+            localSessionData.stopwatchStartTime = 0;
+            localSessionData.stopwatchTime = 0;
+            localSessionData.viggoResults = [];
+            localSessionData.viggoWinnerData = null;
+            localSessionData.buzzerActive = false;
+
+            broadcastState({ 
+                stopwatchRunning: false, 
+                stopwatchStartTime: 0,
                 stopwatchTime: 0, 
                 viggoResults: [],
                 viggoWinnerData: null,
                 buzzerActive: false 
-            }, { merge: true });
-            document.getElementById('stopwatch-display').innerText = "00.0";
+            });
+            updateUI();
         };
 
-        window.evaluateViggo = async function() {
+        window.evaluateViggo = function() {
             playSound('win');
-            const res = localSessionData.viggoResults;
+            const res = localSessionData.viggoResults || [];
             const t1 = res.filter(r => r.team === 'ATA 25-28').map(r => r.time);
             const t2 = res.filter(r => r.team === 'ATA 26-29').map(r => r.time);
             
@@ -807,21 +1159,38 @@
             if(avg1 < avg2 && t1.length > 0) winner = "ATA 25-28";
             if(avg2 < avg1 && t2.length > 0) winner = "ATA 26-29";
 
-            let teamsUpdate = { ...localSessionData.teams };
+            let teamsUpdate = { ...(localSessionData.teams || {}) };
             if(winner !== "UNENTSCHIEDEN") {
                 teamsUpdate[winner] = (teamsUpdate[winner] || 0) + 1;
             }
 
-            await setDoc(sessionDocRef, {
+            localSessionData.viggoWinnerData = { avg1, avg2, winnerTeam: winner };
+            localSessionData.teams = teamsUpdate;
+            localSessionData.buzzerActive = false;
+
+            broadcastState({
                 viggoWinnerData: { avg1, avg2, winnerTeam: winner },
                 buzzerActive: false,
                 teams: teamsUpdate
-            }, { merge: true });
+            });
+            updateUI();
         };
 
         window.toggleFullscreen = function() {
-            if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(e => {});
-            else document.exitFullscreen();
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(e => {});
+            } else {
+                document.exitFullscreen();
+            }
+        };
+
+        window.addEventListener('click', () => {
+            initAudio();
+        }, { once: true });
+
+        window.onload = function() {
+            // Pre-load audio engine ready
+            initAudio();
         };
     </script>
 </body>
