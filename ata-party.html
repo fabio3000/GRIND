@@ -55,9 +55,6 @@
             transform-origin: center center;
             will-change: transform, filter;
         }
-        .zoom-hidden { transform: scale(15) !important; filter: blur(20px); transition: none !important; }
-        .zoom-transition { transform: scale(1) !important; filter: blur(0px); transition: transform 25s linear, filter 25s linear !important; }
-        .zoom-revealed { transform: scale(1) !important; filter: blur(0px); transition: none !important; }
 
         .buzzer-btn {
             background: radial-gradient(circle, #ff4d4d 0%, #cc0000 100%);
@@ -280,9 +277,12 @@
                 </h2>
             </div>
 
-            <div id="view-game-zoom" class="hidden w-full h-full flex flex-col items-center justify-center p-4">
-                <div class="zoom-image-container">
-                    <img id="zoom-img-element" src="" class="zoom-image zoom-hidden" alt="Zoom Object">
+            <div id="view-game-zoom" class="hidden w-full h-full flex flex-col items-center justify-center p-4 relative">
+                <div class="zoom-image-container relative w-full h-full">
+                    <img id="zoom-img-element" src="" class="zoom-image" style="transform: scale(15); filter: blur(20px);" alt="Zoom Object">
+                    <div id="zoom-progress-bar-container" class="absolute bottom-4 left-8 right-8 bg-gray-900/80 rounded-full h-3 p-0.5 border border-cyan-500/40 hidden">
+                        <div id="zoom-progress-bar" class="bg-cyan-400 h-full rounded-full transition-all duration-300" style="width: 0%;"></div>
+                    </div>
                 </div>
             </div>
 
@@ -471,23 +471,58 @@
                         <h3 class="font-bold text-gray-200 mb-3 flex items-center gap-2">
                             <i class="fa-solid fa-magnifying-glass text-cyan-400"></i> Zoom Bild Controls
                         </h3>
-                        <input type="text" id="admin-image-url" placeholder="Bild-URL (https://...)" class="w-full bg-gray-900 border border-gray-600 rounded-xl p-3 text-white text-xs mb-3 focus:outline-none focus:border-cyan-500">
                         
+                        <!-- File Upload & URL Inputs -->
                         <div class="flex gap-2 mb-2">
-                            <button onclick="setZoomImageAndStart()" class="flex-1 bg-purple-600 hover:bg-purple-500 py-2.5 rounded-xl font-bold text-xs">
-                                1. Setzen & Zoom-Start
+                            <input type="text" id="admin-image-url" placeholder="Bild-URL (https://...)" class="flex-1 bg-gray-900 border border-gray-600 rounded-xl p-2.5 text-white text-xs focus:outline-none focus:border-cyan-500">
+                            <label class="bg-cyan-700 hover:bg-cyan-600 text-white font-bold text-xs px-3 py-2.5 rounded-xl cursor-pointer flex items-center gap-1 shadow">
+                                <i class="fa-solid fa-upload"></i> Datei
+                                <input type="file" id="admin-image-file" accept="image/*" class="hidden" onchange="handleZoomFileUpload(event)">
+                            </label>
+                        </div>
+
+                        <!-- Presets for ATA Party -->
+                        <div class="mb-3">
+                            <span class="text-[10px] text-gray-400 font-bold block mb-1">Schnellauswahl Beispielbilder:</span>
+                            <div class="flex flex-wrap gap-1">
+                                <button onclick="selectPresetZoom('https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=800')" class="bg-gray-700 hover:bg-cyan-900 text-cyan-300 text-[11px] px-2.5 py-1 rounded-lg border border-gray-600">Medikament</button>
+                                <button onclick="selectPresetZoom('https://images.unsplash.com/photo-1579154204601-01588f351e67?w=800')" class="bg-gray-700 hover:bg-cyan-900 text-cyan-300 text-[11px] px-2.5 py-1 rounded-lg border border-gray-600">Spritze</button>
+                                <button onclick="selectPresetZoom('https://images.unsplash.com/photo-1516549655169-df83a0774514?w=800')" class="bg-gray-700 hover:bg-cyan-900 text-cyan-300 text-[11px] px-2.5 py-1 rounded-lg border border-gray-600">Stethoskop</button>
+                                <button onclick="selectPresetZoom('https://images.unsplash.com/photo-1530497610245-94d3c16cda28?w=800')" class="bg-gray-700 hover:bg-cyan-900 text-cyan-300 text-[11px] px-2.5 py-1 rounded-lg border border-gray-600">Monitor</button>
+                            </div>
+                        </div>
+
+                        <!-- Duration Selector -->
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="text-xs text-gray-400 font-bold">Dauer:</span>
+                            <select id="admin-zoom-duration" class="bg-gray-900 border border-gray-600 text-xs text-white rounded-lg p-1.5 focus:outline-none">
+                                <option value="15000">15 Sekunden (Schnell)</option>
+                                <option value="25000" selected>25 Sekunden (Normal)</option>
+                                <option value="40000">40 Sekunden (Langsam)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-2 mb-2">
+                            <button onclick="setZoomImageAndStart()" class="bg-purple-600 hover:bg-purple-500 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-1 shadow">
+                                <i class="fa-solid fa-eye"></i> 1. Bild Laden
                             </button>
-                            <button onclick="startZoom()" class="flex-1 bg-yellow-500 hover:bg-yellow-400 text-black py-2.5 rounded-xl font-bold text-xs">
-                                2. Zoom Animation
+                            <button onclick="startZoom()" class="bg-green-600 hover:bg-green-500 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-1 shadow">
+                                <i class="fa-solid fa-play"></i> 2. Zoom Starten
                             </button>
                         </div>
-                        <button onclick="revealZoom()" class="w-full bg-green-600 hover:bg-green-500 py-2.5 rounded-xl font-bold text-xs mb-3">
-                            3. Bild auflösen
-                        </button>
+                        <div class="grid grid-cols-2 gap-2 mb-3">
+                            <button onclick="pauseZoom()" class="bg-yellow-600 hover:bg-yellow-500 text-white font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-1 shadow">
+                                <i class="fa-solid fa-pause"></i> Pause / Halt
+                            </button>
+                            <button onclick="revealZoom()" class="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-1 shadow">
+                                <i class="fa-solid fa-unlock"></i> Auflösen (Scale 1)
+                            </button>
+                        </div>
                         
-                        <div id="admin-zoom-preview-container" class="w-full h-24 bg-gray-900 rounded-lg overflow-hidden border border-gray-700 flex items-center justify-center">
+                        <div id="admin-zoom-preview-container" class="w-full h-24 bg-gray-900 rounded-lg overflow-hidden border border-gray-700 flex items-center justify-center relative">
                             <img id="admin-zoom-preview" src="" class="max-h-full object-contain hidden" alt="Preview">
                             <span id="admin-zoom-preview-placeholder" class="text-xs text-gray-500">Kein Bild geladen</span>
+                            <div id="admin-zoom-status-badge" class="absolute bottom-1 right-1 text-[10px] px-2 py-0.5 rounded bg-black/80 text-cyan-400 font-mono hidden">Bereit</div>
                         </div>
                     </div>
                 </div>
@@ -539,7 +574,7 @@
             viggoResults: [],
             teams: { "ATA 25-28": 0, "ATA 26-29": 0 },
             questionText: "Willkommen beim Quiz!",
-            zoom: { url: "", state: "hidden" },
+            zoom: { url: "", state: "hidden", startTime: 0, duration: 25000 },
             stopwatchRunning: false,
             stopwatchStartTime: 0,
             stopwatchTime: 0,
@@ -736,13 +771,7 @@
                 }
 
                 if (localSessionData.view === 'game3' || localSessionData.view === 'game5') {
-                    const imgEl = document.getElementById('zoom-img-element');
-                    if (imgEl && localSessionData.zoom && localSessionData.zoom.url) {
-                        if (imgEl.src !== localSessionData.zoom.url) imgEl.src = localSessionData.zoom.url;
-                        if (localSessionData.zoom.state === 'hidden') imgEl.className = 'zoom-image zoom-hidden';
-                        else if (localSessionData.zoom.state === 'zooming') imgEl.className = 'zoom-image zoom-transition';
-                        else if (localSessionData.zoom.state === 'revealed') imgEl.className = 'zoom-image zoom-revealed';
-                    }
+                    renderZoomImage();
                 }
 
                 // Buzzer overlay on Live View
@@ -862,9 +891,14 @@
                 if (localSessionData.zoom && localSessionData.zoom.url) {
                     const prevImg = document.getElementById('admin-zoom-preview');
                     const prevPlaceholder = document.getElementById('admin-zoom-preview-placeholder');
+                    const badge = document.getElementById('admin-zoom-status-badge');
                     prevImg.src = localSessionData.zoom.url;
                     prevImg.classList.remove('hidden');
                     prevPlaceholder.classList.add('hidden');
+                    if (badge) {
+                        badge.classList.remove('hidden');
+                        badge.innerText = `Status: ${localSessionData.zoom.state || 'bereit'}`;
+                    }
                 }
 
             } else if (role === 'player') {
@@ -899,6 +933,137 @@
                 }
             }
         }
+
+        function renderZoomImage() {
+            const imgEl = document.getElementById('zoom-img-element');
+            const progressContainer = document.getElementById('zoom-progress-bar-container');
+            const progressBar = document.getElementById('zoom-progress-bar');
+            if (!imgEl) return;
+
+            const zoomData = localSessionData.zoom || {};
+            if (!zoomData.url) {
+                imgEl.src = '';
+                if (progressContainer) progressContainer.classList.add('hidden');
+                return;
+            }
+
+            if (imgEl.src !== zoomData.url) {
+                imgEl.src = zoomData.url;
+            }
+
+            const state = zoomData.state || 'hidden';
+            const duration = zoomData.duration || 25000;
+            const startTime = zoomData.startTime || Date.now();
+
+            if (state === 'hidden') {
+                imgEl.style.transition = 'none';
+                imgEl.style.transform = 'scale(15)';
+                imgEl.style.filter = 'blur(20px)';
+                if (progressContainer) progressContainer.classList.add('hidden');
+                if (progressBar) progressBar.style.width = '0%';
+            } else if (state === 'revealed') {
+                imgEl.style.transition = 'transform 0.5s ease-out, filter 0.5s ease-out';
+                imgEl.style.transform = 'scale(1)';
+                imgEl.style.filter = 'blur(0px)';
+                if (progressContainer) progressContainer.classList.add('hidden');
+            } else if (state === 'paused') {
+                imgEl.style.transition = 'none';
+                if (progressContainer) progressContainer.classList.remove('hidden');
+            } else if (state === 'zooming') {
+                if (progressContainer) progressContainer.classList.remove('hidden');
+                
+                const elapsed = Date.now() - startTime;
+                if (elapsed >= duration) {
+                    localSessionData.zoom.state = 'revealed';
+                    renderZoomImage();
+                    return;
+                }
+
+                const remainingMs = duration - elapsed;
+                const remainingSec = (remainingMs / 1000).toFixed(2);
+                const progressPct = Math.min(100, Math.max(0, (elapsed / duration) * 100));
+                if (progressBar) progressBar.style.width = progressPct + '%';
+
+                // Compute position based on elapsed time so sync works across all screens
+                const progressRatio = elapsed / duration;
+                const currentScale = 15 - (14 * progressRatio);
+                const currentBlur = 20 - (20 * progressRatio);
+
+                // Apply current frame without transition
+                imgEl.style.transition = 'none';
+                imgEl.style.transform = `scale(${currentScale})`;
+                imgEl.style.filter = `blur(${currentBlur}px)`;
+
+                // Force reflow
+                void imgEl.offsetHeight;
+
+                // Animate smoothly to target scale(1) and blur(0px)
+                imgEl.style.transition = `transform ${remainingSec}s linear, filter ${remainingSec}s linear`;
+                imgEl.style.transform = 'scale(1)';
+                imgEl.style.filter = 'blur(0px)';
+            }
+        }
+
+        window.selectPresetZoom = function(url) {
+            document.getElementById('admin-image-url').value = url;
+            setZoomImageAndStart();
+        };
+
+        window.handleZoomFileUpload = function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const dataUrl = e.target.result;
+                document.getElementById('admin-image-url').value = dataUrl;
+                setZoomImageAndStart();
+            };
+            reader.readAsDataURL(file);
+        };
+
+        window.setZoomImageAndStart = function() {
+            const url = document.getElementById('admin-image-url').value.trim();
+            if (!url) { showToast("Bitte erst eine Bild-URL eingeben oder Datei wählen!"); return; }
+            const duration = parseInt(document.getElementById('admin-zoom-duration').value) || 25000;
+
+            const zoomObj = { url: url, state: 'hidden', startTime: Date.now(), duration: duration };
+            localSessionData.zoom = zoomObj;
+            broadcastState({ zoom: zoomObj });
+            showToast("Bild geladen & im Zoom fokussiert!");
+            updateUI();
+        };
+
+        window.startZoom = function() {
+            if (!localSessionData.zoom || !localSessionData.zoom.url) {
+                showToast("Bitte zuerst ein Bild laden!");
+                return;
+            }
+            const duration = parseInt(document.getElementById('admin-zoom-duration').value) || (localSessionData.zoom.duration || 25000);
+            const now = Date.now();
+            const zoomObj = { ...localSessionData.zoom, state: 'zooming', startTime: now, duration: duration };
+            localSessionData.zoom = zoomObj;
+            broadcastState({ zoom: zoomObj });
+            showToast(`Zoom Gestartet (${duration/1000}s)!`);
+            updateUI();
+        };
+
+        window.pauseZoom = function() {
+            if (!localSessionData.zoom || localSessionData.zoom.state !== 'zooming') return;
+            const zoomObj = { ...localSessionData.zoom, state: 'paused' };
+            localSessionData.zoom = zoomObj;
+            broadcastState({ zoom: zoomObj });
+            showToast("Zoom pausiert");
+            updateUI();
+        };
+
+        window.revealZoom = function() {
+            if (!localSessionData.zoom || !localSessionData.zoom.url) return;
+            const zoomObj = { ...localSessionData.zoom, state: 'revealed' };
+            localSessionData.zoom = zoomObj;
+            broadcastState({ zoom: zoomObj });
+            showToast("Bild vollständig aufgelöst!");
+            updateUI();
+        };
 
         window.joinGame = function() {
             const nameInput = document.getElementById('player-name-input').value.trim();
