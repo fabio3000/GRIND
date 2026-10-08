@@ -85,14 +85,13 @@
         ::-webkit-scrollbar-track { background: var(--dark-bg); }
         ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
 
-        /* Toast notification */
         #toast-container {
             position: fixed;
             top: 20px;
             right: 20px;
             z-index: 9999;
             display: flex;
-            flex-col;
+            flex-direction: column;
             gap: 10px;
             pointer-events: none;
         }
@@ -137,7 +136,7 @@
             </button>
         </div>
 
-        <!-- Tiny Host / Admin Controls at Bottom -->
+        <!-- Host / Admin Controls at Bottom -->
         <div class="flex flex-wrap justify-center gap-4 opacity-70 hover:opacity-100 transition duration-300 mb-2">
             <button onclick="selectRole('live')" class="bg-gray-800 border border-cyan-500/50 rounded-xl px-5 py-2.5 text-xs text-cyan-400 font-bold hover:bg-cyan-950 transition">
                 <i class="fa-solid fa-desktop mr-1"></i> Live Beamer
@@ -277,11 +276,12 @@
                 </h2>
             </div>
 
+            <!-- ZOOM GAME DISPLAY VIEW -->
             <div id="view-game-zoom" class="hidden w-full h-full flex flex-col items-center justify-center p-4 relative">
                 <div class="zoom-image-container relative w-full h-full">
                     <img id="zoom-img-element" src="" class="zoom-image" style="transform: scale(15); filter: blur(20px);" alt="Zoom Object">
                     <div id="zoom-progress-bar-container" class="absolute bottom-4 left-8 right-8 bg-gray-900/80 rounded-full h-3 p-0.5 border border-cyan-500/40 hidden">
-                        <div id="zoom-progress-bar" class="bg-cyan-400 h-full rounded-full transition-all duration-300" style="width: 0%;"></div>
+                        <div id="zoom-progress-bar" class="bg-cyan-400 h-full rounded-full transition-all duration-100" style="width: 0%;"></div>
                     </div>
                 </div>
             </div>
@@ -511,10 +511,10 @@
                             </button>
                         </div>
                         <div class="grid grid-cols-2 gap-2 mb-3">
-                            <button onclick="pauseZoom()" class="bg-yellow-600 hover:bg-yellow-500 text-white font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-1 shadow">
+                            <button onclick="pauseZoom()" class="bg-yellow-600 hover:bg-yellow-500 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-1 shadow">
                                 <i class="fa-solid fa-pause"></i> Pause / Halt
                             </button>
-                            <button onclick="revealZoom()" class="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-1 shadow">
+                            <button onclick="revealZoom()" class="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-1 shadow">
                                 <i class="fa-solid fa-unlock"></i> Auflösen (Scale 1)
                             </button>
                         </div>
@@ -574,7 +574,7 @@
             viggoResults: [],
             teams: { "ATA 25-28": 0, "ATA 26-29": 0 },
             questionText: "Willkommen beim Quiz!",
-            zoom: { url: "", state: "hidden", startTime: 0, duration: 25000 },
+            zoom: { url: "", state: "hidden", startTime: 0, duration: 25000, pauseElapsed: 0 },
             stopwatchRunning: false,
             stopwatchStartTime: 0,
             stopwatchTime: 0,
@@ -583,6 +583,7 @@
         };
 
         let stopwatchAnimationFrame = null;
+        let zoomAnimationFrame = null;
         let qrCodeInstance = null;
         let lastBuzzerUid = null;
 
@@ -639,12 +640,10 @@
         }
 
         async function broadcastState(data) {
-            // 1. Send via local BroadcastChannel for zero-latency multi-tab updates
             try {
                 syncChannel.postMessage(data);
             } catch(e){}
 
-            // 2. Persist to Firestore
             try {
                 await setDoc(sessionDocRef, data, { merge: true });
             } catch(e) {
@@ -684,7 +683,6 @@
                 document.getElementById('admin-target-url').value = localSessionData.targetUrl || window.location.href.split('#')[0];
                 await setupSessionSync();
             } else {
-                // Auto restore player login from localStorage
                 const savedName = localStorage.getItem('ata_player_name');
                 const savedTeam = localStorage.getItem('ata_player_team');
                 if (savedName && savedTeam) {
@@ -752,10 +750,8 @@
                 document.getElementById('live-score-team1').innerText = score1;
                 document.getElementById('live-score-team2').innerText = score2;
                 
-                // Hide all views first
                 document.querySelectorAll('#screen-live-view [id^="view-"]').forEach(el => el.classList.add('hidden'));
                 
-                // Map scene name to view container
                 let activeViewId = `view-${localSessionData.view}`;
                 if (localSessionData.view === 'game3' || localSessionData.view === 'game5') {
                     activeViewId = 'view-game-zoom';
@@ -802,7 +798,6 @@
                     lastBuzzerUid = null;
                 }
 
-                // Viggo game view
                 if(localSessionData.view === 'game4') {
                     updateStopwatchDisplay();
                     const list1 = document.getElementById('viggo-list-team1');
@@ -836,7 +831,6 @@
                 document.getElementById('admin-score-team1').innerText = score1;
                 document.getElementById('admin-score-team2').innerText = score2;
 
-                // Highlight active scene button in sidebar
                 ['lobby', 'game1', 'game2', 'game3', 'game4', 'game5'].forEach(sc => {
                     const btn = document.getElementById(`btn-scene-${sc}`);
                     if (btn) {
@@ -887,7 +881,6 @@
                     }
                 }
 
-                // Update Zoom Preview in Admin
                 if (localSessionData.zoom && localSessionData.zoom.url) {
                     const prevImg = document.getElementById('admin-zoom-preview');
                     const prevPlaceholder = document.getElementById('admin-zoom-preview-placeholder');
@@ -944,6 +937,7 @@
             if (!zoomData.url) {
                 imgEl.src = '';
                 if (progressContainer) progressContainer.classList.add('hidden');
+                if (zoomAnimationFrame) cancelAnimationFrame(zoomAnimationFrame);
                 return;
             }
 
@@ -953,54 +947,66 @@
 
             const state = zoomData.state || 'hidden';
             const duration = zoomData.duration || 25000;
-            const startTime = zoomData.startTime || Date.now();
+
+            if (zoomAnimationFrame) {
+                cancelAnimationFrame(zoomAnimationFrame);
+                zoomAnimationFrame = null;
+            }
 
             if (state === 'hidden') {
-                imgEl.style.transition = 'none';
                 imgEl.style.transform = 'scale(15)';
                 imgEl.style.filter = 'blur(20px)';
                 if (progressContainer) progressContainer.classList.add('hidden');
                 if (progressBar) progressBar.style.width = '0%';
             } else if (state === 'revealed') {
-                imgEl.style.transition = 'transform 0.5s ease-out, filter 0.5s ease-out';
                 imgEl.style.transform = 'scale(1)';
                 imgEl.style.filter = 'blur(0px)';
                 if (progressContainer) progressContainer.classList.add('hidden');
+                if (progressBar) progressBar.style.width = '100%';
             } else if (state === 'paused') {
-                imgEl.style.transition = 'none';
+                const pauseElapsed = zoomData.pauseElapsed || 0;
+                const progress = Math.min(1, Math.max(0, pauseElapsed / duration));
+                const currentScale = 15 - (14 * progress);
+                const currentBlur = 20 * (1 - progress);
+                imgEl.style.transform = `scale(${currentScale.toFixed(3)})`;
+                imgEl.style.filter = `blur(${currentBlur.toFixed(2)}px)`;
                 if (progressContainer) progressContainer.classList.remove('hidden');
+                if (progressBar) progressBar.style.width = (progress * 100).toFixed(1) + '%';
             } else if (state === 'zooming') {
                 if (progressContainer) progressContainer.classList.remove('hidden');
-                
-                const elapsed = Date.now() - startTime;
-                if (elapsed >= duration) {
-                    localSessionData.zoom.state = 'revealed';
-                    renderZoomImage();
-                    return;
+
+                function animateZoomFrame() {
+                    const zoomCurrent = localSessionData.zoom || {};
+                    if (zoomCurrent.state !== 'zooming') return;
+
+                    const startTime = zoomCurrent.startTime || Date.now();
+                    const dur = zoomCurrent.duration || 25000;
+                    const elapsed = Date.now() - startTime;
+
+                    if (elapsed >= dur) {
+                        imgEl.style.transform = 'scale(1)';
+                        imgEl.style.filter = 'blur(0px)';
+                        if (progressBar) progressBar.style.width = '100%';
+                        if (progressContainer) progressContainer.classList.add('hidden');
+                        localSessionData.zoom.state = 'revealed';
+                        if (role === 'admin') {
+                            broadcastState({ zoom: { ...localSessionData.zoom, state: 'revealed' } });
+                        }
+                        return;
+                    }
+
+                    const progress = Math.min(1, Math.max(0, elapsed / dur));
+                    const currentScale = 15 - (14 * progress);
+                    const currentBlur = 20 * (1 - progress);
+
+                    imgEl.style.transform = `scale(${currentScale.toFixed(3)})`;
+                    imgEl.style.filter = `blur(${currentBlur.toFixed(2)}px)`;
+                    if (progressBar) progressBar.style.width = (progress * 100).toFixed(1) + '%';
+
+                    zoomAnimationFrame = requestAnimationFrame(animateZoomFrame);
                 }
 
-                const remainingMs = duration - elapsed;
-                const remainingSec = (remainingMs / 1000).toFixed(2);
-                const progressPct = Math.min(100, Math.max(0, (elapsed / duration) * 100));
-                if (progressBar) progressBar.style.width = progressPct + '%';
-
-                // Compute position based on elapsed time so sync works across all screens
-                const progressRatio = elapsed / duration;
-                const currentScale = 15 - (14 * progressRatio);
-                const currentBlur = 20 - (20 * progressRatio);
-
-                // Apply current frame without transition
-                imgEl.style.transition = 'none';
-                imgEl.style.transform = `scale(${currentScale})`;
-                imgEl.style.filter = `blur(${currentBlur}px)`;
-
-                // Force reflow
-                void imgEl.offsetHeight;
-
-                // Animate smoothly to target scale(1) and blur(0px)
-                imgEl.style.transition = `transform ${remainingSec}s linear, filter ${remainingSec}s linear`;
-                imgEl.style.transform = 'scale(1)';
-                imgEl.style.filter = 'blur(0px)';
+                animateZoomFrame();
             }
         }
 
@@ -1026,7 +1032,7 @@
             if (!url) { showToast("Bitte erst eine Bild-URL eingeben oder Datei wählen!"); return; }
             const duration = parseInt(document.getElementById('admin-zoom-duration').value) || 25000;
 
-            const zoomObj = { url: url, state: 'hidden', startTime: Date.now(), duration: duration };
+            const zoomObj = { url: url, state: 'hidden', startTime: 0, duration: duration, pauseElapsed: 0 };
             localSessionData.zoom = zoomObj;
             broadcastState({ zoom: zoomObj });
             showToast("Bild geladen & im Zoom fokussiert!");
@@ -1040,16 +1046,33 @@
             }
             const duration = parseInt(document.getElementById('admin-zoom-duration').value) || (localSessionData.zoom.duration || 25000);
             const now = Date.now();
-            const zoomObj = { ...localSessionData.zoom, state: 'zooming', startTime: now, duration: duration };
+            
+            let startTime = now;
+            if (localSessionData.zoom.state === 'paused' && localSessionData.zoom.pauseElapsed) {
+                startTime = now - localSessionData.zoom.pauseElapsed;
+            }
+
+            const zoomObj = { 
+                ...localSessionData.zoom, 
+                state: 'zooming', 
+                startTime: startTime, 
+                duration: duration,
+                pauseElapsed: 0
+            };
             localSessionData.zoom = zoomObj;
             broadcastState({ zoom: zoomObj });
-            showToast(`Zoom Gestartet (${duration/1000}s)!`);
+            showToast(`Zoom gestartet (${duration/1000}s)!`);
             updateUI();
         };
 
         window.pauseZoom = function() {
             if (!localSessionData.zoom || localSessionData.zoom.state !== 'zooming') return;
-            const zoomObj = { ...localSessionData.zoom, state: 'paused' };
+            const elapsed = Date.now() - (localSessionData.zoom.startTime || Date.now());
+            const zoomObj = { 
+                ...localSessionData.zoom, 
+                state: 'paused', 
+                pauseElapsed: elapsed 
+            };
             localSessionData.zoom = zoomObj;
             broadcastState({ zoom: zoomObj });
             showToast("Zoom pausiert");
@@ -1114,7 +1137,6 @@
                 broadcastState({ viggoResults: newRes });
             } else {
                 const reactTime = Math.max(0.01, (Date.now() - (localSessionData.buzzerUnlockTime || Date.now())) / 1000);
-                // Prevent duplicate entries for same UID
                 const existingIndex = (localSessionData.buzzerQueue || []).findIndex(b => b.uid === myPlayerId);
                 if (existingIndex === -1) {
                     const newQueue = [...(localSessionData.buzzerQueue || []), { uid: myPlayerId, name: window.myPlayerName, team: window.myPlayerTeam, time: reactTime }];
@@ -1202,29 +1224,6 @@
             localSessionData.buzzerQueue = updatedQueue;
             broadcastState({ buzzerQueue: updatedQueue });
             showToast("Falsch! Nächste Person am Buzzer.");
-            updateUI();
-        };
-
-        window.setZoomImageAndStart = function() {
-            const url = document.getElementById('admin-image-url').value.trim();
-            if (!url) { showToast("Bitte erst eine Bild-URL eingeben!"); return; }
-            localSessionData.zoom = { url: url, state: 'hidden' };
-            broadcastState({ zoom: { url: url, state: 'hidden' } });
-            showToast("Bild geladen & fokussiert!");
-            updateUI();
-        };
-
-        window.startZoom = function() {
-            localSessionData.zoom.state = 'zooming';
-            broadcastState({ 'zoom.state': 'zooming' });
-            showToast("Zoom gestartet (25s)...");
-            updateUI();
-        };
-
-        window.revealZoom = function() {
-            localSessionData.zoom.state = 'revealed';
-            broadcastState({ 'zoom.state': 'revealed' });
-            showToast("Bild komplett aufgelöst!");
             updateUI();
         };
 
@@ -1354,7 +1353,6 @@
         }, { once: true });
 
         window.onload = function() {
-            // Pre-load audio engine ready
             initAudio();
         };
     </script>
