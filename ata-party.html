@@ -81,6 +81,10 @@
         }
         .animate-pulse-glow { animation: pulse-glow 2.5s infinite ease-in-out; }
 
+        @keyframes fall {
+            to { transform: translateY(110vh) rotate(720deg); }
+        }
+
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: var(--dark-bg); }
         ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
@@ -118,6 +122,19 @@
 
     <!-- Toast Notifications Container -->
     <div id="toast-container"></div>
+
+    <!-- ADMIN RESET MODAL -->
+    <div id="admin-reset-modal" class="hidden fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-gray-800 p-8 rounded-3xl border-2 border-red-500 shadow-[0_0_50px_rgba(239,68,68,0.4)] max-w-md w-full text-center">
+            <i class="fa-solid fa-triangle-exclamation text-7xl text-red-500 mb-6 animate-pulse"></i>
+            <h3 class="text-3xl font-bold text-white mb-3 gameshow-font">Alles zurücksetzen?</h3>
+            <p class="text-gray-300 mb-8 font-semibold">Möchtest du das gesamte Spiel auf den Anfangszustand setzen? Punkte, Warteschlangen und gestellte Fragen werden gelöscht!</p>
+            <div class="flex gap-4">
+                <button onclick="closeResetModal()" class="flex-1 bg-gray-600 hover:bg-gray-500 py-4 rounded-xl font-bold text-white transition text-lg">Abbrechen</button>
+                <button onclick="executeReset()" class="flex-1 bg-red-600 hover:bg-red-500 py-4 rounded-xl font-bold text-white shadow-[0_0_15px_rgba(239,68,68,0.5)] transition text-lg">Ja, Reset</button>
+            </div>
+        </div>
+    </div>
 
     <!-- ROLE SELECT SCREEN -->
     <div id="screen-role-select" class="w-full h-full flex flex-col items-center justify-between p-6 z-10">
@@ -339,6 +356,17 @@
                 </div>
             </div>
 
+            <!-- WINNER EVALUATION VIEW -->
+            <div id="view-winner" class="hidden w-full h-full flex flex-col items-center justify-center relative overflow-hidden bg-gradient-to-b from-gray-900 to-black">
+                <h2 class="text-6xl md:text-8xl gameshow-font text-white mb-8 animate-bounce drop-shadow-[0_0_20px_rgba(255,255,255,0.8)] z-10">SIEGEREHRUNG</h2>
+                <div id="winner-display-team" class="text-7xl md:text-9xl font-black text-yellow-400 gameshow-font text-center uppercase drop-shadow-[0_0_40px_rgba(250,204,21,1)] z-10 p-8 border-8 border-yellow-400 rounded-3xl bg-black/50 backdrop-blur transition-all duration-500">
+                    TEAM ...
+                </div>
+                <div id="winner-display-score" class="mt-8 text-4xl text-white font-bold z-10 bg-gray-900/80 px-8 py-4 rounded-full border border-gray-600 shadow-2xl">
+                    ... Punkte
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -394,10 +422,21 @@
                 <button id="btn-scene-game5" onclick="setGameState('game5')" class="w-full text-left px-4 py-3 rounded-xl bg-gray-700 hover:bg-purple-600 transition font-bold text-sm flex items-center gap-3">
                     <i class="fa-solid fa-user-tie text-purple-400 w-5"></i> 6. Lehrer Pixel
                 </button>
+                <button id="btn-scene-winner" onclick="setGameState('winner')" class="w-full text-left px-4 py-3 rounded-xl bg-gray-700 hover:bg-purple-600 transition font-bold text-sm flex items-center gap-3">
+                    <i class="fa-solid fa-trophy text-yellow-400 w-5"></i> 7. Siegerehrung
+                </button>
 
-                <div class="mt-auto pt-4 border-t border-gray-700">
+                <div class="mt-auto pt-4 border-t border-gray-700 flex flex-col gap-2">
+                    <button onclick="toggleMusic()" class="w-full text-xs text-gray-400 bg-gray-800 hover:bg-gray-700 py-2 rounded-lg border border-gray-600 transition flex items-center justify-center group relative overflow-hidden">
+                        <i class="fa-solid fa-music mr-2 relative z-10"></i> 
+                        <span class="relative z-10">Party Musik: <span id="admin-music-status" class="font-bold">AUS</span></span>
+                        <div id="admin-music-bg" class="absolute inset-0 bg-blue-600 opacity-0 transition-opacity"></div>
+                    </button>
                     <button onclick="testAudio()" class="w-full text-xs text-gray-400 hover:text-white bg-gray-700/50 py-2 rounded-lg border border-gray-600">
                         <i class="fa-solid fa-volume-high mr-1"></i> Sound Test
+                    </button>
+                    <button onclick="confirmReset()" class="w-full text-xs text-red-400 hover:text-white bg-red-950/50 hover:bg-red-900 py-2 rounded-lg border border-red-800 transition shadow-[0_0_10px_rgba(153,27,27,0.3)] mt-2">
+                        <i class="fa-solid fa-triangle-exclamation mr-1"></i> ALLES ZURÜCKSETZEN
                     </button>
                 </div>
             </div>
@@ -466,14 +505,32 @@
                 <!-- OTHER GAME CONTROLS -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Quiz Control -->
-                    <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700">
-                        <h3 class="font-bold text-gray-200 mb-3 flex items-center gap-2">
-                            <i class="fa-solid fa-question-circle text-pink-400"></i> Quiz Steuerung
+                    <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700 md:col-span-2 shadow-xl">
+                        <h3 class="font-bold text-gray-200 mb-4 flex items-center gap-2 text-lg">
+                            <i class="fa-solid fa-list-check text-pink-400"></i> Quiz Fragen-Manager
                         </h3>
-                        <textarea id="admin-question-input" rows="2" placeholder="Frage hier eingeben..." class="w-full bg-gray-900 border border-gray-600 rounded-xl p-3 text-white text-sm mb-3 focus:outline-none focus:border-purple-500"></textarea>
-                        <button onclick="updateQuestion()" class="w-full bg-purple-600 hover:bg-purple-500 py-3 rounded-xl font-bold text-sm transition">
-                            Auf Leinwand anzeigen
-                        </button>
+                        <div class="flex flex-col md:flex-row gap-6">
+                            <div class="flex-1">
+                                <label class="text-xs text-gray-400 mb-2 block font-bold uppercase tracking-wider">Fragen-Liste (eine pro Zeile)</label>
+                                <textarea id="admin-questions-list" rows="5" placeholder="Wer bin ich?&#10;Was ist 1+1?" class="w-full bg-gray-900 border border-gray-600 rounded-xl p-3 text-white text-sm focus:outline-none focus:border-purple-500 whitespace-pre-wrap"></textarea>
+                                <button onclick="saveQuestionsList()" class="w-full mt-2 bg-gray-700 hover:bg-gray-600 active:scale-95 py-2.5 rounded-xl font-bold text-sm text-white transition shadow">
+                                    <i class="fa-solid fa-save mr-1"></i> Liste Speichern
+                                </button>
+                            </div>
+                            <div class="flex-1 flex flex-col justify-center bg-gray-900 p-5 rounded-xl border border-gray-700 relative">
+                                <div class="text-[10px] text-gray-500 mb-2 uppercase tracking-widest font-black">Aktuelle Frage (Vorschau):</div>
+                                <div id="admin-current-question-preview" class="text-xl font-bold text-pink-400 mb-4 min-h-[60px] flex items-center leading-tight">Keine Frage gewählt</div>
+                                
+                                <div class="flex items-center justify-between mt-auto mb-4 bg-gray-800 p-2 rounded-lg border border-gray-600">
+                                    <button onclick="prevQuestion()" class="bg-gray-700 hover:bg-gray-600 active:scale-90 px-4 py-2 rounded-lg text-white shadow transition"><i class="fa-solid fa-chevron-left"></i> Zurück</button>
+                                    <span id="admin-current-q-index" class="text-sm font-black text-gray-300">0 / 0</span>
+                                    <button onclick="nextQuestion()" class="bg-gray-700 hover:bg-gray-600 active:scale-90 px-4 py-2 rounded-lg text-white shadow transition">Vor <i class="fa-solid fa-chevron-right"></i></button>
+                                </div>
+                                <button onclick="showCurrentQuestion()" class="w-full bg-purple-600 hover:bg-purple-500 py-4 rounded-xl font-black text-lg shadow-[0_0_20px_rgba(147,51,234,0.4)] transition active:scale-95 flex justify-center items-center gap-2">
+                                    <i class="fa-solid fa-desktop"></i> Auf Leinwand anzeigen
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Zoom Control -->
@@ -584,11 +641,14 @@
             viggoResults: [],
             teams: { "ATA 25-28": 0, "ATA 26-29": 0 },
             questionText: "Willkommen beim Quiz!",
+            questionsList: [],
+            currentQuestionIndex: 0,
             zoom: { url: "", state: "hidden", startTime: 0, duration: 25000, pauseElapsed: 0 },
             stopwatchRunning: false,
             stopwatchStartTime: 0,
             stopwatchTime: 0,
             viggoWinnerData: null,
+            bgmPlaying: false,
             targetUrl: window.location.href.split('#')[0]
         };
 
@@ -599,6 +659,10 @@
         let loadedPixelUrl = "";
         let qrCodeInstance = null;
         let lastBuzzerUid = null;
+        
+        let bgmTonePlaying = false;
+        let kick, bass, hihat, bgmLoop;
+        let confettiInterval = null;
 
         let synthBuzzer, synthCorrect, synthWrong, synthWin;
         let audioUnlocked = false;
@@ -613,6 +677,23 @@
                 synthCorrect.volume.value = -4;
                 synthWrong = new Tone.Synth({ oscillator: { type: "sawtooth" }, envelope: { attack: 0.05, decay: 0.3, sustain: 0, release: 0.2 } }).toDestination();
                 synthWin = new Tone.PolySynth(Tone.Synth).toDestination();
+
+                if (!kick) {
+                    kick = new Tone.MembraneSynth().toDestination();
+                    bass = new Tone.FMSynth({ harmonicity: 0.5, modulationIndex: 1.2, oscillator: { type: "sawtooth" }, envelope: { attack: 0.01, decay: 0.2, sustain: 0.1, release: 1 } }).toDestination();
+                    hihat = new Tone.MetalSynth({ frequency: 200, envelope: { attack: 0.001, decay: 0.1, release: 0.01 }, harmonicity: 5.1, modulationIndex: 32, resonance: 4000, octaves: 1.5 }).toDestination();
+                    kick.volume.value = -8; bass.volume.value = -16; hihat.volume.value = -20;
+
+                    let step = 0;
+                    bgmLoop = new Tone.Loop((time) => {
+                        if (step % 4 === 0) kick.triggerAttackRelease("C1", "8n", time);
+                        if (step % 2 !== 0) hihat.triggerAttackRelease("32n", time, 0.1);
+                        if (step % 16 === 0 || step % 16 === 6 || step % 16 === 10) bass.triggerAttackRelease("C2", "8n", time);
+                        else if (step % 16 === 14) bass.triggerAttackRelease("Eb2", "8n", time);
+                        step++;
+                    }, "16n");
+                    Tone.Transport.bpm.value = 125;
+                }
             } catch(e) {
                 console.warn("Tone JS Audio lock", e);
             }
@@ -638,6 +719,57 @@
             playSound('correct');
             showToast("Sound test abgespielt!");
         };
+
+        window.playBGM = async function() {
+            await initAudio();
+            if(!bgmTonePlaying && bgmLoop) {
+                Tone.Transport.start();
+                bgmLoop.start(0);
+                bgmTonePlaying = true;
+            }
+        };
+
+        window.stopBGM = function() {
+            if(bgmTonePlaying && bgmLoop) {
+                bgmLoop.stop();
+                Tone.Transport.stop();
+                bgmTonePlaying = false;
+            }
+        };
+
+        window.toggleMusic = async function() {
+            await initAudio();
+            const newState = !localSessionData.bgmPlaying;
+            broadcastState({ bgmPlaying: newState });
+            showToast(newState ? "Party Musik AKTIVIERT" : "Party Musik GESTOPPT");
+            updateUI();
+        };
+
+        function startConfetti() {
+            if(confettiInterval) return;
+            const container = document.getElementById('view-winner');
+            confettiInterval = setInterval(() => {
+                const conf = document.createElement('i');
+                const icons = ['fa-star', 'fa-trophy', 'fa-heart', 'fa-bolt', 'fa-music', 'fa-gift'];
+                conf.className = `fa-solid ${icons[Math.floor(Math.random()*icons.length)]} absolute text-3xl z-0 opacity-70`;
+                conf.style.left = Math.random() * 100 + 'vw';
+                conf.style.top = '-50px';
+                const colors = ['#facc15', '#ec4899', '#06b6d4', '#84cc16', '#a855f7'];
+                conf.style.color = colors[Math.floor(Math.random()*colors.length)];
+                conf.style.animation = `fall ${Math.random() * 2 + 2}s linear forwards`;
+                container.appendChild(conf);
+                setTimeout(() => { if(conf.parentNode) conf.remove(); }, 4000);
+            }, 100);
+        }
+
+        function stopConfetti() {
+            if(confettiInterval) clearInterval(confettiInterval);
+            confettiInterval = null;
+            const container = document.getElementById('view-winner');
+            if(container) {
+                container.querySelectorAll('i.fa-solid').forEach(el => el.remove());
+            }
+        }
 
         function showToast(msg) {
             const container = document.getElementById('toast-container');
@@ -774,11 +906,41 @@
                 const viewEl = document.getElementById(activeViewId);
                 if(viewEl) viewEl.classList.remove('hidden');
 
-                const titles = { lobby: "Lobby", game1: "Blind Ertasten", game2: "Quiz", game3: "Gegenstand Zoom", game4: "Viggo-Trinken", game5: "Lehrer Pixelation" };
+                const titles = { lobby: "Lobby", game1: "Blind Ertasten", game2: "Quiz", game3: "Gegenstand Zoom", game4: "Viggo-Trinken", game5: "Lehrer Pixelation", winner: "Siegerehrung" };
                 document.getElementById('live-game-title').innerText = titles[localSessionData.view] || "Gameshow";
+
+                if (localSessionData.bgmPlaying && !bgmTonePlaying) {
+                    playBGM();
+                } else if (!localSessionData.bgmPlaying && bgmTonePlaying) {
+                    stopBGM();
+                }
 
                 if(localSessionData.view === 'game2') {
                     document.getElementById('display-question').innerText = localSessionData.questionText || "...";
+                }
+
+                if(localSessionData.view === 'winner') {
+                    const score1 = localSessionData.teams["ATA 25-28"] || 0;
+                    const score2 = localSessionData.teams["ATA 26-29"] || 0;
+                    const teamEl = document.getElementById('winner-display-team');
+                    const scoreEl = document.getElementById('winner-display-score');
+                    
+                    if(score1 > score2) {
+                        teamEl.innerText = "ATA 25-28";
+                        teamEl.className = "text-7xl md:text-9xl font-black text-blue-400 gameshow-font text-center uppercase drop-shadow-[0_0_40px_rgba(96,165,250,1)] z-10 p-8 border-8 border-blue-500 rounded-3xl bg-black/50 backdrop-blur transition-all duration-500";
+                        scoreEl.innerText = `${score1} Punkte (Mittelkurs)`;
+                    } else if(score2 > score1) {
+                        teamEl.innerText = "ATA 26-29";
+                        teamEl.className = "text-7xl md:text-9xl font-black text-green-400 gameshow-font text-center uppercase drop-shadow-[0_0_40px_rgba(74,222,128,1)] z-10 p-8 border-8 border-green-500 rounded-3xl bg-black/50 backdrop-blur transition-all duration-500";
+                        scoreEl.innerText = `${score2} Punkte (Unterkurs)`;
+                    } else {
+                        teamEl.innerText = "UNENTSCHIEDEN!";
+                        teamEl.className = "text-5xl md:text-7xl font-black text-white gameshow-font text-center uppercase drop-shadow-[0_0_40px_rgba(255,255,255,0.8)] z-10 p-8 border-8 border-white rounded-3xl bg-black/50 backdrop-blur transition-all duration-500";
+                        scoreEl.innerText = `${score1} Punkte Gleichstand`;
+                    }
+                    startConfetti();
+                } else {
+                    stopConfetti();
                 }
 
                 if (localSessionData.view === 'game3') {
@@ -848,7 +1010,7 @@
                 document.getElementById('admin-score-team1').innerText = score1;
                 document.getElementById('admin-score-team2').innerText = score2;
 
-                ['lobby', 'game1', 'game2', 'game3', 'game4', 'game5'].forEach(sc => {
+                ['lobby', 'game1', 'game2', 'game3', 'game4', 'game5', 'winner'].forEach(sc => {
                     const btn = document.getElementById(`btn-scene-${sc}`);
                     if (btn) {
                         if (localSessionData.view === sc) {
@@ -858,6 +1020,27 @@
                         }
                     }
                 });
+
+                const musicStatus = document.getElementById('admin-music-status');
+                const musicBg = document.getElementById('admin-music-bg');
+                if (musicStatus && musicBg) {
+                    musicStatus.innerText = localSessionData.bgmPlaying ? "AN" : "AUS";
+                    musicStatus.parentElement.className = localSessionData.bgmPlaying 
+                        ? "w-full text-xs text-white py-2 rounded-lg border border-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.5)] transition flex items-center justify-center group relative overflow-hidden"
+                        : "w-full text-xs text-gray-400 bg-gray-800 hover:bg-gray-700 py-2 rounded-lg border border-gray-600 transition flex items-center justify-center group relative overflow-hidden";
+                    musicBg.style.opacity = localSessionData.bgmPlaying ? "1" : "0";
+                }
+
+                const qListEl = document.getElementById('admin-questions-list');
+                if(qListEl && document.activeElement !== qListEl) {
+                    qListEl.value = (localSessionData.questionsList || []).join('\n');
+                }
+                const list = localSessionData.questionsList || [];
+                const idx = localSessionData.currentQuestionIndex || 0;
+                const idxEl = document.getElementById('admin-current-q-index');
+                if(idxEl) idxEl.innerText = list.length > 0 ? `${idx + 1} / ${list.length}` : `0 / 0`;
+                const prevEl = document.getElementById('admin-current-question-preview');
+                if(prevEl) prevEl.innerText = (list.length > 0 && idx < list.length) ? list[idx] : "Keine Frage gewählt";
 
                 if (localSessionData.view === 'game4') {
                     document.getElementById('admin-panel-buzzer').classList.add('hidden');
@@ -1356,12 +1539,83 @@
             updateUI();
         };
 
-        window.updateQuestion = function() {
-            const text = document.getElementById('admin-question-input').value.trim();
-            if(!text) return;
-            localSessionData.questionText = text;
-            broadcastState({ questionText: text });
-            showToast("Frage auf Leinwand gezeigt!");
+        window.saveQuestionsList = function() {
+            const listRaw = document.getElementById('admin-questions-list').value;
+            const list = listRaw.split('\n').map(q => q.trim()).filter(q => q.length > 0);
+            localSessionData.questionsList = list;
+            localSessionData.currentQuestionIndex = 0;
+            broadcastState({ questionsList: list, currentQuestionIndex: 0 });
+            showToast(`${list.length} Fragen gespeichert!`);
+            updateUI();
+        };
+
+        window.nextQuestion = function() {
+            const list = localSessionData.questionsList || [];
+            let idx = localSessionData.currentQuestionIndex || 0;
+            if(idx < list.length - 1) {
+                idx++;
+                localSessionData.currentQuestionIndex = idx;
+                broadcastState({ currentQuestionIndex: idx });
+                updateUI();
+            }
+        };
+
+        window.prevQuestion = function() {
+            let idx = localSessionData.currentQuestionIndex || 0;
+            if(idx > 0) {
+                idx--;
+                localSessionData.currentQuestionIndex = idx;
+                broadcastState({ currentQuestionIndex: idx });
+                updateUI();
+            }
+        };
+
+        window.showCurrentQuestion = function() {
+            const list = localSessionData.questionsList || [];
+            const idx = localSessionData.currentQuestionIndex || 0;
+            if(list.length > 0 && idx < list.length) {
+                const text = list[idx];
+                localSessionData.questionText = text;
+                broadcastState({ questionText: text });
+                showToast("Frage auf Leinwand übertragen!");
+                updateUI();
+            } else {
+                showToast("Bitte erst eine Frage auswählen!");
+            }
+        };
+
+        window.confirmReset = function() {
+            document.getElementById('admin-reset-modal').classList.remove('hidden');
+        };
+
+        window.closeResetModal = function() {
+            document.getElementById('admin-reset-modal').classList.add('hidden');
+        };
+
+        window.executeReset = function() {
+            document.getElementById('admin-reset-modal').classList.add('hidden');
+            stopBGM();
+            stopConfetti();
+            localSessionData = {
+                view: 'lobby',
+                buzzerActive: false,
+                buzzerUnlockTime: 0,
+                buzzerQueue: [],
+                viggoResults: [],
+                teams: { "ATA 25-28": 0, "ATA 26-29": 0 },
+                questionText: "Willkommen beim Quiz!",
+                questionsList: [],
+                currentQuestionIndex: 0,
+                zoom: { url: "", state: "hidden", startTime: 0, duration: 25000, pauseElapsed: 0 },
+                stopwatchRunning: false,
+                stopwatchStartTime: 0,
+                stopwatchTime: 0,
+                viggoWinnerData: null,
+                bgmPlaying: false,
+                targetUrl: localSessionData.targetUrl || window.location.href.split('#')[0]
+            };
+            broadcastState(localSessionData);
+            showToast("⚠️ ALLES WURDE ZURÜCKGESETZT!");
             updateUI();
         };
 
