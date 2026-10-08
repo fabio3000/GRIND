@@ -607,7 +607,6 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-        // WICHTIG: arrayUnion hinzugefügt um Race Conditions beim Buzzer zu verhindern!
         import { getFirestore, doc, setDoc, onSnapshot, arrayUnion } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -631,7 +630,6 @@
         const SESSION_ID = 'ata_welcome_party_v5';
         const sessionDocRef = doc(db, 'games', SESSION_ID);
 
-        // BroadcastChannel for instant local offline tab sync fallback
         const syncChannel = new BroadcastChannel('ata_party_bc_channel');
 
         let localSessionData = {
@@ -788,7 +786,6 @@
         async function broadcastState(data) {
             try { syncChannel.postMessage(data); } catch(e){}
             try {
-                // Sichert den direkten Datenupload
                 await setDoc(sessionDocRef, data, { merge: true });
             } catch(e) {
                 console.warn("Firestore save error, fallback to local sync", e);
@@ -806,7 +803,6 @@
             role = selectedRole;
             document.getElementById('screen-role-select').classList.add('hidden');
             
-            // Audio laden blockiert nicht mehr das UI/die Netzwerkanmeldung! (Verhinderte Hänger)
             initAudio().catch(e => console.warn(e)); 
 
             try {
@@ -864,8 +860,6 @@
         };
 
         function setupSessionSync() {
-            // FIX: getDoc wurde entfernt um Lade-Hänger ("hangs for several seconds") zu verhindern.
-            // onSnapshot feuert sofort wenn lokaler Cache da ist, und updatet dann live.
             onSnapshot(sessionDocRef, (docSnap) => {
                 if (docSnap.exists()) {
                     localSessionData = { ...localSessionData, ...docSnap.data() };
@@ -879,7 +873,7 @@
                 console.warn("Firestore sync error:", error);
             });
             
-            updateUI(); // Erster Render
+            updateUI();
         }
 
         function updateUI() {
@@ -935,7 +929,6 @@
                 if (localSessionData.view === 'game3') renderZoomImage();
                 else if (localSessionData.view === 'game5') renderPixelImage();
 
-                // Buzzer overlay on Live View
                 const overlay = document.getElementById('live-winner-overlay');
                 if (currentBuzzer && localSessionData.view !== 'game4') {
                     document.getElementById('live-winner-name').innerText = currentBuzzer.name;
@@ -1017,7 +1010,6 @@
                     musicBg.style.opacity = localSessionData.bgmPlaying ? "1" : "0";
                 }
 
-                // FIX QUIZ BUG: Überschreibt Eingaben nicht andauernd!
                 const qListEl = document.getElementById('admin-questions-list');
                 if(qListEl && !qListEl.dataset.loaded) {
                     if (localSessionData.questionsList && localSessionData.questionsList.length > 0) {
@@ -1102,16 +1094,20 @@
                 const inQueue = (localSessionData.buzzerQueue || []).find(b => b.uid === myPlayerId);
                 const inViggo = (localSessionData.viggoResults || []).find(b => b.uid === myPlayerId);
 
+                // FIX: Sauberer Zustand für alle Handys unabhängig vom Team oder Cache
                 if (inQueue || inViggo) {
-                    buzzerBtn.classList.add('disabled'); buzzerBtn.disabled = true;
+                    buzzerBtn.classList.add('disabled'); 
+                    buzzerBtn.disabled = true;
                     statusText.innerText = "GEBUZZERT!";
                     statusText.className = "absolute top-4 text-3xl font-black text-center w-full uppercase tracking-widest text-pink-500 animate-bounce";
-                } else if (localSessionData.buzzerActive) {
-                    buzzerBtn.classList.remove('disabled'); buzzerBtn.disabled = false;
+                } else if (localSessionData.buzzerActive === true) {
+                    buzzerBtn.classList.remove('disabled'); 
+                    buzzerBtn.disabled = false;
                     statusText.innerText = "DRÜCKEN!";
                     statusText.className = "absolute top-4 text-4xl font-black text-center w-full uppercase tracking-widest text-green-400 animate-pulse drop-shadow-[0_0_10px_rgba(74,222,128,0.8)]";
                 } else {
-                    buzzerBtn.classList.add('disabled'); buzzerBtn.disabled = true;
+                    buzzerBtn.classList.add('disabled'); 
+                    buzzerBtn.disabled = true;
                     statusText.innerText = "Gesperrt";
                     statusText.className = "absolute top-4 text-2xl font-bold text-center w-full uppercase tracking-widest text-gray-500";
                 }
@@ -1410,6 +1406,7 @@
             document.getElementById('screen-player-main').classList.add('hidden');
             document.getElementById('screen-player-main').classList.remove('flex');
             document.getElementById('screen-player-login').classList.remove('hidden');
+            document.getElementById('screen-player-login').classList.remove('flex');
             document.getElementById('screen-player-login').classList.add('flex');
         };
 
@@ -1425,12 +1422,10 @@
                 const elapsed = localSessionData.stopwatchStartTime ? Math.max(0.1, (Date.now() - localSessionData.stopwatchStartTime) / 1000) : 0;
                 const newRes = { uid: myPlayerId, name: window.myPlayerName, team: window.myPlayerTeam, time: elapsed };
                 
-                // Optimistic Local Update
                 const updatedList = [...(localSessionData.viggoResults || []), newRes];
                 localSessionData.viggoResults = updatedList;
                 updateUI();
                 
-                // Atomare Server Update verhinder Overwrite (Bug-Fix 2)
                 try { syncChannel.postMessage({ viggoResults: updatedList }); } catch(e){}
                 setDoc(sessionDocRef, { viggoResults: arrayUnion(newRes) }, { merge: true }).catch(e=>console.warn(e));
                 
@@ -1441,12 +1436,10 @@
                 if (existingIndex === -1) {
                     const newEntry = { uid: myPlayerId, name: window.myPlayerName, team: window.myPlayerTeam, time: reactTime };
                     
-                    // Optimistic Local Update
                     const newQueue = [...(localSessionData.buzzerQueue || []), newEntry];
                     localSessionData.buzzerQueue = newQueue;
                     updateUI();
                     
-                    // Atomare Server Update verhinder Overwrite (Bug-Fix 2)
                     try { syncChannel.postMessage({ buzzerQueue: newQueue }); } catch(e){}
                     setDoc(sessionDocRef, { buzzerQueue: arrayUnion(newEntry) }, { merge: true }).catch(e=>console.warn(e));
                 }
@@ -1472,11 +1465,14 @@
             localSessionData.buzzerActive = true;
             localSessionData.buzzerQueue = [];
             localSessionData.buzzerUnlockTime = Date.now();
-            broadcastState({
+            
+            // FIX: Explizite boolische Werte und Synchronisation für alle Clients
+            const payload = {
                 buzzerActive: true,
                 buzzerQueue: [],
-                buzzerUnlockTime: Date.now()
-            });
+                buzzerUnlockTime: localSessionData.buzzerUnlockTime
+            };
+            broadcastState(payload);
             showToast("Buzzer ist JETZT SCHARF!");
             updateUI();
         };
@@ -1484,7 +1480,13 @@
         window.resetBuzzer = function() {
             localSessionData.buzzerActive = false;
             localSessionData.buzzerQueue = [];
-            broadcastState({ buzzerActive: false, buzzerQueue: [] });
+            
+            // FIX: Explizit auf false setzen für alle Handys
+            const payload = {
+                buzzerActive: false,
+                buzzerQueue: []
+            };
+            broadcastState(payload);
             showToast("Buzzer gesperrt & zurückgesetzt");
             updateUI();
         };
@@ -1535,7 +1537,6 @@
             localSessionData.questionsList = list;
             localSessionData.currentQuestionIndex = 0;
             
-            // Marker setzen, dass wir nun die Daten haben. Schützt vor Overwrites.
             document.getElementById('admin-questions-list').dataset.loaded = "true";
             
             broadcastState({ questionsList: list, currentQuestionIndex: 0 });
@@ -1610,7 +1611,7 @@
             };
             
             const qListEl = document.getElementById('admin-questions-list');
-            if(qListEl) qListEl.dataset.loaded = ""; // Reset protection
+            if(qListEl) qListEl.dataset.loaded = "";
             
             broadcastState(localSessionData);
             showToast("⚠️ ALLES WURDE ZURÜCKGESETZT!");
@@ -1693,7 +1694,6 @@
             updateUI();
         };
 
-        // Komplett fehlender Code aus Original wurde wiederhergestellt
         window.evaluateViggo = function() {
             const results = localSessionData.viggoResults || [];
             if (results.length === 0) {
