@@ -145,7 +145,6 @@
             <p class="text-lg md:text-xl text-gray-300 font-semibold">Willkommen zur Welcome Party!</p>
         </div>
         
-        <!-- Big Player Button in Center -->
         <div class="w-full max-w-md flex flex-col items-center justify-center my-auto">
             <button onclick="selectRole('player')" class="w-full bg-pink-600 hover:bg-pink-500 border-4 border-pink-400 rounded-3xl p-8 hover:scale-105 active:scale-95 transition flex flex-col items-center justify-center gap-4 shadow-[0_0_40px_rgba(236,72,153,0.5)] group">
                 <i class="fa-solid fa-mobile-screen-button text-6xl text-white group-hover:animate-bounce"></i>
@@ -153,7 +152,6 @@
             </button>
         </div>
 
-        <!-- Host / Admin Controls at Bottom -->
         <div class="flex flex-wrap justify-center gap-4 opacity-70 hover:opacity-100 transition duration-300 mb-2">
             <button onclick="selectRole('live')" class="bg-gray-800 border border-cyan-500/50 rounded-xl px-5 py-2.5 text-xs text-cyan-400 font-bold hover:bg-cyan-950 transition">
                 <i class="fa-solid fa-desktop mr-1"></i> Live Beamer
@@ -213,7 +211,7 @@
             </div>
         </div>
 
-        <button onclick="logoutPlayer()" class="absolute bottom-4 left-4 text-xs text-gray-400 hover:text-white bg-gray-800/80 px-3 py-2 rounded-lg border border-gray-700">
+        <button onclick="logoutPlayer()" class="absolute bottom-4 left-4 text-xs text-gray-400 hover:text-white bg-gray-800/80 px-3 py-2 rounded-lg border border-gray-700 z-50">
             <i class="fa-solid fa-arrow-right-from-bracket mr-1"></i> Team/Name ändern
         </button>
         
@@ -293,7 +291,7 @@
                 </h2>
             </div>
 
-            <!-- ZOOM GAME DISPLAY VIEW -->
+            <!-- ZOOM GAME DISPLAY VIEW (NOW GAME 5: ZOOM) -->
             <div id="view-game-zoom" class="hidden w-full h-full flex flex-col items-center justify-center p-4 relative">
                 <div class="zoom-image-container relative w-full h-full">
                     <img id="zoom-img-element" src="" class="zoom-image" style="transform: scale(15); filter: blur(20px);" alt="Zoom Object">
@@ -303,7 +301,7 @@
                 </div>
             </div>
 
-            <!-- PIXEL GAME DISPLAY VIEW (GAME 5: LEHRER PIXEL) -->
+            <!-- PIXEL GAME DISPLAY VIEW (NOW GAME 3: PIXEL) -->
             <div id="view-game-pixel" class="hidden w-full h-full flex flex-col items-center justify-center p-4 relative">
                 <div class="zoom-image-container relative w-full h-full flex items-center justify-center">
                     <canvas id="pixel-canvas-element" class="max-w-full max-h-full object-contain rounded-xl shadow-2xl"></canvas>
@@ -313,7 +311,7 @@
                 </div>
             </div>
 
-            <!-- Viggo Leaderboard View -->
+            <!-- Viggo Leaderboard View (GAME 4) -->
             <div id="view-game4" class="hidden w-full h-full flex flex-col items-center justify-start pt-6">
                 <div class="flex items-center justify-center gap-8 mb-6">
                     <i class="fa-solid fa-syringe text-6xl text-green-500 animate-bounce"></i>
@@ -414,13 +412,13 @@
                     <i class="fa-solid fa-question text-purple-400 w-5"></i> 3. Quiz Question
                 </button>
                 <button id="btn-scene-game3" onclick="setGameState('game3')" class="w-full text-left px-4 py-3 rounded-xl bg-gray-700 hover:bg-purple-600 transition font-bold text-sm flex items-center gap-3">
-                    <i class="fa-solid fa-magnifying-glass text-purple-400 w-5"></i> 4. Gegenstand Zoom
+                    <i class="fa-solid fa-magnifying-glass text-purple-400 w-5"></i> 4. Pixel
                 </button>
                 <button id="btn-scene-game4" onclick="setGameState('game4')" class="w-full text-left px-4 py-3 rounded-xl bg-gray-700 hover:bg-purple-600 transition font-bold text-sm flex items-center gap-3">
                     <i class="fa-solid fa-syringe text-purple-400 w-5"></i> 5. Viggo-Trinken
                 </button>
                 <button id="btn-scene-game5" onclick="setGameState('game5')" class="w-full text-left px-4 py-3 rounded-xl bg-gray-700 hover:bg-purple-600 transition font-bold text-sm flex items-center gap-3">
-                    <i class="fa-solid fa-user-tie text-purple-400 w-5"></i> 6. Lehrer Pixel
+                    <i class="fa-solid fa-user-tie text-purple-400 w-5"></i> 6. Zoom
                 </button>
                 <button id="btn-scene-winner" onclick="setGameState('winner')" class="w-full text-left px-4 py-3 rounded-xl bg-gray-700 hover:bg-purple-600 transition font-bold text-sm flex items-center gap-3">
                     <i class="fa-solid fa-trophy text-yellow-400 w-5"></i> 7. Siegerehrung
@@ -472,7 +470,7 @@
                         
                         <div class="flex w-full gap-4">
                             <button onclick="approveAnswer()" class="flex-1 bg-green-500 hover:bg-green-400 text-black font-black py-4 rounded-xl text-lg shadow-[0_0_15px_rgba(34,197,94,0.4)] transition">
-                                <i class="fa-solid fa-check mr-2"></i> RICHTIG (+1 Pkt)
+                                <i class="fa-solid fa-check mr-2"></i> RICHTIG (+<span id="admin-pts-indicator">1</span> Pkt)
                             </button>
                             <button onclick="denyAnswer()" class="flex-1 bg-red-500 hover:bg-red-400 text-white font-black py-4 rounded-xl text-lg shadow-[0_0_15px_rgba(239,68,68,0.4)] transition">
                                 <i class="fa-solid fa-xmark mr-2"></i> FALSCH (Nächster)
@@ -533,10 +531,10 @@
                         </div>
                     </div>
 
-                    <!-- Zoom Control -->
+                    <!-- Zoom / Pixel Control -->
                     <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700">
                         <h3 class="font-bold text-gray-200 mb-3 flex items-center gap-2">
-                            <i class="fa-solid fa-magnifying-glass text-cyan-400"></i> Zoom Bild Controls
+                            <i class="fa-solid fa-image text-cyan-400"></i> Bild Reveal Controls (Pixel / Zoom)
                         </h3>
                         
                         <!-- File Upload & URL Inputs -->
@@ -574,7 +572,7 @@
                                 <i class="fa-solid fa-eye"></i> 1. Bild Laden
                             </button>
                             <button onclick="startZoom()" class="bg-green-600 hover:bg-green-500 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-1 shadow">
-                                <i class="fa-solid fa-play"></i> 2. Zoom Starten
+                                <i class="fa-solid fa-play"></i> 2. Reveal Starten
                             </button>
                         </div>
                         <div class="grid grid-cols-2 gap-2 mb-3">
@@ -783,6 +781,17 @@
             }, 3000);
         }
 
+        function getCurrentGamePoints() {
+            switch(localSessionData.view) {
+                case 'game1': return 1;
+                case 'game2': return 2;
+                case 'game3': return 3;
+                case 'game4': return 4;
+                case 'game5': return 5;
+                default: return 1;
+            }
+        }
+
         async function broadcastState(data) {
             try { syncChannel.postMessage(data); } catch(e){}
             try {
@@ -888,13 +897,13 @@
                 document.querySelectorAll('#screen-live-view [id^="view-"]').forEach(el => el.classList.add('hidden'));
                 
                 let activeViewId = `view-${localSessionData.view}`;
-                if (localSessionData.view === 'game3') activeViewId = 'view-game-zoom';
-                else if (localSessionData.view === 'game5') activeViewId = 'view-game-pixel';
+                if (localSessionData.view === 'game3') activeViewId = 'view-game-pixel';
+                else if (localSessionData.view === 'game5') activeViewId = 'view-game-zoom';
                 
                 const viewEl = document.getElementById(activeViewId);
                 if(viewEl) viewEl.classList.remove('hidden');
 
-                const titles = { lobby: "Lobby", game1: "Blind Ertasten", game2: "Quiz", game3: "Gegenstand Zoom", game4: "Viggo-Trinken", game5: "Lehrer Pixelation", winner: "Siegerehrung" };
+                const titles = { lobby: "Lobby", game1: "Blind Ertasten", game2: "Quiz", game3: "Pixel", game4: "Viggo-Trinken", game5: "Zoom", winner: "Siegerehrung" };
                 document.getElementById('live-game-title').innerText = titles[localSessionData.view] || "Gameshow";
 
                 if (localSessionData.bgmPlaying && !bgmTonePlaying) playBGM();
@@ -926,8 +935,8 @@
                     stopConfetti();
                 }
 
-                if (localSessionData.view === 'game3') renderZoomImage();
-                else if (localSessionData.view === 'game5') renderPixelImage();
+                if (localSessionData.view === 'game3') renderPixelImage();
+                else if (localSessionData.view === 'game5') renderZoomImage();
 
                 const overlay = document.getElementById('live-winner-overlay');
                 if (currentBuzzer && localSessionData.view !== 'game4') {
@@ -988,6 +997,9 @@
             } else if (role === 'admin') {
                 document.getElementById('admin-score-team1').innerText = score1;
                 document.getElementById('admin-score-team2').innerText = score2;
+                
+                const ptsIndicator = document.getElementById('admin-pts-indicator');
+                if(ptsIndicator) ptsIndicator.innerText = getCurrentGamePoints();
 
                 ['lobby', 'game1', 'game2', 'game3', 'game4', 'game5', 'winner'].forEach(sc => {
                     const btn = document.getElementById(`btn-scene-${sc}`);
@@ -1094,7 +1106,6 @@
                 const inQueue = (localSessionData.buzzerQueue || []).find(b => b.uid === myPlayerId);
                 const inViggo = (localSessionData.viggoResults || []).find(b => b.uid === myPlayerId);
 
-                // FIX: Sauberer Zustand für alle Handys unabhängig vom Team oder Cache
                 if (inQueue || inViggo) {
                     buzzerBtn.classList.add('disabled'); 
                     buzzerBtn.disabled = true;
@@ -1325,7 +1336,7 @@
             const zoomObj = { url: url, state: 'hidden', startTime: 0, duration: duration, pauseElapsed: 0 };
             localSessionData.zoom = zoomObj;
             broadcastState({ zoom: zoomObj });
-            showToast("Bild geladen & im Zoom fokussiert!");
+            showToast("Bild geladen!");
             updateUI();
         };
 
@@ -1351,7 +1362,7 @@
             };
             localSessionData.zoom = zoomObj;
             broadcastState({ zoom: zoomObj });
-            showToast(`Zoom gestartet (${duration/1000}s)!`);
+            showToast(`Reveal gestartet (${duration/1000}s)!`);
             updateUI();
         };
 
@@ -1365,7 +1376,7 @@
             };
             localSessionData.zoom = zoomObj;
             broadcastState({ zoom: zoomObj });
-            showToast("Zoom pausiert");
+            showToast("Angehalten");
             updateUI();
         };
 
@@ -1403,10 +1414,14 @@
         window.logoutPlayer = function() {
             localStorage.removeItem('ata_player_name');
             localStorage.removeItem('ata_player_team');
+            window.myPlayerName = null;
+            window.myPlayerTeam = null;
+            document.getElementById('player-name-input').value = '';
+            
             document.getElementById('screen-player-main').classList.add('hidden');
             document.getElementById('screen-player-main').classList.remove('flex');
+            
             document.getElementById('screen-player-login').classList.remove('hidden');
-            document.getElementById('screen-player-login').classList.remove('flex');
             document.getElementById('screen-player-login').classList.add('flex');
         };
 
@@ -1466,7 +1481,6 @@
             localSessionData.buzzerQueue = [];
             localSessionData.buzzerUnlockTime = Date.now();
             
-            // FIX: Explizite boolische Werte und Synchronisation für alle Clients
             const payload = {
                 buzzerActive: true,
                 buzzerQueue: [],
@@ -1481,7 +1495,6 @@
             localSessionData.buzzerActive = false;
             localSessionData.buzzerQueue = [];
             
-            // FIX: Explizit auf false setzen für alle Handys
             const payload = {
                 buzzerActive: false,
                 buzzerQueue: []
@@ -1504,18 +1517,20 @@
         window.approveAnswer = function() {
             if(!localSessionData.buzzerQueue || localSessionData.buzzerQueue.length === 0) return;
             playSound('correct');
+            
+            const pointsToAward = getCurrentGamePoints();
             const winnerTeam = localSessionData.buzzerQueue[0].team;
             const currentScore = (localSessionData.teams && localSessionData.teams[winnerTeam]) || 0;
             
             let teamsUpdate = { ...(localSessionData.teams || {}) };
-            teamsUpdate[winnerTeam] = currentScore + 1;
+            teamsUpdate[winnerTeam] = currentScore + pointsToAward;
 
             localSessionData.teams = teamsUpdate;
             localSessionData.buzzerActive = false;
             localSessionData.buzzerQueue = [];
 
             broadcastState({ teams: teamsUpdate, buzzerActive: false, buzzerQueue: [] });
-            showToast(`+1 Punkt für ${winnerTeam}!`);
+            showToast(`+${pointsToAward} Punkt(e) für ${winnerTeam}!`);
             updateUI();
         };
 
@@ -1714,9 +1729,11 @@
             const winnerData = { avg1, avg2, winnerTeam: winner };
             localSessionData.viggoWinnerData = winnerData;
             
+            const pointsToAward = getCurrentGamePoints();
             let teamsUpdate = { ...(localSessionData.teams || {}) };
+            
             if (winner !== "UNENTSCHIEDEN") {
-                teamsUpdate[winner] = (teamsUpdate[winner] || 0) + 1;
+                teamsUpdate[winner] = (teamsUpdate[winner] || 0) + pointsToAward;
             }
 
             broadcastState({ viggoWinnerData: winnerData, teams: teamsUpdate });
