@@ -183,6 +183,13 @@
                         </div>
                     </label>
                     <label class="cursor-pointer">
+                        <input type="radio" name="team-select" value="Lehrer" class="peer hidden">
+                        <div class="rounded-xl border-2 border-gray-600 p-4 text-center peer-checked:border-yellow-500 peer-checked:bg-yellow-500/20 peer-checked:text-yellow-400 transition">
+                            <div class="font-bold text-lg">Lehrer</div>
+                            <div class="text-xs text-gray-400 mt-1">Gäste</div>
+                        </div>
+                    </label>
+                    <label class="cursor-pointer">
                         <input type="radio" name="team-select" value="ATA 26-29" class="peer hidden">
                         <div class="rounded-xl border-2 border-gray-600 p-4 text-center peer-checked:border-green-500 peer-checked:bg-green-500/20 peer-checked:text-green-400 transition">
                             <div class="font-bold text-lg">ATA 26-29</div>
@@ -227,8 +234,8 @@
 
     <!-- LIVE BEAMER VIEW -->
     <div id="screen-live-view" class="hidden w-full h-full flex-col z-10 relative bg-black overflow-hidden">
-        <div class="w-full bg-gray-900/90 border-b border-gray-800 p-6 flex justify-between items-center h-[12%] shadow-2xl relative z-30">
-            <div class="flex items-center gap-4">
+        <div class="w-full bg-gray-900/90 border-b border-gray-800 p-4 flex justify-between items-center h-[12%] shadow-2xl relative z-30">
+            <div class="flex items-center gap-4 w-1/3 justify-start">
                 <div class="flex flex-col items-start">
                     <span class="text-gray-400 font-bold uppercase tracking-widest text-xs">Team Mittelkurs</span>
                     <span class="text-xl md:text-2xl font-black text-blue-400">ATA 25-28</span>
@@ -237,8 +244,16 @@
                     <span id="live-score-team1" class="text-3xl md:text-4xl gameshow-font font-black text-white">0</span>
                 </div>
             </div>
-            <h2 id="live-game-title" class="text-2xl md:text-4xl gameshow-font text-white text-center absolute left-1/2 transform -translate-x-1/2 neon-text-blue">Lobby</h2>
-            <div class="flex items-center gap-4">
+            
+            <div class="flex flex-col items-center justify-center w-1/3">
+                <h2 id="live-game-title" class="text-xl md:text-2xl gameshow-font text-white text-center mb-1 neon-text-blue">Lobby</h2>
+                <div class="bg-yellow-900/50 border-2 border-yellow-500 rounded-xl px-6 py-1 shadow-[0_0_15px_rgba(234,179,8,0.3)] flex gap-3 items-center">
+                    <span class="text-xs text-yellow-400 font-bold uppercase tracking-widest">Lehrer</span>
+                    <span id="live-score-lehrer" class="text-2xl md:text-3xl gameshow-font font-black text-white">0</span>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4 w-1/3 justify-end">
                 <div class="bg-green-900/50 border-2 border-green-500 rounded-xl px-6 py-2 shadow-[0_0_15px_rgba(34,197,94,0.3)]">
                     <span id="live-score-team2" class="text-3xl md:text-4xl gameshow-font font-black text-white">0</span>
                 </div>
@@ -319,13 +334,20 @@
                 </div>
                 
                 <h2 class="text-3xl text-white font-bold mb-6 uppercase tracking-wider">Wer hat getrunken? (Buzzern!)</h2>
-                <div class="w-full max-w-5xl grid grid-cols-2 gap-8 px-4">
+                <div class="w-full max-w-7xl grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 px-4">
                     <div class="bg-blue-900/30 border border-blue-500/50 rounded-2xl p-6">
                         <h3 class="text-xl font-bold text-blue-400 mb-4 border-b border-blue-500/30 pb-2 flex justify-between">
                             <span>ATA 25-28</span>
                             <span class="text-xs font-normal text-gray-400">Mittelkurs</span>
                         </h3>
                         <div id="viggo-list-team1" class="flex flex-col gap-2 max-h-60 overflow-y-auto pr-1"></div>
+                    </div>
+                    <div class="bg-yellow-900/30 border border-yellow-500/50 rounded-2xl p-6">
+                        <h3 class="text-xl font-bold text-yellow-400 mb-4 border-b border-yellow-500/30 pb-2 flex justify-between">
+                            <span>Lehrer</span>
+                            <span class="text-xs font-normal text-gray-400">Gäste</span>
+                        </h3>
+                        <div id="viggo-list-lehrer" class="flex flex-col gap-2 max-h-60 overflow-y-auto pr-1"></div>
                     </div>
                     <div class="bg-green-900/30 border border-green-500/50 rounded-2xl p-6">
                         <h3 class="text-xl font-bold text-green-400 mb-4 border-b border-green-500/30 pb-2 flex justify-between">
@@ -340,14 +362,18 @@
                     <h2 class="text-5xl font-bold text-yellow-400 mb-8 flex items-center gap-4">
                         <i class="fa-solid fa-trophy text-yellow-400"></i> Auswertung
                     </h2>
-                    <div class="flex gap-12 text-center">
-                        <div class="bg-blue-950/80 border border-blue-500/50 p-6 rounded-2xl min-w-[200px]">
+                    <div class="flex gap-8 text-center flex-wrap justify-center">
+                        <div class="bg-blue-950/80 border border-blue-500/50 p-6 rounded-2xl min-w-[180px]">
                             <div class="text-xl text-blue-400 font-bold mb-2">Ø ATA 25-28</div>
-                            <div id="viggo-avg-team1" class="text-5xl font-black text-white">0.0s</div>
+                            <div id="viggo-avg-team1" class="text-4xl font-black text-white">0.0s</div>
                         </div>
-                        <div class="bg-green-950/80 border border-green-500/50 p-6 rounded-2xl min-w-[200px]">
+                        <div class="bg-yellow-950/80 border border-yellow-500/50 p-6 rounded-2xl min-w-[180px]">
+                            <div class="text-xl text-yellow-400 font-bold mb-2">Ø Lehrer</div>
+                            <div id="viggo-avg-lehrer" class="text-4xl font-black text-white">0.0s</div>
+                        </div>
+                        <div class="bg-green-950/80 border border-green-500/50 p-6 rounded-2xl min-w-[180px]">
                             <div class="text-xl text-green-400 font-bold mb-2">Ø ATA 26-29</div>
-                            <div id="viggo-avg-team2" class="text-5xl font-black text-white">0.0s</div>
+                            <div id="viggo-avg-team2" class="text-4xl font-black text-white">0.0s</div>
                         </div>
                     </div>
                     <div id="viggo-winner-text" class="mt-10 text-4xl font-black px-8 py-4 rounded-2xl border"></div>
@@ -360,8 +386,11 @@
                 <div id="winner-display-team" class="text-7xl md:text-9xl font-black text-yellow-400 gameshow-font text-center uppercase drop-shadow-[0_0_40px_rgba(250,204,21,1)] z-10 p-8 border-8 border-yellow-400 rounded-3xl bg-black/50 backdrop-blur transition-all duration-500">
                     TEAM ...
                 </div>
-                <div id="winner-display-score" class="mt-8 text-4xl text-white font-bold z-10 bg-gray-900/80 px-8 py-4 rounded-full border border-gray-600 shadow-2xl">
+                <div id="winner-display-score" class="mt-6 text-4xl text-white font-bold z-10 bg-gray-900/80 px-8 py-4 rounded-full border border-gray-600 shadow-2xl">
                     ... Punkte
+                </div>
+                <div id="top-players-list" class="mt-10 z-10 w-full max-w-4xl px-4 flex justify-center items-center gap-6 flex-wrap">
+                    <!-- Top 3 Players will be injected here -->
                 </div>
             </div>
 
@@ -375,13 +404,21 @@
                 <i class="fa-solid fa-sliders"></i> Admin Dashboard
             </h2>
             
-            <div class="flex items-center gap-6">
+            <div class="flex items-center gap-4 flex-wrap justify-end">
                 <!-- Team 1 Score Controls -->
                 <div class="flex items-center gap-2 bg-gray-800/80 px-3 py-1.5 rounded-xl border border-blue-500/40">
                     <span class="text-blue-400 font-bold text-sm">ATA 25-28:</span>
                     <span id="admin-score-team1" class="text-white text-xl font-bold min-w-[24px] text-center">0</span>
                     <button onclick="adjustScore('ATA 25-28', 1)" class="bg-blue-600 hover:bg-blue-500 text-white w-7 h-7 rounded-lg font-bold text-sm flex items-center justify-center">+</button>
                     <button onclick="adjustScore('ATA 25-28', -1)" class="bg-gray-700 hover:bg-gray-600 text-white w-7 h-7 rounded-lg font-bold text-sm flex items-center justify-center">-</button>
+                </div>
+
+                <!-- Lehrer Score Controls -->
+                <div class="flex items-center gap-2 bg-gray-800/80 px-3 py-1.5 rounded-xl border border-yellow-500/40">
+                    <span class="text-yellow-400 font-bold text-sm">Lehrer:</span>
+                    <span id="admin-score-lehrer" class="text-white text-xl font-bold min-w-[24px] text-center">0</span>
+                    <button onclick="adjustScore('Lehrer', 1)" class="bg-yellow-600 hover:bg-yellow-500 text-white w-7 h-7 rounded-lg font-bold text-sm flex items-center justify-center">+</button>
+                    <button onclick="adjustScore('Lehrer', -1)" class="bg-gray-700 hover:bg-gray-600 text-white w-7 h-7 rounded-lg font-bold text-sm flex items-center justify-center">-</button>
                 </div>
 
                 <!-- Team 2 Score Controls -->
@@ -636,7 +673,8 @@
             buzzerUnlockTime: 0,
             buzzerQueue: [],
             viggoResults: [],
-            teams: { "ATA 25-28": 0, "ATA 26-29": 0 },
+            teams: { "ATA 25-28": 0, "Lehrer": 0, "ATA 26-29": 0 },
+            playerScores: {},
             questionText: "Willkommen beim Quiz!",
             questionsList: [],
             currentQuestionIndex: 0,
@@ -652,6 +690,7 @@
         let stopwatchAnimationFrame = null;
         let zoomAnimationFrame = null;
         let pixelAnimationFrame = null;
+        let playerLoopFrame = null;
         let loadedPixelImage = null;
         let loadedPixelUrl = "";
         let qrCodeInstance = null;
@@ -874,6 +913,7 @@
                     localSessionData = { ...localSessionData, ...docSnap.data() };
                     if(!localSessionData.buzzerQueue) localSessionData.buzzerQueue = [];
                     if(!localSessionData.viggoResults) localSessionData.viggoResults = [];
+                    if(!localSessionData.playerScores) localSessionData.playerScores = {};
                     updateUI();
                 } else {
                     setDoc(sessionDocRef, localSessionData).catch(e => console.warn(e));
@@ -885,13 +925,60 @@
             updateUI();
         }
 
+        function playerUILoop() {
+            if(role === 'player') {
+                const myTeam = window.myPlayerTeam;
+                const btn = document.getElementById('main-buzzer');
+                const statusText = document.getElementById('buzzer-status-text');
+                
+                const inQueue = (localSessionData.buzzerQueue || []).find(b => b.uid === myPlayerId);
+                const inViggo = (localSessionData.viggoResults || []).find(b => b.uid === myPlayerId);
+
+                if (inQueue || inViggo) {
+                    btn.className = "buzzer-btn disabled w-64 h-64 md:w-80 md:h-80 rounded-full flex items-center justify-center text-5xl md:text-6xl font-black text-white/90 select-none outline-none mt-12";
+                    btn.disabled = true;
+                    statusText.innerText = "GEBUZZERT!";
+                    statusText.className = "absolute top-4 text-3xl font-black text-center w-full uppercase tracking-widest text-pink-500 animate-bounce";
+                } else if (localSessionData.buzzerActive === true) {
+                    if (myTeam === "Lehrer") {
+                        const elapsed = Date.now() - (localSessionData.buzzerUnlockTime || Date.now());
+                        if (elapsed < 10000) {
+                            btn.className = "buzzer-btn disabled w-64 h-64 md:w-80 md:h-80 rounded-full flex items-center justify-center text-5xl md:text-6xl font-black text-white/90 select-none outline-none mt-12";
+                            btn.disabled = true;
+                            const rem = Math.ceil((10000 - elapsed) / 1000);
+                            statusText.innerText = `Sperre: ${rem}s`;
+                            statusText.className = "absolute top-4 text-2xl font-bold text-center w-full uppercase tracking-widest text-yellow-500";
+                        } else {
+                            btn.className = "buzzer-btn w-64 h-64 md:w-80 md:h-80 rounded-full flex items-center justify-center text-5xl md:text-6xl font-black text-white/90 select-none outline-none mt-12";
+                            btn.disabled = false;
+                            statusText.innerText = "DRÜCKEN!";
+                            statusText.className = "absolute top-4 text-4xl font-black text-center w-full uppercase tracking-widest text-green-400 animate-pulse drop-shadow-[0_0_10px_rgba(74,222,128,0.8)]";
+                        }
+                    } else {
+                        btn.className = "buzzer-btn w-64 h-64 md:w-80 md:h-80 rounded-full flex items-center justify-center text-5xl md:text-6xl font-black text-white/90 select-none outline-none mt-12";
+                        btn.disabled = false;
+                        statusText.innerText = "DRÜCKEN!";
+                        statusText.className = "absolute top-4 text-4xl font-black text-center w-full uppercase tracking-widest text-green-400 animate-pulse drop-shadow-[0_0_10px_rgba(74,222,128,0.8)]";
+                    }
+                } else {
+                    btn.className = "buzzer-btn disabled w-64 h-64 md:w-80 md:h-80 rounded-full flex items-center justify-center text-5xl md:text-6xl font-black text-white/90 select-none outline-none mt-12";
+                    btn.disabled = true;
+                    statusText.innerText = "Gesperrt";
+                    statusText.className = "absolute top-4 text-2xl font-bold text-center w-full uppercase tracking-widest text-gray-500";
+                }
+            }
+            playerLoopFrame = requestAnimationFrame(playerUILoop);
+        }
+
         function updateUI() {
             const score1 = (localSessionData.teams && localSessionData.teams["ATA 25-28"]) || 0;
+            const scoreL = (localSessionData.teams && localSessionData.teams["Lehrer"]) || 0;
             const score2 = (localSessionData.teams && localSessionData.teams["ATA 26-29"]) || 0;
             const currentBuzzer = (localSessionData.buzzerQueue && localSessionData.buzzerQueue.length > 0) ? localSessionData.buzzerQueue[0] : null;
 
             if (role === 'live') {
                 document.getElementById('live-score-team1').innerText = score1;
+                document.getElementById('live-score-lehrer').innerText = scoreL;
                 document.getElementById('live-score-team2').innerText = score2;
                 
                 document.querySelectorAll('#screen-live-view [id^="view-"]').forEach(el => el.classList.add('hidden'));
@@ -916,20 +1003,39 @@
                 if(localSessionData.view === 'winner') {
                     const teamEl = document.getElementById('winner-display-team');
                     const scoreEl = document.getElementById('winner-display-score');
+                    const maxScore = Math.max(score1, scoreL, score2);
                     
-                    if(score1 > score2) {
-                        teamEl.innerText = "ATA 25-28";
-                        teamEl.className = "text-7xl md:text-9xl font-black text-blue-400 gameshow-font text-center uppercase drop-shadow-[0_0_40px_rgba(96,165,250,1)] z-10 p-8 border-8 border-blue-500 rounded-3xl bg-black/50 backdrop-blur transition-all duration-500";
-                        scoreEl.innerText = `${score1} Punkte (Mittelkurs)`;
-                    } else if(score2 > score1) {
-                        teamEl.innerText = "ATA 26-29";
-                        teamEl.className = "text-7xl md:text-9xl font-black text-green-400 gameshow-font text-center uppercase drop-shadow-[0_0_40px_rgba(74,222,128,1)] z-10 p-8 border-8 border-green-500 rounded-3xl bg-black/50 backdrop-blur transition-all duration-500";
-                        scoreEl.innerText = `${score2} Punkte (Unterkurs)`;
+                    let winners = [];
+                    if(score1 === maxScore) winners.push('ATA 25-28');
+                    if(scoreL === maxScore) winners.push('Lehrer');
+                    if(score2 === maxScore) winners.push('ATA 26-29');
+
+                    if(winners.length === 1) {
+                        const winTeam = winners[0];
+                        teamEl.innerText = winTeam;
+                        if(winTeam === 'ATA 25-28') teamEl.className = "text-7xl md:text-9xl font-black text-blue-400 gameshow-font text-center uppercase drop-shadow-[0_0_40px_rgba(96,165,250,1)] z-10 p-8 border-8 border-blue-500 rounded-3xl bg-black/50 backdrop-blur transition-all duration-500";
+                        else if(winTeam === 'Lehrer') teamEl.className = "text-7xl md:text-9xl font-black text-yellow-400 gameshow-font text-center uppercase drop-shadow-[0_0_40px_rgba(250,204,21,1)] z-10 p-8 border-8 border-yellow-500 rounded-3xl bg-black/50 backdrop-blur transition-all duration-500";
+                        else teamEl.className = "text-7xl md:text-9xl font-black text-green-400 gameshow-font text-center uppercase drop-shadow-[0_0_40px_rgba(74,222,128,1)] z-10 p-8 border-8 border-green-500 rounded-3xl bg-black/50 backdrop-blur transition-all duration-500";
+                        scoreEl.innerText = `${maxScore} Punkte`;
                     } else {
                         teamEl.innerText = "UNENTSCHIEDEN!";
                         teamEl.className = "text-5xl md:text-7xl font-black text-white gameshow-font text-center uppercase drop-shadow-[0_0_40px_rgba(255,255,255,0.8)] z-10 p-8 border-8 border-white rounded-3xl bg-black/50 backdrop-blur transition-all duration-500";
-                        scoreEl.innerText = `${score1} Punkte Gleichstand`;
+                        scoreEl.innerText = `${maxScore} Punkte (${winners.join(' & ')})`;
                     }
+                    
+                    const pScores = localSessionData.playerScores || {};
+                    const topPlayers = Object.values(pScores).sort((a,b) => b.score - a.score).slice(0, 3);
+                    let topHtml = '<div class="w-full text-center text-2xl font-bold text-gray-400 mb-2 w-full">Top Einzelspieler</div>';
+                    topPlayers.forEach((p, idx) => {
+                        const colors = ['text-yellow-400', 'text-gray-300', 'text-amber-600'];
+                        topHtml += `<div class="bg-gray-800/80 border border-gray-600 px-6 py-4 rounded-xl text-center min-w-[150px] shadow-lg">
+                            <div class="text-4xl ${colors[idx]} mb-2"><i class="fa-solid fa-medal"></i></div>
+                            <div class="text-xl font-bold text-white truncate max-w-[200px]">${p.name}</div>
+                            <div class="text-sm font-black text-pink-400 mt-1">${p.score} Pkt</div>
+                        </div>`;
+                    });
+                    document.getElementById('top-players-list').innerHTML = topHtml;
+
                     startConfetti();
                 } else {
                     stopConfetti();
@@ -943,7 +1049,9 @@
                     document.getElementById('live-winner-name').innerText = currentBuzzer.name;
                     const teamEl = document.getElementById('live-winner-team');
                     teamEl.innerText = currentBuzzer.team;
-                    teamEl.className = `text-3xl font-bold px-8 py-3 rounded-2xl mb-4 ${currentBuzzer.team === 'ATA 25-28' ? 'bg-blue-600 text-white shadow-[0_0_20px_rgba(37,99,235,0.6)]' : 'bg-green-600 text-white shadow-[0_0_20px_rgba(22,163,74,0.6)]'}`;
+                    if(currentBuzzer.team === 'ATA 25-28') teamEl.className = "text-3xl font-bold px-8 py-3 rounded-2xl mb-4 bg-blue-600 text-white shadow-[0_0_20px_rgba(37,99,235,0.6)]";
+                    else if(currentBuzzer.team === 'Lehrer') teamEl.className = "text-3xl font-bold px-8 py-3 rounded-2xl mb-4 bg-yellow-600 text-white shadow-[0_0_20px_rgba(202,138,4,0.6)]";
+                    else teamEl.className = "text-3xl font-bold px-8 py-3 rounded-2xl mb-4 bg-green-600 text-white shadow-[0_0_20px_rgba(22,163,74,0.6)]";
                     document.getElementById('live-winner-time').innerText = (currentBuzzer.time || 0).toFixed(2);
                     
                     const qIndicator = document.getElementById('live-queue-indicator');
@@ -968,15 +1076,17 @@
                 if(localSessionData.view === 'game4') {
                     updateStopwatchDisplay();
                     const list1 = document.getElementById('viggo-list-team1');
+                    const listL = document.getElementById('viggo-list-lehrer');
                     const list2 = document.getElementById('viggo-list-team2');
-                    list1.innerHTML = ''; list2.innerHTML = '';
+                    list1.innerHTML = ''; listL.innerHTML = ''; list2.innerHTML = '';
                     
                     (localSessionData.viggoResults || []).forEach((res, index) => {
-                        const html = `<div class="bg-gray-800/90 p-3 rounded-xl flex justify-between items-center border border-gray-700 shadow">
-                            <span class="font-bold text-white text-lg">${index+1}. ${res.name}</span>
+                        const html = `<div class="bg-gray-800/90 p-3 rounded-xl flex justify-between items-center border border-gray-700 shadow mb-2">
+                            <span class="font-bold text-white text-sm md:text-lg truncate max-w-[120px]">${index+1}. ${res.name}</span>
                             <span class="font-mono text-yellow-400 font-bold">${res.time.toFixed(1)}s</span>
                         </div>`;
                         if(res.team === 'ATA 25-28') list1.innerHTML += html;
+                        else if(res.team === 'Lehrer') listL.innerHTML += html;
                         else list2.innerHTML += html;
                     });
 
@@ -984,11 +1094,15 @@
                     if(localSessionData.viggoWinnerData) {
                         resOverlay.classList.remove('hidden'); resOverlay.classList.add('flex');
                         document.getElementById('viggo-avg-team1').innerText = (localSessionData.viggoWinnerData.avg1 || 0).toFixed(1) + 's';
+                        document.getElementById('viggo-avg-lehrer').innerText = (localSessionData.viggoWinnerData.avgL || 0).toFixed(1) + 's';
                         document.getElementById('viggo-avg-team2').innerText = (localSessionData.viggoWinnerData.avg2 || 0).toFixed(1) + 's';
                         const winnerText = document.getElementById('viggo-winner-text');
                         const wTeam = localSessionData.viggoWinnerData.winnerTeam;
                         winnerText.innerText = wTeam === "UNENTSCHIEDEN" ? "Unentschieden!" : `Punkt für ${wTeam}!`;
-                        winnerText.className = `mt-10 text-4xl font-black px-8 py-4 rounded-2xl border ${wTeam === 'ATA 25-28' ? 'bg-blue-600 text-white border-blue-400' : (wTeam === 'ATA 26-29' ? 'bg-green-600 text-white border-green-400' : 'bg-gray-700 text-white border-gray-500')}`;
+                        if(wTeam === 'ATA 25-28') winnerText.className = "mt-10 text-4xl font-black px-8 py-4 rounded-2xl border bg-blue-600 text-white border-blue-400";
+                        else if(wTeam === 'Lehrer') winnerText.className = "mt-10 text-4xl font-black px-8 py-4 rounded-2xl border bg-yellow-600 text-white border-yellow-400";
+                        else if(wTeam === 'ATA 26-29') winnerText.className = "mt-10 text-4xl font-black px-8 py-4 rounded-2xl border bg-green-600 text-white border-green-400";
+                        else winnerText.className = "mt-10 text-4xl font-black px-8 py-4 rounded-2xl border bg-gray-700 text-white border-gray-500";
                     } else {
                         resOverlay.classList.add('hidden'); resOverlay.classList.remove('flex');
                     }
@@ -996,6 +1110,7 @@
 
             } else if (role === 'admin') {
                 document.getElementById('admin-score-team1').innerText = score1;
+                document.getElementById('admin-score-lehrer').innerText = scoreL;
                 document.getElementById('admin-score-team2').innerText = score2;
                 
                 const ptsIndicator = document.getElementById('admin-pts-indicator');
@@ -1054,7 +1169,10 @@
                     decisionPanel.classList.remove('hidden'); decisionPanel.classList.add('flex');
                     document.getElementById('admin-winner-name').innerText = currentBuzzer.name;
                     document.getElementById('admin-winner-team').innerText = currentBuzzer.team;
-                    document.getElementById('admin-winner-team').className = `text-sm px-3 py-1 rounded-lg font-bold ${currentBuzzer.team === 'ATA 25-28' ? 'bg-blue-600 text-white' : 'bg-green-600 text-white'}`;
+                    if(currentBuzzer.team === 'ATA 25-28') document.getElementById('admin-winner-team').className = "text-sm px-3 py-1 rounded-lg font-bold bg-blue-600 text-white";
+                    else if(currentBuzzer.team === 'Lehrer') document.getElementById('admin-winner-team').className = "text-sm px-3 py-1 rounded-lg font-bold bg-yellow-600 text-white";
+                    else document.getElementById('admin-winner-team').className = "text-sm px-3 py-1 rounded-lg font-bold bg-green-600 text-white";
+                    
                     document.getElementById('admin-winner-time').innerText = (currentBuzzer.time || 0).toFixed(2);
                     
                     const qCount = document.getElementById('admin-queue-count');
@@ -1095,34 +1213,13 @@
                 if(myName) {
                     document.getElementById('player-display-name').innerText = myName;
                     document.getElementById('player-display-team').innerText = myTeam;
-                    document.getElementById('player-display-team').className = `text-xs font-bold uppercase tracking-wider ${myTeam === 'ATA 25-28' ? 'text-blue-400' : 'text-green-400'}`;
-                    document.getElementById('player-display-score').innerText = myTeam === 'ATA 25-28' ? score1 : score2;
-                }
-
-                const buzzerBtn = document.getElementById('main-buzzer');
-                const statusText = document.getElementById('buzzer-status-text');
-                
-                // FIX: Klassen komplett zurücksetzen für sauberen State
-                buzzerBtn.className = "buzzer-btn w-64 h-64 md:w-80 md:h-80 rounded-full flex items-center justify-center text-5xl md:text-6xl font-black text-white/90 select-none outline-none mt-12";
-
-                const inQueue = (localSessionData.buzzerQueue || []).find(b => b.uid === myPlayerId);
-                const inViggo = (localSessionData.viggoResults || []).find(b => b.uid === myPlayerId);
-                const isBuzzerActive = !!localSessionData.buzzerActive; // Erzwinge strikten Boolean
-
-                if (inQueue || inViggo) {
-                    buzzerBtn.classList.add('disabled'); 
-                    buzzerBtn.disabled = true;
-                    statusText.innerText = "GEBUZZERT!";
-                    statusText.className = "absolute top-4 text-3xl font-black text-center w-full uppercase tracking-widest text-pink-500 animate-bounce";
-                } else if (isBuzzerActive) {
-                    buzzerBtn.disabled = false;
-                    statusText.innerText = "DRÜCKEN!";
-                    statusText.className = "absolute top-4 text-4xl font-black text-center w-full uppercase tracking-widest text-green-400 animate-pulse drop-shadow-[0_0_10px_rgba(74,222,128,0.8)]";
-                } else {
-                    buzzerBtn.classList.add('disabled'); 
-                    buzzerBtn.disabled = true;
-                    statusText.innerText = "Gesperrt";
-                    statusText.className = "absolute top-4 text-2xl font-bold text-center w-full uppercase tracking-widest text-gray-500";
+                    if(myTeam === 'ATA 25-28') document.getElementById('player-display-team').className = "text-xs font-bold uppercase tracking-wider text-blue-400";
+                    else if(myTeam === 'Lehrer') document.getElementById('player-display-team').className = "text-xs font-bold uppercase tracking-wider text-yellow-400";
+                    else document.getElementById('player-display-team').className = "text-xs font-bold uppercase tracking-wider text-green-400";
+                    
+                    if(myTeam === 'ATA 25-28') document.getElementById('player-display-score').innerText = score1;
+                    else if(myTeam === 'Lehrer') document.getElementById('player-display-score').innerText = scoreL;
+                    else document.getElementById('player-display-score').innerText = score2;
                 }
             }
         }
@@ -1411,9 +1508,11 @@
             document.getElementById('screen-player-main').classList.remove('hidden');
             document.getElementById('screen-player-main').classList.add('flex');
             updateUI();
+            if (!playerLoopFrame) playerUILoop();
         }
 
         window.logoutPlayer = function() {
+            if (playerLoopFrame) { cancelAnimationFrame(playerLoopFrame); playerLoopFrame = null; }
             localStorage.removeItem('ata_player_name');
             localStorage.removeItem('ata_player_team');
             window.myPlayerName = null;
@@ -1429,6 +1528,9 @@
 
         window.hitBuzzer = function() {
             if (!localSessionData.buzzerActive) return;
+            if (window.myPlayerTeam === "Lehrer") {
+                if (Date.now() - (localSessionData.buzzerUnlockTime || Date.now()) < 10000) return;
+            }
 
             const btn = document.getElementById('main-buzzer');
             btn.classList.add('active-press');
@@ -1533,11 +1635,20 @@
             let teamsUpdate = { ...(localSessionData.teams || {}) };
             teamsUpdate[winnerTeam] = currentScore + pointsToAward;
 
+            const winnerUid = localSessionData.buzzerQueue[0].uid;
+            const winnerName = localSessionData.buzzerQueue[0].name;
+            let pScores = { ...(localSessionData.playerScores || {}) };
+            pScores[winnerUid] = { 
+                name: winnerName, 
+                score: (pScores[winnerUid] ? pScores[winnerUid].score : 0) + pointsToAward 
+            };
+
             localSessionData.teams = teamsUpdate;
+            localSessionData.playerScores = pScores;
             localSessionData.buzzerActive = false;
             localSessionData.buzzerQueue = [];
 
-            broadcastState({ teams: teamsUpdate, buzzerActive: false, buzzerQueue: [] });
+            broadcastState({ teams: teamsUpdate, playerScores: pScores, buzzerActive: false, buzzerQueue: [] });
             showToast(`+${pointsToAward} Punkt(e) für ${winnerTeam}!`);
             updateUI();
         };
@@ -1620,7 +1731,8 @@
                 buzzerUnlockTime: 0,
                 buzzerQueue: [],
                 viggoResults: [],
-                teams: { "ATA 25-28": 0, "ATA 26-29": 0 },
+                teams: { "ATA 25-28": 0, "Lehrer": 0, "ATA 26-29": 0 },
+                playerScores: {},
                 questionText: "Willkommen beim Quiz!",
                 questionsList: [],
                 currentQuestionIndex: 0,
@@ -1725,16 +1837,21 @@
             }
 
             const t1 = results.filter(r => r.team === 'ATA 25-28');
+            const tL = results.filter(r => r.team === 'Lehrer');
             const t2 = results.filter(r => r.team === 'ATA 26-29');
 
             const avg1 = t1.length ? t1.reduce((sum, r) => sum + r.time, 0) / t1.length : 0;
+            const avgL = tL.length ? tL.reduce((sum, r) => sum + r.time, 0) / tL.length : 0;
             const avg2 = t2.length ? t2.reduce((sum, r) => sum + r.time, 0) / t2.length : 0;
 
             let winner = "UNENTSCHIEDEN";
-            if (avg1 > 0 && (avg2 === 0 || avg1 < avg2)) winner = 'ATA 25-28';
-            else if (avg2 > 0 && (avg1 === 0 || avg2 < avg1)) winner = 'ATA 26-29';
+            let minTime = Infinity;
 
-            const winnerData = { avg1, avg2, winnerTeam: winner };
+            if (avg1 > 0) { minTime = avg1; winner = 'ATA 25-28'; }
+            if (avgL > 0 && avgL < minTime) { minTime = avgL; winner = 'Lehrer'; }
+            if (avg2 > 0 && avg2 < minTime) { minTime = avg2; winner = 'ATA 26-29'; }
+
+            const winnerData = { avg1, avgL, avg2, winnerTeam: winner };
             localSessionData.viggoWinnerData = winnerData;
             
             const pointsToAward = getCurrentGamePoints();
