@@ -670,6 +670,7 @@
         let localSessionData = {
             view: 'lobby',
             buzzerActive: false,
+            lehrerActive: false,
             buzzerUnlockTime: 0,
             buzzerQueue: [],
             viggoResults: [],
@@ -699,9 +700,58 @@
         let bgmTonePlaying = false;
         let kick, bass, hihat, bgmLoop;
         let confettiInterval = null;
+        let playerInterval = null;
 
         let synthBuzzer, synthCorrect, synthWrong, synthWin;
         let audioUnlocked = false;
+
+        function startPlayerLoop() {
+            if (playerInterval) clearInterval(playerInterval);
+            playerInterval = setInterval(() => {
+                if (role !== 'player') return;
+                
+                const myTeam = window.myPlayerTeam;
+                const btn = document.getElementById('main-buzzer');
+                const statusText = document.getElementById('buzzer-status-text');
+                if (!btn || !statusText) return;
+
+                const inQueue = (localSessionData.buzzerQueue || []).some(b => b.uid === myPlayerId);
+                const inViggo = (localSessionData.viggoResults || []).some(b => b.uid === myPlayerId);
+
+                // Exakte Klassen-Sets, um Überschneidungen zu 100% auszuschließen
+                const classesLocked = "buzzer-btn disabled w-64 h-64 md:w-80 md:h-80 rounded-full flex items-center justify-center text-5xl md:text-6xl font-black text-white/90 select-none outline-none mt-12";
+                const classesActive = "buzzer-btn w-64 h-64 md:w-80 md:h-80 rounded-full flex items-center justify-center text-5xl md:text-6xl font-black text-white/90 select-none outline-none mt-12";
+
+                if (inQueue || inViggo) {
+                    btn.className = classesLocked;
+                    btn.disabled = true;
+                    statusText.innerText = "GEBUZZERT!";
+                    statusText.className = "absolute top-4 text-3xl md:text-4xl font-black text-center w-full uppercase tracking-widest text-pink-500 animate-bounce";
+                } else if (localSessionData.buzzerActive === true) {
+                    if (myTeam === "Lehrer" && localSessionData.lehrerActive === false) {
+                        btn.className = classesLocked;
+                        btn.disabled = true;
+                        
+                        let rem = 10;
+                        if (window.lehrerCountdownStarted) {
+                            rem = Math.max(0, 10 - Math.floor((Date.now() - window.lehrerCountdownStarted) / 1000));
+                        }
+                        statusText.innerText = `Sperre: ${rem}s`;
+                        statusText.className = "absolute top-4 text-2xl md:text-3xl font-bold text-center w-full uppercase tracking-widest text-yellow-500";
+                    } else {
+                        btn.className = classesActive;
+                        btn.disabled = false;
+                        statusText.innerText = "DRÜCKEN!";
+                        statusText.className = "absolute top-4 text-4xl md:text-5xl font-black text-center w-full uppercase tracking-widest text-green-400 animate-pulse drop-shadow-[0_0_10px_rgba(74,222,128,0.8)]";
+                    }
+                } else {
+                    btn.className = classesLocked;
+                    btn.disabled = true;
+                    statusText.innerText = "Gesperrt";
+                    statusText.className = "absolute top-4 text-2xl md:text-3xl font-bold text-center w-full uppercase tracking-widest text-gray-500";
+                }
+            }, 100);
+        }
 
         async function initAudio() {
             if (audioUnlocked) return;
@@ -1221,6 +1271,13 @@
                     else if(myTeam === 'Lehrer') document.getElementById('player-display-score').innerText = scoreL;
                     else document.getElementById('player-display-score').innerText = score2;
                 }
+
+                // Verwaltet nur noch den optischen Countdown, der Rest wird vom Player-Loop geregelt
+                if (localSessionData.buzzerActive && localSessionData.lehrerActive === false && !window.lehrerCountdownStarted) {
+                    window.lehrerCountdownStarted = Date.now();
+                } else if (!localSessionData.buzzerActive || localSessionData.lehrerActive === true) {
+                    window.lehrerCountdownStarted = null;
+                }
             }
         }
 
@@ -1508,11 +1565,11 @@
             document.getElementById('screen-player-main').classList.remove('hidden');
             document.getElementById('screen-player-main').classList.add('flex');
             updateUI();
-            if (!playerLoopFrame) playerUILoop();
+            startPlayerLoop();
         }
 
         window.logoutPlayer = function() {
-            if (playerLoopFrame) { cancelAnimationFrame(playerLoopFrame); playerLoopFrame = null; }
+            if (playerInterval) { clearInterval(playerInterval); playerInterval = null; }
             localStorage.removeItem('ata_player_name');
             localStorage.removeItem('ata_player_team');
             window.myPlayerName = null;
@@ -1528,8 +1585,8 @@
 
         window.hitBuzzer = function() {
             if (!localSessionData.buzzerActive) return;
-            if (window.myPlayerTeam === "Lehrer") {
-                if (Date.now() - (localSessionData.buzzerUnlockTime || Date.now()) < 10000) return;
+            if (window.myPlayerTeam === "Lehrer" && localSessionData.lehrerActive === false) {
+                return; // Noch gesperrt!
             }
 
             const btn = document.getElementById('main-buzzer');
@@ -1568,12 +1625,14 @@
         window.setGameState = function(newState) {
             localSessionData.view = newState;
             localSessionData.buzzerActive = false;
+            localSessionData.lehrerActive = false;
             localSessionData.buzzerQueue = [];
             localSessionData.viggoResults = [];
             localSessionData.viggoWinnerData = null;
             broadcastState({
                 view: newState,
                 buzzerActive: false,
+                lehrerActive: false,
                 buzzerQueue: [],
                 viggoResults: [],
                 viggoWinnerData: null
@@ -1584,28 +1643,41 @@
         window.activateBuzzer = function() {
             initAudio();
             localSessionData.buzzerActive = true;
+            localSessionData.lehrerActive = false;
             localSessionData.buzzerQueue = [];
             localSessionData.viggoResults = [];
             localSessionData.buzzerUnlockTime = Date.now();
             
             const payload = {
                 buzzerActive: true,
+                lehrerActive: false,
                 buzzerQueue: [],
                 viggoResults: [],
                 buzzerUnlockTime: localSessionData.buzzerUnlockTime
             };
             broadcastState(payload);
-            showToast("Buzzer ist JETZT SCHARF!");
+            showToast("Buzzer ist SCHARF (Lehrer warten 10s)!");
             updateUI();
+
+            // Sende offiziellen Unlock für Lehrer nach genau 10 Sekunden vom Admin aus
+            setTimeout(() => {
+                if (localSessionData.buzzerActive) {
+                    localSessionData.lehrerActive = true;
+                    broadcastState({ lehrerActive: true });
+                    showToast("Lehrer-Buzzer ist nun auch frei!");
+                }
+            }, 10000);
         };
 
         window.resetBuzzer = function() {
             localSessionData.buzzerActive = false;
+            localSessionData.lehrerActive = false;
             localSessionData.buzzerQueue = [];
             localSessionData.viggoResults = [];
             
             const payload = {
                 buzzerActive: false,
+                lehrerActive: false,
                 buzzerQueue: [],
                 viggoResults: []
             };
@@ -1728,6 +1800,7 @@
             localSessionData = {
                 view: 'lobby',
                 buzzerActive: false,
+                lehrerActive: false,
                 buzzerUnlockTime: 0,
                 buzzerQueue: [],
                 viggoResults: [],
@@ -1776,6 +1849,7 @@
             localSessionData.viggoResults = [];
             localSessionData.viggoWinnerData = null;
             localSessionData.buzzerActive = true;
+            localSessionData.lehrerActive = true; // Viggo hat KEINE 10s Sperre
 
             broadcastState({ 
                 stopwatchRunning: true, 
@@ -1783,9 +1857,10 @@
                 stopwatchTime: 0, 
                 viggoResults: [],
                 viggoWinnerData: null,
-                buzzerActive: true 
+                buzzerActive: true,
+                lehrerActive: true
             });
-            showToast("Stoppuhr gestartet & Buzzer frei!");
+            showToast("Stoppuhr gestartet & alle Buzzer frei!");
             updateStopwatchDisplay();
             updateUI();
         };
