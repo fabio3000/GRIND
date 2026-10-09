@@ -1101,18 +1101,20 @@
 
                 const buzzerBtn = document.getElementById('main-buzzer');
                 const statusText = document.getElementById('buzzer-status-text');
-                buzzerBtn.classList.remove('active-press');
+                
+                // FIX: Klassen komplett zurücksetzen für sauberen State
+                buzzerBtn.className = "buzzer-btn w-64 h-64 md:w-80 md:h-80 rounded-full flex items-center justify-center text-5xl md:text-6xl font-black text-white/90 select-none outline-none mt-12";
 
                 const inQueue = (localSessionData.buzzerQueue || []).find(b => b.uid === myPlayerId);
                 const inViggo = (localSessionData.viggoResults || []).find(b => b.uid === myPlayerId);
+                const isBuzzerActive = !!localSessionData.buzzerActive; // Erzwinge strikten Boolean
 
                 if (inQueue || inViggo) {
                     buzzerBtn.classList.add('disabled'); 
                     buzzerBtn.disabled = true;
                     statusText.innerText = "GEBUZZERT!";
                     statusText.className = "absolute top-4 text-3xl font-black text-center w-full uppercase tracking-widest text-pink-500 animate-bounce";
-                } else if (localSessionData.buzzerActive === true) {
-                    buzzerBtn.classList.remove('disabled'); 
+                } else if (isBuzzerActive) {
                     buzzerBtn.disabled = false;
                     statusText.innerText = "DRÜCKEN!";
                     statusText.className = "absolute top-4 text-4xl font-black text-center w-full uppercase tracking-widest text-green-400 animate-pulse drop-shadow-[0_0_10px_rgba(74,222,128,0.8)]";
@@ -1465,11 +1467,13 @@
             localSessionData.view = newState;
             localSessionData.buzzerActive = false;
             localSessionData.buzzerQueue = [];
+            localSessionData.viggoResults = [];
             localSessionData.viggoWinnerData = null;
             broadcastState({
                 view: newState,
                 buzzerActive: false,
                 buzzerQueue: [],
+                viggoResults: [],
                 viggoWinnerData: null
             });
             updateUI();
@@ -1479,11 +1483,13 @@
             initAudio();
             localSessionData.buzzerActive = true;
             localSessionData.buzzerQueue = [];
+            localSessionData.viggoResults = [];
             localSessionData.buzzerUnlockTime = Date.now();
             
             const payload = {
                 buzzerActive: true,
                 buzzerQueue: [],
+                viggoResults: [],
                 buzzerUnlockTime: localSessionData.buzzerUnlockTime
             };
             broadcastState(payload);
@@ -1494,10 +1500,12 @@
         window.resetBuzzer = function() {
             localSessionData.buzzerActive = false;
             localSessionData.buzzerQueue = [];
+            localSessionData.viggoResults = [];
             
             const payload = {
                 buzzerActive: false,
-                buzzerQueue: []
+                buzzerQueue: [],
+                viggoResults: []
             };
             broadcastState(payload);
             showToast("Buzzer gesperrt & zurückgesetzt");
