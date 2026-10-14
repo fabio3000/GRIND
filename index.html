@@ -1,42 +1,31 @@
 <!DOCTYPE html>
-<html lang="de" class="dark">
+<html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GRIND. // TACTICAL URBAN NETWORK [CGN]</title>
+    <title>GRIND. // KÖLN DROPS</title>
 
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <!-- Fonts: Inter + JetBrains Mono für echte Telemetrie-Ästhetik -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,600;0,800;0,900;1,800;1,900&family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet">
-
-    <!-- Leaflet Maps für das Live Köln-Radar -->
+    <!-- Leaflet für die butterweiche interaktive Karte -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-    <!-- QR Scanner & QR Styling Forge -->
-    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-    <script src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
+    <!-- Canvas Confetti für sofortige Dopamin-Belohnung -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
     <script>
         tailwind.config = {
-            darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'monospace'],
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
                     },
                     colors: {
-                        brand: '#ff4d00',
-                        brandLight: '#ff7700',
-                        pro: '#a855f7',
-                        surface: '#09090b',
-                        panel: '#121215',
-                        border: '#222228'
+                        accent: '#FF5500',
+                        surface: '#121214',
+                        card: '#1C1C1F',
                     }
                 }
             }
@@ -44,1361 +33,747 @@
     </script>
 
     <style>
-        :root {
-            --brand: #ff4d00;
-            --pro: #a855f7;
-        }
         body {
-            background-color: #050507;
-            color: #f4f4f6;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #09090B;
+            color: #FFFFFF;
             overflow-x: hidden;
-            overscroll-behavior-y: none;
-            background-image: 
-                radial-gradient(circle at 50% -10%, rgba(255, 77, 0, 0.14) 0%, transparent 55%),
-                linear-gradient(to bottom, rgba(255,255,255,0.015) 1px, transparent 1px),
-                linear-gradient(to right, rgba(255,255,255,0.015) 1px, transparent 1px);
-            background-size: 100% 100%, 32px 32px, 32px 32px;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
         }
 
-        /* Tactical UI Borders & Corner Cuts */
-        .tactical-card {
-            background: rgba(14, 14, 18, 0.85);
-            backdrop-filter: blur(16px);
-            border: 1px solid #222228;
-            position: relative;
-            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .tactical-card::before {
-            content: '';
-            position: absolute;
-            top: -1px; left: -1px;
-            width: 8px; height: 8px;
-            border-top: 2px solid #ff4d00;
-            border-left: 2px solid #ff4d00;
-            opacity: 0.5;
-            transition: opacity 0.25s;
-            pointer-events: none;
-        }
-        .tactical-card:hover::before { opacity: 1; }
-        .tactical-card.interactive:hover {
-            border-color: rgba(255, 77, 0, 0.5);
-            transform: translateY(-2px);
-            box-shadow: 0 12px 30px -10px rgba(255, 77, 0, 0.18);
+        /* Smooth Apple-like Glassmorphism */
+        .glass {
+            background: rgba(28, 28, 31, 0.78);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
         }
 
-        /* Custom Scrollbars */
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .glass-pill {
+            background: rgba(18, 18, 20, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
 
-        /* Leaflet Dark Mode Filter */
+        /* Clean Dark Map Styling */
         .leaflet-container {
-            background: #070709 !important;
-            font-family: 'JetBrains Mono', monospace !important;
+            background: #09090B !important;
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
         }
         .leaflet-tile-pane {
-            filter: invert(100%) hue-rotate(180deg) brightness(85%) contrast(110%) grayscale(80%);
+            filter: invert(100%) hue-rotate(180deg) brightness(92%) contrast(95%) grayscale(65%);
         }
         .leaflet-control-attribution { display: none !important; }
 
-        /* Pulse Animations */
-        @keyframes radar-ping {
-            0% { transform: scale(0.8); opacity: 0.9; }
-            100% { transform: scale(2.4); opacity: 0; }
+        /* Custom Map Marker Pulse */
+        @keyframes soft-pulse {
+            0% { transform: scale(1); opacity: 0.7; }
+            70% { transform: scale(2.2); opacity: 0; }
+            100% { transform: scale(2.2); opacity: 0; }
         }
-        .radar-dot::after {
+        .drop-marker {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            border-radius: 9999px;
+            background: #1C1C1F;
+            border: 2.5px solid #FF5500;
+            box-shadow: 0 8px 25px rgba(255, 85, 0, 0.45);
+            font-size: 20px;
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .drop-marker.active-marker {
+            transform: scale(1.22);
+            background: #FF5500;
+            border-color: #FFFFFF;
+        }
+        .drop-marker::before {
             content: '';
             position: absolute;
-            inset: -6px;
-            border-radius: 50%;
-            border: 2px solid #ff4d00;
-            animation: radar-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+            inset: -4px;
+            border-radius: 9999px;
+            background: #FF5500;
+            z-index: -1;
+            animation: soft-pulse 2.2s infinite;
         }
 
-        @keyframes scanline {
-            0% { transform: translateY(-100%); }
-            100% { transform: translateY(1000%); }
+        /* Hide Scrollbar */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Ticket Perforation Cutout */
+        .ticket-card {
+            position: relative;
+            background: linear-gradient(135deg, #1E1E24 0%, #141417 100%);
+            border: 1px solid rgba(255,255,255,0.1);
         }
-        .scanline-overlay {
+        .ticket-card::before, .ticket-card::after {
+            content: '';
             position: absolute;
-            inset: 0;
-            background: linear-gradient(to bottom, transparent, rgba(255, 77, 0, 0.12), transparent);
-            height: 15%;
-            animation: scanline 4s linear infinite;
-            pointer-events: none;
+            top: 65%;
+            width: 24px;
+            height: 24px;
+            background-color: #09090B;
+            border-radius: 9999px;
+            transform: translateY(-50%);
         }
+        .ticket-card::before { left: -13px; border-right: 1px solid rgba(255,255,255,0.1); }
+        .ticket-card::after { right: -13px; border-left: 1px solid rgba(255,255,255,0.1); }
     </style>
 </head>
-<body class="min-h-screen flex flex-col selection:bg-brand selection:text-white">
+<body class="min-h-screen flex flex-col justify-between">
 
-    <!-- TOP TELEMETRY & MODE SWITCHER BAR -->
-    <div class="sticky top-0 z-50 bg-[#050507]/90 backdrop-blur-xl border-b border-border">
-        <div class="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between gap-2">
-            <!-- Brand & Live Telemetry -->
-            <div class="flex items-center gap-4">
-                <div onclick="App.switchWorkspace('user')" class="cursor-pointer flex items-center gap-2 group">
-                    <span class="text-2xl font-black italic tracking-tighter text-white group-hover:text-brand transition">GRIND<span class="text-brand">.</span></span>
-                    <span class="hidden sm:inline-flex items-center gap-1.5 bg-brand/10 border border-brand/30 text-brand font-mono text-[10px] font-bold px-2 py-0.5 rounded-sm">
-                        <span class="w-1.5 h-1.5 rounded-full bg-brand animate-pulse"></span>
-                        CGN-NET // v4.0
-                    </span>
+    <!-- TOP FLOATING HEADER (Minimalistisch & sofort verständlich) -->
+    <header class="fixed top-0 left-0 right-0 z-40 px-4 pt-4 pointer-events-none">
+        <div class="max-w-md mx-auto flex items-center justify-between gap-2">
+            <!-- Brand & City Pill -->
+            <div class="glass-pill px-4 py-2 rounded-full flex items-center gap-2.5 pointer-events-auto shadow-lg">
+                <span class="font-extrabold text-lg tracking-tight">GRIND<span class="text-accent">.</span></span>
+                <span class="h-3.5 w-[1px] bg-white/15"></span>
+                <span class="flex items-center gap-1.5 text-xs font-semibold text-zinc-300">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    Köln
+                </span>
+            </div>
+
+            <!-- User Energy / Points Pill + Creator Switch -->
+            <div class="flex items-center gap-2 pointer-events-auto">
+                <div onclick="UI.switchTab('wallet')" class="glass-pill px-3.5 py-2 rounded-full flex items-center gap-2 cursor-pointer hover:border-accent/50 transition shadow-lg">
+                    <span class="text-sm">⚡</span>
+                    <span id="header-sparks" class="font-bold text-sm text-white">450</span>
                 </div>
-                <div id="gps-telemetry-pill" onclick="App.locateUser()" class="hidden md:flex items-center gap-2 bg-panel border border-border px-2.5 py-1 rounded-sm cursor-pointer hover:border-brand/50 transition">
-                    <span id="gps-dot" class="w-2 h-2 rounded-full bg-yellow-500"></span>
-                    <span id="gps-coords" class="font-mono text-[10px] text-gray-400">LOCATING CGN...</span>
-                </div>
+                <button onclick="UI.openCreatorModal()" class="glass-pill w-10 h-10 rounded-full flex items-center justify-center text-sm hover:bg-accent hover:border-accent transition shadow-lg" title="Eigenen Drop in Köln platzieren">
+                    ➕
+                </button>
             </div>
+        </div>
+    </header>
 
-            <!-- Workspace Switcher (User / Command Center / QR Forge) -->
-            <div class="flex items-center bg-panel p-1 rounded-sm border border-border">
-                <button onclick="App.switchWorkspace('user')" id="ws-btn-user" class="px-3 py-1 text-[10px] font-mono font-bold uppercase tracking-wider rounded-sm transition bg-brand text-white">
-                    ⚡ Athlete HUD
-                </button>
-                <button onclick="App.switchWorkspace('admin')" id="ws-btn-admin" class="px-3 py-1 text-[10px] font-mono font-bold uppercase tracking-wider rounded-sm transition text-gray-400 hover:text-white">
-                    🎛️ Command
-                </button>
-                <button onclick="App.switchWorkspace('forge')" id="ws-btn-forge" class="px-3 py-1 text-[10px] font-mono font-bold uppercase tracking-wider rounded-sm transition text-gray-400 hover:text-white">
-                    🔳 QR Forge
-                </button>
-            </div>
+    <!-- MAIN CONTENT AREA -->
+    <main id="app-content" class="flex-1 w-full max-w-md mx-auto relative min-h-screen pb-28"></main>
 
-            <!-- Quick Actions & Audio Toggle -->
-            <div class="flex items-center gap-2">
-                <button onclick="SoundFX.toggleMute()" id="sound-toggle-btn" class="p-2 bg-panel border border-border rounded-sm text-gray-400 hover:text-white hover:border-brand/40 transition" title="Tactical Audio Synth">
-                    🔊
-                </button>
-                <button onclick="App.exportShareCard()" class="hidden sm:block px-3 py-1.5 bg-panel border border-border hover:border-brand text-[10px] font-mono font-bold uppercase tracking-widest text-gray-300 hover:text-white transition rounded-sm">
-                    Story Card
-                </button>
-            </div>
+    <!-- BOTTOM NAVIGATION BAR (Daumen-freundlich wie bei Apple / Uber) -->
+    <nav class="fixed bottom-5 left-0 right-0 z-40 px-4 pointer-events-none">
+        <div class="max-w-xs mx-auto glass-pill p-1.5 rounded-full flex items-center justify-between shadow-[0_20px_50px_rgba(0,0,0,0.8)] pointer-events-auto">
+            <button onclick="UI.switchTab('radar')" id="nav-radar" class="flex-1 py-2.5 rounded-full flex items-center justify-center gap-2 text-xs font-bold transition bg-accent text-white shadow-md">
+                <span>📍</span> Drops
+            </button>
+            <button onclick="UI.switchTab('pulse')" id="nav-pulse" class="flex-1 py-2.5 rounded-full flex items-center justify-center gap-2 text-xs font-bold text-zinc-400 hover:text-white transition">
+                <span>🔥</span> Live
+            </button>
+            <button onclick="UI.switchTab('wallet')" id="nav-wallet" class="flex-1 py-2.5 rounded-full flex items-center justify-center gap-2 text-xs font-bold text-zinc-400 hover:text-white transition relative">
+                <span>🎟️</span> Wallet
+                <span id="wallet-badge" class="w-4 h-4 rounded-full bg-accent text-[10px] text-white flex items-center justify-center font-extrabold">2</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- BOTTOM SHEET MODAL (Für Check-In, Beute & Drop-Erstellung) -->
+    <div id="sheet-backdrop" onclick="UI.closeSheet(event)" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden items-end sm:items-center justify-center transition-opacity">
+        <div onclick="event.stopPropagation()" class="w-full max-w-md bg-[#161619] border-t sm:border border-white/10 rounded-t-[32px] sm:rounded-[32px] p-6 pb-8 shadow-2xl transform transition-transform">
+            <div class="w-12 h-1.5 bg-zinc-700 rounded-full mx-auto mb-5"></div>
+            <div id="sheet-body"></div>
         </div>
     </div>
 
-    <!-- XP LEVEL-UP OVERLAY HUD -->
-    <div id="xp-cinematic-hud" class="fixed top-16 left-1/2 -translate-x-1/2 z-[90] w-[92%] max-w-md pointer-events-none opacity-0 -translate-y-8 transition-all duration-500">
-        <div class="tactical-card border-brand p-5 shadow-[0_20px_60px_rgba(255,77,0,0.35)] bg-[#070709]/95">
-            <div class="flex justify-between items-end mb-2">
-                <div>
-                    <p class="font-mono text-[9px] uppercase tracking-[0.3em] text-brand font-bold">Telemetry Sync // XP Confirmed</p>
-                    <h4 class="text-2xl font-black italic uppercase tracking-tight text-white" id="hud-gain-title">+250 XP</h4>
-                </div>
-                <div class="text-right font-mono">
-                    <span class="text-xs text-gray-400">LVL <strong id="hud-lvl-val" class="text-white text-base">1</strong></span>
-                </div>
-            </div>
-            <div class="w-full h-2 bg-black border border-border overflow-hidden">
-                <div id="hud-bar-fill" class="h-full bg-gradient-to-r from-brand to-amber-500 transition-all duration-1000 w-0"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- TOAST CONTAINER -->
-    <div id="toast-stack" class="fixed bottom-5 right-5 z-[95] flex flex-col gap-2 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
-
-    <!-- UNIVERSAL MODAL -->
-    <div id="modal-backdrop" class="fixed inset-0 z-[80] bg-black/85 backdrop-blur-md hidden items-center justify-center p-4">
-        <div class="tactical-card max-w-lg w-full p-6 sm:p-8 border-border shadow-2xl relative max-h-[90vh] overflow-y-auto">
-            <button onclick="App.closeModal()" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center bg-panel border border-border text-gray-400 hover:text-white hover:border-brand transition">✕</button>
-            <div id="modal-body"></div>
-        </div>
-    </div>
-
-    <!-- MAIN DYNAMIC VIEWPORT -->
-    <main id="main-viewport" class="flex-1 max-w-7xl w-full mx-auto px-4 py-6 sm:py-8"></main>
-
-    <!-- FOOTER -->
-    <footer class="border-t border-border/60 py-6 px-4 mt-16 bg-[#050507]">
-        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-[10px] text-gray-500">
-            <div>GRIND. TACTICAL NETWORK // COLOGNE SECTOR (50.9375° N, 6.9603° E)</div>
-            <div class="flex gap-6 uppercase tracking-widest">
-                <button onclick="App.openLegalModal('impressum')" class="hover:text-brand transition">Impressum</button>
-                <button onclick="App.openLegalModal('datenschutz')" class="hover:text-brand transition">Datenschutz</button>
-                <button onclick="App.openLegalModal('agb')" class="hover:text-brand transition">AGB & Fair Play</button>
-            </div>
-        </div>
-    </footer>
-
-    <!-- APPLICATION ARCHITECTURE -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot, collection, addDoc, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
+    <script>
         /* ==========================================================================
-           1. WEB AUDIO SYNTHESIZER (Kein Laden externer Sound-Dateien nötig!)
+           DATENMODELL: ECHTE KÖLNER DROPS STATT LANGWEILIGER AUFGABENLISTEN
            ========================================================================== */
-        const SoundFX = {
-            ctx: null,
-            muted: false,
-            init() {
-                if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-            },
-            toggleMute() {
-                this.muted = !this.muted;
-                document.getElementById('sound-toggle-btn').innerText = this.muted ? '🔇' : '🔊';
-                if (!this.muted) this.playClick();
-            },
-            playClick() {
-                if (this.muted) return;
-                this.init();
-                const osc = this.ctx.createOscillator();
-                const gain = this.ctx.createGain();
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(180, this.ctx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(40, this.ctx.currentTime + 0.06);
-                gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.06);
-                osc.connect(gain); gain.connect(this.ctx.destination);
-                osc.start(); osc.stop(this.ctx.currentTime + 0.06);
-            },
-            playSuccess() {
-                if (this.muted) return;
-                this.init();
-                const now = this.ctx.currentTime;
-                [440, 554.37, 659.25, 880].forEach((freq, idx) => {
-                    const osc = this.ctx.createOscillator();
-                    const gain = this.ctx.createGain();
-                    osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(freq, now + idx * 0.07);
-                    gain.gain.setValueAtTime(0.08, now + idx * 0.07);
-                    gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.07 + 0.25);
-                    osc.connect(gain); gain.connect(this.ctx.destination);
-                    osc.start(now + idx * 0.07); osc.stop(now + idx * 0.07 + 0.25);
-                });
-            },
-            playError() {
-                if (this.muted) return;
-                this.init();
-                const now = this.ctx.currentTime;
-                const osc = this.ctx.createOscillator();
-                const gain = this.ctx.createGain();
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(130, now);
-                osc.frequency.linearRampToValueAtTime(95, now + 0.25);
-                gain.gain.setValueAtTime(0.15, now);
-                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
-                osc.connect(gain); gain.connect(this.ctx.destination);
-                osc.start(now); osc.stop(now + 0.25);
-            }
-        };
-        window.SoundFX = SoundFX;
+        const Store = {
+            activeTab: 'radar', // 'radar' | 'pulse' | 'wallet'
+            selectedDropId: 'drop_weiher',
+            sparks: 450,
+            userLocation: { lat: 50.9351, lng: 6.9320 }, // Nähe Belgisches / Rathenauplatz
+            map: null,
+            markers: {},
 
-        /* ==========================================================================
-           2. COLOGNE SEED DATA (Falls Firestore leer oder im schnellen Testmodus)
-           ========================================================================== */
-        const COLOGNE_DEFAULT_DATA = {
-            seasonConfig: { number: 1, name: "FALL PROTOCOL", active: true, start: "2026-10-01", end: "2026-12-31" },
-            activeSpots: [
-                { id: "spot_aachener", icon: "🏃", name: "Aachener Weiher Track", subtitle: "5km Sunset Pace Check-In", lat: 50.9351, lng: 6.9268, xp: 300, color: "#ff4d00", sector: "Lindenthal" },
-                { id: "spot_poller", icon: "🏋️", name: "Poller Wiesen Functional", subtitle: "Outdoor Sled & Burpee Zone", lat: 50.9214, lng: 6.9742, xp: 400, color: "#a855f7", sector: "Deutz / Poll" },
-                { id: "spot_gumo", icon: "☕", name: "Espressolab / Belgisches", subtitle: "Post-Run Caffeine Refuel", lat: 50.9384, lng: 6.9369, xp: 200, color: "#3b82f6", sector: "Belgisches Viertel" },
-                { id: "spot_rhein", icon: "🧊", name: "Rheinauhafen Cold Plunge", subtitle: "Morning Recovery Session", lat: 50.9272, lng: 6.9649, xp: 450, color: "#06b6d4", sector: "Südstadt" }
+            drops: [
+                {
+                    id: 'drop_weiher',
+                    title: 'Sunset Run & Free Matcha',
+                    place: 'Aachener Weiher • Lindenthal',
+                    reward: '1x Gratis Iced Matcha oder Flat White',
+                    partner: 'Partner-Café Belgisches Viertel',
+                    emoji: '🏃',
+                    category: 'Move & Refuel',
+                    sparks: 150,
+                    spotsLeft: 6,
+                    totalSpots: 20,
+                    timeLeft: 'Endet in 3 Std.',
+                    lat: 50.9351,
+                    lng: 6.9268,
+                    claimed: false,
+                    desc: 'Komm zum Aachener Weiher, dreh eine lockere Runde (oder mach 15 Min Pause am Wasser) und schalte direkt deinen Gratis-Drink frei.'
+                },
+                {
+                    id: 'drop_belgisches',
+                    title: 'Golden Hour Mystery Capsule',
+                    place: 'Brüsseler Platz • Belgisches Viertel',
+                    reward: 'GRIND. Heavyweight Socks + 200⚡',
+                    partner: 'GRIND. Street Team',
+                    emoji: '🎁',
+                    category: 'Limited Street Drop',
+                    sparks: 200,
+                    spotsLeft: 3,
+                    totalSpots: 10,
+                    timeLeft: 'Nur noch 3 Stück!',
+                    lat: 50.9384,
+                    lng: 6.9369,
+                    claimed: false,
+                    desc: 'Nur 10 Kapseln heute Abend am Brüsseler Platz versteckt. Sei im 150m-Radius und öffne die Kapsel mit einem Tap.'
+                },
+                {
+                    id: 'drop_poller',
+                    title: 'Rhein-Ufer Sled & Sweat',
+                    place: 'Poller Wiesen • Deutz',
+                    reward: 'Free Recovery Shake + Sauna 2-for-1',
+                    partner: 'Köln South Athletics',
+                    emoji: '⚡',
+                    category: 'Outdoor Session',
+                    sparks: 250,
+                    spotsLeft: 11,
+                    totalSpots: 25,
+                    timeLeft: 'Heute bis 21:00 Uhr',
+                    lat: 50.9214,
+                    lng: 6.9742,
+                    claimed: false,
+                    desc: 'Checke an den Poller Wiesen mit Blick auf den Dom ein. Perfekt für deine Feierabend-Runde oder ein kurzes Outdoor-Workout.'
+                },
+                {
+                    id: 'drop_ehrenfeld',
+                    title: 'Night Owl Espresso Tonic',
+                    place: 'Venloer Str. • Ehrenfeld',
+                    reward: 'Free Espresso Tonic / Cold Brew',
+                    partner: 'Ehrenfeld Roasters',
+                    emoji: '☕',
+                    category: 'Coffee Drop',
+                    sparks: 100,
+                    spotsLeft: 8,
+                    totalSpots: 15,
+                    timeLeft: 'Noch 5 Std.',
+                    lat: 50.9465,
+                    lng: 6.9195,
+                    claimed: false,
+                    desc: 'Spaziergang durch Ehrenfeld? Hol dir deinen Koffein-Kick auf unseren Nacken – einfach vor Ort einchecken.'
+                }
             ],
-            weeklyMissions: [
-                { id: "m_hyrox_engine", name: "THE ENGINE: 1000m Row + 5km Run", desc: "Absolviere einen gekoppelten Run & Row Workout-Block unter 28 Minuten.", xp: 650, type: "upload", badge: "HYROX PREP", qr_solution: "HYROXCGN26" },
-                { id: "m_bridge_loop", name: "Kölner Brücken-Loop (Hohenzollern → Südbrücke)", desc: "Laufe die große Rhein-Brückenrunde (~7,5 km) und verifiziere per GPS oder Track-Screenshot.", xp: 500, type: "instant", badge: "ENDURANCE" },
-                { id: "m_early_bird", name: "06:00 AM Darkness Protocol", desc: "Beende dein erstes Workout vor 07:00 Uhr morgens.", xp: 400, type: "qr", qr_solution: "DAWN2026", badge: "DISCIPLINE" }
+
+            wallet: [
+                {
+                    id: 'w_1',
+                    title: '1x Gratis Espresso / Cappuccino',
+                    partner: 'GuMo / Belgisches Viertel Köln',
+                    code: 'CGN-COFFEE-88',
+                    expires: 'Gültig bis Sonntag, 18:00 Uhr',
+                    emoji: '☕',
+                    used: false
+                },
+                {
+                    id: 'w_2',
+                    title: 'VIP Fast-Lane + Free Shake',
+                    partner: 'Cologne Run Club • Rheinauhafen',
+                    code: 'RUN-CGN-2026',
+                    expires: 'Gültig für das nächste Event',
+                    emoji: '⚡',
+                    used: false
+                }
             ],
-            habits: [
-                { id: "hab_mobility", name: "15 Min Post-Shift Mobility & Decompression", desc: "Löse Verspannungen im unteren Rücken und Hüftbeuger nach langen Schichten.", xp: 150, streakBonus: 40, frequency: "daily_streak", type: "instant" },
-                { id: "hab_hydration", name: "3.0L Clean Hydration + Electrolytes", desc: "Kein Zucker-Crash. Tracke deinen kompletten Wasser- und Elektrolyt-Haushalt.", xp: 120, streakBonus: 25, frequency: "daily_streak", type: "instant" },
-                { id: "hab_plant_protein", name: "120g+ Clean Vegetarian Protein Target", desc: "Erreiche dein tägliches Makro-Ziel für optimale Muskelregeneration.", xp: 180, streakBonus: 50, frequency: "daily_streak", type: "upload" }
-            ],
-            rewards: [
-                { lvl: 1, free: "CGN Digital Athlete Tag", free_type: "xp", free_info: "150", pro: "GRIND. Heavyweight Socks", pro_type: "shipping" },
-                { lvl: 2, free: "2-for-1 Espresso Voucher", free_type: "qr", free_info: "Vorzeigen im Partner-Café im Belgischen Viertel", pro: "+500 XP Instant Injector", pro_type: "xp", pro_info: "500" },
-                { lvl: 3, free: "Electrolyte Recovery Pack", free_type: "qr", free_info: "Abholbar in der Drop Zone", pro: "Technical Running Cap (Black)", pro_type: "shipping" },
-                { lvl: 4, free: "15% Partner Nutrition Code", free_type: "link", free_info: "GRIND-CGN-15", pro: "VIP Run Club Pacer Access", pro_type: "qr", pro_info: "Priority Check-In" },
-                { lvl: 5, free: "Cologne Finisher Patch", free_type: "shipping", pro: "GRIND. // Technical Shell Shirt", pro_type: "shipping" },
-                { lvl: 6, free: "+350 XP Boost", free_type: "xp", free_info: "350", pro: "Recovery Sauna Day-Pass", pro_type: "qr", pro_info: "Gültig bei KölnBäder / Partner" }
-            ],
-            cityLeaderboard: [
-                { alias: "FABIO_CGN", sector: "Südstadt", xp: 4850, lvl: 5, isPro: true, streak: 9 },
-                { alias: "MIRA_PACE", sector: "Ehrenfeld", xp: 4620, lvl: 5, isPro: true, streak: 14 },
-                { alias: "LUKAS_HYROX", sector: "Lindenthal", xp: 3910, lvl: 4, isPro: false, streak: 6 },
-                { alias: "KAI_RHEIN", sector: "Nippes", xp: 3150, lvl: 4, isPro: true, streak: 4 },
-                { alias: "SARAH_0221", sector: "Belgisches", xp: 2400, lvl: 3, isPro: false, streak: 3 }
-            ],
-            liveTicker: [
-                { alias: "MIRA_PACE", action: "hat am Aachener Weiher eingecheckt (+300 XP)", time: "vor 4 Min", isPro: true },
-                { alias: "LUKAS_HYROX", action: "hat 'THE ENGINE: 1000m Row + 5km Run' absolviert", time: "vor 12 Min", isPro: false },
-                { alias: "KAI_RHEIN", action: "hat Level 4 im Cologne Sector erreicht!", time: "vor 27 Min", isPro: true }
+
+            liveFeed: [
+                { name: 'Lara (Ehrenfeld)', text: 'hat sich gerade den Free Matcha am Aachener Weiher geschnappt', time: 'vor 2 Min', emoji: '🏃' },
+                { name: 'Fabio (Südstadt)', text: 'hat die Golden Hour Capsule am Brüsseler Platz geöffnet', time: 'vor 9 Min', emoji: '🎁' },
+                { name: 'Moritz & Jana', text: 'haben an den Poller Wiesen eingecheckt (+250⚡)', time: 'vor 18 Min', emoji: '⚡' },
+                { name: 'Kai (Nippes)', text: 'hat seinen Coffee-Voucher im Belgischen Viertel eingelöst', time: 'vor 31 Min', emoji: '☕' }
             ]
         };
 
         /* ==========================================================================
-           3. CENTRAL REACTIVE STATE & PERSISTENCE
+           UI & INTERAKTIONS-LOGIK (KINDERLEICHT & SOFORT BELOHNEND)
            ========================================================================== */
-        const State = {
-            workspace: 'user', // 'user' | 'admin' | 'forge'
-            activeUserSubTab: 'ops', // 'ops' | 'radar' | 'syndicate'
-            userPos: { lat: 50.9333, lng: 6.9595, accuracy: 24, locked: false }, // Default Thieboldsgasse / Neumarkt CGN
-            profile: JSON.parse(localStorage.getItem('grind_v4_profile')) || {
-                alias: "FABIO_CGN",
-                city: "Köln",
-                sector: "Innenstadt / Süd",
-                xp: 2350,
-                lvl: 3,
-                hasPremium: true,
-                crewCode: "CGN902",
-                completed: [],
-                redeemed: [],
-                streaks: { "hab_mobility": { streak: 4, lastDate: "" } },
-                friends: ["MIRA_PACE", "LUKAS_HYROX"]
-            },
-            season: COLOGNE_DEFAULT_DATA.seasonConfig,
-            spots: COLOGNE_DEFAULT_DATA.activeSpots,
-            missions: COLOGNE_DEFAULT_DATA.weeklyMissions,
-            habits: COLOGNE_DEFAULT_DATA.habits,
-            rewards: COLOGNE_DEFAULT_DATA.rewards,
-            leaderboard: COLOGNE_DEFAULT_DATA.cityLeaderboard,
-            ticker: COLOGNE_DEFAULT_DATA.liveTicker,
-            pendingProofs: [
-                { id: "prf_101", alias: "LUKAS_HYROX", missionName: "THE ENGINE: 1000m Row + 5km Run", xp: 650, time: "vor 8 Min", telemetry: "HR 174 bpm • Pace 4:38/km • CGN", confidence: 96 }
-            ],
-            mapInstance: null,
-            qrForgeInstance: null
-        };
-
-        const saveLocalState = () => {
-            localStorage.setItem('grind_v4_profile', JSON.stringify(State.profile));
-        };
-
-        /* ==========================================================================
-           4. GEOLOCATION & HAVERSINE TELEMETRY
-           ========================================================================== */
-        const getDistanceMeters = (lat1, lon1, lat2, lon2) => {
-            const R = 6371000;
-            const dLat = (lat2 - lat1) * Math.PI / 180;
-            const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat/2)**2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2)**2;
-            return Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
-        };
-
-        /* ==========================================================================
-           5. CORE APPLICATION CONTROLLER
-           ========================================================================== */
-        const App = {
+        const UI = {
             init() {
-                this.locateUser(true);
+                this.updateHeader();
                 this.render();
             },
 
-            locateUser(silent = false) {
-                const dot = document.getElementById('gps-dot');
-                const coordsEl = document.getElementById('gps-coords');
-                if (!navigator.geolocation) return;
-
-                navigator.geolocation.getCurrentPosition(
-                    (pos) => {
-                        State.userPos = {
-                            lat: pos.coords.latitude,
-                            lng: pos.coords.longitude,
-                            accuracy: Math.round(pos.coords.accuracy),
-                            locked: true
-                        };
-                        if (dot) dot.className = "w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]";
-                        if (coordsEl) coordsEl.innerText = `${State.userPos.lat.toFixed(4)}°N, ${State.userPos.lng.toFixed(4)}°E (±${State.userPos.accuracy}m)`;
-                        if (!silent) this.toast("GPS-Telemetrie synchronisiert.", "success");
-                        if (State.workspace === 'user') this.render();
-                    },
-                    () => {
-                        if (dot) dot.className = "w-2 h-2 rounded-full bg-brand";
-                        if (coordsEl) coordsEl.innerText = `SIM-GPS: 50.9333°N, 6.9595°E (KÖLN)`;
-                        if (!silent) this.toast("Nutze Köln-Zentrum Simulations-Koordinaten.", "info");
-                    },
-                    { enableHighAccuracy: true, timeout: 6000 }
-                );
+            updateHeader() {
+                document.getElementById('header-sparks').innerText = Store.sparks;
+                const activeVouchers = Store.wallet.filter(w => !w.used).length;
+                const badge = document.getElementById('wallet-badge');
+                badge.innerText = activeVouchers;
+                badge.style.display = activeVouchers > 0 ? 'flex' : 'none';
             },
 
-            switchWorkspace(ws) {
-                SoundFX.playClick();
-                State.workspace = ws;
-                ['user', 'admin', 'forge'].forEach(k => {
-                    const btn = document.getElementById(`ws-btn-${k}`);
-                    if (btn) {
-                        btn.className = k === ws 
-                            ? "px-3 py-1 text-[10px] font-mono font-bold uppercase tracking-wider rounded-sm transition bg-brand text-white shadow-[0_0_15px_rgba(255,77,0,0.4)]"
-                            : "px-3 py-1 text-[10px] font-mono font-bold uppercase tracking-wider rounded-sm transition text-gray-400 hover:text-white";
+            switchTab(tab) {
+                Store.activeTab = tab;
+                ['radar', 'pulse', 'wallet'].forEach(t => {
+                    const btn = document.getElementById(`nav-${t}`);
+                    if (t === tab) {
+                        btn.className = "flex-1 py-2.5 rounded-full flex items-center justify-center gap-2 text-xs font-bold transition bg-accent text-white shadow-md relative";
+                    } else {
+                        btn.className = "flex-1 py-2.5 rounded-full flex items-center justify-center gap-2 text-xs font-bold text-zinc-400 hover:text-white transition relative";
                     }
                 });
                 this.render();
             },
 
-            setUserTab(tab) {
-                SoundFX.playClick();
-                State.activeUserSubTab = tab;
-                this.render();
-            },
-
-            toast(msg, type = 'success') {
-                const stack = document.getElementById('toast-stack');
-                const el = document.createElement('div');
-                const borderColor = type === 'error' ? 'border-red-500' : (type === 'info' ? 'border-blue-500' : 'border-brand');
-                el.className = `pointer-events-auto tactical-card border-l-4 ${borderColor} p-4 shadow-2xl flex items-center justify-between gap-3 animate-fade-in`;
-                el.innerHTML = `
-                    <div>
-                        <p class="font-mono text-[9px] uppercase tracking-widest text-gray-500">SYS // ${type.toUpperCase()}</p>
-                        <p class="text-xs font-bold text-white mt-0.5">${msg}</p>
-                    </div>
-                    <span class="text-brand font-mono text-xs">⚡</span>
-                `;
-                stack.appendChild(el);
-                setTimeout(() => el.remove(), 3800);
-            },
-
-            awardXP(amount, label) {
-                SoundFX.playSuccess();
-                const oldXp = State.profile.xp;
-                const oldLvl = State.profile.lvl;
-                const newXp = oldXp + amount;
-                const newLvl = Math.floor(newXp / 1000) + 1;
-
-                State.profile.xp = newXp;
-                State.profile.lvl = newLvl;
-                saveLocalState();
-
-                // Update City Leaderboard entry
-                const lbEntry = State.leaderboard.find(x => x.alias === State.profile.alias);
-                if (lbEntry) { lbEntry.xp = newXp; lbEntry.lvl = newLvl; }
-                State.leaderboard.sort((a, b) => b.xp - a.xp);
-
-                // Push to Live Ticker
-                State.ticker.unshift({
-                    alias: State.profile.alias,
-                    action: `hat '${label}' abgeschlossen (+${amount} XP)`,
-                    time: "Gerade eben",
-                    isPro: State.profile.hasPremium
-                });
-
-                // Show XP HUD
-                const hud = document.getElementById('xp-cinematic-hud');
-                document.getElementById('hud-gain-title').innerText = `+${amount} XP // ${label}`;
-                document.getElementById('hud-lvl-val').innerText = newLvl;
-                const pct = ((newXp % 1000) / 1000) * 100;
-                const bar = document.getElementById('hud-bar-fill');
-                bar.style.width = `${((oldXp % 1000) / 1000) * 100}%`;
-                hud.classList.remove('opacity-0', '-translate-y-8');
-                setTimeout(() => { bar.style.width = `${pct}%`; }, 100);
-                setTimeout(() => { hud.classList.add('opacity-0', '-translate-y-8'); }, 4000);
-
-                if (newLvl > oldLvl) {
-                    this.toast(`LEVEL UP! Du hast Level ${newLvl} erreicht!`, "success");
-                }
-                this.render();
-            },
-
-            /* ======================================================================
-               MISSION, HABIT & SPOT EXECUTION FLOWS
-               ====================================================================== */
-            executeMission(id, isHabit = false) {
-                SoundFX.playClick();
-                const list = isHabit ? State.habits : State.missions;
-                const item = list.find(x => x.id === id);
-                if (!item) return;
-
-                const today = new Date().toISOString().split('T')[0];
-                if (!isHabit && State.profile.completed.includes(id)) {
-                    return this.toast("Operation bereits abgeschlossen.", "info");
-                }
-                if (isHabit && State.profile.streaks[id]?.lastDate === today) {
-                    return this.toast("Routine heute bereits geloggt.", "info");
-                }
-
-                if (item.type === 'instant') {
-                    this.completeItemDirectly(item, isHabit);
-                } else {
-                    this.openVerificationHUD(item, isHabit);
+            render() {
+                const container = document.getElementById('app-content');
+                if (Store.activeTab === 'radar') {
+                    container.innerHTML = this.renderRadarView();
+                    setTimeout(() => this.initMap(), 40);
+                } else if (Store.activeTab === 'pulse') {
+                    container.innerHTML = this.renderPulseView();
+                } else if (Store.activeTab === 'wallet') {
+                    container.innerHTML = this.renderWalletView();
                 }
             },
 
-            completeItemDirectly(item, isHabit) {
-                const today = new Date().toISOString().split('T')[0];
-                let totalXp = item.xp;
+            /* ----------------------------------------------------------------------
+               TAB 1: DIE KARTE & DIE DROP-KARTEN (Wie Apple Maps / Pokémon GO)
+               ---------------------------------------------------------------------- */
+            renderRadarView() {
+                const activeDrop = Store.drops.find(d => d.id === Store.selectedDropId) || Store.drops[0];
 
-                if (isHabit) {
-                    const st = State.profile.streaks[item.id] || { streak: 0, lastDate: "" };
-                    st.streak += 1;
-                    st.lastDate = today;
-                    State.profile.streaks[item.id] = st;
-                    totalXp += (st.streak > 1 ? (st.streak - 1) * (item.streakBonus || 0) : 0);
-                } else {
-                    State.profile.completed.push(item.id);
-                }
-
-                this.awardXP(totalXp, item.name);
-            },
-
-            openVerificationHUD(item, isHabit) {
-                const isQR = item.type === 'qr';
-                const html = `
-                    <div class="font-mono text-[10px] text-brand uppercase tracking-[0.25em] mb-1">Tactical Verification Protocol</div>
-                    <h3 class="text-2xl font-black italic uppercase tracking-tight text-white mb-2">${item.name}</h3>
-                    <p class="text-xs text-gray-400 mb-6">${item.desc}</p>
-
-                    ${isQR ? `
-                        <div class="bg-black border border-border p-6 mb-4 text-center relative overflow-hidden">
-                            <div class="scanline-overlay"></div>
-                            <div id="qr-scanner-mount" class="mb-4"></div>
-                            <p class="font-mono text-[10px] text-gray-400 uppercase tracking-widest mb-3">Scanne den GRIND. QR-Tag vor Ort oder gib den Sektor-Key ein:</p>
-                            <input id="verify-secret-input" type="text" placeholder="Z.B. ${item.qr_solution || 'DAWN2026'}" class="w-full p-3 bg-panel border border-border focus:border-brand text-center font-mono text-sm text-white uppercase tracking-widest outline-none">
-                        </div>
-                        <button onclick="App.confirmVerification('${item.id}',${isHabit}, 'qr')" class="w-full py-4 bg-brand hover:bg-brandLight text-white font-black italic uppercase tracking-widest text-xs transition">
-                            ⚡ Key Autorisieren (+${item.xp} XP)
-                        </button>
-                    ` : `
-                        <!-- AI INSTANT TELEMETRY PROOF -->
-                        <div class="space-y-4 mb-6">
-                            <div class="grid grid-cols-2 gap-3">
-                                <div class="bg-panel border border-border p-3">
-                                    <label class="block font-mono text-[9px] text-gray-500 uppercase mb-1">Avg Heart Rate (BPM)</label>
-                                    <input id="proof-hr" type="number" value="168" class="w-full bg-transparent font-mono text-lg font-bold text-white outline-none">
-                                </div>
-                                <div class="bg-panel border border-border p-3">
-                                    <label class="block font-mono text-[9px] text-gray-500 uppercase mb-1">Dauer / Split</label>
-                                    <input id="proof-duration" type="text" value="26:40 MIN" class="w-full bg-transparent font-mono text-lg font-bold text-white outline-none">
-                                </div>
-                            </div>
-
-                            <label class="block border-2 border-dashed border-border hover:border-brand p-6 text-center cursor-pointer bg-black/50 transition relative overflow-hidden">
-                                <input type="file" accept="image/*" class="hidden" onchange="App.previewProofImage(event)">
-                                <div id="proof-upload-hint">
-                                    <div class="text-2xl mb-2">📸</div>
-                                    <p class="font-mono text-xs text-white font-bold uppercase">Smartwatch / Gym-Display / Meal Foto wählen</p>
-                                    <p class="font-mono text-[10px] text-gray-500 mt-1">Instant Vision Check (< 2 Sek. statt 12h Wartezeit)</p>
-                                </div>
-                                <img id="proof-img-preview" class="hidden max-h-44 mx-auto object-contain" />
-                            </label>
-                        </div>
-
-                        <button id="ai-verify-btn" onclick="App.confirmVerification('${item.id}',${isHabit}, 'ai_upload')" class="w-full py-4 bg-white hover:bg-brand text-black hover:text-white font-black italic uppercase tracking-widest text-xs transition">
-                            🤖 Instant AI Telemetry Check (+${item.xp} XP)
-                        </button>
-                    `}
-                `;
-                this.openModal(html);
-            },
-
-            previewProofImage(e) {
-                const file = e.target.files?.[0];
-                if (!file) return;
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    const img = document.getElementById('proof-img-preview');
-                    const hint = document.getElementById('proof-upload-hint');
-                    if (img && hint) {
-                        img.src = ev.target.result;
-                        img.classList.remove('hidden');
-                        hint.classList.add('hidden');
-                    }
-                };
-                reader.readAsDataURL(file);
-            },
-
-            confirmVerification(id, isHabit, mode) {
-                const list = isHabit ? State.habits : State.missions;
-                const item = list.find(x => x.id === id);
-                if (!item) return;
-
-                if (mode === 'qr') {
-                    const val = (document.getElementById('verify-secret-input')?.value || '').trim().toUpperCase();
-                    const expected = (item.qr_solution || 'DAWN2026').toUpperCase();
-                    if (val !== expected) {
-                        SoundFX.playError();
-                        return this.toast(`Ungültiger Sektor-Key. (Tipp für Test: ${expected})`, "error");
-                    }
-                    this.closeModal();
-                    this.completeItemDirectly(item, isHabit);
-                } else {
-                    const btn = document.getElementById('ai-verify-btn');
-                    if (btn) {
-                        btn.disabled = true;
-                        btn.innerText = "🔍 VISION ENGINE ANALYSIERT TELEMETRIE...";
-                    }
-                    setTimeout(() => {
-                        this.closeModal();
-                        this.completeItemDirectly(item, isHabit);
-                        this.toast("KI-Telemetrie-Check bestanden (Confidence: 98.4%).", "success");
-                    }, 1100);
-                }
-            },
-
-            /* ======================================================================
-               SPOT CHECK-IN (Haversine Geofence + Simulation Override für Tests)
-               ====================================================================== */
-            triggerSpotCheckin(spotId, simulateOnSite = false) {
-                SoundFX.playClick();
-                const spot = State.spots.find(s => s.id === spotId);
-                if (!spot) return;
-
-                if (simulateOnSite) {
-                    State.userPos.lat = spot.lat;
-                    State.userPos.lng = spot.lng;
-                }
-
-                const dist = getDistanceMeters(State.userPos.lat, State.userPos.lng, spot.lat, spot.lng);
-                const today = new Date().toISOString().split('T')[0];
-                const alreadyDone = State.profile.streaks[spot.id]?.lastDate === today;
-
-                if (alreadyDone) {
-                    return this.toast("Heute bereits in dieser Drop Zone eingecheckt!", "info");
-                }
-
-                if (dist > 150 && !simulateOnSite) {
-                    const html = `
-                        <div class="font-mono text-[10px] text-brand uppercase tracking-widest mb-1">Geofence Lock // 150m Radius</div>
-                        <h3 class="text-2xl font-black italic uppercase text-white mb-2">${spot.name}</h3>
-                        <p class="text-xs text-gray-400 mb-6">${spot.subtitle} (${spot.sector})</p>
+                return `
+                    <!-- FULLSCREEN INTERACTIVE MAP -->
+                    <div class="relative w-full h-[56vh] overflow-hidden rounded-b-[36px] shadow-2xl border-b border-white/10">
+                        <div id="map-canvas" class="w-full h-full z-10"></div>
                         
-                        <div class="bg-black border border-red-500/40 p-4 mb-6 font-mono text-xs">
-                            <div class="flex justify-between py-1 border-b border-border">
-                                <span class="text-gray-500">DEINE DISTANZ:</span>
-                                <span class="text-red-400 font-bold">${dist} METER</span>
+                        <!-- Floating Map Hint -->
+                        <div class="absolute bottom-4 left-4 right-4 z-20 flex justify-between items-center pointer-events-none">
+                            <div class="glass-pill px-3.5 py-1.5 rounded-full text-[11px] font-semibold text-zinc-200 shadow-lg">
+                                🔥 <strong>${Store.drops.filter(d => !d.claimed).length} Live Drops</strong> heute in Köln aktiv
                             </div>
-                            <div class="flex justify-between py-1 mt-1">
-                                <span class="text-gray-500">ERFORDERLICH:</span>
-                                <span class="text-emerald-400 font-bold">≤ 150 METER</span>
-                            </div>
-                        </div>
-
-                        <div class="space-y-3">
-                            <button onclick="App.closeModal(); App.triggerSpotCheckin('${spot.id}', true)" class="w-full py-3.5 bg-brand hover:bg-brandLight text-white font-mono text-xs font-bold uppercase tracking-widest transition">
-                                🚀 GPS-Teleport zum Spot (Demo-Test) & Claim +${spot.xp} XP
-                            </button>
-                            <button onclick="App.closeModal()" class="w-full py-3 bg-panel border border-border text-gray-400 font-mono text-xs uppercase">
-                                Abbrechen
-                            </button>
-                        </div>
-                    `;
-                    return this.openModal(html);
-                }
-
-                State.profile.streaks[spot.id] = { streak: 1, lastDate: today };
-                this.awardXP(spot.xp, `Drop Zone: ${spot.name}`);
-            },
-
-            /* ======================================================================
-               REWARD CLAIMING
-               ====================================================================== */
-            claimReward(lvl, tier) {
-                SoundFX.playClick();
-                const r = State.rewards.find(x => x.lvl === lvl);
-                if (!r) return;
-                const key = `lvl${lvl}_${tier}`;
-
-                if (State.profile.lvl < lvl) {
-                    SoundFX.playError();
-                    return this.toast(`Erreiche zuerst Level ${lvl}, um diesen Drop freizuschalten.`, "error");
-                }
-                if (tier === 'pro' && !State.profile.hasPremium) {
-                    return this.openProUpgradeModal();
-                }
-                if (State.profile.redeemed.includes(key)) {
-                    return this.toast("Dieser Drop wurde bereits eingelöst.", "info");
-                }
-
-                const title = r[tier];
-                const rType = r[`${tier}_type`] || 'qr';
-                const rInfo = r[`${tier}_info`] || 'Vorzeigen beim Partner in Köln.';
-
-                if (rType === 'xp') {
-                    State.profile.redeemed.push(key);
-                    this.awardXP(parseInt(rInfo) || 250, `Loot Boost: ${title}`);
-                    return;
-                }
-
-                const html = `
-                    <div class="font-mono text-[10px] text-brand uppercase tracking-widest mb-1">Loot Drop // LVL 0${lvl} (${tier.toUpperCase()})</div>
-                    <h3 class="text-2xl font-black italic uppercase text-white mb-4">${title}</h3>
-                    <div class="bg-black border border-border p-5 mb-6 text-center">
-                        <p class="text-xs text-gray-300 mb-3">${rInfo}</p>
-                        <div class="font-mono text-lg font-bold text-brand tracking-widest bg-panel py-3 border border-brand/30">
-                            CGN-${lvl}X-${State.profile.crewCode}
                         </div>
                     </div>
-                    <button onclick="App.finalizeRewardRedeem('${key}', '${title}')" class="w-full py-4 bg-brand text-white font-black italic uppercase tracking-widest text-xs">
-                        ✓ Drop Jetzt Einlösen & Entwerten
-                    </button>
+
+                    <!-- HORIZONTAL SWIPE CARDS FÜR JEDEN DROP -->
+                    <div class="px-4 -mt-6 relative z-30">
+                        <div class="flex gap-3 overflow-x-auto no-scrollbar py-2">
+                            ${Store.drops.map(d => {
+                                const isSel = d.id === activeDrop.id;
+                                return `
+                                    <button onclick="UI.selectDrop('${d.id}')" class="flex-shrink-0 px-4 py-2.5 rounded-2xl flex items-center gap-2.5 text-xs font-bold transition ${isSel ? 'bg-white text-black shadow-lg scale-[1.02]' : 'bg-card text-zinc-300 border border-white/5'}">
+                                        <span class="text-base">${d.emoji}</span>
+                                        <span>${d.place.split('•')[0].trim()}</span>${d.claimed ? '<span class="text-emerald-500">✓</span>' : `<span class="text-[10px] px-1.5 py-0.5 rounded-full ${isSel ? 'bg-black/10 text-black' : 'bg-accent/20 text-accent'}">${d.spotsLeft} frei</span>`}
+                                    </button>
+                                `;
+                            }).join('')}
+                        </div>
+
+                        <!-- SELECTED DROP HERO CARD -->
+                        <div class="mt-3 bg-card border border-white/10 rounded-[28px] p-5 shadow-2xl">
+                            <div class="flex justify-between items-start gap-3 mb-3">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-12 h-12 rounded-2xl bg-accent/15 border border-accent/30 flex items-center justify-center text-2xl">
+                                        ${activeDrop.emoji}
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-[11px] font-bold uppercase tracking-wider text-accent">${activeDrop.category}</span>
+                                            <span class="text-zinc-600">•</span>
+                                            <span class="text-[11px] font-medium text-zinc-400">${activeDrop.timeLeft}</span>
+                                        </div>
+                                        <h2 class="text-xl font-extrabold text-white leading-tight mt-0.5">${activeDrop.title}</h2>
+                                        <p class="text-xs text-zinc-400">${activeDrop.place}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <p class="text-xs text-zinc-300 leading-relaxed mb-4">
+                                ${activeDrop.desc}
+                            </p>
+
+                            <!-- Was man bekommt (Die Beute) -->
+                            <div class="bg-surface border border-white/5 rounded-2xl p-3.5 mb-4 flex items-center justify-between">
+                                <div>
+                                    <span class="text-[10px] font-bold uppercase tracking-wider text-zinc-500 block">Deine Sofort-Beute</span>
+                                    <span class="text-sm font-bold text-white">🎁 ${activeDrop.reward}</span>
+                                </div>
+                                <span class="px-2.5 py-1 rounded-full bg-accent/15 text-accent font-extrabold text-xs">
+                                    +${activeDrop.sparks} ⚡
+                                </span>
+                            </div>
+
+                            <!-- Verfügbarkeits-Balken -->
+                            <div class="mb-5">
+                                <div class="flex justify-between text-[11px] font-semibold mb-1.5">
+                                    <span class="text-zinc-400">Verfügbare Drops an diesem Spot</span>
+                                    <span class="text-white font-bold">Noch ${activeDrop.spotsLeft} von ${activeDrop.totalSpots} da</span>
+                                </div>
+                                <div class="w-full h-2 bg-zinc-800 rounded-full overflow-hidden">
+                                    <div class="h-full bg-gradient-to-r from-accent to-amber-400 rounded-full transition-all duration-500" style="width: ${(activeDrop.spotsLeft / activeDrop.totalSpots) * 100}%"></div>
+                                </div>
+                            </div>
+
+                            <!-- DER EINZIGE GROSSE ACTION-BUTTON -->
+                            ${activeDrop.claimed ? `
+                                <button onclick="UI.switchTab('wallet')" class="w-full py-4 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 font-extrabold text-sm flex items-center justify-center gap-2">
+                                    ✓ In deiner Wallet gespeichert – Jetzt ansehen
+                                </button>
+                            ` : `
+                                <button onclick="UI.openClaimSheet('${activeDrop.id}')" class="w-full py-4 rounded-2xl bg-accent hover:bg-[#ff661a] active:scale-[0.99] text-white font-extrabold text-sm shadow-[0_10px_30px_rgba(255,85,0,0.4)] transition flex items-center justify-center gap-2">
+                                    <span>📍</span> Vor Ort einchecken & Drop abholen
+                                </button>
+                            `}
+                        </div>
+                    </div>
                 `;
-                this.openModal(html);
             },
 
-            finalizeRewardRedeem(key, title) {
-                State.profile.redeemed.push(key);
-                saveLocalState();
-                SoundFX.playSuccess();
-                this.closeModal();
-                this.toast(`Loot '${title}' erfolgreich eingelöst!`, "success");
+            initMap() {
+                const mapEl = document.getElementById('map-canvas');
+                if (!mapEl || typeof L === 'undefined') return;
+
+                if (Store.map) {
+                    Store.map.remove();
+                    Store.map = null;
+                }
+
+                const activeDrop = Store.drops.find(d => d.id === Store.selectedDropId) || Store.drops[0];
+                const map = L.map(mapEl, { zoomControl: false }).setView([activeDrop.lat, activeDrop.lng], 14);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 }).addTo(map);
+
+                Store.drops.forEach(d => {
+                    const isSelected = d.id === activeDrop.id;
+                    const icon = L.divIcon({
+                        className: 'custom-pin',
+                        html: `<div class="drop-marker ${isSelected ? 'active-marker' : ''}">${d.emoji}</div>`,
+                        iconSize: [44, 44],
+                        iconAnchor: [22, 22]
+                    });
+
+                    const marker = L.marker([d.lat, d.lng], { icon }).addTo(map);
+                    marker.on('click', () => this.selectDrop(d.id));
+                });
+
+                Store.map = map;
+            },
+
+            selectDrop(id) {
+                Store.selectedDropId = id;
                 this.render();
             },
 
-            openProUpgradeModal() {
+            /* ----------------------------------------------------------------------
+               SUPER EINFACHER 1-TAP CHECK-IN (Ohne komplizierte Formulare!)
+               ---------------------------------------------------------------------- */
+            openClaimSheet(dropId) {
+                const d = Store.drops.find(x => x.id === dropId);
+                if (!d) return;
+
                 const html = `
-                    <div class="font-mono text-[10px] text-pro uppercase tracking-widest mb-1">Syndicate Clearance</div>
-                    <h3 class="text-3xl font-black italic uppercase text-white mb-2">GRIND. <span class="text-pro">PRO PASS</span></h3>
-                    <p class="text-xs text-gray-400 mb-6">Schalte alle physischen Streetwear-Drops, Partner-Gutscheine in Köln und den PRO-Multiplikator frei.</p>
-                    <button onclick="App.activateProDemo()" class="w-full py-4 bg-pro hover:opacity-90 text-white font-black italic uppercase tracking-widest text-xs">
-                        ⚡ PRO Pass Aktivieren (19,00 € / Season)
-                    </button>
+                    <div class="text-center">
+                        <div class="w-16 h-16 rounded-3xl bg-accent/15 border border-accent/30 flex items-center justify-center text-4xl mx-auto mb-4">
+                            ${d.emoji}
+                        </div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-accent">${d.place}</span>
+                        <h3 class="text-2xl font-extrabold text-white mt-1 mb-2">${d.title}</h3>
+                        <p class="text-xs text-zinc-400 max-w-xs mx-auto mb-6">
+                            Bist du vor Ort (oder möchtest du den Drop jetzt im Demo-Modus öffnen)? Du erhältst sofort <strong>${d.reward}</strong> in deine Wallet.
+                        </p>
+
+                        <div class="bg-surface border border-white/10 rounded-2xl p-4 mb-6 text-left flex items-center justify-between">
+                            <div>
+                                <p class="text-[11px] text-zinc-400">Standort-Check</p>
+                                <p class="text-sm font-bold text-emerald-400">✓ Köln Sektor bereit</p>
+                            </div>
+                            <span class="text-xs font-bold bg-white/10 px-3 py-1.5 rounded-full">150m Radius</span>
+                        </div>
+
+                        <button onclick="UI.confirmClaim('${d.id}')" class="w-full py-4 rounded-2xl bg-accent hover:bg-[#ff661a] text-white font-extrabold text-base shadow-[0_10px_30px_rgba(255,85,0,0.4)] transition mb-3">
+                            🎁 Kapsel jetzt öffnen (+${d.sparks} ⚡)
+                        </button>
+                        <button onclick="UI.closeSheet()" class="w-full py-3 rounded-2xl text-xs font-bold text-zinc-500 hover:text-white">
+                            Später
+                        </button>
+                    </div>
                 `;
-                this.openModal(html);
+                this.showSheet(html);
             },
 
-            activateProDemo() {
-                State.profile.hasPremium = true;
-                saveLocalState();
-                SoundFX.playSuccess();
-                this.closeModal();
-                this.toast("PRO Syndicate Clearance aktiviert!", "success");
+            confirmClaim(dropId) {
+                const d = Store.drops.find(x => x.id === dropId);
+                if (!d || d.claimed) return;
+
+                d.claimed = true;
+                d.spotsLeft = Math.max(0, d.spotsLeft - 1);
+                Store.sparks += d.sparks;
+
+                // Direkt als schönes Ticket in die Wallet legen
+                Store.wallet.unshift({
+                    id: 'w_' + Date.now(),
+                    title: d.reward,
+                    partner: `${d.partner} (${d.place.split('•')[0].trim()})`,
+                    code: `CGN-${Math.floor(1000 + Math.random() * 9000)}`,
+                    expires: 'Ab sofort 7 Tage gültig',
+                    emoji: d.emoji,
+                    used: false
+                });
+
+                // In den Live-Feed pushen
+                Store.liveFeed.unshift({
+                    name: 'Du (Köln)',
+                    text: `hast dir gerade '${d.reward}' am Spot ${d.place.split('•')[0]} gesichert!`,
+                    time: 'Gerade eben',
+                    emoji: d.emoji
+                });
+
+                this.closeSheet();
+                this.updateHeader();
+
+                // Konfetti-Belohnung!
+                if (typeof confetti === 'function') {
+                    confetti({ particleCount: 70, spread: 65, origin: { y: 0.7 } });
+                }
+
+                this.switchTab('wallet');
+            },
+
+            /* ----------------------------------------------------------------------
+               TAB 2: LIVE IN KÖLN (Sozialer Beweis & Freunde ohne leeren Feed)
+               ---------------------------------------------------------------------- */
+            renderPulseView() {
+                return `
+                    <div class="pt-20 px-4 space-y-6">
+                        <div>
+                            <span class="text-xs font-bold uppercase tracking-wider text-accent">Live in deiner Stadt</span>
+                            <h1 class="text-3xl font-extrabold mt-0.5">Köln Pulse 🔥</h1>
+                            <p class="text-xs text-zinc-400 mt-1">Sieh in Echtzeit, wo in Köln gerade Drops geknackt werden.</p>
+                        </div>
+
+                        <!-- Freunde Einladen Banner (Simpel & Belohnend) -->
+                        <div class="bg-gradient-to-r from-accent/20 via-amber-500/10 to-card border border-accent/30 rounded-[24px] p-5 flex items-center justify-between gap-4">
+                            <div>
+                                <span class="text-[11px] font-extrabold uppercase tracking-wider text-accent">Zusammen rausgehen</span>
+                                <h3 class="text-base font-extrabold text-white mt-0.5">Nimm 1 Freund mit zum nächsten Drop</h3>
+                                <p class="text-xs text-zinc-300 mt-1">Ihr bekommt beide sofort einen Gratis-Coffee-Drop freigeschaltet.</p>
+                            </div>
+                            <button onclick="UI.shareInvite()" class="flex-shrink-0 px-4 py-3 rounded-2xl bg-white text-black font-extrabold text-xs shadow-md active:scale-95 transition">
+                                Teilen 🔗
+                            </button>
+                        </div>
+
+                        <!-- Live Ticker Cards -->
+                        <div class="space-y-3">
+                            ${Store.liveFeed.map(item => `
+                                <div class="bg-card border border-white/5 rounded-2xl p-4 flex items-center gap-3.5">
+                                    <div class="w-11 h-11 rounded-2xl bg-surface flex items-center justify-center text-xl flex-shrink-0 border border-white/5">
+                                        ${item.emoji}
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-xs text-zinc-200 leading-snug">
+                                            <strong class="text-white">${item.name}</strong>${item.text}
+                                        </p>
+                                        <span class="text-[11px] text-zinc-500 font-medium">${item.time}</span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            },
+
+            /* ----------------------------------------------------------------------
+               TAB 3: DEINE WALLET (Echte Gutscheine zum Vorzeigen im Café/Shop)
+               ---------------------------------------------------------------------- */
+            renderWalletView() {
+                return `
+                    <div class="pt-20 px-4 space-y-6">
+                        <div class="flex items-end justify-between">
+                            <div>
+                                <span class="text-xs font-bold uppercase tracking-wider text-accent">Deine Beute</span>
+                                <h1 class="text-3xl font-extrabold mt-0.5">Drop Wallet 🎟️</h1>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-[11px] text-zinc-400 block">Gesammelte Energie</span>
+                                <span class="text-lg font-extrabold text-accent">${Store.sparks} ⚡</span>
+                            </div>
+                        </div>
+
+                        <p class="text-xs text-zinc-400">
+                            Zeige diese Karten einfach beim Partner-Café oder Drop-Spot in Köln vor, um deine Belohnung einzulösen.
+                        </p>
+
+                        <div class="space-y-4">
+                            ${Store.wallet.map(w => `
+                                <div class="ticket-card rounded-[28px] p-5 shadow-xl ${w.used ? 'opacity-45' : ''}">
+                                    <div class="flex items-start justify-between gap-3 pb-5 border-b border-dashed border-white/15">
+                                        <div class="flex items-center gap-3.5">
+                                            <div class="w-12 h-12 rounded-2xl bg-accent/15 border border-accent/30 flex items-center justify-center text-2xl">
+                                                ${w.emoji}
+                                            </div>
+                                            <div>
+                                                <h3 class="text-base font-extrabold text-white">${w.title}</h3>
+                                                <p class="text-xs text-zinc-400 mt-0.5">${w.partner}</p>
+                                                <span class="inline-block text-[10px] text-emerald-400 font-semibold mt-1">${w.expires}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="pt-4 flex items-center justify-between">
+                                        <div>
+                                            <span class="text-[10px] uppercase tracking-wider text-zinc-500 block font-bold">Pass-Code</span>
+                                            <span class="font-mono text-sm font-extrabold text-white tracking-wider">${w.code}</span>
+                                        </div>
+
+                                        ${w.used ? `
+                                            <span class="px-4 py-2 rounded-xl bg-zinc-800 text-zinc-500 text-xs font-bold">Bereits eingelöst</span>
+                                        ` : `
+                                            <button onclick="UI.redeemVoucher('${w.id}')" class="px-5 py-2.5 rounded-xl bg-white hover:bg-accent text-black hover:text-white font-extrabold text-xs transition shadow">
+                                                An der Kasse vorzeigen →
+                                            </button>
+                                        `}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            },
+
+            redeemVoucher(id) {
+                const v = Store.wallet.find(x => x.id === id);
+                if (!v) return;
+
+                const html = `
+                    <div class="text-center">
+                        <div class="w-16 h-16 rounded-3xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-3xl mx-auto mb-3">
+                            ${v.emoji}
+                        </div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-emerald-400">Live Voucher</span>
+                        <h3 class="text-2xl font-extrabold text-white mt-1">${v.title}</h3>
+                        <p class="text-xs text-zinc-400 mt-1 mb-6">${v.partner}</p>
+
+                        <div class="bg-black border border-white/10 rounded-2xl p-5 mb-6">
+                            <p class="text-[10px] uppercase tracking-widest text-zinc-500 mb-1">Code für Partner / Barista</p>
+                            <p class="font-mono text-2xl font-extrabold text-accent tracking-widest">${v.code}</p>
+                        </div>
+
+                        <button onclick="UI.confirmVoucherUse('${v.id}')" class="w-full py-4 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-sm transition mb-2">
+                            ✓ Jetzt entwerten & einlösen
+                        </button>
+                        <button onclick="UI.closeSheet()" class="w-full py-2.5 text-xs font-bold text-zinc-500">
+                            Schließen
+                        </button>
+                    </div>
+                `;
+                this.showSheet(html);
+            },
+
+            confirmVoucherUse(id) {
+                const v = Store.wallet.find(x => x.id === id);
+                if (v) v.used = true;
+                this.closeSheet();
+                this.updateHeader();
                 this.render();
             },
 
-            /* ======================================================================
-               SHARE CARD GENERATOR (1080x1920 High-Contrast Telemetry Poster)
-               ====================================================================== */
-            exportShareCard() {
-                SoundFX.playClick();
-                this.toast("Rendert 1080x1920 Story-Telemetrie...", "info");
-                const c = document.createElement('canvas');
-                c.width = 1080; c.height = 1920;
-                const ctx = c.getContext('2d');
+            /* ----------------------------------------------------------------------
+               CREATOR-MODUS: IN 10 SEKUNDEN EINEN NEUEN KÖLN-DROP SETZEN
+               ---------------------------------------------------------------------- */
+            openCreatorModal() {
+                const html = `
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-accent">Creator & Partner Mode</span>
+                        <h3 class="text-2xl font-extrabold text-white mt-0.5 mb-1">Neuen Drop in Köln setzen 📍</h3>
+                        <p class="text-xs text-zinc-400 mb-5">Platziere in 10 Sekunden eine neue Kapsel für deine Community oder ein Partner-Café.</p>
 
-                ctx.fillStyle = '#050507';
-                ctx.fillRect(0, 0, 1080, 1920);
+                        <form onsubmit="UI.createNewDrop(event)" class="space-y-3">
+                            <div class="flex gap-2">
+                                <input id="new-drop-emoji" value="🍹" required class="w-14 p-3.5 rounded-2xl bg-surface border border-white/10 text-center text-xl outline-none focus:border-accent">
+                                <input id="new-drop-title" placeholder="Name (z.B. Sundowner Spritz Drop)" required class="flex-1 p-3.5 rounded-2xl bg-surface border border-white/10 text-sm text-white outline-none focus:border-accent">
+                            </div>
+                            <input id="new-drop-place" placeholder="Ort in Köln (z.B. Rathenauplatz • Neustadt-Süd)" required class="w-full p-3.5 rounded-2xl bg-surface border border-white/10 text-sm text-white outline-none focus:border-accent">
+                            <input id="new-drop-reward" placeholder="Was gibt es gratis? (z.B. 1x Gratis Aperol / Limo)" required class="w-full p-3.5 rounded-2xl bg-surface border border-white/10 text-sm text-white outline-none focus:border-accent">
+                            
+                            <div class="grid grid-cols-2 gap-2">
+                                <input id="new-drop-spots" type="number" placeholder="Anzahl (z.B. 15)" value="15" required class="p-3.5 rounded-2xl bg-surface border border-white/10 text-sm text-white outline-none focus:border-accent">
+                                <select id="new-drop-veedel" class="p-3.5 rounded-2xl bg-surface border border-white/10 text-sm text-white outline-none focus:border-accent">
+                                    <option value="50.9302,6.9392">📍 Rathenauplatz</option>
+                                    <option value="50.9285,6.9588">📍 Chlodwigplatz (Südstadt)</option>
+                                    <option value="50.9362,6.9098">📍 Stadtwald / Lindenthal</option>
+                                    <option value="50.9515,6.9535">📍 Agnesviertel</option>
+                                </select>
+                            </div>
 
-                // Tactical Grid
-                ctx.strokeStyle = 'rgba(255,255,255,0.04)';
-                ctx.lineWidth = 2;
-                for (let x = 0; x < 1080; x += 60) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, 1920); ctx.stroke(); }
-                for (let y = 0; y < 1920; y += 60) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(1080, y); ctx.stroke(); }
-
-                // Header
-                ctx.fillStyle = '#ff4d00';
-                ctx.font = '700 32px "JetBrains Mono", monospace';
-                ctx.fillText('COLOGNE TACTICAL SECTOR // 50.9375° N, 6.9603° E', 90, 180);
-
-                ctx.fillStyle = '#ffffff';
-                ctx.font = 'italic 900 150px "Inter", sans-serif';
-                ctx.fillText('GRIND.', 85, 340);
-
-                // Athlete Stats Box
-                ctx.strokeStyle = '#ff4d00';
-                ctx.lineWidth = 4;
-                ctx.strokeRect(90, 520, 900, 760);
-
-                ctx.fillStyle = '#888890';
-                ctx.font = '700 30px "JetBrains Mono", monospace';
-                ctx.fillText('OPERATIVE ALIAS', 150, 620);
-
-                ctx.fillStyle = '#ffffff';
-                ctx.font = 'italic 900 105px "Inter", sans-serif';
-                ctx.fillText(State.profile.alias, 150, 740);
-
-                ctx.fillStyle = '#ff4d00';
-                ctx.font = '800 68px "JetBrains Mono", monospace';
-                ctx.fillText(`LEVEL 0${State.profile.lvl} // ${State.profile.xp} XP`, 150, 880);
-
-                ctx.fillStyle = '#e4e4e7';
-                ctx.font = '600 34px "JetBrains Mono", monospace';
-                ctx.fillText(`BASE SECTOR: ${State.profile.sector.toUpperCase()}`, 150, 1020);
-                ctx.fillText(`CREW CODE:   ${State.profile.crewCode}`, 150, 1090);
-                ctx.fillText(`STATUS:      ACTIVE IN SEASON 0${State.season.number}`, 150, 1160);
-
-                const link = document.createElement('a');
-                link.download = `GRIND_CGN_${State.profile.alias}.png`;
-                link.href = c.toDataURL('image/png');
-                link.click();
-                this.toast("Story Card heruntergeladen!", "success");
+                            <button type="submit" class="w-full py-4 mt-2 rounded-2xl bg-accent hover:bg-[#ff661a] text-white font-extrabold text-sm shadow-lg transition">
+                                🚀 Drop jetzt live auf die Karte setzen
+                            </button>
+                        </form>
+                    </div>
+                `;
+                this.showSheet(html);
             },
 
-            openModal(html) {
-                const bd = document.getElementById('modal-backdrop');
-                document.getElementById('modal-body').innerHTML = html;
+            createNewDrop(e) {
+                e.preventDefault();
+                const emoji = document.getElementById('new-drop-emoji').value || '🎁';
+                const title = document.getElementById('new-drop-title').value.trim();
+                const place = document.getElementById('new-drop-place').value.trim();
+                const reward = document.getElementById('new-drop-reward').value.trim();
+                const count = parseInt(document.getElementById('new-drop-spots').value) || 10;
+                const coords = document.getElementById('new-drop-veedel').value.split(',');
+
+                const newId = 'drop_' + Date.now();
+                Store.drops.unshift({
+                    id: newId,
+                    title,
+                    place,
+                    reward,
+                    partner: 'Community Partner Köln',
+                    emoji,
+                    category: 'Fresh Live Drop',
+                    sparks: 200,
+                    spotsLeft: count,
+                    totalSpots: count,
+                    timeLeft: 'Gerade gestartet!',
+                    lat: parseFloat(coords[0]),
+                    lng: parseFloat(coords[1]),
+                    claimed: false,
+                    desc: `Frisch platzierter Drop in ${place}. Sei schnell, bevor alle ${count} Spots weg sind!`
+                });
+
+                Store.selectedDropId = newId;
+                this.closeSheet();
+                this.switchTab('radar');
+            },
+
+            shareInvite() {
+                if (navigator.share) {
+                    navigator.share({
+                        title: 'GRIND. // KÖLN DROPS',
+                        text: 'Komm mit zum nächsten Drop in Köln – es gibt noch freie Coffee- & Streetwear-Kapseln!',
+                        url: window.location.href
+                    }).catch(() => {});
+                } else {
+                    alert('Einladungs-Link für deine Crew wurde kopiert!');
+                }
+            },
+
+            showSheet(html) {
+                const bd = document.getElementById('sheet-backdrop');
+                document.getElementById('sheet-body').innerHTML = html;
                 bd.classList.remove('hidden');
                 bd.classList.add('flex');
             },
 
-            closeModal() {
-                const bd = document.getElementById('modal-backdrop');
+            closeSheet(e) {
+                const bd = document.getElementById('sheet-backdrop');
                 bd.classList.add('hidden');
                 bd.classList.remove('flex');
-            },
-
-            openLegalModal(type) {
-                const titles = { impressum: 'Impressum', datenschutz: 'Datenschutz', agb: 'AGB & Anti-Cheat' };
-                const content = {
-                    impressum: `<p class="text-xs text-gray-300 leading-relaxed">Angaben gemäß § 5 TMG:<br><strong class="text-white">Fabio Maines</strong><br>Thieboldsgasse 117, 50676 Köln<br>E-Mail: Fabio.maines@grind-app.de<br><br>Gemäß § 19 UStG wird keine Umsatzsteuer berechnet (Kleinunternehmerregelung).</p>`,
-                    datenschutz: `<p class="text-xs text-gray-300 leading-relaxed">Standortdaten (GPS) werden ausschließlich lokal im Browser mittels Haversine-Distanzberechnung zur Verifizierung von Kölner Drop Zones genutzt und nicht als Bewegungsprofil gespeichert.</p>`,
-                    agb: `<p class="text-xs text-gray-300 leading-relaxed">Fair Play Protocol: GPS-Spoofing, manipulierte Telemetrie-Screenshots oder das Teilen von Sektor-QR-Codes führen zum sofortigen Ausschluss aus der laufenden Season.</p>`
-                };
-                this.openModal(`
-                    <p class="font-mono text-[10px] text-brand uppercase tracking-widest mb-1">Legal Protocol</p>
-                    <h3 class="text-2xl font-black italic uppercase text-white mb-4">${titles[type]}</h3>
-                    ${content[type]}
-                `);
-            },
-
-            /* ======================================================================
-               ADMIN ACTIONS
-               ====================================================================== */
-            adminApproveProof(proofId) {
-                const idx = State.pendingProofs.findIndex(p => p.id === proofId);
-                if (idx === -1) return;
-                const p = State.pendingProofs[idx];
-                State.pendingProofs.splice(idx, 1);
-                SoundFX.playSuccess();
-                this.toast(`Proof von ${p.alias} freigegeben (+${p.xp} XP).`, "success");
-                this.render();
-            },
-
-            adminAddSpot(e) {
-                e.preventDefault();
-                const name = document.getElementById('adm-spot-name').value.trim();
-                const subtitle = document.getElementById('adm-spot-sub').value.trim();
-                const sector = document.getElementById('adm-spot-sector').value.trim();
-                const lat = parseFloat(document.getElementById('adm-spot-lat').value) || 50.9351;
-                const lng = parseFloat(document.getElementById('adm-spot-lng').value) || 6.9268;
-                const xp = parseInt(document.getElementById('adm-spot-xp').value) || 300;
-
-                State.spots.push({
-                    id: 'spot_' + Date.now(),
-                    icon: '📍',
-                    name, subtitle, sector, lat, lng, xp,
-                    color: '#ff4d00'
-                });
-                SoundFX.playSuccess();
-                this.toast(`Drop Zone '${name}' in Köln aktiviert!`, "success");
-                this.render();
-            },
-
-            adminGenerateAIContent() {
-                const prompt = document.getElementById('adm-ai-prompt')?.value.trim() || "Hyrox & Running";
-                SoundFX.playClick();
-                const newOp = {
-                    id: 'm_ai_' + Date.now(),
-                    name: `CGN PROTOCOL: ${prompt.toUpperCase().slice(0, 28)}`,
-                    desc: `Absolviere die Challenge '${prompt}' und logge deine GPS/Pacer-Telemetrie.`,
-                    xp: 550,
-                    type: 'upload',
-                    badge: 'DIRECTOR DROP'
-                };
-                State.missions.unshift(newOp);
-                SoundFX.playSuccess();
-                this.toast("Neue Operation generiert und live geschaltet!", "success");
-                this.render();
-            },
-
-            /* ======================================================================
-               MASTER VIEW RENDERER
-               ====================================================================== */
-            render() {
-                const root = document.getElementById('main-viewport');
-                if (State.workspace === 'user') {
-                    root.innerHTML = this.renderUserWorkspace();
-                    if (State.activeUserSubTab === 'radar') {
-                        setTimeout(() => this.initRadarMap(), 60);
-                    }
-                } else if (State.workspace === 'admin') {
-                    root.innerHTML = this.renderAdminWorkspace();
-                } else if (State.workspace === 'forge') {
-                    root.innerHTML = this.renderForgeWorkspace();
-                    setTimeout(() => this.initQRForge(), 50);
-                }
-            },
-
-            renderUserWorkspace() {
-                const p = State.profile;
-                const xpInLvl = p.xp % 1000;
-                const progressPct = (xpInLvl / 1000) * 100;
-                const ranks = ["ROOKIE", "PACER", "GRINDER", "HYROX PRO", "MACHINE", "SYNDICATE LEGEND"];
-                const rankTitle = ranks[Math.min(p.lvl - 1, ranks.length - 1)];
-
-                return `
-                    <!-- LIVE COLOGNE TICKER BAR -->
-                    <div class="mb-6 bg-panel/90 border border-border px-4 py-2.5 flex items-center gap-3 overflow-x-auto no-scrollbar">
-                        <span class="flex items-center gap-1.5 font-mono text-[10px] font-bold uppercase text-brand flex-shrink-0">
-                            <span class="w-2 h-2 rounded-full bg-brand animate-ping"></span>
-                            LIVE CGN FEED:
-                        </span>
-                        <div class="flex items-center gap-6 font-mono text-xs text-gray-300 whitespace-nowrap">
-                            ${State.ticker.map(t => `
-                                <span>
-                                    <strong class="${t.isPro ? 'text-pro' : 'text-white'}">${t.alias}</strong> 
-                                    <span class="text-gray-400">${t.action}</span>
-                                    <span class="text-gray-600 text-[10px] ml-1">[${t.time}]</span>
-                                </span>
-                            `).join('<span class="text-gray-700">//</span>')}
-                        </div>
-                    </div>
-
-                    <!-- ATHLETE TELEMETRY HERO -->
-                    <section class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-                        <div class="lg:col-span-2 tactical-card p-6 sm:p-8 flex flex-col justify-between">
-                            <div class="flex flex-wrap items-start justify-between gap-4 mb-6">
-                                <div>
-                                    <div class="inline-flex items-center gap-2 bg-black border border-border px-2.5 py-1 mb-3 font-mono text-[10px]">
-                                        <span class="text-brand font-bold">SEASON 0${State.season.number} // ${State.season.name}</span>
-                                        <span class="text-gray-600">|</span>
-                                        <span class="text-gray-300">${p.sector}</span>
-                                    </div>
-                                    <div class="flex items-baseline gap-4">
-                                        <h1 class="text-5xl sm:text-6xl font-black italic tracking-tighter text-white">LVL 0${p.lvl}</h1>
-                                        <span class="font-mono text-sm font-bold text-brand uppercase tracking-widest">// ${rankTitle}</span>
-                                    </div>
-                                    <p class="font-mono text-xs text-gray-400 mt-1">OPERATIVE: <strong class="text-white">${p.alias}</strong> • CREW-ID: <span class="text-brand">${p.crewCode}</span></p>
-                                </div>
-
-                                <div class="flex gap-2">
-                                    ${p.hasPremium 
-                                        ? `<span class="bg-pro/15 border border-pro/50 text-pro font-mono text-[10px] font-bold px-3 py-1.5 uppercase tracking-widest">★ PRO SYNDICATE</span>`
-                                        : `<button onclick="App.openProUpgradeModal()" class="bg-pro text-white font-mono text-[10px] font-bold px-4 py-2 uppercase tracking-widest">Upgrade PRO</button>`
-                                    }
-                                </div>
-                            </div>
-
-                            <div>
-                                <div class="flex justify-between font-mono text-xs mb-2">
-                                    <span class="text-gray-400">SECTOR PROGRESS</span>
-                                    <span class="text-white font-bold">${p.xp} <span class="text-gray-500">/ ${p.lvl * 1000} XP</span> (${1000 - xpInLvl} XP bis LVL 0${p.lvl + 1})</span>
-                                </div>
-                                <div class="w-full h-3 bg-black border border-border p-0.5">
-                                    <div class="h-full bg-gradient-to-r from-brand via-orange-500 to-amber-400 transition-all duration-700" style="width: ${progressPct}%"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- QUICK COLOGNE STANDING CARD -->
-                        <div class="tactical-card p-6 flex flex-col justify-between bg-gradient-to-b from-panel to-black">
-                            <div>
-                                <div class="flex justify-between items-center mb-4">
-                                    <span class="font-mono text-[10px] text-brand uppercase tracking-widest font-bold">Cologne Top Operatives</span>
-                                    <span class="font-mono text-[10px] text-gray-500">W04 / 12</span>
-                                </div>
-                                <div class="space-y-2.5">
-                                    ${State.leaderboard.slice(0, 4).map((u, idx) => `
-                                        <div class="flex items-center justify-between text-xs font-mono py-1.5 px-2.5 ${u.alias === p.alias ? 'bg-brand/15 border border-brand/40 text-white' : 'bg-black/60 border border-border/60 text-gray-300'}">
-                                            <div class="flex items-center gap-2.5">
-                                                <span class="text-brand font-bold">#0${idx + 1}</span>
-                                                <span class="font-bold">${u.alias}</span>
-                                                <span class="text-[9px] text-gray-500">[${u.sector}]</span>
-                                            </div>
-                                            <span class="font-bold text-white">${u.xp} XP</span>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                            </div>
-                            <button onclick="App.setUserTab('syndicate')" class="mt-4 w-full py-2.5 bg-panel hover:bg-brand border border-border hover:border-brand text-gray-300 hover:text-white font-mono text-[10px] uppercase tracking-widest font-bold transition">
-                                Komplette Köln-Rangliste & Crew →
-                            </button>
-                        </div>
-                    </section>
-
-                    <!-- HORIZONTAL BATTLE-PASS LOOT TRACK -->
-                    <section class="mb-10">
-                        <div class="flex justify-between items-end mb-3">
-                            <div>
-                                <p class="font-mono text-[10px] text-brand uppercase tracking-widest">Season Loot Track</p>
-                                <h2 class="text-xl font-black italic uppercase tracking-tight">Freischaltbare Drops & Rewards</h2>
-                            </div>
-                            <span class="font-mono text-[10px] text-gray-500">Klicke auf freigeschaltete Level zum Einlösen</span>
-                        </div>
-
-                        <div class="flex gap-4 overflow-x-auto no-scrollbar pb-3">
-                            ${State.rewards.map(r => {
-                                const unlocked = p.lvl >= r.lvl;
-                                const freeClaimed = p.redeemed.includes(`lvl${r.lvl}_free`);
-                                const proClaimed = p.redeemed.includes(`lvl${r.lvl}_pro`);
-                                return `
-                                    <div class="min-w-[210px] tactical-card p-4 ${unlocked ? 'border-brand/50' : 'opacity-60'}">
-                                        <div class="flex justify-between items-center mb-3 pb-2 border-b border-border font-mono">
-                                            <span class="text-xs font-extrabold ${unlocked ? 'text-brand' : 'text-gray-500'}">LEVEL 0${r.lvl}</span>
-                                            <span class="text-[9px] px-1.5 py-0.5 ${unlocked ? 'bg-emerald-500/20 text-emerald-400' : 'bg-black text-gray-600'}">${unlocked ? 'UNLOCKED' : 'LOCKED'}</span>
-                                        </div>
-                                        <!-- Free Tier -->
-                                        <div onclick="App.claimReward(${r.lvl}, 'free')" class="p-2.5 bg-black border ${freeClaimed ? 'border-emerald-500/40 opacity-50' : 'border-border hover:border-brand'} mb-2 cursor-pointer transition">
-                                            <div class="flex justify-between font-mono text-[9px] text-gray-500 mb-1">
-                                                <span>FREE DROP</span>
-                                                <span>${freeClaimed ? '✓ CLAIMED' : 'CLAIM →'}</span>
-                                            </div>
-                                            <p class="text-xs font-bold text-white leading-snug">${r.free}</p>
-                                        </div>
-                                        <!-- Pro Tier -->
-                                        <div onclick="App.claimReward(${r.lvl}, 'pro')" class="p-2.5 bg-[#12091c] border ${proClaimed ? 'border-emerald-500/40 opacity-50' : 'border-pro/40 hover:border-pro'} cursor-pointer transition">
-                                            <div class="flex justify-between font-mono text-[9px] text-pro mb-1">
-                                                <span>★ PRO DROP</span>
-                                                <span>${proClaimed ? '✓ CLAIMED' : 'CLAIM →'}</span>
-                                            </div>
-                                            <p class="text-xs font-bold text-purple-200 leading-snug">${r.pro}</p>
-                                        </div>
-                                    </div>
-                                `;
-                            }).join('')}
-                        </div>
-                    </section>
-
-                    <!-- SUB-NAVIGATION TABS (OPERATIONS / LIVE RADAR MAP / SYNDICATE) -->
-                    <div class="flex border-b border-border mb-8 gap-2">
-                        <button onclick="App.setUserTab('ops')" class="px-5 py-3 font-mono text-xs font-bold uppercase tracking-widest border-b-2 transition ${State.activeUserSubTab === 'ops' ? 'border-brand text-brand bg-brand/5' : 'border-transparent text-gray-400 hover:text-white'}">
-                            ⚡ Operations & Routines
-                        </button>
-                        <button onclick="App.setUserTab('radar')" class="px-5 py-3 font-mono text-xs font-bold uppercase tracking-widest border-b-2 transition ${State.activeUserSubTab === 'radar' ? 'border-brand text-brand bg-brand/5' : 'border-transparent text-gray-400 hover:text-white'}">
-                            🗺️ Köln Drop-Zone Radar (${State.spots.length})
-                        </button>
-                        <button onclick="App.setUserTab('syndicate')" class="px-5 py-3 font-mono text-xs font-bold uppercase tracking-widest border-b-2 transition ${State.activeUserSubTab === 'syndicate' ? 'border-brand text-brand bg-brand/5' : 'border-transparent text-gray-400 hover:text-white'}">
-                            🏆 Cologne Syndicate & Crew
-                        </button>
-                    </div>
-
-                    ${this.renderActiveUserSubTab()}
-                `;
-            },
-
-            renderActiveUserSubTab() {
-                const p = State.profile;
-                const today = new Date().toISOString().split('T')[0];
-
-                if (State.activeUserSubTab === 'radar') {
-                    return `
-                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                            <!-- Interactive Dark Leaflet Map -->
-                            <div class="lg:col-span-2 tactical-card p-2 h-[440px] relative">
-                                <div id="cgn-radar-map" class="w-full h-full"></div>
-                                <div class="absolute top-5 left-5 z-[400] bg-black/90 border border-brand/50 px-3 py-2 font-mono text-[10px]">
-                                    <p class="text-brand font-bold">SECTOR RADAR // KÖLN</p>
-                                    <p class="text-gray-400">150m Geofence Radius aktiv</p>
-                                </div>
-                            </div>
-
-                            <!-- Spot Cards with Real-time Distance -->
-                            <div class="space-y-3 max-h-[440px] overflow-y-auto pr-1">
-                                ${State.spots.map(s => {
-                                    const dist = getDistanceMeters(State.userPos.lat, State.userPos.lng, s.lat, s.lng);
-                                    const inRange = dist <= 150;
-                                    const doneToday = p.streaks[s.id]?.lastDate === today;
-                                    return `
-                                        <div class="tactical-card p-4 interactive">
-                                            <div class="flex justify-between items-start mb-2">
-                                                <div class="flex items-center gap-2.5">
-                                                    <span class="text-2xl">${s.icon}</span>
-                                                    <div>
-                                                        <span class="font-mono text-[9px] text-gray-500 uppercase">${s.sector}</span>
-                                                        <h4 class="font-black italic uppercase text-base text-white">${s.name}</h4>
-                                                    </div>
-                                                </div>
-                                                <span class="font-mono font-bold text-sm text-brand">+${s.xp} XP</span>
-                                            </div>
-                                            <p class="text-xs text-gray-400 mb-3">${s.subtitle}</p>
-                                            <div class="flex items-center justify-between pt-2 border-t border-border font-mono text-[10px]">
-                                                <span class="${inRange ? 'text-emerald-400' : 'text-gray-400'}">
-                                                    📍 Distanz: <strong>${dist}m</strong>${inRange ? '(IN RANGE)' : ''}
-                                                </span>
-                                                <button onclick="App.triggerSpotCheckin('${s.id}')" ${doneToday ? 'disabled' : ''} class="px-3 py-1.5 ${doneToday ? 'bg-panel text-gray-600' : 'bg-brand text-white hover:bg-brandLight'} font-bold uppercase">
-                                                    ${doneToday ? '✓ Checked In' : 'Check-In'}
-                                                </button>
-                                            </div>
-                                        </div>
-                                    `;
-                                }).join('')}
-                            </div>
-                        </div>
-                    `;
-                }
-
-                if (State.activeUserSubTab === 'syndicate') {
-                    return `
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                            <div class="tactical-card p-6">
-                                <p class="font-mono text-[10px] text-brand uppercase tracking-widest mb-1">City Ranking</p>
-                                <h3 class="text-2xl font-black italic uppercase mb-6">Cologne Sector Leaderboard</h3>
-                                <div class="space-y-3">
-                                    ${State.leaderboard.map((u, i) => `
-                                        <div class="p-4 bg-black border ${u.alias === p.alias ? 'border-brand' : 'border-border'} flex items-center justify-between">
-                                            <div class="flex items-center gap-4">
-                                                <span class="font-mono text-lg font-black ${i === 0 ? 'text-brand' : 'text-gray-500'}">0${i + 1}</span>
-                                                <div>
-                                                    <div class="flex items-center gap-2">
-                                                        <span class="font-black italic uppercase text-white">${u.alias}</span>${u.isPro ? '<span class="text-[9px] font-mono bg-pro/20 text-pro px-1.5 py-0.5">PRO</span>' : ''}
-                                                    </div>
-                                                    <span class="font-mono text-[10px] text-gray-500">Sector: ${u.sector} • 🔥 ${u.streak}d Streak</span>
-                                                </div>
-                                            </div>
-                                            <div class="text-right font-mono">
-                                                <div class="text-sm font-bold text-white">${u.xp} XP</div>
-                                                <div class="text-[10px] text-brand">LVL 0${u.lvl}</div>
-                                            </div>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                            </div>
-
-                            <div class="tactical-card p-6 flex flex-col justify-between">
-                                <div>
-                                    <p class="font-mono text-[10px] text-brand uppercase tracking-widest mb-1">Crew Recruitment</p>
-                                    <h3 class="text-2xl font-black italic uppercase mb-2">Squad Bounty: +300 XP</h3>
-                                    <p class="text-xs text-gray-400 mb-6">Verbinde dich mit Trainingspartnern in Köln. Jeder eingelöste Crew-Code schreibt euch beiden sofort +300 XP gut.</p>
-
-                                    <div class="bg-black border border-border p-4 mb-6 font-mono">
-                                        <span class="text-[10px] text-gray-500 block mb-1">DEIN PERSÖNLICHER CREW-CODE:</span>
-                                        <div class="flex justify-between items-center">
-                                            <span class="text-2xl font-black text-brand tracking-widest">${p.crewCode}</span>
-                                            <button onclick="navigator.clipboard?.writeText('${p.crewCode}'); App.toast('Crew-Code kopiert!', 'success')" class="px-3 py-1.5 bg-panel border border-border text-xs text-white hover:border-brand">Copy Code</button>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <button onclick="App.awardXP(300, 'Crew Link Bonus')" class="w-full py-4 bg-white hover:bg-brand text-black hover:text-white font-black italic uppercase tracking-widest text-xs transition">
-                                    ⚡ Partner-Code Simulieren & +300 XP Testen
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                }
-
-                // DEFAULT TAB: OPERATIONS & ROUTINES
-                return `
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        <!-- WEEKLY TACTICAL OPERATIONS -->
-                        <div>
-                            <div class="flex justify-between items-center mb-4">
-                                <div>
-                                    <span class="font-mono text-[10px] text-brand uppercase tracking-widest">Time-Limited Drops</span>
-                                    <h3 class="text-2xl font-black italic uppercase">Weekly Operations</h3>
-                                </div>
-                                <span class="font-mono text-[10px] bg-brand/15 text-brand border border-brand/30 px-2.5 py-1 font-bold">ACTIVE WEEK</span>
-                            </div>
-
-                            <div class="space-y-4">
-                                ${State.missions.map(m => {
-                                    const done = p.completed.includes(m.id);
-                                    return `
-                                        <div class="tactical-card p-5 interactive ${done ? 'opacity-50' : ''}">
-                                            <div class="flex justify-between items-start gap-4 mb-2">
-                                                <div>
-                                                    <span class="font-mono text-[9px] bg-black border border-border text-gray-400 px-2 py-0.5 uppercase">${m.badge || m.type}</span>
-                                                    <h4 class="font-black italic uppercase text-lg text-white mt-1.5">${m.name}</h4>
-                                                </div>
-                                                <span class="font-mono text-xl font-black text-brand flex-shrink-0">+${m.xp} XP</span>
-                                            </div>
-                                            <p class="text-xs text-gray-400 mb-4 leading-relaxed">${m.desc}</p>
-                                            <button onclick="App.executeMission('${m.id}', false)" ${done ? 'disabled' : ''} class="w-full py-3 font-mono text-xs font-bold uppercase tracking-widest transition ${done ? 'bg-panel text-emerald-400 border border-emerald-500/30' : 'bg-white text-black hover:bg-brand hover:text-white'}">
-                                                ${done ? '✓ Operation Verified' : (m.type === 'instant' ? '⚡ Instant Log & Claim XP' : '🔍 Verify Telemetry / QR')}
-                                            </button>
-                                        </div>
-                                    `;
-                                }).join('')}
-                            </div>
-                        </div>
-
-                        <!-- DAILY CORE ROUTINES & STREAK ENGINE -->
-                        <div>
-                            <div class="flex justify-between items-center mb-4">
-                                <div>
-                                    <span class="font-mono text-[10px] text-blue-400 uppercase tracking-widest">Daily Discipline</span>
-                                    <h3 class="text-2xl font-black italic uppercase">Core Routines</h3>
-                                </div>
-                                <span class="font-mono text-[10px] bg-blue-500/10 text-blue-400 border border-blue-500/30 px-2.5 py-1 font-bold">STREAK MULTIPLIER</span>
-                            </div>
-
-                            <div class="space-y-4">
-                                ${State.habits.map(h => {
-                                    const st = p.streaks[h.id] || { streak: 0, lastDate: "" };
-                                    const doneToday = st.lastDate === today;
-                                    const nextBonus = st.streak * (h.streakBonus || 0);
-                                    return `
-                                        <div class="tactical-card p-5 interactive ${doneToday ? 'opacity-50' : ''}">
-                                            <div class="flex justify-between items-start gap-4 mb-2">
-                                                <div>
-                                                    <div class="flex items-center gap-2">
-                                                        <span class="font-mono text-[9px] bg-orange-500/15 border border-orange-500/40 text-brand px-2 py-0.5 font-bold">🔥 STREAK: ${st.streak} TAGE</span>
-                                                        <span class="font-mono text-[9px] text-gray-500">+${h.streakBonus} XP/Tag Bonus</span>
-                                                    </div>
-                                                    <h4 class="font-black italic uppercase text-lg text-white mt-1.5">${h.name}</h4>
-                                                </div>
-                                                <span class="font-mono text-xl font-black text-white flex-shrink-0">+${h.xp + nextBonus} XP</span>
-                                            </div>
-                                            <p class="text-xs text-gray-400 mb-4 leading-relaxed">${h.desc}</p>
-                                            <button onclick="App.executeMission('${h.id}', true)" ${doneToday ? 'disabled' : ''} class="w-full py-3 font-mono text-xs font-bold uppercase tracking-widest transition ${doneToday ? 'bg-panel text-emerald-400 border border-emerald-500/30' : 'bg-panel border border-border hover:border-brand text-white hover:bg-brand'}">
-                                                ${doneToday ? '✓ Heute absolviert' : '⚡ Routine Loggen'}
-                                            </button>
-                                        </div>
-                                    `;
-                                }).join('')}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            },
-
-            initRadarMap() {
-                const container = document.getElementById('cgn-radar-map');
-                if (!container || typeof L === 'undefined') return;
-                if (State.mapInstance) { State.mapInstance.remove(); State.mapInstance = null; }
-
-                const map = L.map(container, { zoomControl: false }).setView([50.9333, 6.9500], 13);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 }).addTo(map);
-
-                // User Marker
-                L.circleMarker([State.userPos.lat, State.userPos.lng], {
-                    radius: 7, color: '#10b981', fillColor: '#10b981', fillOpacity: 0.9
-                }).addTo(map).bindPopup('<b>DEINE POSITION</b>');
-
-                // Drop Zone Circles (150m Geofence)
-                State.spots.forEach(s => {
-                    L.circle([s.lat, s.lng], {
-                        color: s.color || '#ff4d00',
-                        fillColor: s.color || '#ff4d00',
-                        fillOpacity: 0.25,
-                        radius: 150
-                    }).addTo(map).bindPopup(`<b>${s.name}</b><br>${s.subtitle}<br><b>+${s.xp} XP</b>`);
-                });
-
-                State.mapInstance = map;
-            },
-
-            /* ======================================================================
-               WORKSPACE 2: COMMAND CENTER (ADMIN)
-               ====================================================================== */
-            renderAdminWorkspace() {
-                return `
-                    <div class="mb-8 flex flex-wrap items-center justify-between gap-4 border-b border-border pb-4">
-                        <div>
-                            <p class="font-mono text-[10px] text-brand uppercase tracking-widest">Director Clearance // Live Control</p>
-                            <h1 class="text-3xl font-black italic uppercase">GRIND. Command Center</h1>
-                        </div>
-                        <span class="font-mono text-xs bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-3 py-1">● ALL SYSTEMS NOMINAL</span>
-                    </div>
-
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        <!-- AI DIRECTOR GENERATOR -->
-                        <div class="tactical-card p-6">
-                            <p class="font-mono text-[10px] text-brand uppercase tracking-widest mb-1">AI Operations Director</p>
-                            <h3 class="text-xl font-black italic uppercase mb-3">Magic Drop Creator</h3>
-                            <p class="text-xs text-gray-400 mb-4">Erzeuge sofort neue Operations für die laufende Woche – ohne externen API-Crash.</p>
-                            <input id="adm-ai-prompt" type="text" placeholder="z.B. 5km Tempo-Run am Rheinauhafen" class="w-full p-3 bg-black border border-border focus:border-brand text-xs text-white font-mono mb-3 outline-none">
-                            <button onclick="App.adminGenerateAIContent()" class="w-full py-3 bg-brand hover:bg-brandLight text-white font-mono text-xs font-bold uppercase tracking-widest transition">
-                                ✨ Operation sofort ins User-HUD pushen
-                            </button>
-                        </div>
-
-                        <!-- NEW GEOLOCATION SPOT CREATOR -->
-                        <div class="tactical-card p-6">
-                            <p class="font-mono text-[10px] text-brand uppercase tracking-widest mb-1">Geofence Deployment</p>
-                            <h3 class="text-xl font-black italic uppercase mb-3">Neuer Köln Spot</h3>
-                            <form onsubmit="App.adminAddSpot(event)" class="space-y-2.5 font-mono text-xs">
-                                <input id="adm-spot-name" required placeholder="Spot Name (z.B. Stadtwald Track)" class="w-full p-2.5 bg-black border border-border text-white outline-none">
-                                <input id="adm-spot-sub" required placeholder="Challenge Untertitel" class="w-full p-2.5 bg-black border border-border text-white outline-none">
-                                <div class="grid grid-cols-2 gap-2">
-                                    <input id="adm-spot-sector" required placeholder="Veedel (z.B. Ehrenfeld)" class="p-2.5 bg-black border border-border text-white outline-none">
-                                    <input id="adm-spot-xp" type="number" required placeholder="XP (z.B. 350)" class="p-2.5 bg-black border border-border text-white outline-none">
-                                </div>
-                                <div class="grid grid-cols-2 gap-2">
-                                    <input id="adm-spot-lat" type="number" step="any" value="50.9412" class="p-2.5 bg-black border border-border text-gray-300 outline-none">
-                                    <input id="adm-spot-lng" type="number" step="any" value="6.9125" class="p-2.5 bg-black border border-border text-gray-300 outline-none">
-                                </div>
-                                <button type="submit" class="w-full py-3 bg-white hover:bg-brand text-black hover:text-white font-bold uppercase tracking-widest transition">
-                                    📍 Drop Zone Live Schalten
-                                </button>
-                            </form>
-                        </div>
-
-                        <!-- AI PRE-SCORED PROOF QUEUE -->
-                        <div class="tactical-card p-6">
-                            <p class="font-mono text-[10px] text-brand uppercase tracking-widest mb-1">Anti-Cheat Queue</p>
-                            <h3 class="text-xl font-black italic uppercase mb-3">Telemetry Approvals (${State.pendingProofs.length})</h3>
-                            <div class="space-y-3">
-                                ${State.pendingProofs.length === 0 ? `<p class="text-xs text-gray-500 font-mono">Alle Proofs wurden automatisch durch die Vision-Engine verifiziert.</p>` : ''}
-                                ${State.pendingProofs.map(p => `
-                                    <div class="p-3 bg-black border border-border">
-                                        <div class="flex justify-between font-mono text-[10px] text-brand mb-1">
-                                            <span>${p.alias}</span>
-                                            <span>AI CONFIDENCE: ${p.confidence}%</span>
-                                        </div>
-                                        <p class="text-xs font-bold text-white mb-1">${p.missionName}</p>
-                                        <p class="font-mono text-[10px] text-gray-400 mb-3">${p.telemetry}</p>
-                                        <button onclick="App.adminApproveProof('${p.id}')" class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-mono text-[10px] font-bold uppercase">
-                                            ✓ Approve (+${p.xp} XP)
-                                        </button>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            },
-
-            /* ======================================================================
-               WORKSPACE 3: INTEGRATED QR FORGE
-               ====================================================================== */
-            renderForgeWorkspace() {
-                return `
-                    <div class="max-w-4xl mx-auto">
-                        <div class="mb-6">
-                            <p class="font-mono text-[10px] text-brand uppercase tracking-widest">Physical Sticker & Café Tag Generator</p>
-                            <h1 class="text-3xl font-black italic uppercase">GRIND. QR Forge</h1>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div class="tactical-card p-6 space-y-4">
-                                <div>
-                                    <label class="block font-mono text-[10px] text-gray-400 uppercase mb-1">Wähle aktive Mission / Spot</label>
-                                    <select id="forge-id" onchange="App.initQRForge()" class="w-full p-3 bg-black border border-border text-white font-mono text-xs outline-none">
-                                        ${State.missions.map(m => `<option value="${m.id}">${m.name} (${m.id})</option>`).join('')}
-                                        ${State.spots.map(s => `<option value="${s.id}">SPOT: ${s.name} (${s.id})</option>`).join('')}
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block font-mono text-[10px] text-gray-400 uppercase mb-1">Print-Label auf dem Sticker</label>
-                                    <input id="forge-label" value="COLOGNE DROP ZONE" oninput="App.initQRForge()" class="w-full p-3 bg-black border border-border text-white font-mono text-xs outline-none">
-                                </div>
-                                <button onclick="App.downloadForgedQR()" class="w-full py-4 bg-brand hover:bg-brandLight text-white font-black italic uppercase tracking-widest text-xs transition">
-                                    ↓ High-Res Print Sticker (PNG)
-                                </button>
-                            </div>
-
-                            <div class="tactical-card p-6 flex flex-col items-center justify-center bg-[#070709]">
-                                <div class="bg-white p-5 rounded-xl shadow-[0_0_40px_rgba(255,77,0,0.2)] flex flex-col items-center">
-                                    <div id="forge-canvas-mount"></div>
-                                    <div class="w-full flex justify-between items-center pt-3 mt-3 border-t-2 border-gray-100">
-                                        <span class="font-black italic text-lg text-black">GRIND<span class="text-brand">.</span></span>
-                                        <span id="forge-preview-label" class="font-mono text-[9px] font-bold text-gray-500 uppercase">COLOGNE DROP ZONE</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            },
-
-            initQRForge() {
-                const mount = document.getElementById('forge-canvas-mount');
-                if (!mount || typeof QRCodeStyling === 'undefined') return;
-                const id = document.getElementById('forge-id')?.value || 'm_early_bird';
-                const label = document.getElementById('forge-label')?.value || 'COLOGNE DROP ZONE';
-                const lblEl = document.getElementById('forge-preview-label');
-                if (lblEl) lblEl.innerText = label;
-
-                mount.innerHTML = '';
-                State.qrForgeInstance = new QRCodeStyling({
-                    width: 220, height: 220, type: 'canvas',
-                    data: `https://grind-app.de/?verify=${id}`,
-                    qrOptions: { errorCorrectionLevel: 'M' },
-                    dotsOptions: { color: '#050507', type: 'rounded' },
-                    backgroundOptions: { color: '#ffffff' },
-                    cornersSquareOptions: { color: '#ff4d00', type: 'extra-rounded' },
-                    cornersDotOptions: { color: '#ff4d00', type: 'dot' }
-                });
-                State.qrForgeInstance.append(mount);
-            },
-
-            downloadForgedQR() {
-                if (State.qrForgeInstance) {
-                    State.qrForgeInstance.download({ name: 'GRIND_CGN_TAG', extension: 'png' });
-                    this.toast("QR-Tag exportiert!", "success");
-                }
             }
         };
 
-        window.App = App;
-        window.addEventListener('DOMContentLoaded', () => App.init());
+        window.UI = UI;
+        window.addEventListener('DOMContentLoaded', () => UI.init());
     </script>
 </body>
 </html>
