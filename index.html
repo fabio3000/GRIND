@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GRIND. // KÖLN DROPS</title>
+    <title>GRIND. // SWEAT FOR DROPS [KÖLN]</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,600;0,700;0,800;1,800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
     
-    <!-- Leaflet für die butterweiche interaktive Karte -->
+    <!-- Leaflet Interactive Map -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-    <!-- Canvas Confetti für sofortige Dopamin-Belohnung -->
+    <!-- Canvas Confetti -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
     <script>
@@ -21,11 +21,13 @@
                 extend: {
                     fontFamily: {
                         sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
                     },
                     colors: {
                         accent: '#FF5500',
-                        surface: '#121214',
-                        card: '#1C1C1F',
+                        neon: '#CCFF00',
+                        surface: '#111114',
+                        card: '#19191E',
                     }
                 }
             }
@@ -35,392 +37,351 @@
     <style>
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #09090B;
+            background-color: #08080A;
             color: #FFFFFF;
             overflow-x: hidden;
             -webkit-tap-highlight-color: transparent;
             user-select: none;
         }
 
-        /* Smooth Apple-like Glassmorphism */
-        .glass {
-            background: rgba(28, 28, 31, 0.78);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
         .glass-pill {
-            background: rgba(18, 18, 20, 0.85);
+            background: rgba(20, 20, 24, 0.85);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        /* Clean Dark Map Styling */
-        .leaflet-container {
-            background: #09090B !important;
-            font-family: 'Plus Jakarta Sans', sans-serif !important;
-        }
+        /* Dark Map Styling */
+        .leaflet-container { background: #08080A !important; }
         .leaflet-tile-pane {
-            filter: invert(100%) hue-rotate(180deg) brightness(92%) contrast(95%) grayscale(65%);
+            filter: invert(100%) hue-rotate(180deg) brightness(92%) contrast(95%) grayscale(60%);
         }
         .leaflet-control-attribution { display: none !important; }
 
-        /* Custom Map Marker Pulse */
-        @keyframes soft-pulse {
-            0% { transform: scale(1); opacity: 0.7; }
-            70% { transform: scale(2.2); opacity: 0; }
-            100% { transform: scale(2.2); opacity: 0; }
+        /* Map Pin Animations */
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); opacity: 0.8; }
+            70% { transform: scale(2.1); opacity: 0; }
+            100% { transform: scale(2.1); opacity: 0; }
         }
-        .drop-marker {
+        .drop-pin {
             position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 44px;
-            height: 44px;
+            width: 46px;
+            height: 46px;
             border-radius: 9999px;
-            background: #1C1C1F;
+            background: #19191E;
             border: 2.5px solid #FF5500;
             box-shadow: 0 8px 25px rgba(255, 85, 0, 0.45);
             font-size: 20px;
-            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
-        .drop-marker.active-marker {
+        .drop-pin.selected {
             transform: scale(1.22);
             background: #FF5500;
             border-color: #FFFFFF;
         }
-        .drop-marker::before {
+        .drop-pin::before {
             content: '';
             position: absolute;
             inset: -4px;
             border-radius: 9999px;
             background: #FF5500;
             z-index: -1;
-            animation: soft-pulse 2.2s infinite;
+            animation: pulse-ring 2s infinite;
         }
 
-        /* Hide Scrollbar */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* Ticket Perforation Cutout */
-        .ticket-card {
+        /* Apple Wallet Style Ticket */
+        .wallet-pass {
+            background: linear-gradient(145deg, #22222A 0%, #151519 100%);
+            border: 1px solid rgba(255,255,255,0.12);
             position: relative;
-            background: linear-gradient(135deg, #1E1E24 0%, #141417 100%);
-            border: 1px solid rgba(255,255,255,0.1);
         }
-        .ticket-card::before, .ticket-card::after {
-            content: '';
-            position: absolute;
-            top: 65%;
-            width: 24px;
-            height: 24px;
-            background-color: #09090B;
-            border-radius: 9999px;
-            transform: translateY(-50%);
-        }
-        .ticket-card::before { left: -13px; border-right: 1px solid rgba(255,255,255,0.1); }
-        .ticket-card::after { right: -13px; border-left: 1px solid rgba(255,255,255,0.1); }
     </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between">
 
-    <!-- TOP FLOATING HEADER (Minimalistisch & sofort verständlich) -->
-    <header class="fixed top-0 left-0 right-0 z-40 px-4 pt-4 pointer-events-none">
+    <!-- FLOATING TOP BAR -->
+    <header class="fixed top-0 left-0 right-0 z-40 px-4 pt-3.5 pointer-events-none">
         <div class="max-w-md mx-auto flex items-center justify-between gap-2">
-            <!-- Brand & City Pill -->
-            <div class="glass-pill px-4 py-2 rounded-full flex items-center gap-2.5 pointer-events-auto shadow-lg">
-                <span class="font-extrabold text-lg tracking-tight">GRIND<span class="text-accent">.</span></span>
-                <span class="h-3.5 w-[1px] bg-white/15"></span>
-                <span class="flex items-center gap-1.5 text-xs font-semibold text-zinc-300">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    Köln
+            <!-- Brand & Demo Badge -->
+            <div onclick="App.switchTab('map')" class="glass-pill px-4 py-2 rounded-full flex items-center gap-2.5 pointer-events-auto cursor-pointer shadow-lg">
+                <span class="font-extrabold text-lg tracking-tight italic">GRIND<span class="text-accent">.</span></span>
+                <span class="px-2 py-0.5 rounded-full bg-neon/15 border border-neon/40 text-neon text-[10px] font-extrabold uppercase tracking-wider">
+                    Köln Live
                 </span>
             </div>
 
-            <!-- User Energy / Points Pill + Creator Switch -->
+            <!-- Right Controls: Sponsor Pitch Mode & Sparks -->
             <div class="flex items-center gap-2 pointer-events-auto">
-                <div onclick="UI.switchTab('wallet')" class="glass-pill px-3.5 py-2 rounded-full flex items-center gap-2 cursor-pointer hover:border-accent/50 transition shadow-lg">
-                    <span class="text-sm">⚡</span>
-                    <span id="header-sparks" class="font-bold text-sm text-white">450</span>
-                </div>
-                <button onclick="UI.openCreatorModal()" class="glass-pill w-10 h-10 rounded-full flex items-center justify-center text-sm hover:bg-accent hover:border-accent transition shadow-lg" title="Eigenen Drop in Köln platzieren">
-                    ➕
+                <button onclick="App.switchTab('sponsor')" id="sponsor-top-btn" class="glass-pill px-3.5 py-2 rounded-full flex items-center gap-1.5 text-xs font-bold text-zinc-200 hover:border-neon hover:text-neon transition shadow-lg">
+                    <span>💼</span> B2B / Sponsoren
                 </button>
+                <div onclick="App.switchTab('wallet')" class="glass-pill px-3.5 py-2 rounded-full flex items-center gap-1.5 cursor-pointer shadow-lg">
+                    <span>⚡</span>
+                    <span id="top-sparks" class="font-mono font-bold text-xs text-white">650</span>
+                </div>
             </div>
         </div>
     </header>
 
-    <!-- MAIN CONTENT AREA -->
-    <main id="app-content" class="flex-1 w-full max-w-md mx-auto relative min-h-screen pb-28"></main>
+    <!-- MAIN VIEWPORT -->
+    <main id="app-viewport" class="flex-1 w-full max-w-md mx-auto relative min-h-screen pb-28"></main>
 
-    <!-- BOTTOM NAVIGATION BAR (Daumen-freundlich wie bei Apple / Uber) -->
+    <!-- ACTIVE LIVE WORKOUT / CHALLENGE OVERLAY (Full-Screen HUD wie Strava / Nike Run Club) -->
+    <div id="live-tracker-overlay" class="fixed inset-0 z-50 bg-[#08080A] hidden flex-col justify-between p-6"></div>
+
+    <!-- BOTTOM NAVIGATION BAR -->
     <nav class="fixed bottom-5 left-0 right-0 z-40 px-4 pointer-events-none">
-        <div class="max-w-xs mx-auto glass-pill p-1.5 rounded-full flex items-center justify-between shadow-[0_20px_50px_rgba(0,0,0,0.8)] pointer-events-auto">
-            <button onclick="UI.switchTab('radar')" id="nav-radar" class="flex-1 py-2.5 rounded-full flex items-center justify-center gap-2 text-xs font-bold transition bg-accent text-white shadow-md">
+        <div class="max-w-xs mx-auto glass-pill p-1.5 rounded-full flex items-center justify-between shadow-[0_20px_50px_rgba(0,0,0,0.85)] pointer-events-auto">
+            <button onclick="App.switchTab('map')" id="nav-map" class="flex-1 py-2.5 rounded-full flex items-center justify-center gap-1.5 text-xs font-bold transition bg-accent text-white shadow-md">
                 <span>📍</span> Drops
             </button>
-            <button onclick="UI.switchTab('pulse')" id="nav-pulse" class="flex-1 py-2.5 rounded-full flex items-center justify-center gap-2 text-xs font-bold text-zinc-400 hover:text-white transition">
-                <span>🔥</span> Live
+            <button onclick="App.switchTab('feed')" id="nav-feed" class="flex-1 py-2.5 rounded-full flex items-center justify-center gap-1.5 text-xs font-bold text-zinc-400 hover:text-white transition">
+                <span>🔥</span> Club
             </button>
-            <button onclick="UI.switchTab('wallet')" id="nav-wallet" class="flex-1 py-2.5 rounded-full flex items-center justify-center gap-2 text-xs font-bold text-zinc-400 hover:text-white transition relative">
+            <button onclick="App.switchTab('wallet')" id="nav-wallet" class="flex-1 py-2.5 rounded-full flex items-center justify-center gap-1.5 text-xs font-bold text-zinc-400 hover:text-white transition relative">
                 <span>🎟️</span> Wallet
-                <span id="wallet-badge" class="w-4 h-4 rounded-full bg-accent text-[10px] text-white flex items-center justify-center font-extrabold">2</span>
+                <span id="wallet-count" class="w-4 h-4 rounded-full bg-neon text-[10px] text-black flex items-center justify-center font-extrabold">2</span>
             </button>
         </div>
     </nav>
 
-    <!-- BOTTOM SHEET MODAL (Für Check-In, Beute & Drop-Erstellung) -->
-    <div id="sheet-backdrop" onclick="UI.closeSheet(event)" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden items-end sm:items-center justify-center transition-opacity">
-        <div onclick="event.stopPropagation()" class="w-full max-w-md bg-[#161619] border-t sm:border border-white/10 rounded-t-[32px] sm:rounded-[32px] p-6 pb-8 shadow-2xl transform transition-transform">
-            <div class="w-12 h-1.5 bg-zinc-700 rounded-full mx-auto mb-5"></div>
-            <div id="sheet-body"></div>
-        </div>
-    </div>
-
     <script>
         /* ==========================================================================
-           DATENMODELL: ECHTE KÖLNER DROPS STATT LANGWEILIGER AUFGABENLISTEN
+           1. DIE KÖLNER CHALLENGES (Mit echten Sponsor-Mechaniken & Prüf-Logik)
            ========================================================================== */
-        const Store = {
-            activeTab: 'radar', // 'radar' | 'pulse' | 'wallet'
-            selectedDropId: 'drop_weiher',
-            sparks: 450,
-            userLocation: { lat: 50.9351, lng: 6.9320 }, // Nähe Belgisches / Rathenauplatz
+        const State = {
+            tab: 'map', // 'map' | 'feed' | 'wallet' | 'sponsor'
+            selectedDropId: 'drop_pace',
+            sparks: 650,
             map: null,
-            markers: {},
+            activeInterval: null,
 
             drops: [
                 {
-                    id: 'drop_weiher',
-                    title: 'Sunset Run & Free Matcha',
+                    id: 'drop_pace',
+                    sponsor: 'MORE NUTRITION × LAP COFFEE',
+                    title: 'Aachener Weiher Pace-Drop',
                     place: 'Aachener Weiher • Lindenthal',
-                    reward: '1x Gratis Iced Matcha oder Flat White',
-                    partner: 'Partner-Café Belgisches Viertel',
-                    emoji: '🏃',
-                    category: 'Move & Refuel',
-                    sparks: 150,
-                    spotsLeft: 6,
-                    totalSpots: 20,
-                    timeLeft: 'Endet in 3 Std.',
+                    emoji: '🏃‍♂️',
+                    challengeType: 'PACE_RUN', // Erfordert Mindest-km + Mindest-Pace!
+                    requirementBadge: '🏃 2.0 km @ min. 5:30 /km',
+                    targetKm: 2.0,
+                    targetPaceSec: 330, // 5:30 min/km = 330 Sek
+                    reward: '1x Gratis Iced Protein Matcha + More Sample Pack',
+                    sparks: 300,
+                    spotsLeft: 9,
+                    totalSpots: 25,
                     lat: 50.9351,
                     lng: 6.9268,
                     claimed: false,
-                    desc: 'Komm zum Aachener Weiher, dreh eine lockere Runde (oder mach 15 Min Pause am Wasser) und schalte direkt deinen Gratis-Drink frei.'
+                    howItWorks: 'Live-GPS & Kadenz-Prüfung: Starte den Tracker am Weiher. Halte über 2,0 km eine Pace von 5:30/km oder schneller, um die Kapsel zu knacken.'
                 },
                 {
-                    id: 'drop_belgisches',
-                    title: 'Golden Hour Mystery Capsule',
+                    id: 'drop_sprint',
+                    sponsor: 'RED BULL × KÖLN STREET CLUB',
+                    title: '3-Minuten Flash-Sprint',
                     place: 'Brüsseler Platz • Belgisches Viertel',
-                    reward: 'GRIND. Heavyweight Socks + 200⚡',
-                    partner: 'GRIND. Street Team',
-                    emoji: '🎁',
-                    category: 'Limited Street Drop',
-                    sparks: 200,
+                    emoji: '⚡',
+                    challengeType: 'SPEED_SPRINT', // Erfordert Ankunft im Radius bevor der Timer abläuft!
+                    requirementBadge: '⏱️ 350m Sprint in < 120 Sek.',
+                    startDistanceM: 350,
+                    timeLimitSec: 120,
+                    reward: 'Limited Heavyweight Shirt + Cold Red Bull Zero',
+                    sparks: 400,
                     spotsLeft: 3,
                     totalSpots: 10,
-                    timeLeft: 'Nur noch 3 Stück!',
                     lat: 50.9384,
                     lng: 6.9369,
                     claimed: false,
-                    desc: 'Nur 10 Kapseln heute Abend am Brüsseler Platz versteckt. Sei im 150m-Radius und öffne die Kapsel mit einem Tap.'
+                    howItWorks: 'Speed-Radar: Du bist 350m vom Spot entfernt. Sobald du startest, hast du 120 Sekunden, um physisch in den 30m-Zielkreis zu sprinten!'
                 },
                 {
-                    id: 'drop_poller',
-                    title: 'Rhein-Ufer Sled & Sweat',
+                    id: 'drop_hiit',
+                    sponsor: 'URBAN SPORTS CLUB × HYROX CGN',
+                    title: 'Poller Wiesen 60s Burnout',
                     place: 'Poller Wiesen • Deutz',
-                    reward: 'Free Recovery Shake + Sauna 2-for-1',
-                    partner: 'Köln South Athletics',
-                    emoji: '⚡',
-                    category: 'Outdoor Session',
+                    emoji: '🔥',
+                    challengeType: 'MOTION_HIIT', // Prüft Handy-Beschleunigungssensor (Squat Jumps / Burpees)
+                    requirementBadge: '🔥 25 Squat-Jumps in 60 Sek.',
+                    targetReps: 25,
+                    reward: 'Gratis Day-Pass (Sauna / Gym) + Recovery Shake',
                     sparks: 250,
-                    spotsLeft: 11,
-                    totalSpots: 25,
-                    timeLeft: 'Heute bis 21:00 Uhr',
+                    spotsLeft: 14,
+                    totalSpots: 30,
                     lat: 50.9214,
                     lng: 6.9742,
                     claimed: false,
-                    desc: 'Checke an den Poller Wiesen mit Blick auf den Dom ein. Perfekt für deine Feierabend-Runde oder ein kurzes Outdoor-Workout.'
+                    howItWorks: 'Motion-Sensor-Check: Der G-Sensor deines Smartphones zählt jede echte Wiederholung vor Ort an den Poller Wiesen.'
                 },
                 {
-                    id: 'drop_ehrenfeld',
-                    title: 'Night Owl Espresso Tonic',
+                    id: 'drop_squad',
+                    sponsor: 'ESN × EHRENFELD ROASTERS',
+                    title: '2-Player Buddy Check-In',
                     place: 'Venloer Str. • Ehrenfeld',
-                    reward: 'Free Espresso Tonic / Cold Brew',
-                    partner: 'Ehrenfeld Roasters',
-                    emoji: '☕',
-                    category: 'Coffee Drop',
-                    sparks: 100,
-                    spotsLeft: 8,
+                    emoji: '🤝',
+                    challengeType: 'SQUAD_SYNC', // Erfordert 2 Personen gleichzeitig vor Ort
+                    requirementBadge: '🤝 2 Personen Live-Sync',
+                    reward: '2x Gratis Flat White + 2x ESN Designer Bar',
+                    sparks: 200,
+                    spotsLeft: 7,
                     totalSpots: 15,
-                    timeLeft: 'Noch 5 Std.',
                     lat: 50.9465,
                     lng: 6.9195,
                     claimed: false,
-                    desc: 'Spaziergang durch Ehrenfeld? Hol dir deinen Koffein-Kick auf unseren Nacken – einfach vor Ort einchecken.'
+                    howItWorks: 'Kein Solo-Claim: Verbinde dich vor Ort per 1-Tap Radar mit einem Trainingspartner. Nur gemeinsam geht die Kapsel auf.'
                 }
             ],
 
             wallet: [
                 {
-                    id: 'w_1',
-                    title: '1x Gratis Espresso / Cappuccino',
-                    partner: 'GuMo / Belgisches Viertel Köln',
-                    code: 'CGN-COFFEE-88',
-                    expires: 'Gültig bis Sonntag, 18:00 Uhr',
-                    emoji: '☕',
+                    id: 'w_101',
+                    sponsor: 'MORE NUTRITION × BELGISCHES VIERTEL',
+                    title: '1x Gratis Iced Protein Matcha',
+                    code: 'MORE-CGN-941',
+                    verifiedBy: 'Verifiziert: 2.0 km Run (4:58 /km Pace)',
+                    emoji: '🧋',
                     used: false
                 },
                 {
-                    id: 'w_2',
-                    title: 'VIP Fast-Lane + Free Shake',
-                    partner: 'Cologne Run Club • Rheinauhafen',
-                    code: 'RUN-CGN-2026',
-                    expires: 'Gültig für das nächste Event',
-                    emoji: '⚡',
+                    id: 'w_102',
+                    sponsor: 'URBAN SPORTS CLUB KÖLN',
+                    title: '1x Free Recovery Sauna Day-Pass',
+                    code: 'USC-RHEIN-402',
+                    verifiedBy: 'Verifiziert: Poller Wiesen HIIT Session',
+                    emoji: '🧖‍♂️',
                     used: false
                 }
             ],
 
-            liveFeed: [
-                { name: 'Lara (Ehrenfeld)', text: 'hat sich gerade den Free Matcha am Aachener Weiher geschnappt', time: 'vor 2 Min', emoji: '🏃' },
-                { name: 'Fabio (Südstadt)', text: 'hat die Golden Hour Capsule am Brüsseler Platz geöffnet', time: 'vor 9 Min', emoji: '🎁' },
-                { name: 'Moritz & Jana', text: 'haben an den Poller Wiesen eingecheckt (+250⚡)', time: 'vor 18 Min', emoji: '⚡' },
-                { name: 'Kai (Nippes)', text: 'hat seinen Coffee-Voucher im Belgischen Viertel eingelöst', time: 'vor 31 Min', emoji: '☕' }
+            clubFeed: [
+                { user: 'Fabio M.', veedel: 'Südstadt', badge: '4:52 /km Pace ✓', text: 'hat den Aachener Weiher Pace-Drop geknackt (2.0 km in 09:44 min)', time: 'vor 3 Min', emoji: '🏃‍♂️' },
+                { user: 'Lena & Sarah', veedel: 'Ehrenfeld', badge: 'Buddy-Sync ✓', text: 'haben zusammen den ESN × Roasters Drop auf der Venloer Str. geöffnet', time: 'vor 11 Min', emoji: '🤝' },
+                { user: 'Tom_0221', veedel: 'Belgisches', badge: '94 Sek. Sprint ✓', text: 'hat sich eines der letzten 3 Shirts beim Brüsseler Platz Flash-Sprint geholt!', time: 'vor 24 Min', emoji: '⚡' }
             ]
         };
 
         /* ==========================================================================
-           UI & INTERAKTIONS-LOGIK (KINDERLEICHT & SOFORT BELOHNEND)
+           2. APP CONTROLLER & LIVE TRACKING ENGINES
            ========================================================================== */
-        const UI = {
+        const App = {
             init() {
-                this.updateHeader();
+                this.updateBadges();
                 this.render();
             },
 
-            updateHeader() {
-                document.getElementById('header-sparks').innerText = Store.sparks;
-                const activeVouchers = Store.wallet.filter(w => !w.used).length;
-                const badge = document.getElementById('wallet-badge');
-                badge.innerText = activeVouchers;
-                badge.style.display = activeVouchers > 0 ? 'flex' : 'none';
+            updateBadges() {
+                document.getElementById('top-sparks').innerText = State.sparks;
+                const openCount = State.wallet.filter(w => !w.used).length;
+                const wc = document.getElementById('wallet-count');
+                wc.innerText = openCount;
+                wc.style.display = openCount > 0 ? 'flex' : 'none';
             },
 
             switchTab(tab) {
-                Store.activeTab = tab;
-                ['radar', 'pulse', 'wallet'].forEach(t => {
+                State.tab = tab;
+                ['map', 'feed', 'wallet'].forEach(t => {
                     const btn = document.getElementById(`nav-${t}`);
-                    if (t === tab) {
-                        btn.className = "flex-1 py-2.5 rounded-full flex items-center justify-center gap-2 text-xs font-bold transition bg-accent text-white shadow-md relative";
-                    } else {
-                        btn.className = "flex-1 py-2.5 rounded-full flex items-center justify-center gap-2 text-xs font-bold text-zinc-400 hover:text-white transition relative";
-                    }
+                    if (!btn) return;
+                    btn.className = (t === tab)
+                        ? "flex-1 py-2.5 rounded-full flex items-center justify-center gap-1.5 text-xs font-bold transition bg-accent text-white shadow-md relative"
+                        : "flex-1 py-2.5 rounded-full flex items-center justify-center gap-1.5 text-xs font-bold text-zinc-400 hover:text-white transition relative";
                 });
                 this.render();
             },
 
             render() {
-                const container = document.getElementById('app-content');
-                if (Store.activeTab === 'radar') {
-                    container.innerHTML = this.renderRadarView();
+                const vp = document.getElementById('app-viewport');
+                if (State.tab === 'map') {
+                    vp.innerHTML = this.renderMapTab();
                     setTimeout(() => this.initMap(), 40);
-                } else if (Store.activeTab === 'pulse') {
-                    container.innerHTML = this.renderPulseView();
-                } else if (Store.activeTab === 'wallet') {
-                    container.innerHTML = this.renderWalletView();
+                } else if (State.tab === 'feed') {
+                    vp.innerHTML = this.renderFeedTab();
+                } else if (State.tab === 'wallet') {
+                    vp.innerHTML = this.renderWalletTab();
+                } else if (State.tab === 'sponsor') {
+                    vp.innerHTML = this.renderSponsorPitchTab();
                 }
             },
 
             /* ----------------------------------------------------------------------
-               TAB 1: DIE KARTE & DIE DROP-KARTEN (Wie Apple Maps / Pokémon GO)
+               VIEW 1: MAP & CHALLENGE CARDS
                ---------------------------------------------------------------------- */
-            renderRadarView() {
-                const activeDrop = Store.drops.find(d => d.id === Store.selectedDropId) || Store.drops[0];
+            renderMapTab() {
+                const d = State.drops.find(x => x.id === State.selectedDropId) || State.drops[0];
 
                 return `
-                    <!-- FULLSCREEN INTERACTIVE MAP -->
-                    <div class="relative w-full h-[56vh] overflow-hidden rounded-b-[36px] shadow-2xl border-b border-white/10">
-                        <div id="map-canvas" class="w-full h-full z-10"></div>
-                        
-                        <!-- Floating Map Hint -->
-                        <div class="absolute bottom-4 left-4 right-4 z-20 flex justify-between items-center pointer-events-none">
-                            <div class="glass-pill px-3.5 py-1.5 rounded-full text-[11px] font-semibold text-zinc-200 shadow-lg">
-                                🔥 <strong>${Store.drops.filter(d => !d.claimed).length} Live Drops</strong> heute in Köln aktiv
+                    <!-- MAP CONTAINER -->
+                    <div class="relative w-full h-[50vh] overflow-hidden rounded-b-[36px] border-b border-white/10 shadow-2xl">
+                        <div id="map-el" class="w-full h-full z-10"></div>
+                        <div class="absolute bottom-3.5 left-4 right-4 z-20 flex justify-between items-center pointer-events-none">
+                            <div class="glass-pill px-3.5 py-1.5 rounded-full text-[11px] font-bold text-zinc-200">
+                                ⚡ Sweat-to-Unlock: Verdiene dir echte Drops in Köln
                             </div>
                         </div>
                     </div>
 
-                    <!-- HORIZONTAL SWIPE CARDS FÜR JEDEN DROP -->
-                    <div class="px-4 -mt-6 relative z-30">
-                        <div class="flex gap-3 overflow-x-auto no-scrollbar py-2">
-                            ${Store.drops.map(d => {
-                                const isSel = d.id === activeDrop.id;
+                    <!-- DROP SELECTOR PILLS -->
+                    <div class="px-4 -mt-5 relative z-30">
+                        <div class="flex gap-2.5 overflow-x-auto no-scrollbar py-2">
+                            ${State.drops.map(item => {
+                                const active = item.id === d.id;
                                 return `
-                                    <button onclick="UI.selectDrop('${d.id}')" class="flex-shrink-0 px-4 py-2.5 rounded-2xl flex items-center gap-2.5 text-xs font-bold transition ${isSel ? 'bg-white text-black shadow-lg scale-[1.02]' : 'bg-card text-zinc-300 border border-white/5'}">
-                                        <span class="text-base">${d.emoji}</span>
-                                        <span>${d.place.split('•')[0].trim()}</span>${d.claimed ? '<span class="text-emerald-500">✓</span>' : `<span class="text-[10px] px-1.5 py-0.5 rounded-full ${isSel ? 'bg-black/10 text-black' : 'bg-accent/20 text-accent'}">${d.spotsLeft} frei</span>`}
+                                    <button onclick="App.selectDrop('${item.id}')" class="flex-shrink-0 px-4 py-2.5 rounded-2xl flex items-center gap-2 text-xs font-extrabold transition ${active ? 'bg-white text-black shadow-xl scale-[1.03]' : 'bg-card text-zinc-300 border border-white/10'}">
+                                        <span>${item.emoji}</span>
+                                        <span>${item.place.split('•')[0].trim()}</span>
+                                        <span class="text-[10px] px-2 py-0.5 rounded-full ${active ? 'bg-black text-neon' : 'bg-white/10 text-zinc-300'}">${item.spotsLeft} da</span>
                                     </button>
                                 `;
                             }).join('')}
                         </div>
 
-                        <!-- SELECTED DROP HERO CARD -->
-                        <div class="mt-3 bg-card border border-white/10 rounded-[28px] p-5 shadow-2xl">
-                            <div class="flex justify-between items-start gap-3 mb-3">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-12 h-12 rounded-2xl bg-accent/15 border border-accent/30 flex items-center justify-center text-2xl">
-                                        ${activeDrop.emoji}
-                                    </div>
-                                    <div>
-                                        <div class="flex items-center gap-2">
-                                            <span class="text-[11px] font-bold uppercase tracking-wider text-accent">${activeDrop.category}</span>
-                                            <span class="text-zinc-600">•</span>
-                                            <span class="text-[11px] font-medium text-zinc-400">${activeDrop.timeLeft}</span>
-                                        </div>
-                                        <h2 class="text-xl font-extrabold text-white leading-tight mt-0.5">${activeDrop.title}</h2>
-                                        <p class="text-xs text-zinc-400">${activeDrop.place}</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <p class="text-xs text-zinc-300 leading-relaxed mb-4">
-                                ${activeDrop.desc}
-                            </p>
-
-                            <!-- Was man bekommt (Die Beute) -->
-                            <div class="bg-surface border border-white/5 rounded-2xl p-3.5 mb-4 flex items-center justify-between">
-                                <div>
-                                    <span class="text-[10px] font-bold uppercase tracking-wider text-zinc-500 block">Deine Sofort-Beute</span>
-                                    <span class="text-sm font-bold text-white">🎁 ${activeDrop.reward}</span>
-                                </div>
-                                <span class="px-2.5 py-1 rounded-full bg-accent/15 text-accent font-extrabold text-xs">
-                                    +${activeDrop.sparks} ⚡
+                        <!-- ACTIVE DROP CHALLENGE CARD -->
+                        <div class="mt-2 bg-card border border-white/10 rounded-[28px] p-5 shadow-2xl">
+                            <!-- Sponsor Tag & Challenge Badge -->
+                            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                                <span class="text-[10px] font-extrabold uppercase tracking-widest text-accent bg-accent/10 border border-accent/30 px-2.5 py-1 rounded-full">
+                                    PARTNER: ${d.sponsor}
+                                </span>
+                                <span class="font-mono text-[11px] font-extrabold bg-neon/15 text-neon border border-neon/30 px-2.5 py-1 rounded-full">
+                                    ${d.requirementBadge}
                                 </span>
                             </div>
 
-                            <!-- Verfügbarkeits-Balken -->
-                            <div class="mb-5">
-                                <div class="flex justify-between text-[11px] font-semibold mb-1.5">
-                                    <span class="text-zinc-400">Verfügbare Drops an diesem Spot</span>
-                                    <span class="text-white font-bold">Noch ${activeDrop.spotsLeft} von ${activeDrop.totalSpots} da</span>
+                            <h2 class="text-2xl font-extrabold text-white leading-tight">${d.title}</h2>
+                            <p class="text-xs text-zinc-400 mt-0.5 mb-3">${d.place} • Noch ${d.spotsLeft} von ${d.totalSpots} Drops verfügbar</p>
+
+                            <!-- Wie wird es geprüft? -->
+                            <div class="bg-surface border border-white/5 rounded-2xl p-3.5 mb-3">
+                                <div class="flex items-center gap-2 text-[11px] font-bold text-zinc-300 mb-1">
+                                    <span>🛡️</span> Live-Tracking & Anti-Cheat Bedingung:
                                 </div>
-                                <div class="w-full h-2 bg-zinc-800 rounded-full overflow-hidden">
-                                    <div class="h-full bg-gradient-to-r from-accent to-amber-400 rounded-full transition-all duration-500" style="width: ${(activeDrop.spotsLeft / activeDrop.totalSpots) * 100}%"></div>
-                                </div>
+                                <p class="text-xs text-zinc-400 leading-relaxed">${d.howItWorks}</p>
                             </div>
 
-                            <!-- DER EINZIGE GROSSE ACTION-BUTTON -->
-                            ${activeDrop.claimed ? `
-                                <button onclick="UI.switchTab('wallet')" class="w-full py-4 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 font-extrabold text-sm flex items-center justify-center gap-2">
-                                    ✓ In deiner Wallet gespeichert – Jetzt ansehen
+                            <!-- Belohnung -->
+                            <div class="bg-gradient-to-r from-accent/15 to-surface border border-accent/30 rounded-2xl p-3.5 mb-5 flex items-center justify-between">
+                                <div>
+                                    <span class="text-[10px] font-bold uppercase tracking-wider text-accent block">Wird bei Erfolg sofort freigeschaltet</span>
+                                    <span class="text-sm font-extrabold text-white">🎁 ${d.reward}</span>
+                                </div>
+                                <span class="font-mono text-xs font-extrabold text-neon bg-black/50 px-2.5 py-1 rounded-lg">+${d.sparks}⚡</span>
+                            </div>
+
+                            <!-- START CHALLENGE BUTTON -->
+                            ${d.claimed ? `
+                                <button onclick="App.switchTab('wallet')" class="w-full py-4 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 font-extrabold text-sm">
+                                    ✓ Challenge geschafft! Gutschein in deiner Wallet →
                                 </button>
                             ` : `
-                                <button onclick="UI.openClaimSheet('${activeDrop.id}')" class="w-full py-4 rounded-2xl bg-accent hover:bg-[#ff661a] active:scale-[0.99] text-white font-extrabold text-sm shadow-[0_10px_30px_rgba(255,85,0,0.4)] transition flex items-center justify-center gap-2">
-                                    <span>📍</span> Vor Ort einchecken & Drop abholen
+                                <button onclick="App.launchLiveChallenge('${d.id}')" class="w-full py-4 rounded-2xl bg-accent hover:bg-[#ff661a] active:scale-[0.99] text-white font-extrabold text-sm shadow-[0_12px_35px_rgba(255,85,0,0.45)] transition flex items-center justify-center gap-2">
+                                    <span>🔥</span> Live-Challenge jetzt starten (${d.requirementBadge.split(' ')[1]})
                                 </button>
                             `}
                         </div>
@@ -429,151 +390,344 @@
             },
 
             initMap() {
-                const mapEl = document.getElementById('map-canvas');
-                if (!mapEl || typeof L === 'undefined') return;
+                const el = document.getElementById('map-el');
+                if (!el || typeof L === 'undefined') return;
+                if (State.map) { State.map.remove(); State.map = null; }
 
-                if (Store.map) {
-                    Store.map.remove();
-                    Store.map = null;
-                }
-
-                const activeDrop = Store.drops.find(d => d.id === Store.selectedDropId) || Store.drops[0];
-                const map = L.map(mapEl, { zoomControl: false }).setView([activeDrop.lat, activeDrop.lng], 14);
+                const activeDrop = State.drops.find(x => x.id === State.selectedDropId) || State.drops[0];
+                const map = L.map(el, { zoomControl: false }).setView([activeDrop.lat, activeDrop.lng], 14);
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 }).addTo(map);
 
-                Store.drops.forEach(d => {
-                    const isSelected = d.id === activeDrop.id;
+                State.drops.forEach(d => {
+                    const isSel = d.id === activeDrop.id;
                     const icon = L.divIcon({
                         className: 'custom-pin',
-                        html: `<div class="drop-marker ${isSelected ? 'active-marker' : ''}">${d.emoji}</div>`,
-                        iconSize: [44, 44],
-                        iconAnchor: [22, 22]
+                        html: `<div class="drop-pin ${isSel ? 'selected' : ''}">${d.emoji}</div>`,
+                        iconSize: [46, 46],
+                        iconAnchor: [23, 23]
                     });
-
-                    const marker = L.marker([d.lat, d.lng], { icon }).addTo(map);
-                    marker.on('click', () => this.selectDrop(d.id));
+                    L.marker([d.lat, d.lng], { icon }).addTo(map).on('click', () => this.selectDrop(d.id));
                 });
 
-                Store.map = map;
+                State.map = map;
             },
 
             selectDrop(id) {
-                Store.selectedDropId = id;
+                State.selectedDropId = id;
                 this.render();
             },
 
-            /* ----------------------------------------------------------------------
-               SUPER EINFACHER 1-TAP CHECK-IN (Ohne komplizierte Formulare!)
-               ---------------------------------------------------------------------- */
-            openClaimSheet(dropId) {
-                const d = Store.drops.find(x => x.id === dropId);
+            /* ======================================================================
+               3. DAS HERZSTÜCK: DIE INTERAKTIVEN LIVE-CHALLENGE TRACKER (DEMO + ECHT)
+               ====================================================================== */
+            launchLiveChallenge(dropId) {
+                const d = State.drops.find(x => x.id === dropId);
                 if (!d) return;
 
-                const html = `
-                    <div class="text-center">
-                        <div class="w-16 h-16 rounded-3xl bg-accent/15 border border-accent/30 flex items-center justify-center text-4xl mx-auto mb-4">
-                            ${d.emoji}
-                        </div>
-                        <span class="text-xs font-bold uppercase tracking-wider text-accent">${d.place}</span>
-                        <h3 class="text-2xl font-extrabold text-white mt-1 mb-2">${d.title}</h3>
-                        <p class="text-xs text-zinc-400 max-w-xs mx-auto mb-6">
-                            Bist du vor Ort (oder möchtest du den Drop jetzt im Demo-Modus öffnen)? Du erhältst sofort <strong>${d.reward}</strong> in deine Wallet.
-                        </p>
+                const overlay = document.getElementById('live-tracker-overlay');
+                overlay.classList.remove('hidden');
+                overlay.classList.add('flex');
 
-                        <div class="bg-surface border border-white/10 rounded-2xl p-4 mb-6 text-left flex items-center justify-between">
-                            <div>
-                                <p class="text-[11px] text-zinc-400">Standort-Check</p>
-                                <p class="text-sm font-bold text-emerald-400">✓ Köln Sektor bereit</p>
-                            </div>
-                            <span class="text-xs font-bold bg-white/10 px-3 py-1.5 rounded-full">150m Radius</span>
-                        </div>
-
-                        <button onclick="UI.confirmClaim('${d.id}')" class="w-full py-4 rounded-2xl bg-accent hover:bg-[#ff661a] text-white font-extrabold text-base shadow-[0_10px_30px_rgba(255,85,0,0.4)] transition mb-3">
-                            🎁 Kapsel jetzt öffnen (+${d.sparks} ⚡)
-                        </button>
-                        <button onclick="UI.closeSheet()" class="w-full py-3 rounded-2xl text-xs font-bold text-zinc-500 hover:text-white">
-                            Später
-                        </button>
-                    </div>
-                `;
-                this.showSheet(html);
+                if (d.challengeType === 'PACE_RUN') {
+                    this.startPaceRunEngine(d, overlay);
+                } else if (d.challengeType === 'SPEED_SPRINT') {
+                    this.startSprintRadarEngine(d, overlay);
+                } else if (d.challengeType === 'MOTION_HIIT') {
+                    this.startMotionHiitEngine(d, overlay);
+                } else {
+                    this.startSquadSyncEngine(d, overlay);
+                }
             },
 
-            confirmClaim(dropId) {
-                const d = Store.drops.find(x => x.id === dropId);
-                if (!d || d.claimed) return;
+            closeLiveChallenge() {
+                if (State.activeInterval) clearInterval(State.activeInterval);
+                const overlay = document.getElementById('live-tracker-overlay');
+                overlay.classList.add('hidden');
+                overlay.classList.remove('flex');
+            },
 
-                d.claimed = true;
-                d.spotsLeft = Math.max(0, d.spotsLeft - 1);
-                Store.sparks += d.sparks;
+            /* --- ENGINE A: LIVE GPS PACE TRACKER (Mindest-Pace & Mindest-km) --- */
+            startPaceRunEngine(drop, overlay) {
+                let currentKm = 0.0;
+                let elapsedSec = 0;
+                let currentPaceStr = "5:08";
+                let cadence = 172;
+                let speedMultiplier = 1; // Für den Demo-Turbo-Button
 
-                // Direkt als schönes Ticket in die Wallet legen
-                Store.wallet.unshift({
+                const renderTracker = () => {
+                    const pct = Math.min(100, (currentKm / drop.targetKm) * 100);
+                    overlay.innerHTML = `
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="text-[10px] font-mono uppercase tracking-widest text-neon flex items-center gap-1.5">
+                                    <span class="w-2 h-2 rounded-full bg-neon animate-ping"></span>
+                                    GPS & CADENCE ANTI-CHEAT ACTIVE
+                                </span>
+                                <h3 class="text-lg font-extrabold text-white mt-0.5">${drop.title}</h3>
+                            </div>
+                            <button onclick="App.closeLiveChallenge()" class="px-3 py-1.5 rounded-full bg-card border border-white/10 text-xs text-zinc-400">Abbrechen</button>
+                        </div>
+
+                        <!-- BIG STRAVA/NIKE STYLE TELEMETRY NUMBERS -->
+                        <div class="my-auto space-y-6 text-center">
+                            <div>
+                                <span class="text-xs font-bold uppercase tracking-widest text-zinc-500">Gelaufene Distanz (Ziel: ${drop.targetKm.toFixed(1)} km)</span>
+                                <div class="font-mono text-7xl font-extrabold text-white tracking-tighter mt-1">
+                                    ${currentKm.toFixed(2)} <span class="text-2xl text-accent">km</span>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-3 gap-3">
+                                <div class="bg-card border border-emerald-500/40 rounded-2xl p-3.5">
+                                    <span class="text-[10px] font-bold uppercase text-zinc-400 block">Aktuelle Pace</span>
+                                    <span class="font-mono text-2xl font-extrabold text-emerald-400">${currentPaceStr}</span>
+                                    <span class="text-[10px] text-emerald-400 block">✓ Ziel ≤ 5:30</span>
+                                </div>
+                                <div class="bg-card border border-white/10 rounded-2xl p-3.5">
+                                    <span class="text-[10px] font-bold uppercase text-zinc-400 block">Schritt-Kadenz</span>
+                                    <span class="font-mono text-2xl font-extrabold text-white">${cadence}</span>
+                                    <span class="text-[10px] text-zinc-500 block">spm (Kein Bike)</span>
+                                </div>
+                                <div class="bg-card border border-white/10 rounded-2xl p-3.5">
+                                    <span class="text-[10px] font-bold uppercase text-zinc-400 block">Laufzeit</span>
+                                    <span class="font-mono text-2xl font-extrabold text-white">${Math.floor(elapsedSec/60)}:${String(elapsedSec%60).padStart(2,'0')}</span>
+                                    <span class="text-[10px] text-zinc-500 block">Minuten</span>
+                                </div>
+                            </div>
+
+                            <!-- Progress Bar -->
+                            <div class="bg-card p-4 rounded-2xl border border-white/10 text-left">
+                                <div class="flex justify-between text-xs font-bold mb-2">
+                                    <span class="text-zinc-300">Drop-Freischaltung</span>
+                                    <span class="text-neon">${Math.round(pct)}%</span>
+                                </div>
+                                <div class="w-full h-3 bg-black rounded-full overflow-hidden">
+                                    <div class="h-full bg-gradient-to-r from-accent to-neon transition-all duration-300" style="width: ${pct}%"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- DEMO TURBO CONTROLS (Damit du jetzt sofort testen kannst!) -->
+                        <div class="space-y-2.5">
+                            <button onclick="window._boostRun()" class="w-full py-4 rounded-2xl bg-neon text-black font-extrabold text-sm shadow-[0_0_30px_rgba(204,255,0,0.35)] active:scale-95 transition">
+                                ⚡ DEMO-TURBO: +0.50 km mit 4:55er Pace vorspulen
+                            </button>
+                            <p class="text-[11px] text-center text-zinc-500">
+                                Im Live-Betrieb misst die App über GPS-Wegpunkte + Smartphone-Schrittzähler deine echte Laufrunde am Aachener Weiher.
+                            </p>
+                        </div>
+                    `;
+                };
+
+                window._boostRun = () => {
+                    currentKm = Math.min(drop.targetKm, currentKm + 0.55);
+                    elapsedSec += 160;
+                    currentPaceStr = "4:52";
+                    cadence = 178;
+                    renderTracker();
+                    if (currentKm >= drop.targetKm) {
+                        clearInterval(State.activeInterval);
+                        setTimeout(() => this.completeChallenge(drop, `2.0 km Run @ ${currentPaceStr}/km Pace`), 400);
+                    }
+                };
+
+                renderTracker();
+                State.activeInterval = setInterval(() => {
+                    currentKm = Math.min(drop.targetKm, currentKm + 0.03 * speedMultiplier);
+                    elapsedSec += 1;
+                    cadence = 170 + Math.floor(Math.random() * 8);
+                    const paceSec = 295 + Math.floor(Math.random() * 12);
+                    currentPaceStr = `${Math.floor(paceSec/60)}:${String(paceSec%60).padStart(2,'0')}`;
+                    renderTracker();
+
+                    if (currentKm >= drop.targetKm) {
+                        clearInterval(State.activeInterval);
+                        this.completeChallenge(drop, `2.0 km Run @ ${currentPaceStr}/km Pace`);
+                    }
+                }, 1000);
+            },
+
+            /* --- ENGINE B: FLASH-SPRINT RADAR (Sei in < 120 Sek am Spot!) --- */
+            startSprintRadarEngine(drop, overlay) {
+                let distLeft = drop.startDistanceM;
+                let secLeft = drop.timeLimitSec;
+
+                const renderSprint = () => {
+                    overlay.innerHTML = `
+                        <div class="flex justify-between items-center">
+                            <span class="text-[10px] font-mono uppercase tracking-widest text-accent">⚡ LIVE PROXIMITY SPRINT</span>
+                            <button onclick="App.closeLiveChallenge()" class="px-3 py-1.5 rounded-full bg-card border border-white/10 text-xs text-zinc-400">Abbrechen</button>
+                        </div>
+
+                        <div class="my-auto text-center space-y-6">
+                            <div class="w-40 h-40 rounded-full border-4 border-accent/40 mx-auto flex flex-col items-center justify-center relative bg-accent/5">
+                                <span class="text-[11px] uppercase font-bold text-zinc-400">Distanz zum Drop</span>
+                                <span class="font-mono text-5xl font-extrabold text-white mt-1">${distLeft}m</span>
+                            </div>
+
+                            <div>
+                                <span class="text-xs uppercase font-bold text-zinc-500">Verbleibende Zeit für die letzten ${drop.spotsLeft} Shirts</span>
+                                <div class="font-mono text-5xl font-extrabold text-neon mt-1">${secLeft}s</div>
+                            </div>
+                        </div>
+
+                        <button onclick="window._sprintStep()" class="w-full py-4 rounded-2xl bg-accent text-white font-extrabold text-sm shadow-lg active:scale-95 transition">
+                            🏃‍♂️ DEMO-SPRINT: 100 Meter näher an den Brüsseler Platz sprinten
+                        </button>
+                    `;
+                };
+
+                window._sprintStep = () => {
+                    distLeft = Math.max(0, distLeft - 100);
+                    renderSprint();
+                    if (distLeft <= 20) {
+                        clearInterval(State.activeInterval);
+                        this.completeChallenge(drop, `350m Flash-Sprint in ${drop.timeLimitSec - secLeft} Sek.`);
+                    }
+                };
+
+                renderSprint();
+                State.activeInterval = setInterval(() => {
+                    secLeft = Math.max(0, secLeft - 1);
+                    distLeft = Math.max(0, distLeft - 4);
+                    renderSprint();
+                    if (distLeft <= 20) {
+                        clearInterval(State.activeInterval);
+                        this.completeChallenge(drop, `350m Flash-Sprint in ${drop.timeLimitSec - secLeft} Sek.`);
+                    }
+                }, 1000);
+            },
+
+            /* --- ENGINE C: MOTION SENSOR HIIT (Accelerometer Reps) --- */
+            startMotionHiitEngine(drop, overlay) {
+                let reps = 0;
+
+                const renderHiit = () => {
+                    const pct = Math.min(100, (reps / drop.targetReps) * 100);
+                    overlay.innerHTML = `
+                        <div class="flex justify-between items-center">
+                            <span class="text-[10px] font-mono uppercase tracking-widest text-neon">🔥 G-SENSOR WORKOUT VERIFICATION</span>
+                            <button onclick="App.closeLiveChallenge()" class="px-3 py-1.5 rounded-full bg-card border border-white/10 text-xs text-zinc-400">Abbrechen</button>
+                        </div>
+
+                        <div class="my-auto text-center space-y-6">
+                            <span class="text-xs font-bold uppercase tracking-widest text-zinc-400">Erkannte Squat-Jumps / Burpees</span>
+                            <div class="font-mono text-8xl font-extrabold text-white">${reps}<span class="text-3xl text-zinc-500">/${drop.targetReps}</span></div>
+                            <div class="w-full h-3 bg-card rounded-full overflow-hidden">
+                                <div class="h-full bg-neon transition-all" style="width: ${pct}%"></div>
+                            </div>
+                            <p class="text-xs text-zinc-400">Schüttle dein Smartphone (echter G-Sensor aktiv!) oder nutze den Demo-Button:</p>
+                        </div>
+
+                        <button onclick="window._addReps()" class="w-full py-4 rounded-2xl bg-neon text-black font-extrabold text-sm active:scale-95 transition">
+                            🔥 +5 Wiederholungen ausführen (Sensor-Burst)
+                        </button>
+                    `;
+                };
+
+                window._addReps = () => {
+                    reps = Math.min(drop.targetReps, reps + 5);
+                    renderHiit();
+                    if (reps >= drop.targetReps) {
+                        window.removeEventListener('devicemotion', motionListener);
+                        this.completeChallenge(drop, `${drop.targetReps} G-Sensor Verified Reps`);
+                    }
+                };
+
+                const motionListener = (event) => {
+                    const acc = event.accelerationIncludingGravity;
+                    if (acc && (Math.abs(acc.y) > 16 || Math.abs(acc.z) > 16)) {
+                        window._addReps();
+                    }
+                };
+                window.addEventListener('devicemotion', motionListener);
+                renderHiit();
+            },
+
+            /* --- ENGINE D: 2-PLAYER SQUAD SYNC --- */
+            startSquadSyncEngine(drop, overlay) {
+                overlay.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <span class="text-[10px] font-mono uppercase tracking-widest text-accent">🤝 DUAL PROXIMITY HANDSHAKE</span>
+                        <button onclick="App.closeLiveChallenge()" class="px-3 py-1.5 rounded-full bg-card border border-white/10 text-xs text-zinc-400">Abbrechen</button>
+                    </div>
+
+                    <div class="my-auto text-center space-y-5">
+                        <div class="text-6xl animate-bounce">🤝</div>
+                        <h3 class="text-2xl font-extrabold text-white">Suche Buddy im 15m-Radius...</h3>
+                        <p class="text-xs text-zinc-400 max-w-xs mx-auto">Damit Sponsoren doppelt profitieren, öffnet sich dieser Drop nur, wenn 2 Freunde gleichzeitig vor dem Café stehen.</p>
+                        <div class="bg-card border border-white/10 rounded-2xl p-4 font-mono text-sm text-neon">
+                            ✓ Gefunden: MORITZ_CGN (Distanz: 1.8m)
+                        </div>
+                    </div>
+
+                    <button onclick="App.completeChallenge(State.drops[3], 'Buddy-Sync mit MORITZ_CGN')" class="w-full py-4 rounded-2xl bg-accent text-white font-extrabold text-sm">
+                        ⚡ Gemeinsam einchecken & 2x Drop öffnen
+                    </button>
+                `;
+            },
+
+            /* --- ABSCHLUSS & BELOHNUNGS-AUSGABE --- */
+            completeChallenge(drop, proofSummary) {
+                this.closeLiveChallenge();
+                drop.claimed = true;
+                drop.spotsLeft = Math.max(0, drop.spotsLeft - 1);
+                State.sparks += drop.sparks;
+
+                State.wallet.unshift({
                     id: 'w_' + Date.now(),
-                    title: d.reward,
-                    partner: `${d.partner} (${d.place.split('•')[0].trim()})`,
+                    sponsor: drop.sponsor,
+                    title: drop.reward,
                     code: `CGN-${Math.floor(1000 + Math.random() * 9000)}`,
-                    expires: 'Ab sofort 7 Tage gültig',
-                    emoji: d.emoji,
+                    verifiedBy: `Verifiziert: ${proofSummary}`,
+                    emoji: drop.emoji,
                     used: false
                 });
 
-                // In den Live-Feed pushen
-                Store.liveFeed.unshift({
-                    name: 'Du (Köln)',
-                    text: `hast dir gerade '${d.reward}' am Spot ${d.place.split('•')[0]} gesichert!`,
+                State.clubFeed.unshift({
+                    user: 'Du (Köln)',
+                    veedel: drop.place.split('•')[1]?.trim() || 'Köln',
+                    badge: `${proofSummary} ✓`,
+                    text: `hast gerade '${drop.reward}' von ${drop.sponsor} freigeschaltet!`,
                     time: 'Gerade eben',
-                    emoji: d.emoji
+                    emoji: drop.emoji
                 });
 
-                this.closeSheet();
-                this.updateHeader();
-
-                // Konfetti-Belohnung!
+                this.updateBadges();
                 if (typeof confetti === 'function') {
-                    confetti({ particleCount: 70, spread: 65, origin: { y: 0.7 } });
+                    confetti({ particleCount: 90, spread: 75, origin: { y: 0.65 } });
                 }
-
                 this.switchTab('wallet');
             },
 
-            /* ----------------------------------------------------------------------
-               TAB 2: LIVE IN KÖLN (Sozialer Beweis & Freunde ohne leeren Feed)
-               ---------------------------------------------------------------------- */
-            renderPulseView() {
+            /* ======================================================================
+               4. TAB: CLUB FEED (Social Proof & Live-Kölner-Aktivität)
+               ====================================================================== */
+            renderFeedTab() {
                 return `
-                    <div class="pt-20 px-4 space-y-6">
+                    <div class="pt-20 px-4 space-y-5">
                         <div>
-                            <span class="text-xs font-bold uppercase tracking-wider text-accent">Live in deiner Stadt</span>
-                            <h1 class="text-3xl font-extrabold mt-0.5">Köln Pulse 🔥</h1>
-                            <p class="text-xs text-zinc-400 mt-1">Sieh in Echtzeit, wo in Köln gerade Drops geknackt werden.</p>
+                            <span class="text-xs font-extrabold uppercase tracking-wider text-accent">Live Sweat Feed</span>
+                            <h1 class="text-3xl font-extrabold mt-0.5">Köln Club 🔥</h1>
+                            <p class="text-xs text-zinc-400 mt-1">Jeder Drop hier wurde durch echte Pace, Sprints oder Workouts in Köln verdient.</p>
                         </div>
 
-                        <!-- Freunde Einladen Banner (Simpel & Belohnend) -->
-                        <div class="bg-gradient-to-r from-accent/20 via-amber-500/10 to-card border border-accent/30 rounded-[24px] p-5 flex items-center justify-between gap-4">
-                            <div>
-                                <span class="text-[11px] font-extrabold uppercase tracking-wider text-accent">Zusammen rausgehen</span>
-                                <h3 class="text-base font-extrabold text-white mt-0.5">Nimm 1 Freund mit zum nächsten Drop</h3>
-                                <p class="text-xs text-zinc-300 mt-1">Ihr bekommt beide sofort einen Gratis-Coffee-Drop freigeschaltet.</p>
-                            </div>
-                            <button onclick="UI.shareInvite()" class="flex-shrink-0 px-4 py-3 rounded-2xl bg-white text-black font-extrabold text-xs shadow-md active:scale-95 transition">
-                                Teilen 🔗
-                            </button>
-                        </div>
-
-                        <!-- Live Ticker Cards -->
                         <div class="space-y-3">
-                            ${Store.liveFeed.map(item => `
-                                <div class="bg-card border border-white/5 rounded-2xl p-4 flex items-center gap-3.5">
-                                    <div class="w-11 h-11 rounded-2xl bg-surface flex items-center justify-center text-xl flex-shrink-0 border border-white/5">
-                                        ${item.emoji}
+                            ${State.clubFeed.map(f => `
+                                <div class="bg-card border border-white/10 rounded-3xl p-4">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <div class="flex items-center gap-2.5">
+                                            <span class="w-9 h-9 rounded-2xl bg-surface flex items-center justify-center text-lg">${f.emoji}</span>
+                                            <div>
+                                                <span class="text-xs font-extrabold text-white">${f.user}</span>
+                                                <span class="text-[11px] text-zinc-500 block">${f.veedel} •${f.time}</span>
+                                            </div>
+                                        </div>
+                                        <span class="font-mono text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 px-2.5 py-1 rounded-full">
+                                            ${f.badge}
+                                        </span>
                                     </div>
-                                    <div class="flex-1 min-w-0">
-                                        <p class="text-xs text-zinc-200 leading-snug">
-                                            <strong class="text-white">${item.name}</strong>${item.text}
-                                        </p>
-                                        <span class="text-[11px] text-zinc-500 font-medium">${item.time}</span>
-                                    </div>
+                                    <p class="text-xs text-zinc-300 leading-relaxed">${f.text}</p>
                                 </div>
                             `).join('')}
                         </div>
@@ -581,54 +735,39 @@
                 `;
             },
 
-            /* ----------------------------------------------------------------------
-               TAB 3: DEINE WALLET (Echte Gutscheine zum Vorzeigen im Café/Shop)
-               ---------------------------------------------------------------------- */
-            renderWalletView() {
+            /* ======================================================================
+               5. TAB: WALLET (Verifizierte Beute-Gutscheine)
+               ====================================================================== */
+            renderWalletTab() {
                 return `
-                    <div class="pt-20 px-4 space-y-6">
-                        <div class="flex items-end justify-between">
-                            <div>
-                                <span class="text-xs font-bold uppercase tracking-wider text-accent">Deine Beute</span>
-                                <h1 class="text-3xl font-extrabold mt-0.5">Drop Wallet 🎟️</h1>
-                            </div>
-                            <div class="text-right">
-                                <span class="text-[11px] text-zinc-400 block">Gesammelte Energie</span>
-                                <span class="text-lg font-extrabold text-accent">${Store.sparks} ⚡</span>
-                            </div>
+                    <div class="pt-20 px-4 space-y-5">
+                        <div>
+                            <span class="text-xs font-extrabold uppercase tracking-wider text-neon">Earned, Not Given</span>
+                            <h1 class="text-3xl font-extrabold mt-0.5">Deine Wallet 🎟️</h1>
+                            <p class="text-xs text-zinc-400 mt-1">Jedes Ticket trägt deinen verifizierten Workout-Stempel. Einfach an der Kasse vorzeigen.</p>
                         </div>
 
-                        <p class="text-xs text-zinc-400">
-                            Zeige diese Karten einfach beim Partner-Café oder Drop-Spot in Köln vor, um deine Belohnung einzulösen.
-                        </p>
-
                         <div class="space-y-4">
-                            ${Store.wallet.map(w => `
-                                <div class="ticket-card rounded-[28px] p-5 shadow-xl ${w.used ? 'opacity-45' : ''}">
-                                    <div class="flex items-start justify-between gap-3 pb-5 border-b border-dashed border-white/15">
-                                        <div class="flex items-center gap-3.5">
-                                            <div class="w-12 h-12 rounded-2xl bg-accent/15 border border-accent/30 flex items-center justify-center text-2xl">
-                                                ${w.emoji}
-                                            </div>
-                                            <div>
-                                                <h3 class="text-base font-extrabold text-white">${w.title}</h3>
-                                                <p class="text-xs text-zinc-400 mt-0.5">${w.partner}</p>
-                                                <span class="inline-block text-[10px] text-emerald-400 font-semibold mt-1">${w.expires}</span>
-                                            </div>
-                                        </div>
+                            ${State.wallet.map(w => `
+                                <div class="wallet-pass rounded-[28px] p-5 shadow-2xl ${w.used ? 'opacity-40' : ''}">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="text-[10px] font-extrabold uppercase tracking-widest text-accent">${w.sponsor}</span>
+                                        <span class="font-mono text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">${w.verifiedBy}</span>
                                     </div>
-
-                                    <div class="pt-4 flex items-center justify-between">
+                                    <div class="flex items-center gap-3.5 my-3">
+                                        <div class="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-2xl">${w.emoji}</div>
+                                        <h3 class="text-lg font-extrabold text-white leading-snug">${w.title}</h3>
+                                    </div>
+                                    <div class="pt-3 border-t border-dashed border-white/15 flex items-center justify-between">
                                         <div>
-                                            <span class="text-[10px] uppercase tracking-wider text-zinc-500 block font-bold">Pass-Code</span>
-                                            <span class="font-mono text-sm font-extrabold text-white tracking-wider">${w.code}</span>
+                                            <span class="text-[10px] text-zinc-500 uppercase font-bold block">Partner-Code</span>
+                                            <span class="font-mono text-base font-extrabold text-neon tracking-widest">${w.code}</span>
                                         </div>
-
                                         ${w.used ? `
-                                            <span class="px-4 py-2 rounded-xl bg-zinc-800 text-zinc-500 text-xs font-bold">Bereits eingelöst</span>
+                                            <span class="text-xs font-bold text-zinc-500">Eingelöst ✓</span>
                                         ` : `
-                                            <button onclick="UI.redeemVoucher('${w.id}')" class="px-5 py-2.5 rounded-xl bg-white hover:bg-accent text-black hover:text-white font-extrabold text-xs transition shadow">
-                                                An der Kasse vorzeigen →
+                                            <button onclick="App.redeemWalletItem('${w.id}')" class="px-4 py-2.5 rounded-xl bg-white text-black font-extrabold text-xs hover:bg-neon transition">
+                                                Jetzt vorzeigen & einlösen
                                             </button>
                                         `}
                                     </div>
@@ -639,141 +778,115 @@
                 `;
             },
 
-            redeemVoucher(id) {
-                const v = Store.wallet.find(x => x.id === id);
-                if (!v) return;
-
-                const html = `
-                    <div class="text-center">
-                        <div class="w-16 h-16 rounded-3xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-3xl mx-auto mb-3">
-                            ${v.emoji}
-                        </div>
-                        <span class="text-xs font-bold uppercase tracking-wider text-emerald-400">Live Voucher</span>
-                        <h3 class="text-2xl font-extrabold text-white mt-1">${v.title}</h3>
-                        <p class="text-xs text-zinc-400 mt-1 mb-6">${v.partner}</p>
-
-                        <div class="bg-black border border-white/10 rounded-2xl p-5 mb-6">
-                            <p class="text-[10px] uppercase tracking-widest text-zinc-500 mb-1">Code für Partner / Barista</p>
-                            <p class="font-mono text-2xl font-extrabold text-accent tracking-widest">${v.code}</p>
-                        </div>
-
-                        <button onclick="UI.confirmVoucherUse('${v.id}')" class="w-full py-4 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-sm transition mb-2">
-                            ✓ Jetzt entwerten & einlösen
-                        </button>
-                        <button onclick="UI.closeSheet()" class="w-full py-2.5 text-xs font-bold text-zinc-500">
-                            Schließen
-                        </button>
-                    </div>
-                `;
-                this.showSheet(html);
-            },
-
-            confirmVoucherUse(id) {
-                const v = Store.wallet.find(x => x.id === id);
-                if (v) v.used = true;
-                this.closeSheet();
-                this.updateHeader();
+            redeemWalletItem(id) {
+                const item = State.wallet.find(x => x.id === id);
+                if (item) item.used = true;
+                this.updateBadges();
                 this.render();
             },
 
-            /* ----------------------------------------------------------------------
-               CREATOR-MODUS: IN 10 SEKUNDEN EINEN NEUEN KÖLN-DROP SETZEN
-               ---------------------------------------------------------------------- */
-            openCreatorModal() {
-                const html = `
-                    <div>
-                        <span class="text-xs font-bold uppercase tracking-wider text-accent">Creator & Partner Mode</span>
-                        <h3 class="text-2xl font-extrabold text-white mt-0.5 mb-1">Neuen Drop in Köln setzen 📍</h3>
-                        <p class="text-xs text-zinc-400 mb-5">Platziere in 10 Sekunden eine neue Kapsel für deine Community oder ein Partner-Café.</p>
+            /* ======================================================================
+               6. TAB: B2B SPONSOR PITCH DECK (Warum Marken wie More, ESN & Cafés zahlen)
+               ====================================================================== */
+            renderSponsorPitchTab() {
+                return `
+                    <div class="pt-20 px-4 space-y-6">
+                        <div class="bg-gradient-to-br from-accent/25 via-card to-card border border-accent/40 rounded-[28px] p-5">
+                            <span class="text-[10px] font-mono font-extrabold uppercase tracking-widest text-neon bg-black/60 px-2.5 py-1 rounded-full">
+                                B2B PARTNER & SPONSOR COCKPIT
+                            </span>
+                            <h1 class="text-2xl font-extrabold text-white mt-3 leading-tight">
+                                Warum Marken wie More Nutrition, ESN, Lululemon & Kölner Cafés uns lieben:
+                            </h1>
+                            <p class="text-xs text-zinc-300 mt-2 leading-relaxed">
+                                Statt langweiliger Instagram-Werbung kaufen Sponsoren bei <strong>GRIND.</strong> echte physische Bewegung, garantierte Ladenbesuche (Foot Traffic) und hochgradig authentischen Story-Content.
+                            </p>
+                        </div>
 
-                        <form onsubmit="UI.createNewDrop(event)" class="space-y-3">
-                            <div class="flex gap-2">
-                                <input id="new-drop-emoji" value="🍹" required class="w-14 p-3.5 rounded-2xl bg-surface border border-white/10 text-center text-xl outline-none focus:border-accent">
-                                <input id="new-drop-title" placeholder="Name (z.B. Sundowner Spritz Drop)" required class="flex-1 p-3.5 rounded-2xl bg-surface border border-white/10 text-sm text-white outline-none focus:border-accent">
+                        <!-- Live ROI Kennzahlen für Sponsoren -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="bg-card border border-white/10 rounded-2xl p-4">
+                                <span class="text-[10px] font-bold uppercase text-zinc-400">Garantierte Ladenbesuche</span>
+                                <div class="font-mono text-2xl font-extrabold text-white mt-1">100% CPA</div>
+                                <span class="text-[10px] text-emerald-400">Zahle nur pro echtem Check-In</span>
                             </div>
-                            <input id="new-drop-place" placeholder="Ort in Köln (z.B. Rathenauplatz • Neustadt-Süd)" required class="w-full p-3.5 rounded-2xl bg-surface border border-white/10 text-sm text-white outline-none focus:border-accent">
-                            <input id="new-drop-reward" placeholder="Was gibt es gratis? (z.B. 1x Gratis Aperol / Limo)" required class="w-full p-3.5 rounded-2xl bg-surface border border-white/10 text-sm text-white outline-none focus:border-accent">
-                            
-                            <div class="grid grid-cols-2 gap-2">
-                                <input id="new-drop-spots" type="number" placeholder="Anzahl (z.B. 15)" value="15" required class="p-3.5 rounded-2xl bg-surface border border-white/10 text-sm text-white outline-none focus:border-accent">
-                                <select id="new-drop-veedel" class="p-3.5 rounded-2xl bg-surface border border-white/10 text-sm text-white outline-none focus:border-accent">
-                                    <option value="50.9302,6.9392">📍 Rathenauplatz</option>
-                                    <option value="50.9285,6.9588">📍 Chlodwigplatz (Südstadt)</option>
-                                    <option value="50.9362,6.9098">📍 Stadtwald / Lindenthal</option>
-                                    <option value="50.9515,6.9535">📍 Agnesviertel</option>
-                                </select>
+                            <div class="bg-card border border-white/10 rounded-2xl p-4">
+                                <span class="text-[10px] font-bold uppercase text-zinc-400">Ø Pace-Drop Reichweite</span>
+                                <div class="font-mono text-2xl font-extrabold text-neon mt-1">4.2 km</div>
+                                <span class="text-[10px] text-zinc-400">pro Teilnehmer durch Köln</span>
                             </div>
+                        </div>
 
-                            <button type="submit" class="w-full py-4 mt-2 rounded-2xl bg-accent hover:bg-[#ff661a] text-white font-extrabold text-sm shadow-lg transition">
-                                🚀 Drop jetzt live auf die Karte setzen
-                            </button>
-                        </form>
+                        <!-- Eigenen gesponserten Drop erstellen (Live-Demo für Sponsoren-Gespräche!) -->
+                        <div class="bg-card border border-white/10 rounded-[28px] p-5">
+                            <h3 class="text-base font-extrabold text-white mb-1">🚀 Live-Demo: Sponsor-Drop in 10 Sek. erstellen</h3>
+                            <p class="text-xs text-zinc-400 mb-4">Zeige einem Café-Besitzer oder Brand-Manager in Köln live, wie sein eigener Drop aussieht:</p>
+
+                            <form onsubmit="App.createSponsorDrop(event)" class="space-y-3">
+                                <input id="sp-brand" placeholder="Brand / Sponsor (z.B. LAP COFFEE × ESN)" required class="w-full p-3 rounded-xl bg-surface border border-white/10 text-xs text-white outline-none focus:border-accent">
+                                <input id="sp-title" placeholder="Challenge-Name (z.B. Rheinufer 3km Tempo-Drop)" required class="w-full p-3 rounded-xl bg-surface border border-white/10 text-xs text-white outline-none focus:border-accent">
+                                <div class="grid grid-cols-2 gap-2">
+                                    <select id="sp-type" class="p-3 rounded-xl bg-surface border border-white/10 text-xs text-white outline-none">
+                                        <option value="PACE_RUN">🏃‍♂️ Pace-Run (km + Pace)</option>
+                                        <option value="SPEED_SPRINT">⚡ 3-Minuten Flash-Sprint</option>
+                                        <option value="MOTION_HIIT">🔥 60s HIIT Sensor-Workout</option>
+                                        <option value="SQUAD_SYNC">🤝 2-Personen Buddy-Sync</option>
+                                    </select>
+                                    <input id="sp-reward" placeholder="Reward (z.B. Free Iced Matcha)" required class="p-3 rounded-xl bg-surface border border-white/10 text-xs text-white outline-none">
+                                </div>
+                                <button type="submit" class="w-full py-3.5 rounded-xl bg-neon text-black font-extrabold text-xs uppercase tracking-wider shadow-lg">
+                                    ⚡ Sponsor-Drop sofort auf die Köln-Karte setzen
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 `;
-                this.showSheet(html);
             },
 
-            createNewDrop(e) {
+            createSponsorDrop(e) {
                 e.preventDefault();
-                const emoji = document.getElementById('new-drop-emoji').value || '🎁';
-                const title = document.getElementById('new-drop-title').value.trim();
-                const place = document.getElementById('new-drop-place').value.trim();
-                const reward = document.getElementById('new-drop-reward').value.trim();
-                const count = parseInt(document.getElementById('new-drop-spots').value) || 10;
-                const coords = document.getElementById('new-drop-veedel').value.split(',');
+                const sponsor = document.getElementById('sp-brand').value.trim().toUpperCase();
+                const title = document.getElementById('sp-title').value.trim();
+                const type = document.getElementById('sp-type').value;
+                const reward = document.getElementById('sp-reward').value.trim();
+
+                const badges = {
+                    PACE_RUN: '🏃 2.0 km @ min. 5:30 /km',
+                    SPEED_SPRINT: '⏱️ 350m Sprint in < 120 Sek.',
+                    MOTION_HIIT: '🔥 25 Squat-Jumps in 60 Sek.',
+                    SQUAD_SYNC: '🤝 2 Personen Live-Sync'
+                };
 
                 const newId = 'drop_' + Date.now();
-                Store.drops.unshift({
+                State.drops.unshift({
                     id: newId,
+                    sponsor,
                     title,
-                    place,
+                    place: 'Rathenauplatz • Köln Zentrum',
+                    emoji: '🔥',
+                    challengeType: type,
+                    requirementBadge: badges[type],
+                    targetKm: 2.0,
+                    startDistanceM: 350,
+                    timeLimitSec: 120,
+                    targetReps: 25,
                     reward,
-                    partner: 'Community Partner Köln',
-                    emoji,
-                    category: 'Fresh Live Drop',
-                    sparks: 200,
-                    spotsLeft: count,
-                    totalSpots: count,
-                    timeLeft: 'Gerade gestartet!',
-                    lat: parseFloat(coords[0]),
-                    lng: parseFloat(coords[1]),
+                    sparks: 350,
+                    spotsLeft: 15,
+                    totalSpots: 15,
+                    lat: 50.9302,
+                    lng: 6.9392,
                     claimed: false,
-                    desc: `Frisch platzierter Drop in ${place}. Sei schnell, bevor alle ${count} Spots weg sind!`
+                    howItWorks: `Gesponserte Live-Challenge von ${sponsor}: Absolviere die Vorgabe (${badges[type]}), um deinen Drop direkt in die Wallet zu laden.`
                 });
 
-                Store.selectedDropId = newId;
-                this.closeSheet();
-                this.switchTab('radar');
-            },
-
-            shareInvite() {
-                if (navigator.share) {
-                    navigator.share({
-                        title: 'GRIND. // KÖLN DROPS',
-                        text: 'Komm mit zum nächsten Drop in Köln – es gibt noch freie Coffee- & Streetwear-Kapseln!',
-                        url: window.location.href
-                    }).catch(() => {});
-                } else {
-                    alert('Einladungs-Link für deine Crew wurde kopiert!');
-                }
-            },
-
-            showSheet(html) {
-                const bd = document.getElementById('sheet-backdrop');
-                document.getElementById('sheet-body').innerHTML = html;
-                bd.classList.remove('hidden');
-                bd.classList.add('flex');
-            },
-
-            closeSheet(e) {
-                const bd = document.getElementById('sheet-backdrop');
-                bd.classList.add('hidden');
-                bd.classList.remove('flex');
+                State.selectedDropId = newId;
+                this.switchTab('map');
             }
         };
 
-        window.UI = UI;
-        window.addEventListener('DOMContentLoaded', () => UI.init());
+        window.App = App;
+        window.addEventListener('DOMContentLoaded', () => App.init());
     </script>
 </body>
 </html>
