@@ -1,0 +1,1609 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>nabiko.creates ✨ | Handmade Crochet & Cuties</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for Cute Aesthetic -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Quicksand:wght@500;600;700&family=Short+Stack&display=swap" rel="stylesheet">
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        heading: ['Fredoka', 'sans-serif'],
+                        body: ['Quicksand', 'sans-serif'],
+                        hand: ['Short Stack', 'cursive'],
+                    },
+                    colors: {
+                        cream: '#FFFDF9',
+                        paper: '#F7F2EB',
+                        matcha: '#CFE1B9',
+                        matchaDark: '#7A9A55',
+                        sakura: '#FFD6E0',
+                        sakuraDark: '#E56B8F',
+                        taro: '#E2D4F0',
+                        taroDark: '#8863B8',
+                        butter: '#FFF1B5',
+                        sky: '#CDE8F6',
+                        cocoa: '#4A3B39',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Scrapbook, Grid & Paper Cutout Aesthetics */
+        body {
+            background-color: #FFFDF9;
+            color: #4A3B39;
+            font-family: 'Quicksand', sans-serif;
+            background-image: 
+                radial-gradient(#E5DDD3 1.5px, transparent 1.5px), 
+                radial-gradient(#FFE5EC 1.5px, #FFFDF9 1.5px);
+            background-size: 32px 32px;
+            background-position: 0 0, 16px 16px;
+            overflow-x: hidden;
+        }
+
+        /* Notebook Grid Pattern */
+        .bg-notebook {
+            background-color: #ffffff;
+            background-image: 
+                linear-gradient(#f0e8ff 1px, transparent 1px),
+                linear-gradient(90deg, #f0e8ff 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        /* Gingham Pattern like the Gomu Gomu post */
+        .bg-gingham-purple {
+            background-color: #ffffff;
+            background-image: 
+                linear-gradient(45deg, rgba(216, 180, 254, 0.35) 25%, transparent 25%, transparent 75%, rgba(216, 180, 254, 0.35) 75%, rgba(216, 180, 254, 0.35)),
+                linear-gradient(45deg, rgba(216, 180, 254, 0.35) 25%, transparent 25%, transparent 75%, rgba(216, 180, 254, 0.35) 75%, rgba(216, 180, 254, 0.35));
+            background-size: 24px 24px;
+            background-position: 0 0, 12px 12px;
+        }
+
+        /* Die-Cut Sticker Effect (White outline + hard drop shadow) */
+        .sticker-cutout {
+            filter: 
+                drop-shadow(3px 0 0 #ffffff) 
+                drop-shadow(-3px 0 0 #ffffff) 
+                drop-shadow(0 3px 0 #ffffff) 
+                drop-shadow(0 -3px 0 #ffffff)
+                drop-shadow(2px 2px 0 #ffffff)
+                drop-shadow(-2px -2px 0 #ffffff)
+                drop-shadow(2px -2px 0 #ffffff)
+                drop-shadow(-2px 2px 0 #ffffff)
+                drop-shadow(0px 6px 0px rgba(74, 59, 57, 0.18));
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease;
+        }
+
+        .sticker-cutout:hover {
+            transform: scale(1.07) rotate(-3deg) translateY(-4px);
+            filter: 
+                drop-shadow(4px 0 0 #ffffff) 
+                drop-shadow(-4px 0 0 #ffffff) 
+                drop-shadow(0 4px 0 #ffffff) 
+                drop-shadow(0 -4px 0 #ffffff)
+                drop-shadow(0px 12px 8px rgba(74, 59, 57, 0.22));
+        }
+
+        /* Card Cutout Shadow */
+        .card-cutout {
+            border: 2.5px solid #4A3B39;
+            box-shadow: 5px 6px 0px #4A3B39;
+            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .card-cutout:hover {
+            transform: translate(-3px, -4px);
+            box-shadow: 8px 10px 0px #4A3B39;
+        }
+        .card-cutout:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 3px 0px #4A3B39;
+        }
+
+        /* Washi Tape Effect */
+        .washi-tape {
+            position: absolute;
+            height: 26px;
+            width: 95px;
+            opacity: 0.85;
+            z-index: 10;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            clip-path: polygon(4% 0%, 96% 2%, 100% 15%, 97% 35%, 100% 55%, 96% 75%, 100% 95%, 95% 100%, 3% 98%, 0% 80%, 4% 60%, 0% 40%, 3% 20%);
+        }
+
+        /* Scallop Border Effect */
+        .scallop-box {
+            position: relative;
+        }
+
+        /* Floating Animation */
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(3deg); }
+        }
+        @keyframes floatReverse {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(7px) rotate(-3deg); }
+        }
+        .animate-float {
+            animation: floatSlow 4s ease-in-out infinite;
+        }
+        .animate-float-reverse {
+            animation: floatReverse 4.5s ease-in-out infinite;
+        }
+
+        /* Marquee Ticker */
+        @keyframes marquee {
+            0% { transform: translateX(0%); }
+            100% { transform: translateX(-50%); }
+        }
+        .marquee-track {
+            display: flex;
+            width: 200%;
+            animation: marquee 24s linear infinite;
+        }
+        .marquee-track:hover {
+            animation-play-state: paused;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #FFFDF9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #FFD6E0;
+            border-radius: 9999px;
+            border: 2px solid #4A3B39;
+        }
+    </style>
+</head>
+<body class="selection:bg-sakura selection:text-cocoa relative">
+
+    <!-- Top Cute Marquee Banner -->
+    <div class="bg-taro border-b-2 border-cocoa py-1.5 overflow-hidden text-xs sm:text-sm font-heading font-medium text-cocoa">
+        <div class="marquee-track">
+            <div class="flex justify-around w-1/2 items-center gap-6 px-4 whitespace-nowrap">
+                <span>🧶 100% Handmade Crochet Cuties</span>
+                <span>•</span>
+                <span>🌸 New Gomu Gomu no Mi & Miku Drops!</span>
+                <span>•</span>
+                <span>✨ Free Shipping over €60 + Free Sticker Pack</span>
+                <span>•</span>
+                <span>🐸 Custom Orders are currently OPEN!</span>
+                <span>•</span>
+            </div>
+            <div class="flex justify-around w-1/2 items-center gap-6 px-4 whitespace-nowrap">
+                <span>🧶 100% Handmade Crochet Cuties</span>
+                <span>•</span>
+                <span>🌸 New Gomu Gomu no Mi & Miku Drops!</span>
+                <span>•</span>
+                <span>✨ Free Shipping over €60 + Free Sticker Pack</span>
+                <span>•</span>
+                <span>🐸 Custom Orders are currently OPEN!</span>
+                <span>•</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header Navigation -->
+    <header class="sticky top-3 z-40 px-3 sm:px-6 lg:px-10 mt-3">
+        <nav class="max-w-6xl mx-auto bg-white/95 backdrop-blur-md card-cutout rounded-full px-4 sm:px-7 py-3 flex items-center justify-between">
+            <!-- Brand Logo -->
+            <a href="#" class="flex items-center gap-2.5 group">
+                <div class="w-10 h-10 rounded-full bg-sakura border-2 border-cocoa flex items-center justify-center text-xl shadow-sm group-hover:rotate-12 transition-transform">
+                    🧶
+                </div>
+                <div>
+                    <span class="font-heading font-bold text-lg sm:text-xl tracking-tight text-cocoa block leading-none">nabiko.creates</span>
+                    <span class="font-hand text-[11px] text-sakuraDark block">.* crochet & froggiecore *.</span>
+                </div>
+            </a>
+
+            <!-- Desktop Menu Links -->
+            <div class="hidden md:flex items-center gap-2 lg:gap-4 font-heading text-sm font-medium">
+                <a href="#shop" class="px-3.5 py-1.5 rounded-full hover:bg-sakura/50 transition-colors">🛍️ Shop Cuties</a>
+                <a href="#customizer" class="px-3.5 py-1.5 rounded-full hover:bg-matcha/60 transition-colors">💐 Bouquet & Custom Builder</a>
+                <a href="#reviews" class="px-3.5 py-1.5 rounded-full hover:bg-butter/80 transition-colors">💌 Love Notes</a>
+            </div>
+
+            <!-- Right Actions: Sound, Wishlist, Cart -->
+            <div class="flex items-center gap-2 sm:gap-3">
+                <!-- Cute Sound Toggle (Tone/WebAudio synthesizer) -->
+                <button id="soundToggleBtn" onclick="toggleSound()" title="Toggle cute click sounds" class="w-10 h-10 rounded-full bg-butter border-2 border-cocoa flex items-center justify-center hover:scale-105 transition-transform">
+                    <i id="soundIcon" class="ph-fill ph-speaker-high text-lg text-cocoa"></i>
+                </button>
+
+                <!-- Wishlist Counter -->
+                <button onclick="filterByWishlist()" title="Show your favorites" class="relative w-10 h-10 rounded-full bg-sakura/70 border-2 border-cocoa flex items-center justify-center hover:scale-105 transition-transform">
+                    <i class="ph-fill ph-heart text-lg text-sakuraDark"></i>
+                    <span id="wishlistBadge" class="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-white border-2 border-cocoa text-[11px] font-heading font-bold flex items-center justify-center">0</span>
+                </button>
+
+                <!-- Shopping Bag Button -->
+                <button onclick="toggleCart(true)" class="flex items-center gap-2 bg-matcha hover:bg-matcha/80 border-2 border-cocoa rounded-full px-4 py-2 font-heading font-semibold text-sm shadow-[2px_3px_0px_#4A3B39] active:translate-y-0.5 transition-all">
+                    <i class="ph-bold ph-Tote text-lg"></i>
+                    <span class="hidden sm:inline">Cart</span>
+                    <span id="cartCountBadge" class="bg-white border-2 border-cocoa px-2 py-0.2 rounded-full text-xs font-bold">0</span>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Scrapbook Collage Section -->
+    <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
+        <div class="bg-notebook card-cutout rounded-3xl p-6 sm:p-10 lg:p-12 relative overflow-hidden">
+            <!-- Decorative Washi Tapes on Corners -->
+            <div class="washi-tape bg-sakura -top-2 left-8 -rotate-12"></div>
+            <div class="washi-tape bg-matcha -top-2 right-10 rotate-12"></div>
+            <div class="washi-tape bg-taro -bottom-2 left-1/3 rotate-3"></div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
+                <!-- Left Text Column -->
+                <div class="lg:col-span-7 space-y-5 text-center lg:text-left">
+                    <div class="inline-flex items-center gap-2 bg-butter border-2 border-cocoa rounded-full px-4 py-1 text-xs sm:text-sm font-heading font-semibold shadow-[2px_2px_0px_#4A3B39] -rotate-1">
+                        <span>✨ Welcome to Nabiko's Crochet World</span>
+                        <span class="text-sakuraDark">✿</span>
+                    </div>
+
+                    <h1 class="font-heading font-bold text-3xl sm:text-5xl lg:text-[52px] text-cocoa leading-[1.12]">
+                        Cozy Crochet <br class="hidden sm:inline" />
+                        <span class="inline-block bg-sakura px-4 py-1 rounded-2xl border-2 border-cocoa shadow-[4px_4px_0px_#4A3B39] -rotate-2 my-1">Cutouts</span> & 
+                        <span class="inline-block bg-taro px-4 py-1 rounded-2xl border-2 border-cocoa shadow-[4px_4px_0px_#4A3B39] rotate-1 my-1">Plushies!</span>
+                    </h1>
+
+                    <p class="text-base sm:text-lg text-cocoa/85 max-w-xl mx-auto lg:mx-0 font-medium leading-relaxed">
+                        Every single piece is crocheted stitch by stitch by hand with lots of love! From anime-inspired creations (<span class="font-hand underline decoration-sakuraDark">One Piece, Miku & Maomao</span>) to fluffy cats and forever crochet flower bouquets. 🌸🧶
+                    </p>
+
+                    <div class="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-2">
+                        <a href="#shop" onclick="playPopSound()" class="bg-sakura hover:bg-sakura/90 text-cocoa font-heading font-bold text-base sm:text-lg px-7 py-3.5 rounded-2xl card-cutout flex items-center gap-2">
+                            <span>Shop Cuties</span>
+                            <i class="ph-bold ph-sparkle"></i>
+                        </a>
+                        <a href="#customizer" onclick="playPopSound()" class="bg-white hover:bg-butter/60 text-cocoa font-heading font-bold text-base sm:text-lg px-6 py-3.5 rounded-2xl card-cutout flex items-center gap-2">
+                            <span>💐 Custom Order Builder</span>
+                        </a>
+                    </div>
+
+                    <!-- Cute Polaroid Mini Stats -->
+                    <div class="pt-4 flex flex-wrap justify-center lg:justify-start gap-4 sm:gap-6 text-xs sm:text-sm font-heading">
+                        <div class="flex items-center gap-2 bg-white/90 px-3.5 py-2 rounded-xl border-2 border-cocoa shadow-[2px_2px_0px_#4A3B39] -rotate-1">
+                            <span class="text-lg">💖</span>
+                            <span><strong>100%</strong> Handmade</span>
+                        </div>
+                        <div class="flex items-center gap-2 bg-white/90 px-3.5 py-2 rounded-xl border-2 border-cocoa shadow-[2px_2px_0px_#4A3B39] rotate-1">
+                            <span class="text-lg">🧶</span>
+                            <span>Plush Yarns & PDF Patterns</span>
+                        </div>
+                        <div class="flex items-center gap-2 bg-white/90 px-3.5 py-2 rounded-xl border-2 border-cocoa shadow-[2px_2px_0px_#4A3B39] -rotate-1">
+                            <span class="text-lg">🎁</span>
+                            <span>Cute Packaging</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Interactive Cutout Collage Column -->
+                <div class="lg:col-span-5 relative min-h-[320px] sm:min-h-[360px] flex items-center justify-center">
+                    <!-- Decorative Background Circle -->
+                    <div class="w-64 h-64 sm:w-72 sm:h-72 rounded-full bg-gingham-purple border-2 border-dashed border-cocoa/50 flex items-center justify-center relative">
+                        <span class="position absolute -top-4 bg-white border-2 border-cocoa px-3 py-0.5 rounded-full font-hand text-xs shadow-sm">✨ click the stickers! ✨</span>
+                    </div>
+
+                    <!-- Floating Cutout 1: Gomu Gomu no Mi (Center-Left) -->
+                    <div onclick="quickOpenProduct('gomu-fruit')" class="cursor-pointer absolute left-2 sm:left-6 top-6 animate-float z-20 group" title="View Gomu Gomu no Mi">
+                        <div class="sticker-cutout w-32 h-32 sm:w-36 sm:h-36 flex flex-col items-center justify-center">
+                            <svg viewBox="0 0 140 140" class="w-full h-full">
+                                <!-- Stem -->
+                                <path d="M70 32 C70 15, 95 15, 100 28 C104 37, 88 38, 86 30" fill="none" stroke="#558B2F" stroke-width="10" stroke-linecap="round"/>
+                                <path d="M70 32 C60 22, 48 25, 45 32" fill="none" stroke="#689F38" stroke-width="8" stroke-linecap="round"/>
+                                <!-- Purple Devil Fruit Body -->
+                                <circle cx="70" cy="82" r="44" fill="#7E57C2" stroke="#4A3B39" stroke-width="4"/>
+                                <!-- Crochet Swirl Patterns -->
+                                <path d="M45 65 C38 55, 58 50, 56 64 C55 72, 43 72, 47 63" fill="none" stroke="#D1C4E9" stroke-width="4.5" stroke-linecap="round"/>
+                                <path d="M75 62 C68 52, 88 48, 86 62 C85 70, 73 70, 77 61" fill="none" stroke="#D1C4E9" stroke-width="4.5" stroke-linecap="round"/>
+                                <path d="M95 78 C90 68, 108 68, 104 80 C100 88, 90 85, 94 78" fill="none" stroke="#D1C4E9" stroke-width="4.5" stroke-linecap="round"/>
+                                <path d="M42 92 C36 82, 55 82, 53 94 C50 102, 40 99, 44 92" fill="none" stroke="#D1C4E9" stroke-width="4.5" stroke-linecap="round"/>
+                                <path d="M68 95 C62 84, 84 84, 81 97 C78 106, 65 103, 70 94" fill="none" stroke="#D1C4E9" stroke-width="4.5" stroke-linecap="round"/>
+                                <!-- Cute Blush & Eyes -->
+                                <circle cx="58" cy="78" r="3.5" fill="#4A3B39"/>
+                                <circle cx="82" cy="78" r="3.5" fill="#4A3B39"/>
+                                <ellipse cx="50" cy="82" rx="4" ry="2.5" fill="#FF8DA1"/>
+                                <ellipse cx="90" cy="82" rx="4" ry="2.5" fill="#FF8DA1"/>
+                                <path d="M66 80 Q70 85 74 80" fill="none" stroke="#4A3B39" stroke-width="2.5" stroke-linecap="round"/>
+                            </svg>
+                            <span class="bg-taro border-2 border-cocoa px-2.5 py-0.5 rounded-full font-hand text-[11px] font-bold -mt-3 shadow-sm">Gomu Gomu 🍇</span>
+                        </div>
+                    </div>
+
+                    <!-- Floating Cutout 2: Hatsune Miku Doll (Right Top) -->
+                    <div onclick="quickOpenProduct('miku-plush')" class="cursor-pointer absolute right-2 sm:right-4 top-2 animate-float-reverse z-20" title="View Miku Amigurumi">
+                        <div class="sticker-cutout w-36 h-36 sm:w-40 sm:h-40 flex flex-col items-center justify-center">
+                            <svg viewBox="0 0 150 150" class="w-full h-full">
+                                <!-- Giant Twin Tails -->
+                                <path d="M42 52 C18 65, 14 115, 28 132 C38 140, 44 118, 42 90" fill="#4DB6AC" stroke="#4A3B39" stroke-width="4" stroke-linecap="round"/>
+                                <path d="M108 52 C132 65, 136 115, 122 132 C112 140, 106 118, 108 90" fill="#4DB6AC" stroke="#4A3B39" stroke-width="4" stroke-linecap="round"/>
+                                <!-- Hair Tie Ribbons -->
+                                <rect x="34" y="42" width="14" height="10" rx="3" transform="rotate(-20 34 42)" fill="#263238" stroke="#E91E63" stroke-width="2.5"/>
+                                <rect x="102" y="38" width="14" height="10" rx="3" transform="rotate(20 102 38)" fill="#263238" stroke="#E91E63" stroke-width="2.5"/>
+                                <!-- Dress Body -->
+                                <path d="M55 88 L46 122 L104 122 L95 88 Z" fill="#546E7A" stroke="#4A3B39" stroke-width="4" stroke-linejoin="round"/>
+                                <!-- Aqua Tie -->
+                                <path d="M75 90 L71 112 L75 117 L79 112 Z" fill="#4DB6AC" stroke="#4A3B39" stroke-width="2.5"/>
+                                <!-- Head -->
+                                <circle cx="75" cy="68" r="26" fill="#FFE0CC" stroke="#4A3B39" stroke-width="4"/>
+                                <!-- Bangs -->
+                                <path d="M48 64 C50 38, 100 38, 102 64 C94 54, 85 66, 75 56 C65 66, 56 54, 48 64 Z" fill="#4DB6AC" stroke="#4A3B39" stroke-width="4" stroke-linejoin="round"/>
+                                <!-- Eyes & Blush -->
+                                <circle cx="64" cy="72" r="3.5" fill="#4A3B39"/>
+                                <circle cx="86" cy="72" r="3.5" fill="#4A3B39"/>
+                                <ellipse cx="57" cy="76" rx="4.5" ry="2.5" fill="#FFAB91"/>
+                                <ellipse cx="93" cy="76" rx="4.5" ry="2.5" fill="#FFAB91"/>
+                            </svg>
+                            <span class="bg-sky border-2 border-cocoa px-2.5 py-0.5 rounded-full font-hand text-[11px] font-bold -mt-3 shadow-sm">⋆miku⋆ 🎶</span>
+                        </div>
+                    </div>
+
+                    <!-- Floating Cutout 3: Froggy Hat Cutie (Bottom Left) -->
+                    <div onclick="quickOpenProduct('froggy-hat')" class="cursor-pointer absolute bottom-2 left-4 sm:left-8 animate-float-reverse z-30" title="View Froggy Hat">
+                        <div class="sticker-cutout w-32 h-32 sm:w-36 sm:h-36 flex flex-col items-center justify-center">
+                            <svg viewBox="0 0 150 150" class="w-full h-full">
+                                <!-- Tie Straps -->
+                                <path d="M40 82 Q30 112 36 135" fill="none" stroke="#689F38" stroke-width="5" stroke-linecap="round"/>
+                                <path d="M110 82 Q120 112 114 135" fill="none" stroke="#689F38" stroke-width="5" stroke-linecap="round"/>
+                                <!-- Hat Brim & Dome -->
+                                <path d="M32 82 C36 52, 114 52, 118 82 C126 88, 110 96, 98 88 C85 95, 65 95, 52 88 C40 96, 24 88, 32 82 Z" fill="#7CB342" stroke="#4A3B39" stroke-width="4" stroke-linejoin="round"/>
+                                <!-- Frog Eyes -->
+                                <circle cx="56" cy="52" r="14" fill="#7CB342" stroke="#4A3B39" stroke-width="4"/>
+                                <circle cx="56" cy="52" r="10" fill="#FFFFFF"/>
+                                <circle cx="56" cy="52" r="5.5" fill="#263238"/>
+                                <circle cx="94" cy="52" r="14" fill="#7CB342" stroke="#4A3B39" stroke-width="4"/>
+                                <circle cx="94" cy="52" r="10" fill="#FFFFFF"/>
+                                <circle cx="94" cy="52" r="5.5" fill="#263238"/>
+                            </svg>
+                            <span class="bg-matcha border-2 border-cocoa px-2.5 py-0.5 rounded-full font-hand text-[11px] font-bold -mt-3 shadow-sm">Froggy Hat 🐸</span>
+                        </div>
+                    </div>
+
+                    <!-- Floating Cutout 4: Flower Bouquet (Bottom Right) -->
+                    <div onclick="quickOpenProduct('lily-bouquet')" class="cursor-pointer absolute bottom-0 right-4 sm:right-8 animate-float z-30" title="View Crochet Flower Bouquet">
+                        <div class="sticker-cutout w-32 h-32 sm:w-36 sm:h-36 flex flex-col items-center justify-center">
+                            <svg viewBox="0 0 150 150" class="w-full h-full">
+                                <!-- Wrapping Paper Cone -->
+                                <polygon points="35,65 115,65 88,132 62,132" fill="#E1F5FE" stroke="#4A3B39" stroke-width="4" stroke-linejoin="round"/>
+                                <polygon points="45,58 105,58 92,115 58,115" fill="#FFF9C4" stroke="#4A3B39" stroke-width="3" stroke-linejoin="round"/>
+                                <!-- Stems & Leaves -->
+                                <path d="M75 65 L60 42 M75 65 L92 44 M75 65 L75 35" stroke="#66BB6A" stroke-width="4" stroke-linecap="round"/>
+                                <!-- Crochet Blue & White Lily Flowers -->
+                                <circle cx="56" cy="44" r="14" fill="#64B5F6" stroke="#4A3B39" stroke-width="3.5"/>
+                                <circle cx="56" cy="44" r="5" fill="#FFF176"/>
+                                <circle cx="94" cy="46" r="14" fill="#7986CB" stroke="#4A3B39" stroke-width="3.5"/>
+                                <circle cx="94" cy="46" r="5" fill="#FFF176"/>
+                                <circle cx="75" cy="34" r="16" fill="#FFB2C9" stroke="#4A3B39" stroke-width="3.5"/>
+                                <circle cx="75" cy="34" r="6" fill="#FFF59D"/>
+                                <!-- Ribbon Bow -->
+                                <path d="M62 112 C45 102, 45 124, 68 115 C92 124, 92 102, 75 112" fill="#B3E5FC" stroke="#4A3B39" stroke-width="3.5" stroke-linecap="round"/>
+                            </svg>
+                            <span class="bg-sakura border-2 border-cocoa px-3 py-0.5 rounded-full font-hand text-[11px] font-bold -mt-3 shadow-sm">Forever Bouquet 💐</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Shop Section with Cutout Category Filters -->
+    <section id="shop" class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Section Title Header -->
+        <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+            <div>
+                <div class="inline-block bg-matcha border-2 border-cocoa px-3 py-0.5 rounded-full font-hand text-xs mb-2 shadow-[2px_2px_0px_#4A3B39] -rotate-1">
+                    ✨ straight from my Instagram feed ✨
+                </div>
+                <h2 class="font-heading font-bold text-3xl sm:text-4xl text-cocoa flex items-center gap-3">
+                    <span>Nabiko's Cutie Collection</span>
+                    <span class="text-2xl animate-bounce">🧶</span>
+                </h2>
+            </div>
+
+            <!-- Search Input -->
+            <div class="relative w-full md:w-72">
+                <input 
+                    id="searchInput"
+                    oninput="handleSearch(this.value)"
+                    type="text" 
+                    placeholder="Search e.g. Froggy, Axolotl, Miku..." 
+                    class="w-full bg-white border-2 border-cocoa rounded-full py-2.5 pl-10 pr-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-sakura shadow-[3px_3px_0px_#4A3B39]"
+                >
+                <i class="ph-bold ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-cocoa/70 text-lg"></i>
+            </div>
+        </div>
+
+        <!-- Category Cutout Tabs -->
+        <div class="flex items-center gap-2.5 sm:gap-3.5 overflow-x-auto pb-4 mb-6 no-scrollbar" id="categoryTabs">
+            <button onclick="setCategory('all')" data-cat="all" class="cat-btn bg-cocoa text-white border-2 border-cocoa px-4 sm:px-5 py-2 rounded-2xl font-heading font-semibold text-xs sm:text-sm shadow-[3px_3px_0px_#E56B8F] shrink-0 transition-transform hover:-translate-y-0.5">
+                🌈 All Cuties (15)
+            </button>
+            <button onclick="setCategory('plushies')" data-cat="plushies" class="cat-btn bg-white hover:bg-sakura/50 text-cocoa border-2 border-cocoa px-4 sm:px-5 py-2 rounded-2xl font-heading font-semibold text-xs sm:text-sm shadow-[3px_3px_0px_#4A3B39] shrink-0 transition-transform hover:-translate-y-0.5">
+                🧸 Anime & Plushies
+            </button>
+            <button onclick="setCategory('bouquets')" data-cat="bouquets" class="cat-btn bg-white hover:bg-matcha/60 text-cocoa border-2 border-cocoa px-4 sm:px-5 py-2 rounded-2xl font-heading font-semibold text-xs sm:text-sm shadow-[3px_3px_0px_#4A3B39] shrink-0 transition-transform hover:-translate-y-0.5">
+                💐 Crochet Flowers & Bouquets
+            </button>
+            <button onclick="setCategory('bags')" data-cat="bags" class="cat-btn bg-white hover:bg-butter/80 text-cocoa border-2 border-cocoa px-4 sm:px-5 py-2 rounded-2xl font-heading font-semibold text-xs sm:text-sm shadow-[3px_3px_0px_#4A3B39] shrink-0 transition-transform hover:-translate-y-0.5">
+                🐸 Hats, Bags & Keychains
+            </button>
+            <button onclick="setCategory('patterns')" data-cat="patterns" class="cat-btn bg-white hover:bg-taro/70 text-cocoa border-2 border-cocoa px-4 sm:px-5 py-2 rounded-2xl font-heading font-semibold text-xs sm:text-sm shadow-[3px_3px_0px_#4A3B39] shrink-0 transition-transform hover:-translate-y-0.5">
+                🍒 Pouches & PDF Patterns
+            </button>
+        </div>
+
+        <!-- Products Grid (Dynamic Rendered via JS) -->
+        <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-7 sm:gap-8">
+            <!-- Populated by JavaScript -->
+        </div>
+    </section>
+
+    <!-- Interactive Customizer Section: Build your own Crochet Bouquet or Custom Plushie -->
+    <section id="customizer" class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="bg-gradient-to-br from-sakura/50 via-cream to-taro/50 card-cutout rounded-3xl p-6 sm:p-10 relative">
+            <!-- Washi tape top center -->
+            <div class="washi-tape bg-butter -top-3 left-1/2 -translate-x-1/2 rotate-2"></div>
+
+            <div class="text-center max-w-2xl mx-auto mb-8">
+                <span class="bg-white border-2 border-cocoa px-3.5 py-1 rounded-full font-hand text-xs inline-block mb-2 shadow-sm">
+                    ✂️ Interactive Cutout Customizer
+                </span>
+                <h2 class="font-heading font-bold text-2xl sm:text-4xl text-cocoa">
+                    Build Your Own Crochet Flower Bouquet! 💐
+                </h2>
+                <p class="text-sm sm:text-base text-cocoa/80 mt-2">
+                    Just like on my Instagram: Pick your favorite crochet flowers, pastel wrapping paper, and a cute mini charm – and watch your cutout bouquet come to life!
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                <!-- Live Cutout Canvas Preview (Left 5 Cols) -->
+                <div class="lg:col-span-5 flex flex-col items-center">
+                    <div class="w-full max-w-sm bg-notebook border-2 border-cocoa rounded-3xl p-6 shadow-[5px_6px_0px_#4A3B39] flex flex-col items-center relative min-h-[340px] justify-between">
+                        <span class="font-hand text-xs bg-white border border-cocoa px-3 py-1 rounded-full shadow-sm">
+                            ✨ Live Cutout Preview ✨
+                        </span>
+
+                        <!-- Dynamic SVG Bouquet Preview -->
+                        <div id="bouquetPreviewContainer" class="my-2 sticker-cutout w-56 h-56 flex items-center justify-center">
+                            <!-- Rendered by JS -->
+                        </div>
+
+                        <div class="w-full bg-white/90 border-2 border-cocoa rounded-2xl p-3 text-center">
+                            <p id="customSummaryText" class="font-heading font-semibold text-sm text-cocoa">
+                                Blue Lilies & Forget-Me-Nots
+                            </p>
+                            <p class="font-hand text-xs text-cocoa/70 mt-0.5">Hand-crocheted & wrapped with love</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Builder Controls (Right 7 Cols) -->
+                <div class="lg:col-span-7 space-y-6 bg-white/90 border-2 border-cocoa rounded-3xl p-6 shadow-[4px_4px_0px_#4A3B39]">
+                    <!-- Step 1: Choose Main Flowers -->
+                    <div>
+                        <label class="font-heading font-bold text-sm sm:text-base text-cocoa flex items-center gap-2 mb-3">
+                            <span class="w-6 h-6 rounded-full bg-sakura border-2 border-cocoa inline-flex items-center justify-center text-xs">1</span>
+                            <span>Choose your main crochet flowers:</span>
+                        </label>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3" id="flowerOptions">
+                            <button onclick="updateBouquet('flower', 'blue-lily', 'Blue Lilies & Forget-Me-Nots', 38)" data-val="blue-lily" class="flower-opt border-2 border-cocoa bg-sky/50 rounded-2xl p-3 text-left transition-all shadow-[2px_2px_0px_#4A3B39]">
+                                <div class="text-xl mb-1">💠🌸</div>
+                                <div class="font-heading font-bold text-xs sm:text-sm">Blue Lily Mix</div>
+                                <div class="text-[11px] text-cocoa/70">€38.00</div>
+                            </button>
+                            <button onclick="updateBouquet('flower', 'pink-peony', 'Fluffy Pink Peony', 34)" data-val="pink-peony" class="flower-opt border-2 border-cocoa bg-white hover:bg-sakura/30 rounded-2xl p-3 text-left transition-all">
+                                <div class="text-xl mb-1">🌺✨</div>
+                                <div class="font-heading font-bold text-xs sm:text-sm">Pink Peony</div>
+                                <div class="text-[11px] text-cocoa/70">€34.00</div>
+                            </button>
+                            <button onclick="updateBouquet('flower', 'glaze-lily', 'Genshin Glaze Lily & Lamp Grass', 40)" data-val="glaze-lily" class="flower-opt border-2 border-cocoa bg-white hover:bg-sky/40 rounded-2xl p-3 text-left transition-all">
+                                <div class="text-xl mb-1">💠🌿</div>
+                                <div class="font-heading font-bold text-xs sm:text-sm">Glaze Lily Mix</div>
+                                <div class="text-[11px] text-cocoa/70">€40.00</div>
+                            </button>
+                            <button onclick="updateBouquet('flower', 'taro-tulips', 'Purple Taro Tulips & Daisies', 36)" data-val="taro-tulips" class="flower-opt border-2 border-cocoa bg-white hover:bg-taro/30 rounded-2xl p-3 text-left transition-all">
+                                <div class="text-xl mb-1">🌷💜</div>
+                                <div class="font-heading font-bold text-xs sm:text-sm">Taro Tulip Mix</div>
+                                <div class="text-[11px] text-cocoa/70">€36.00</div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Wrapping Paper Color -->
+                    <div>
+                        <label class="font-heading font-bold text-sm sm:text-base text-cocoa flex items-center gap-2 mb-3">
+                            <span class="w-6 h-6 rounded-full bg-matcha border-2 border-cocoa inline-flex items-center justify-center text-xs">2</span>
+                            <span>Pick your waffle & pastel wrapping paper:</span>
+                        </label>
+                        <div class="flex flex-wrap gap-3" id="wrapOptions">
+                            <button onclick="updateBouquet('wrap', '#E1F5FE', 'Pastel Sky Blue')" class="wrap-opt flex items-center gap-2 px-4 py-2 rounded-full border-2 border-cocoa bg-sky font-heading text-xs font-semibold shadow-[2px_2px_0px_#4A3B39]">
+                                <span class="w-3.5 h-3.5 rounded-full bg-[#81D4FA] border border-cocoa"></span> Sky Blue
+                            </button>
+                            <button onclick="updateBouquet('wrap', '#FFF9C4', 'Butter Yellow & Gingham')" class="wrap-opt flex items-center gap-2 px-4 py-2 rounded-full border-2 border-cocoa bg-white font-heading text-xs font-semibold">
+                                <span class="w-3.5 h-3.5 rounded-full bg-[#FFF176] border border-cocoa"></span> Butter Yellow
+                            </button>
+                            <button onclick="updateBouquet('wrap', '#FCE4EC', 'Sakura Pink')" class="wrap-opt flex items-center gap-2 px-4 py-2 rounded-full border-2 border-cocoa bg-white font-heading text-xs font-semibold">
+                                <span class="w-3.5 h-3.5 rounded-full bg-[#F48FB1] border border-cocoa"></span> Sakura Pink
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Extra Cutie Add-on -->
+                    <div>
+                        <label class="font-heading font-bold text-sm sm:text-base text-cocoa flex items-center gap-2 mb-2">
+                            <span class="w-6 h-6 rounded-full bg-taro border-2 border-cocoa inline-flex items-center justify-center text-xs">3</span>
+                            <span>Hide a mini amigurumi inside the bouquet? (+€6.00)</span>
+                        </label>
+                        <div class="flex flex-wrap gap-2.5">
+                            <button onclick="updateBouquet('addon', 'none', 'No Mini Charm', 0)" class="addon-opt px-3.5 py-1.5 rounded-xl border-2 border-cocoa bg-butter font-heading text-xs font-semibold">
+                                Just Flowers 🌸
+                            </button>
+                            <button onclick="updateBouquet('addon', 'bee', 'Mini Crochet Bee 🐝', 6)" class="addon-opt px-3.5 py-1.5 rounded-xl border-2 border-cocoa bg-white font-heading text-xs font-semibold">
+                                + Mini Bee 🐝 (+€6)
+                            </button>
+                            <button onclick="updateBouquet('addon', 'frog', 'Froggiecore Frog 🐸', 6)" class="addon-opt px-3.5 py-1.5 rounded-xl border-2 border-cocoa bg-white font-heading text-xs font-semibold">
+                                + Mini Frog 🐸 (+€6)
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Price & Add to Cart Action -->
+                    <div class="pt-3 border-t-2 border-dashed border-cocoa/20 flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div>
+                            <span class="text-xs text-cocoa/70 block">Your Custom Bouquet Price:</span>
+                            <span id="customBouquetPrice" class="font-heading font-bold text-2xl text-cocoa">€38.00</span>
+                        </div>
+                        <button onclick="addCustomBouquetToCart()" class="w-full sm:w-auto bg-matcha hover:bg-matcha/90 text-cocoa font-heading font-bold px-6 py-3 rounded-2xl card-cutout flex items-center justify-center gap-2">
+                            <i class="ph-bold ph-magic-wand"></i>
+                            <span>Add Custom Bouquet to Cart</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- "Yarn vs Finish Project" Interactive Flip Card Banner -->
+    <section id="reviews" class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <!-- Left Card: Yarn vs Finish Interactive Card -->
+            <div class="lg:col-span-5 bg-paper card-cutout rounded-3xl p-6 flex flex-col justify-between relative overflow-hidden">
+                <div>
+                    <span class="bg-sakura border-2 border-cocoa px-3 py-0.5 rounded-full font-hand text-xs inline-block mb-3">
+                        ✨ Yarn vs. Finish Project ✨
+                    </span>
+                    <h3 class="font-heading font-bold text-2xl text-cocoa">
+                        From fluffy yarn skeins to a finished cutie! 🧶
+                    </h3>
+                    <p class="text-sm text-cocoa/80 mt-1">
+                        Click the yarn balls to see what they turned into!
+                    </p>
+                </div>
+
+                <!-- Interactive Toggle Area -->
+                <div id="yarnTransformationBox" onclick="toggleYarnMagic()" class="my-5 cursor-pointer bg-white border-2 border-cocoa rounded-2xl p-5 text-center shadow-[3px_3px_0px_#4A3B39] hover:scale-[1.02] transition-all">
+                    <div id="yarnStateView">
+                        <div class="flex justify-center gap-3 text-4xl my-2">
+                            <span class="animate-bounce">🧶</span>
+                            <span class="animate-bounce" style="animation-delay:0.15s">🌸</span>
+                            <span class="animate-bounce" style="animation-delay:0.3s">🥬</span>
+                        </div>
+                        <p class="font-hand text-sm font-bold text-cocoa mt-2">5 soft pastel yarn balls...</p>
+                        <span class="inline-block mt-2 text-xs bg-butter border border-cocoa px-3 py-1 rounded-full font-heading font-semibold">
+                            👉 Click to transform!
+                        </span>
+                    </div>
+                </div>
+
+                <div class="text-xs font-hand text-cocoa/75 flex items-center justify-between">
+                    <span>@nabiko.creates</span>
+                    <span>100% Handmade with love 💕</span>
+                </div>
+            </div>
+
+            <!-- Right Card: Customer Love Notes (Scrapbook Sticky Notes) -->
+            <div class="lg:col-span-7 bg-notebook card-cutout rounded-3xl p-6 sm:p-8 relative">
+                <h3 class="font-heading font-bold text-2xl text-cocoa mb-5 flex items-center gap-2">
+                    <span>💌 Love Notes & Reviews</span>
+                    <span class="text-sm font-hand bg-butter border border-cocoa px-2.5 py-0.5 rounded-full">★ 5.0 (140+ Cuties adopted)</span>
+                </h3>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="bg-butter/70 border-2 border-cocoa rounded-2xl p-4 shadow-[3px_3px_0px_#4A3B39] -rotate-1">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="font-heading font-bold text-sm">Leonora 🌸</span>
+                            <span class="text-xs">⭐⭐⭐⭐⭐</span>
+                        </div>
+                        <p class="text-xs sm:text-sm text-cocoa/90 font-medium">
+                            "The crochet rat tote bag is absolutely iconic!! People stop me at uni every single day to compliment it. So soft and well-made!"
+                        </p>
+                        <span class="block mt-2 font-hand text-[11px] text-cocoa/60">Bought: Cute Rat Bag 🐀👜</span>
+                    </div>
+
+                    <div class="bg-sakura/60 border-2 border-cocoa rounded-2xl p-4 shadow-[3px_3px_0px_#4A3B39] rotate-1">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="font-heading font-bold text-sm">Mina & Kai 🏴‍☠️</span>
+                            <span class="text-xs">⭐⭐⭐⭐⭐</span>
+                        </div>
+                        <p class="text-xs sm:text-sm text-cocoa/90 font-medium">
+                            "The Going Merry ship and the Gomu Gomu no Mi AirPods pouch look even cuter in person than on Instagram! And the free stickers were adorable!"
+                        </p>
+                        <span class="block mt-2 font-hand text-[11px] text-cocoa/60">Bought: Going Merry & Gomu Case</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Cute Footer -->
+    <footer class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-14">
+        <div class="bg-cocoa text-cream card-cutout rounded-3xl p-8 sm:p-10 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div class="text-center md:text-left space-y-2">
+                <div class="flex items-center justify-center md:justify-start gap-2.5">
+                    <span class="w-9 h-9 rounded-full bg-sakura text-cocoa flex items-center justify-center text-lg font-bold">🧶</span>
+                    <span class="font-heading font-bold text-2xl">nabiko.creates</span>
+                </div>
+                <p class="text-sm text-cream/80 max-w-sm">
+                    Handmade Crochet Plushies, Forever Bouquets, Bags & Patterns. Every single piece is one of a kind! ✨
+                </p>
+            </div>
+
+            <div class="flex flex-wrap justify-center gap-3">
+                <a href="#shop" class="bg-sakura text-cocoa font-heading font-bold text-xs sm:text-sm px-4 py-2.5 rounded-xl border-2 border-white hover:scale-105 transition-transform">
+                    📸 Instagram: @nabiko.creates
+                </a>
+                <button onclick="showToast('💌 Feel free to message me anytime for custom requests!')" class="bg-taro text-cocoa font-heading font-bold text-xs sm:text-sm px-4 py-2.5 rounded-xl border-2 border-white hover:scale-105 transition-transform">
+                    💌 DM for Custom Orders
+                </button>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Product Quick-View / Detail Modal -->
+    <div id="productModal" class="fixed inset-0 bg-cocoa/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-cream card-cutout rounded-3xl max-w-lg w-full p-6 sm:p-8 relative animate-fadeIn">
+            <button onclick="closeProductModal()" class="absolute top-4 right-4 w-9 h-9 rounded-full bg-sakura border-2 border-cocoa flex items-center justify-center font-bold hover:scale-110 transition-transform">
+                ✕
+            </button>
+            <div id="productModalContent">
+                <!-- Dynamic content -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide-over Shopping Cart Drawer -->
+    <div id="cartDrawerBackdrop" onclick="toggleCart(false)" class="fixed inset-0 bg-cocoa/40 backdrop-blur-xs z-50 hidden transition-opacity"></div>
+    <aside id="cartDrawer" class="fixed top-0 right-0 h-full w-full max-w-md bg-cream border-l-4 border-cocoa z-50 translate-x-full transition-transform duration-300 flex flex-col justify-between p-6">
+        <!-- Top Drawer Header -->
+        <div>
+            <div class="flex items-center justify-between pb-4 border-b-2 border-dashed border-cocoa/30">
+                <div class="flex items-center gap-2">
+                    <span class="text-2xl">🧺</span>
+                    <h3 class="font-heading font-bold text-xl text-cocoa">Your Adopted Cuties</h3>
+                </div>
+                <button onclick="toggleCart(false)" class="w-9 h-9 rounded-full bg-sakura border-2 border-cocoa flex items-center justify-center font-bold hover:rotate-90 transition-transform">
+                    ✕
+                </button>
+            </div>
+
+            <!-- Free Shipping Progress Bar -->
+            <div class="my-4 bg-butter/60 border-2 border-cocoa rounded-2xl p-3">
+                <p id="freeShippingText" class="text-xs font-heading font-semibold text-cocoa mb-1.5">
+                    ✨ €60.00 away from free shipping + free sticker pack!
+                </p>
+                <div class="w-full h-3 bg-white rounded-full border border-cocoa overflow-hidden">
+                    <div id="freeShippingBar" class="h-full bg-matcha transition-all duration-300" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- Cart Items List -->
+            <div id="cartItemsContainer" class="space-y-3 max-h-[52vh] overflow-y-auto pr-1">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+
+        <!-- Bottom Checkout Summary -->
+        <div class="pt-4 border-t-2 border-cocoa space-y-3 bg-cream">
+            <div class="flex items-center justify-between text-sm font-medium">
+                <span>Free Cutout Sticker Pack 🌸</span>
+                <span class="font-hand text-matchaDark font-bold">INCLUDED (€0.00)</span>
+            </div>
+            <div class="flex items-center justify-between font-heading font-bold text-lg">
+                <span>Total:</span>
+                <span id="cartTotalPrice">€0.00</span>
+            </div>
+            <button onclick="handleCheckout()" class="w-full bg-sakura hover:bg-sakura/90 text-cocoa font-heading font-bold py-3.5 rounded-2xl card-cutout flex items-center justify-center gap-2 text-base">
+                <span>✨ Place Order with Love</span>
+                <i class="ph-bold ph-heart"></i>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Custom Cute Toast Notification -->
+    <div id="toastBox" class="fixed bottom-5 right-5 z-50 pointer-events-none opacity-0 translate-y-4 transition-all duration-300">
+        <div class="bg-white border-2 border-cocoa rounded-2xl px-4 py-3 shadow-[4px_4px_0px_#4A3B39] flex items-center gap-2.5 font-heading font-semibold text-sm text-cocoa">
+            <span class="text-lg">🌸</span>
+            <span id="toastMessage">Added!</span>
+        </div>
+    </div>
+
+    <script>
+        // Sound Effects using Web Audio API (No external files needed)
+        let soundEnabled = true;
+        let audioCtx = null;
+
+        function playPopSound(freq = 580) {
+            if (!soundEnabled) return;
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(freq * 1.45, audioCtx.currentTime + 0.09);
+                gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.09);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.09);
+            } catch (e) {
+                // Ignore if browser blocks audio before interaction
+            }
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const icon = document.getElementById('soundIcon');
+            icon.className = soundEnabled ? 'ph-fill ph-speaker-high text-lg text-cocoa' : 'ph-fill ph-speaker-slash text-lg text-cocoa/50';
+            if (soundEnabled) playPopSound(660);
+            showToast(soundEnabled ? '🔊 Cute sounds enabled!' : '🔇 Sounds muted');
+        }
+
+        // Complete Product Data matching all items from both Instagram screenshots
+        const products = [
+            {
+                id: 'gomu-fruit',
+                name: 'Gomu Gomu no Mi Pouch & Pattern',
+                subtitle: 'One Piece Devil Fruit (Finished Pouch or PDF)',
+                price: 24.00,
+                category: 'patterns',
+                badge: '🍇 PATTERN RELEASE',
+                washiColor: 'bg-taro',
+                bgPattern: 'bg-gingham-purple',
+                description: 'Inspired by One Piece! Available as a handmade crochet AirPods/mini pouch featuring the iconic swirls, or as a detailed step-by-step PDF crochet pattern.',
+                svg: `<svg viewBox="0 0 140 140" class="w-40 h-40">
+                    <path d="M70 30 C70 14, 96 14, 100 28 C104 37, 88 38, 86 30" fill="none" stroke="#558B2F" stroke-width="10" stroke-linecap="round"/>
+                    <circle cx="70" cy="82" r="44" fill="#7E57C2" stroke="#4A3B39" stroke-width="4"/>
+                    <path d="M45 65 C38 55, 58 50, 56 64 C55 72, 43 72, 47 63" fill="none" stroke="#D1C4E9" stroke-width="4.5" stroke-linecap="round"/>
+                    <path d="M75 62 C68 52, 88 48, 86 62 C85 70, 73 70, 77 61" fill="none" stroke="#D1C4E9" stroke-width="4.5" stroke-linecap="round"/>
+                    <path d="M95 78 C90 68, 108 68, 104 80 C100 88, 90 85, 94 78" fill="none" stroke="#D1C4E9" stroke-width="4.5" stroke-linecap="round"/>
+                    <path d="M42 92 C36 82, 55 82, 53 94 C50 102, 40 99, 44 92" fill="none" stroke="#D1C4E9" stroke-width="4.5" stroke-linecap="round"/>
+                    <path d="M68 95 C62 84, 84 84, 81 97 C78 106, 65 103, 70 94" fill="none" stroke="#D1C4E9" stroke-width="4.5" stroke-linecap="round"/>
+                    <line x1="27" y1="78" x2="113" y2="78" stroke="#4A3B39" stroke-width="2.5" stroke-dasharray="4 3"/>
+                </svg>`
+            },
+            {
+                id: 'miku-plush',
+                name: '⋆miku⋆ Amigurumi Plushie',
+                subtitle: 'Vocaloid Chibi Doll with long twin-tails',
+                price: 42.00,
+                category: 'plushies',
+                badge: '🎶 FAN FAVORITE',
+                washiColor: 'bg-sky',
+                bgPattern: 'bg-notebook',
+                description: 'Super sweet hand-crocheted Hatsune Miku plushie with her signature extra-long turquoise twin-tails, cute tie, and rosy cheeks.',
+                svg: `<svg viewBox="0 0 150 150" class="w-40 h-40">
+                    <path d="M42 52 C18 65, 14 115, 28 132 C38 140, 44 118, 42 90" fill="#4DB6AC" stroke="#4A3B39" stroke-width="4" stroke-linecap="round"/>
+                    <path d="M108 52 C132 65, 136 115, 122 132 C112 140, 106 118, 108 90" fill="#4DB6AC" stroke="#4A3B39" stroke-width="4" stroke-linecap="round"/>
+                    <rect x="34" y="42" width="14" height="10" rx="3" transform="rotate(-20 34 42)" fill="#263238" stroke="#E91E63" stroke-width="2.5"/>
+                    <rect x="102" y="38" width="14" height="10" rx="3" transform="rotate(20 102 38)" fill="#263238" stroke="#E91E63" stroke-width="2.5"/>
+                    <path d="M55 88 L46 122 L104 122 L95 88 Z" fill="#546E7A" stroke="#4A3B39" stroke-width="4" stroke-linejoin="round"/>
+                    <path d="M75 90 L71 112 L75 117 L79 112 Z" fill="#4DB6AC" stroke="#4A3B39" stroke-width="2.5"/>
+                    <circle cx="75" cy="68" r="26" fill="#FFE0CC" stroke="#4A3B39" stroke-width="4"/>
+                    <path d="M48 64 C50 38, 100 38, 102 64 C94 54, 85 66, 75 56 C65 66, 56 54, 48 64 Z" fill="#4DB6AC" stroke="#4A3B39" stroke-width="4" stroke-linejoin="round"/>
+                    <circle cx="64" cy="72" r="3.5" fill="#4A3B39"/>
+                    <circle cx="86" cy="72" r="3.5" fill="#4A3B39"/>
+                    <ellipse cx="57" cy="76" rx="4.5" ry="2.5" fill="#FFAB91"/>
+                    <ellipse cx="93" cy="76" rx="4.5" ry="2.5" fill="#FFAB91"/>
+                </svg>`
+            },
+            {
+                id: 'calico-cat',
+                name: 'Fluffy Calico Cat Plush',
+                subtitle: 'Ultra-fluffy lucky cat plushie with bell collar',
+                price: 39.00,
+                category: 'plushies',
+                badge: '🐱 ULTRA FLUFFY',
+                washiColor: 'bg-butter',
+                bgPattern: 'bg-white',
+                description: 'Crocheted with ultra-soft feather yarn! Comes with a custom beaded collar ("CARLA"), a tiny golden bell, and the softest little paws.',
+                svg: `<svg viewBox="0 0 150 150" class="w-40 h-40">
+                    <!-- Ears -->
+                    <polygon points="40,55 34,24 64,40" fill="#3E2723" stroke="#4A3B39" stroke-width="4" stroke-linejoin="round"/>
+                    <polygon points="110,55 116,24 86,40" fill="#FB8C00" stroke="#4A3B39" stroke-width="4" stroke-linejoin="round"/>
+                    <!-- Fluffy Body -->
+                    <ellipse cx="75" cy="105" rx="34" ry="28" fill="#FFFFFF" stroke="#4A3B39" stroke-width="4" stroke-dasharray="10 2"/>
+                    <!-- Fluffy Head -->
+                    <circle cx="75" cy="66" r="30" fill="#FFFFFF" stroke="#4A3B39" stroke-width="4"/>
+                    <!-- Calico Patches -->
+                    <path d="M46 56 C52 38, 72 42, 66 62 Z" fill="#3E2723"/>
+                    <path d="M84 44 C98 44, 105 58, 92 66 Z" fill="#FFB74D"/>
+                    <!-- Collar & Bell -->
+                    <path d="M52 90 Q75 98 98 90" fill="none" stroke="#4A3B39" stroke-width="5" stroke-linecap="round"/>
+                    <circle cx="75" cy="96" r="6" fill="#FFD54F" stroke="#4A3B39" stroke-width="2.5"/>
+                    <!-- Cute Face -->
+                    <circle cx="63" cy="67" r="4" fill="#4A3B39"/>
+                    <circle cx="87" cy="67" r="4" fill="#4A3B39"/>
+                    <polygon points="72,72 78,72 75,76" fill="#F48FB1"/>
+                    <ellipse cx="54" cy="73" rx="4.5" ry="2.5" fill="#FFCDD2"/>
+                    <ellipse cx="96" cy="73" rx="4.5" ry="2.5" fill="#FFCDD2"/>
+                </svg>`
+            },
+            {
+                id: 'rat-bag',
+                name: 'Iconic Crochet Rat Tote Bag',
+                subtitle: 'Crossbody tote bag with pink straps & little paws',
+                price: 54.00,
+                category: 'bags',
+                badge: '🐀 VIRAL HIT',
+                washiColor: 'bg-sakura',
+                bgPattern: 'bg-notebook',
+                description: 'The viral star from my feed! A roomy cream-white crochet bag shaped like a cute rat with 4 little paws, button eyes, and sturdy pink shoulder straps.',
+                svg: `<svg viewBox="0 0 150 150" class="w-40 h-40">
+                    <!-- Pink Straps -->
+                    <path d="M52 52 L58 14 M88 52 L82 14" stroke="#F48FB1" stroke-width="8" stroke-linecap="round"/>
+                    <!-- Pink Tail -->
+                    <path d="M40 95 Q22 115 26 134" fill="none" stroke="#F8BBD0" stroke-width="5" stroke-linecap="round"/>
+                    <!-- Bag Body + Rat Head -->
+                    <path d="M40 52 L96 52 L98 82 L134 98 L98 108 L92 122 L86 136 L78 116 L62 116 L54 136 L44 114 Z" fill="#F5F0E6" stroke="#4A3B39" stroke-width="4" stroke-linejoin="round"/>
+                    <!-- Pink Ear & Nose -->
+                    <circle cx="104" cy="82" r="7" fill="#F8BBD0" stroke="#4A3B39" stroke-width="2.5"/>
+                    <circle cx="134" cy="98" r="4" fill="#F48FB1"/>
+                    <circle cx="115" cy="93" r="3" fill="#4A3B39"/>
+                </svg>`
+            },
+            {
+                id: 'maomao-doll',
+                name: 'Maomao Amigurumi Doll',
+                subtitle: 'The Apothecary Diaries Plushie',
+                price: 46.00,
+                category: 'plushies',
+                badge: '🌿 APOTHECARY',
+                washiColor: 'bg-matcha',
+                bgPattern: 'bg-white',
+                description: 'Detailed Maomao crochet doll featuring deep green hair, bright blue eyes, pink hair accessories, and her signature burgundy skirt with ruffled trim.',
+                svg: `<svg viewBox="0 0 150 150" class="w-40 h-40">
+                    <!-- Skirt -->
+                    <path d="M52 94 L44 130 L106 130 L98 94 Z" fill="#8E1B2B" stroke="#4A3B39" stroke-width="4" stroke-linejoin="round"/>
+                    <path d="M44 130 Q55 136 65 130 Q75 136 85 130 Q95 136 106 130" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
+                    <!-- Top -->
+                    <path d="M55 78 L95 78 L98 96 L52 96 Z" fill="#AED581" stroke="#4A3B39" stroke-width="3.5"/>
+                    <!-- Head -->
+                    <circle cx="75" cy="58" r="24" fill="#FFE0CC" stroke="#4A3B39" stroke-width="4"/>
+                    <!-- Dark Green Hair -->
+                    <path d="M48 56 C48 28, 102 28, 102 56 C94 46, 84 52, 75 46 C66 52, 56 46, 48 56 Z" fill="#1B5E20" stroke="#4A3B39" stroke-width="4"/>
+                    <!-- Blue Eyes -->
+                    <circle cx="65" cy="61" r="4.5" fill="#3949AB"/>
+                    <circle cx="85" cy="61" r="4.5" fill="#3949AB"/>
+                    <circle cx="64" cy="59.5" r="1.5" fill="#FFFFFF"/>
+                    <circle cx="84" cy="59.5" r="1.5" fill="#FFFFFF"/>
+                </svg>`
+            },
+            {
+                id: 'going-merry',
+                name: 'Going Merry Pirate Ship',
+                subtitle: 'One Piece Crochet Ship with flags & sails',
+                price: 64.00,
+                category: 'plushies',
+                badge: '🏴‍☠️ MASTERPIECE',
+                washiColor: 'bg-butter',
+                bgPattern: 'bg-notebook',
+                description: 'A true collector piece! The Going Merry crocheted entirely by hand—complete with the ram figurehead, embroidered Straw Hat sail, pirate flags, and tiny tangerine trees on deck.',
+                svg: `<svg viewBox="0 0 150 150" class="w-40 h-40">
+                    <!-- Hull -->
+                    <path d="M38 92 L122 92 C120 118, 95 124, 52 120 C40 118, 36 104, 38 92 Z" fill="#5D4037" stroke="#4A3B39" stroke-width="4"/>
+                    <!-- Sheep Figurehead -->
+                    <circle cx="32" cy="86" r="14" fill="#FFF8E7" stroke="#4A3B39" stroke-width="4"/>
+                    <path d="M36 80 C46 76, 48 92, 38 92" fill="none" stroke="#A1887F" stroke-width="5" stroke-linecap="round"/>
+                    <circle cx="27" cy="84" r="2.5" fill="#4A3B39"/>
+                    <!-- Main Sail -->
+                    <rect x="64" y="42" width="32" height="46" rx="4" fill="#FFF3E0" stroke="#4A3B39" stroke-width="3.5"/>
+                    <!-- Red/Yellow Back Canopy -->
+                    <path d="M100 62 L124 62 L120 92 L98 92 Z" fill="#C62828" stroke="#4A3B39" stroke-width="3.5"/>
+                    <!-- Tiny Jolly Roger Flag -->
+                    <rect x="74" y="24" width="18" height="12" rx="2" fill="#263238" stroke="#4A3B39" stroke-width="2"/>
+                </svg>`
+            },
+            {
+                id: 'lily-bouquet',
+                name: 'Blue Lily & Forget-Me-Not Bouquet',
+                subtitle: 'Forever flower bouquet in pastel wrap',
+                price: 38.00,
+                category: 'bouquets',
+                badge: '💐 FOREVER FLOWERS',
+                washiColor: 'bg-sky',
+                bgPattern: 'bg-white',
+                description: 'Never wilts! Hand-crocheted flower bouquet featuring a large white-and-yellow lily, blue blossoms, and tiny forget-me-nots wrapped in pastel blue paper with a sheer ribbon.',
+                svg: `<svg viewBox="0 0 150 150" class="w-40 h-40">
+                    <polygon points="35,65 115,65 88,132 62,132" fill="#E1F5FE" stroke="#4A3B39" stroke-width="4" stroke-linejoin="round"/>
+                    <polygon points="45,58 105,58 92,115 58,115" fill="#FFFFFF" stroke="#4A3B39" stroke-width="3" stroke-linejoin="round"/>
+                    <circle cx="56" cy="46" r="15" fill="#FFF9C4" stroke="#4A3B39" stroke-width="3.5"/>
+                    <circle cx="92" cy="48" r="15" fill="#5C6BC0" stroke="#4A3B39" stroke-width="3.5"/>
+                    <circle cx="76" cy="36" r="14" fill="#64B5F6" stroke="#4A3B39" stroke-width="3.5"/>
+                    <path d="M62 112 C45 102, 45 124, 68 115 C92 124, 92 102, 75 112" fill="#B3E5FC" stroke="#4A3B39" stroke-width="3.5"/>
+                </svg>`
+            },
+            {
+                id: 'bunny-keychain',
+                name: 'Lop-Eared Bunny Chibi Keychain',
+                subtitle: 'Bag charm with beaded strap & floppy ears',
+                price: 22.00,
+                category: 'bags',
+                badge: '🐰 CUSTOM CHARM',
+                washiColor: 'bg-sakura',
+                bgPattern: 'bg-gingham-purple',
+                description: 'Sweet chibi character charm wearing a cozy grey crochet bunny hood with pink inner ears and a personalized letter-bead chain for your bag.',
+                svg: `<svg viewBox="0 0 150 150" class="w-40 h-40">
+                    <!-- Keychain Beads -->
+                    <circle cx="75" cy="18" r="5" fill="#F48FB1" stroke="#4A3B39" stroke-width="2"/>
+                    <circle cx="75" cy="29" r="5" fill="#CE93D8" stroke="#4A3B39" stroke-width="2"/>
+                    <!-- Lop Bunny Ears -->
+                    <path d="M48 54 C24 58, 20 98, 36 102 C44 104, 48 82, 48 68" fill="#8D8D8D" stroke="#4A3B39" stroke-width="4"/>
+                    <path d="M102 54 C126 58, 130 98, 114 102 C106 104, 102 82, 102 68" fill="#8D8D8D" stroke="#4A3B39" stroke-width="4"/>
+                    <!-- Head -->
+                    <circle cx="75" cy="72" r="26" fill="#FFE0CC" stroke="#4A3B39" stroke-width="4"/>
+                    <path d="M48 68 C48 40, 102 40, 102 68" fill="#8D8D8D" stroke="#4A3B39" stroke-width="4"/>
+                    <circle cx="64" cy="76" r="4.5" fill="#4A3B39"/>
+                    <circle cx="86" cy="76" r="4.5" fill="#4A3B39"/>
+                </svg>`
+            },
+            {
+                id: 'demogorgon-charm',
+                name: 'Cute Demogorgon Keychain ("DEMO")',
+                subtitle: 'Stranger Things Hawkins Cutie with bead strap',
+                price: 21.00,
+                category: 'bags',
+                badge: '🌺 HAWKINS CUTIE',
+                washiColor: 'bg-taro',
+                bgPattern: 'bg-notebook',
+                description: 'POV: You are in Hawkins and things just got a lot cuter! Hand-crocheted Demogorgon with a star-shaped flower head, tiny white bead teeth, and a "DEMO" bead tag.',
+                svg: `<svg viewBox="0 0 150 150" class="w-40 h-40">
+                    <!-- Body -->
+                    <ellipse cx="75" cy="108" rx="18" ry="22" fill="#A1887F" stroke="#4A3B39" stroke-width="4"/>
+                    <!-- 5 Red Petals -->
+                    <polygon points="75,65 62,25 88,25" fill="#C62828" stroke="#4A3B39" stroke-width="3.5" stroke-linejoin="round"/>
+                    <polygon points="75,65 115,48 108,74" fill="#C62828" stroke="#4A3B39" stroke-width="3.5" stroke-linejoin="round"/>
+                    <polygon points="75,65 104,102 80,96" fill="#C62828" stroke="#4A3B39" stroke-width="3.5" stroke-linejoin="round"/>
+                    <polygon points="75,65 46,102 70,96" fill="#C62828" stroke="#4A3B39" stroke-width="3.5" stroke-linejoin="round"/>
+                    <polygon points="75,65 35,48 42,74" fill="#C62828" stroke="#4A3B39" stroke-width="3.5" stroke-linejoin="round"/>
+                    <!-- Center Mouth -->
+                    <circle cx="75" cy="65" r="11" fill="#263238" stroke="#FFFFFF" stroke-width="3" stroke-dasharray="3 3"/>
+                </svg>`
+            },
+            {
+                id: 'froggy-hat',
+                name: 'Froggiecore Crochet Frog Hat',
+                subtitle: 'Cozy green ruffled frog hat/headband with big eyes & tie straps',
+                price: 29.00,
+                category: 'bags',
+                badge: '🐸 FROGGIECORE',
+                washiColor: 'bg-matcha',
+                bgPattern: 'bg-notebook',
+                description: 'The ultimate froggiecore accessory! Hand-crocheted in leafy green yarn with cute 3D bulging frog eyes, a wavy ruffled brim, and long chin straps.',
+                svg: `<svg viewBox="0 0 150 150" class="w-40 h-40">
+                    <!-- Long Tie Straps -->
+                    <path d="M38 84 Q28 114 34 138" fill="none" stroke="#689F38" stroke-width="5.5" stroke-linecap="round"/>
+                    <path d="M112 84 Q122 114 116 138" fill="none" stroke="#689F38" stroke-width="5.5" stroke-linecap="round"/>
+                    <!-- Hat Body & Ruffled Brim -->
+                    <path d="M28 84 C34 50, 116 50, 122 84 C132 90, 114 100, 100 90 C86 100, 64 100, 50 90 C36 100, 18 90, 28 84 Z" fill="#7CB342" stroke="#4A3B39" stroke-width="4" stroke-linejoin="round"/>
+                    <!-- Stitch Texture Lines -->
+                    <path d="M46 74 Q75 66 104 74" fill="none" stroke="#558B2F" stroke-width="2.5" stroke-dasharray="4 4"/>
+                    <!-- Big Frog Eyes -->
+                    <circle cx="55" cy="52" r="15" fill="#7CB342" stroke="#4A3B39" stroke-width="4"/>
+                    <circle cx="55" cy="52" r="10.5" fill="#FFFFFF" stroke="#4A3B39" stroke-width="2"/>
+                    <circle cx="55" cy="52" r="6" fill="#263238"/>
+                    <circle cx="53" cy="50" r="2" fill="#FFFFFF"/>
+                    <circle cx="95" cy="52" r="15" fill="#7CB342" stroke="#4A3B39" stroke-width="4"/>
+                    <circle cx="95" cy="52" r="10.5" fill="#FFFFFF" stroke="#4A3B39" stroke-width="2"/>
+                    <circle cx="95" cy="52" r="6" fill="#263238"/>
+                    <circle cx="93" cy="50" r="2" fill="#FFFFFF"/>
+                </svg>`
+            },
+            {
+                id: 'hutao-keychain',
+                name: 'Chibi Hu Tao Amigurumi Keychain',
+                subtitle: 'Mini plush bag charm with talisman hat & red blossom',
+                price: 23.00,
+                category: 'bags',
+                badge: '🔥 ANIME CHARM',
+                washiColor: 'bg-sakura',
+                bgPattern: 'bg-white',
+                description: 'Adorable pocket-sized chibi plush keychain featuring dark twin-tails, crimson eyes, a golden talisman emblem on the hat, and a red flower side accent.',
+                svg: `<svg viewBox="0 0 150 150" class="w-40 h-40">
+                    <!-- Silver Keychain Clasp -->
+                    <line x1="75" y1="10" x2="75" y2="34" stroke="#90A4AE" stroke-width="4" stroke-linecap="round"/>
+                    <circle cx="75" cy="14" r="6" fill="none" stroke="#90A4AE" stroke-width="3.5"/>
+                    <!-- Chibi Body -->
+                    <rect x="54" y="88" width="42" height="34" rx="12" fill="#263238" stroke="#4A3B39" stroke-width="4"/>
+                    <circle cx="60" cy="96" r="5" fill="#FFE0CC" stroke="#4A3B39" stroke-width="2.5"/>
+                    <circle cx="90" cy="96" r="5" fill="#FFE0CC" stroke="#4A3B39" stroke-width="2.5"/>
+                    <!-- Head -->
+                    <circle cx="75" cy="68" r="26" fill="#FFE0CC" stroke="#4A3B39" stroke-width="4"/>
+                    <!-- Dark Hair & Hat -->
+                    <path d="M46 68 C44 34, 106 34, 104 68 C96 56, 86 62, 75 56 C64 62, 54 56, 46 68 Z" fill="#212121" stroke="#4A3B39" stroke-width="4" stroke-linejoin="round"/>
+                    <!-- Yellow Talisman & Red Blossom -->
+                    <polygon points="72,34 82,48 64,48" fill="#FFD54F" stroke="#4A3B39" stroke-width="2.5" stroke-linejoin="round"/>
+                    <circle cx="98" cy="52" r="9" fill="#B71C1C" stroke="#4A3B39" stroke-width="2.5"/>
+                    <!-- Red Eyes -->
+                    <ellipse cx="64" cy="73" rx="3" ry="4.5" fill="#C62828"/>
+                    <ellipse cx="86" cy="73" rx="3" ry="4.5" fill="#C62828"/>
+                </svg>`
+            },
+            {
+                id: 'axolotl-keychains',
+                name: 'Chubby Axolotl Keychain Trio',
+                subtitle: 'Pastel Purple, Sakura Pink or Mint Blue Axolotl Charm',
+                price: 18.00,
+                category: 'plushies',
+                badge: '🦎 AXOLOTLS',
+                washiColor: 'bg-taro',
+                bgPattern: 'bg-gingham-purple',
+                description: 'Chunky, super-squishy mini crochet axolotl keychains! Available in Lavender Purple, Soft Peach-Pink, or Pastel Aqua Blue with tiny gill frills.',
+                svg: `<svg viewBox="0 0 150 150" class="w-40 h-40">
+                    <!-- Purple Axolotl (Left) -->
+                    <g transform="translate(-6, 8) rotate(-8 45 85)">
+                        <line x1="45" y1="35" x2="55" y2="58" stroke="#90A4AE" stroke-width="3"/>
+                        <circle cx="24" cy="72" r="5" fill="#7E57C2"/>
+                        <circle cx="22" cy="84" r="5" fill="#7E57C2"/>
+                        <ellipse cx="46" cy="84" rx="20" ry="22" fill="#9575CD" stroke="#4A3B39" stroke-width="3.5"/>
+                        <circle cx="40" cy="78" r="2.5" fill="#4A3B39"/>
+                        <circle cx="52" cy="78" r="2.5" fill="#4A3B39"/>
+                    </g>
+                    <!-- Mint Axolotl (Right) -->
+                    <g transform="translate(6, 8) rotate(8 105 85)">
+                        <line x1="105" y1="35" x2="95" y2="58" stroke="#90A4AE" stroke-width="3"/>
+                        <circle cx="126" cy="72" r="5" fill="#26A69A"/>
+                        <circle cx="128" cy="84" r="5" fill="#26A69A"/>
+                        <ellipse cx="104" cy="84" rx="20" ry="22" fill="#80CBC4" stroke="#4A3B39" stroke-width="3.5"/>
+                        <circle cx="98" cy="78" r="2.5" fill="#4A3B39"/>
+                        <circle cx="110" cy="78" r="2.5" fill="#4A3B39"/>
+                    </g>
+                    <!-- Pink Axolotl (Center Front) -->
+                    <g transform="translate(0, 14)">
+                        <line x1="75" y1="22" x2="75" y2="54" stroke="#90A4AE" stroke-width="3.5"/>
+                        <circle cx="50" cy="68" r="5.5" fill="#EC407A"/>
+                        <circle cx="48" cy="80" r="5.5" fill="#EC407A"/>
+                        <circle cx="100" cy="68" r="5.5" fill="#EC407A"/>
+                        <circle cx="102" cy="80" r="5.5" fill="#EC407A"/>
+                        <ellipse cx="75" cy="82" rx="22" ry="24" fill="#F8BBD0" stroke="#4A3B39" stroke-width="4"/>
+                        <circle cx="67" cy="76" r="3" fill="#4A3B39"/>
+                        <circle cx="83" cy="76" r="3" fill="#4A3B39"/>
+                        <ellipse cx="62" cy="81" rx="3.5" ry="2" fill="#F48FB1"/>
+                        <ellipse cx="88" cy="81" rx="3.5" ry="2" fill="#F48FB1"/>
+                    </g>
+                </svg>`
+            },
+            {
+                id: 'small-lamp-grass',
+                name: 'Small Lamp Grass Crochet Stem',
+                subtitle: 'Genshin-inspired glowing blue bell flower stem',
+                price: 25.00,
+                category: 'bouquets',
+                badge: '💙 LAMP GRASS',
+                washiColor: 'bg-sky',
+                bgPattern: 'bg-notebook',
+                description: 'Inspired by Genshin Impact! A delicate drooping stem with long lush green leaves and an ombre blue-to-aqua glowing crochet bud.',
+                svg: `<svg viewBox="0 0 150 150" class="w-40 h-40">
+                    <!-- Main Curved Stem -->
+                    <path d="M78 138 L78 72 C78 38, 102 38, 102 58" fill="none" stroke="#33691E" stroke-width="5" stroke-linecap="round"/>
+                    <!-- Long Drooping Green Leaves -->
+                    <path d="M78 125 C58 100, 34 86, 26 98 C38 112, 62 118, 78 132" fill="#558B2F" stroke="#4A3B39" stroke-width="3.5" stroke-linejoin="round"/>
+                    <path d="M78 104 C58 76, 38 58, 30 68 C42 82, 62 92, 78 112" fill="#689F38" stroke="#4A3B39" stroke-width="3.5" stroke-linejoin="round"/>
+                    <path d="M78 120 C96 96, 118 82, 124 94 C114 108, 94 116, 78 130" fill="#558B2F" stroke="#4A3B39" stroke-width="3.5" stroke-linejoin="round"/>
+                    <!-- Ombre Blue Berry Blossom -->
+                    <path d="M86 64 C86 46, 118 46, 118 64 C118 82, 102 92, 102 92 C102 92, 86 82, 86 64 Z" fill="#42A5F5" stroke="#4A3B39" stroke-width="3.5"/>
+                    <ellipse cx="102" cy="78" rx="11" ry="8" fill="#80DEEA"/>
+                    <!-- Top Sepals -->
+                    <path d="M102 48 L92 40 M102 48 L112 40 M102 48 L102 36" stroke="#33691E" stroke-width="4" stroke-linecap="round"/>
+                </svg>`
+            },
+            {
+                id: 'glaze-lily',
+                name: 'Eternal Glaze Lily Flower',
+                subtitle: 'Liyue-inspired blue & white wired crochet lily',
+                price: 28.00,
+                category: 'bouquets',
+                badge: '💠 GLAZE LILY',
+                washiColor: 'bg-sky',
+                bgPattern: 'bg-white',
+                description: 'Hand-crocheted Glaze Lily with poseable wired petals in gradient royal blue and cream white with a soft yellow stamen center.',
+                svg: `<svg viewBox="0 0 150 150" class="w-40 h-40">
+                    <!-- Stem & Leaf -->
+                    <path d="M75 78 L70 138" stroke="#2E7D32" stroke-width="4.5" stroke-linecap="round"/>
+                    <path d="M72 122 C48 112, 36 94, 48 88 C60 84, 68 104, 72 122 Z" fill="#2E7D32" stroke="#4A3B39" stroke-width="3.5"/>
+                    <!-- Outer Blue Petals -->
+                    <ellipse cx="75" cy="44" rx="10" ry="24" fill="#5C6BC0" stroke="#4A3B39" stroke-width="3.5"/>
+                    <ellipse cx="48" cy="64" rx="24" ry="10" transform="rotate(-20 48 64)" fill="#5C6BC0" stroke="#4A3B39" stroke-width="3.5"/>
+                    <ellipse cx="102" cy="64" rx="24" ry="10" transform="rotate(20 102 64)" fill="#5C6BC0" stroke="#4A3B39" stroke-width="3.5"/>
+                    <ellipse cx="56" cy="86" rx="22" ry="9" transform="rotate(-40 56 86)" fill="#7986CB" stroke="#4A3B39" stroke-width="3.5"/>
+                    <ellipse cx="94" cy="86" rx="22" ry="9" transform="rotate(40 94 86)" fill="#7986CB" stroke="#4A3B39" stroke-width="3.5"/>
+                    <!-- Inner White Petals -->
+                    <ellipse cx="64" cy="58" rx="7" ry="15" transform="rotate(-30 64 58)" fill="#FFFFFF" stroke="#4A3B39" stroke-width="2.5"/>
+                    <ellipse cx="86" cy="58" rx="7" ry="15" transform="rotate(30 86 58)" fill="#FFFFFF" stroke="#4A3B39" stroke-width="2.5"/>
+                    <ellipse cx="75" cy="74" rx="7" ry="15" fill="#FFFFFF" stroke="#4A3B39" stroke-width="2.5"/>
+                    <!-- Golden Center -->
+                    <circle cx="75" cy="66" r="7" fill="#FFF176" stroke="#4A3B39" stroke-width="2.5"/>
+                </svg>`
+            },
+            {
+                id: 'cherry-pouch',
+                name: 'Sweet Cherry Drawstring Pouch',
+                subtitle: 'Plump berry-red crochet pouch with green leaf tie',
+                price: 24.00,
+                category: 'patterns',
+                badge: '🍒 CHERRY POUCH',
+                washiColor: 'bg-sakura',
+                bgPattern: 'bg-notebook',
+                description: 'Keep your trinkets, dice, headphones, or lip balm safe inside this plump cherry-red crochet drawstring bag! Cinches shut with a cute green leaf.',
+                svg: `<svg viewBox="0 0 150 150" class="w-40 h-40">
+                    <!-- Green Stem & Leaf Drawstring -->
+                    <path d="M68 48 C58 28, 42 32, 46 46" fill="none" stroke="#558B2F" stroke-width="4" stroke-linecap="round"/>
+                    <path d="M64 48 C38 42, 30 66, 48 72 C58 74, 64 58, 64 48 Z" fill="#4CAF50" stroke="#4A3B39" stroke-width="3.5" stroke-linejoin="round"/>
+                    <!-- Plump Red Cherry Pouch Body -->
+                    <path d="M56 48 L94 48 C114 58, 120 96, 102 116 C88 128, 62 128, 48 116 C30 96, 36 58, 56 48 Z" fill="#C62828" stroke="#4A3B39" stroke-width="4" stroke-linejoin="round"/>
+                    <!-- Cinched Top Pleats -->
+                    <path d="M56 48 Q75 56 94 48" fill="none" stroke="#8E0000" stroke-width="4" stroke-linecap="round"/>
+                    <line x1="68" y1="52" x2="64" y2="70" stroke="#8E0000" stroke-width="3" stroke-linecap="round"/>
+                    <line x1="82" y1="52" x2="86" y2="70" stroke="#8E0000" stroke-width="3" stroke-linecap="round"/>
+                </svg>`
+            }
+        ];
+
+        // State Variables
+        let activeCategory = 'all';
+        let searchQuery = '';
+        let wishlist = new Set();
+        let cart = [
+            { id: 'gomu-fruit', name: 'Gomu Gomu no Mi Pouch & Pattern', price: 24.00, qty: 1 }
+        ];
+
+        // Custom Bouquet State
+        let customBouquet = {
+            flowerType: 'blue-lily',
+            flowerName: 'Blue Lilies & Forget-Me-Nots',
+            flowerPrice: 38,
+            wrapColor: '#E1F5FE',
+            wrapName: 'Pastel Sky Blue',
+            addonType: 'none',
+            addonName: 'No Mini Charm',
+            addonPrice: 0
+        };
+
+        function renderProducts() {
+            const grid = document.getElementById('productGrid');
+            const filtered = products.filter(p => {
+                const matchesCat = activeCategory === 'all' 
+                    ? true 
+                    : activeCategory === 'wishlist' 
+                        ? wishlist.has(p.id) 
+                        : p.category === activeCategory;
+                const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                      p.subtitle.toLowerCase().includes(searchQuery.toLowerCase());
+                return matchesCat && matchesSearch;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full bg-white card-cutout rounded-3xl p-10 text-center space-y-3">
+                        <div class="text-4xl">🧶💭</div>
+                        <h3 class="font-heading font-bold text-xl">No cuties found in this category!</h3>
+                        <p class="text-sm text-cocoa/70">Try another filter or view all products again.</p>
+                        <button onclick="setCategory('all')" class="bg-sakura border-2 border-cocoa px-5 py-2 rounded-full font-heading font-bold text-sm">
+                            Show All Cuties
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = filtered.map((item, idx) => {
+                const isLiked = wishlist.has(item.id);
+                const tiltClass = idx % 2 === 0 ? 'hover:-rotate-1' : 'hover:rotate-1';
+                return `
+                    <article class="bg-white card-cutout rounded-3xl p-5 flex flex-col justify-between relative group ${tiltClass}">
+                        <!-- Decorative Top Washi Tape -->
+                        <div class="washi-tape ${item.washiColor} -top-3 left-1/2 -translate-x-1/2 ${idx % 2 === 0 ? '-rotate-2' : 'rotate-2'}"></div>
+
+                        <div>
+                            <!-- Top Row: Badge & Wishlist Heart -->
+                            <div class="flex items-center justify-between mb-3 relative z-10">
+                                <span class="bg-cream border-2 border-cocoa px-3 py-0.5 rounded-full font-hand text-[11px] font-bold shadow-xs">
+                                    ${item.badge}
+                                </span>
+                                <button onclick="toggleWishlist('${item.id}')" aria-label="Favorite" class="w-9 h-9 rounded-full ${isLiked ? 'bg-sakura text-sakuraDark' : 'bg-white text-cocoa/40'} border-2 border-cocoa flex items-center justify-center hover:scale-110 transition-transform">
+                                    <i class="ph-fill ph-heart text-lg"></i>
+                                </button>
+                            </div>
+
+                            <!-- Cutout Illustration Frame -->
+                            <div onclick="quickOpenProduct('${item.id}')" class="cursor-pointer ${item.bgPattern} border-2 border-cocoa rounded-2xl h-52 flex items-center justify-center relative overflow-hidden mb-4">
+                                <div class="sticker-cutout">
+                                    ${item.svg}
+                                </div>
+                                <span class="absolute bottom-2 right-2 bg-white/90 border border-cocoa px-2.5 py-0.5 rounded-full text-[11px] font-hand opacity-0 group-hover:opacity-100 transition-opacity">
+                                    🔍 View details
+                                </span>
+                            </div>
+
+                            <!-- Title & Subtitle -->
+                            <h3 onclick="quickOpenProduct('${item.id}')" class="cursor-pointer font-heading font-bold text-lg text-cocoa group-hover:text-sakuraDark transition-colors">
+                                ${item.name}
+                            </h3>
+                            <p class="text-xs text-cocoa/75 mt-0.5 line-clamp-2">
+                                ${item.subtitle}
+                            </p>
+                        </div>
+
+                        <!-- Price & Add Button -->
+                        <div class="pt-4 mt-4 border-t-2 border-dashed border-cocoa/15 flex items-center justify-between">
+                            <div>
+                                <span class="text-[11px] font-hand text-cocoa/60 block">Handmade Price</span>
+                                <span class="font-heading font-bold text-xl text-cocoa">€${item.price.toFixed(2)}</span>
+                            </div>
+                            <button onclick="addToCart('${item.id}')" class="bg-sakura hover:bg-matcha text-cocoa font-heading font-bold text-xs sm:text-sm px-4 py-2.5 rounded-xl border-2 border-cocoa shadow-[2px_3px_0px_#4A3B39] active:translate-y-0.5 transition-all flex items-center gap-1.5">
+                                <i class="ph-bold ph-plus"></i>
+                                <span>Add to Cart</span>
+                            </button>
+                        </div>
+                    </article>
+                `;
+            }).join('');
+        }
+
+        function setCategory(cat) {
+            playPopSound(520);
+            activeCategory = cat;
+            document.querySelectorAll('.cat-btn').forEach(btn => {
+                if (btn.dataset.cat === cat) {
+                    btn.className = 'cat-btn bg-cocoa text-white border-2 border-cocoa px-4 sm:px-5 py-2 rounded-2xl font-heading font-semibold text-xs sm:text-sm shadow-[3px_3px_0px_#E56B8F] shrink-0 transition-transform';
+                } else {
+                    btn.className = 'cat-btn bg-white hover:bg-sakura/40 text-cocoa border-2 border-cocoa px-4 sm:px-5 py-2 rounded-2xl font-heading font-semibold text-xs sm:text-sm shadow-[3px_3px_0px_#4A3B39] shrink-0 transition-transform';
+                }
+            });
+            renderProducts();
+        }
+
+        function handleSearch(val) {
+            searchQuery = val;
+            renderProducts();
+        }
+
+        function toggleWishlist(id) {
+            playPopSound(700);
+            if (wishlist.has(id)) {
+                wishlist.delete(id);
+                showToast('Removed from your wishlist');
+            } else {
+                wishlist.add(id);
+                showToast('💖 Added to your wishlist!');
+            }
+            document.getElementById('wishlistBadge').textContent = wishlist.size;
+            renderProducts();
+        }
+
+        function filterByWishlist() {
+            if (wishlist.size === 0) {
+                showToast('💖 Click the little heart on a product first!');
+                return;
+            }
+            activeCategory = 'wishlist';
+            renderProducts();
+            document.getElementById('shop').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Custom Bouquet Live Preview Renderer
+        function renderBouquetPreview() {
+            const container = document.getElementById('bouquetPreviewContainer');
+            const summary = document.getElementById('customSummaryText');
+            const priceEl = document.getElementById('customBouquetPrice');
+
+            let flowersSvg = '';
+            if (customBouquet.flowerType === 'blue-lily') {
+                flowersSvg = `
+                    <circle cx="54" cy="48" r="15" fill="#64B5F6" stroke="#4A3B39" stroke-width="3.5"/>
+                    <circle cx="54" cy="48" r="5" fill="#FFF176"/>
+                    <circle cx="96" cy="48" r="15" fill="#7986CB" stroke="#4A3B39" stroke-width="3.5"/>
+                    <circle cx="96" cy="48" r="5" fill="#FFF176"/>
+                    <circle cx="75" cy="36" r="17" fill="#FFF9C4" stroke="#4A3B39" stroke-width="3.5"/>
+                    <circle cx="75" cy="36" r="6" fill="#FFB74D"/>
+                `;
+            } else if (customBouquet.flowerType === 'pink-peony') {
+                flowersSvg = `
+                    <circle cx="55" cy="50" r="13" fill="#F8BBD0" stroke="#4A3B39" stroke-width="3.5"/>
+                    <circle cx="95" cy="50" r="13" fill="#F8BBD0" stroke="#4A3B39" stroke-width="3.5"/>
+                    <circle cx="75" cy="40" r="21" fill="#F48FB1" stroke="#4A3B39" stroke-width="3.5"/>
+                    <circle cx="75" cy="40" r="12" fill="#FCE4EC" stroke="#4A3B39" stroke-width="2.5" stroke-dasharray="5 3"/>
+                `;
+            } else if (customBouquet.flowerType === 'glaze-lily') {
+                flowersSvg = `
+                    <circle cx="54" cy="48" r="14" fill="#42A5F5" stroke="#4A3B39" stroke-width="3.5"/>
+                    <circle cx="96" cy="48" r="14" fill="#5C6BC0" stroke="#4A3B39" stroke-width="3.5"/>
+                    <circle cx="75" cy="36" r="17" fill="#FFFFFF" stroke="#4A3B39" stroke-width="3.5"/>
+                    <circle cx="75" cy="36" r="6" fill="#FFF176"/>
+                `;
+            } else {
+                flowersSvg = `
+                    <ellipse cx="54" cy="46" rx="12" ry="16" fill="#BA68C8" stroke="#4A3B39" stroke-width="3.5"/>
+                    <ellipse cx="96" cy="46" rx="12" ry="16" fill="#9575CD" stroke="#4A3B39" stroke-width="3.5"/>
+                    <circle cx="75" cy="36" r="16" fill="#E1BEE7" stroke="#4A3B39" stroke-width="3.5"/>
+                    <circle cx="75" cy="36" r="6" fill="#FFF176"/>
+                `;
+            }
+
+            let addonBadge = '';
+            if (customBouquet.addonType === 'bee') {
+                addonBadge = `<circle cx="95" cy="24" r="10" fill="#FFD54F" stroke="#4A3B39" stroke-width="3"/><text x="89" y="28" font-size="12">🐝</text>`;
+            } else if (customBouquet.addonType === 'frog') {
+                addonBadge = `<circle cx="95" cy="24" r="10" fill="#AED581" stroke="#4A3B39" stroke-width="3"/><text x="89" y="28" font-size="12">🐸</text>`;
+            }
+
+            container.innerHTML = `
+                <svg viewBox="0 0 150 150" class="w-full h-full">
+                    <polygon points="32,62 118,62 90,136 60,136" fill="${customBouquet.wrapColor}" stroke="#4A3B39" stroke-width="4" stroke-linejoin="round"/>
+                    <polygon points="44,55 106,55 92,116 58,116" fill="#FFFFFF" stroke="#4A3B39" stroke-width="3" stroke-linejoin="round"/>
+                    <path d="M75 68 L56 46 M75 68 L94 46 M75 68 L75 36" stroke="#66BB6A" stroke-width="4" stroke-linecap="round"/>
+                    ${flowersSvg}
+                    ${addonBadge}
+                    <path d="M62 114 C44 104, 44 126, 68 117 C94 126, 94 104, 75 114" fill="#F8BBD0" stroke="#4A3B39" stroke-width="3.5"/>
+                </svg>
+            `;
+
+            const total = customBouquet.flowerPrice + customBouquet.addonPrice;
+            summary.textContent = `${customBouquet.flowerName} • ${customBouquet.wrapName} ${customBouquet.addonType !== 'none' ? '• ' + customBouquet.addonName : ''}`;
+            priceEl.textContent = `€${total.toFixed(2)}`;
+        }
+
+        function updateBouquet(part, val, label, price = 0) {
+            playPopSound(620);
+            if (part === 'flower') {
+                customBouquet.flowerType = val;
+                customBouquet.flowerName = label;
+                customBouquet.flowerPrice = price;
+            } else if (part === 'wrap') {
+                customBouquet.wrapColor = val;
+                customBouquet.wrapName = label;
+            } else if (part === 'addon') {
+                customBouquet.addonType = val;
+                customBouquet.addonName = label;
+                customBouquet.addonPrice = price;
+            }
+            renderBouquetPreview();
+        }
+
+        function addCustomBouquetToCart() {
+            const total = customBouquet.flowerPrice + customBouquet.addonPrice;
+            const customItem = {
+                id: 'custom-bouquet-' + Date.now(),
+                name: `Custom Bouquet (${customBouquet.flowerName})`,
+                price: total,
+                qty: 1
+            };
+            cart.push(customItem);
+            playPopSound(740);
+            updateCartUI();
+            toggleCart(true);
+            showToast('💐 Your Custom Crochet Bouquet was added to the cart!');
+        }
+
+        // Yarn vs Finish Interactive Card
+        let yarnTransformed = false;
+        function toggleYarnMagic() {
+            playPopSound(680);
+            yarnTransformed = !yarnTransformed;
+            const view = document.getElementById('yarnStateView');
+            if (yarnTransformed) {
+                view.innerHTML = `
+                    <div class="flex justify-center gap-3 text-4xl my-2">
+                        <span class="animate-bounce">💐</span>
+                        <span class="animate-bounce" style="animation-delay:0.1s">🌺</span>
+                        <span class="animate-bounce" style="animation-delay:0.2s">✨</span>
+                    </div>
+                    <p class="font-hand text-sm font-bold text-sakuraDark mt-2">Tadaaa! A finished Forever Peony Bouquet! 🌸</p>
+                    <span class="inline-block mt-2 text-xs bg-matcha border border-cocoa px-3 py-1 rounded-full font-heading font-semibold">
+                        🔄 Click to rewind
+                    </span>
+                `;
+            } else {
+                view.innerHTML = `
+                    <div class="flex justify-center gap-3 text-4xl my-2">
+                        <span class="animate-bounce">🧶</span>
+                        <span class="animate-bounce" style="animation-delay:0.15s">🌸</span>
+                        <span class="animate-bounce" style="animation-delay:0.3s">🥬</span>
+                    </div>
+                    <p class="font-hand text-sm font-bold text-cocoa mt-2">5 soft pastel yarn balls...</p>
+                    <span class="inline-block mt-2 text-xs bg-butter border border-cocoa px-3 py-1 rounded-full font-heading font-semibold">
+                        👉 Click to transform!
+                    </span>
+                `;
+            }
+        }
+
+        // Modal & Cart Logic
+        function quickOpenProduct(id) {
+            playPopSound(600);
+            const item = products.find(p => p.id === id);
+            if (!item) return;
+            const modal = document.getElementById('productModal');
+            const content = document.getElementById('productModalContent');
+
+            content.innerHTML = `
+                <div class="flex flex-col items-center text-center space-y-4">
+                    <span class="bg-butter border-2 border-cocoa px-3 py-0.5 rounded-full font-hand text-xs font-bold">
+                        ${item.badge}
+                    </span>
+                    <div class="${item.bgPattern} border-2 border-cocoa rounded-3xl w-full py-6 flex items-center justify-center">
+                        <div class="sticker-cutout">${item.svg}</div>
+                    </div>
+                    <h3 class="font-heading font-bold text-2xl text-cocoa">${item.name}</h3>
+                    <p class="text-sm text-cocoa/80 leading-relaxed">${item.description}</p>
+                    <div class="w-full pt-3 flex items-center justify-between border-t-2 border-dashed border-cocoa/20">
+                        <span class="font-heading font-bold text-2xl text-cocoa">€${item.price.toFixed(2)}</span>
+                        <button onclick="addToCart('${item.id}'); closeProductModal();" class="bg-sakura hover:bg-matcha text-cocoa font-heading font-bold px-6 py-3 rounded-2xl card-cutout">
+                            🧶 Adopt Now
+                        </button>
+                    </div>
+                </div>
+            `;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeProductModal() {
+            const modal = document.getElementById('productModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function addToCart(productId) {
+            playPopSound(720);
+            const prod = products.find(p => p.id === productId);
+            if (!prod) return;
+
+            const existing = cart.find(item => item.id === productId);
+            if (existing) {
+                existing.qty += 1;
+            } else {
+                cart.push({ id: prod.id, name: prod.name, price: prod.price, qty: 1 });
+            }
+            updateCartUI();
+            showToast(`🧶 "${prod.name}" added to cart!`);
+        }
+
+        function changeQty(id, delta) {
+            playPopSound(540);
+            const idx = cart.findIndex(i => i.id === id);
+            if (idx === -1) return;
+            cart[idx].qty += delta;
+            if (cart[idx].qty <= 0) {
+                cart.splice(idx, 1);
+            }
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const countBadge = document.getElementById('cartCountBadge');
+            const container = document.getElementById('cartItemsContainer');
+            const totalEl = document.getElementById('cartTotalPrice');
+            const shipText = document.getElementById('freeShippingText');
+            const shipBar = document.getElementById('freeShippingBar');
+
+            const totalItems = cart.reduce((sum, i) => sum + i.qty, 0);
+            const totalPrice = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
+
+            countBadge.textContent = totalItems;
+            totalEl.textContent = `€${totalPrice.toFixed(2)}`;
+
+            // Free shipping threshold = 60 EUR
+            const pct = Math.min(100, (totalPrice / 60) * 100);
+            shipBar.style.width = `${pct}%`;
+            if (totalPrice >= 60) {
+                shipText.innerHTML = '🎉 <strong>Yay!</strong> You unlocked Free Shipping + Free Sticker Pack!';
+            } else {
+                const diff = (60 - totalPrice).toFixed(2);
+                shipText.innerHTML = `✨ Only <strong>€${diff}</strong> away from Free Shipping!`;
+            }
+
+            if (cart.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-10 space-y-2">
+                        <div class="text-4xl">🧺💭</div>
+                        <p class="font-heading font-bold text-base">Your basket is empty!</p>
+                        <p class="text-xs text-cocoa/70">Pick some fluffy crochet cuties to adopt.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = cart.map(item => `
+                <div class="bg-white border-2 border-cocoa rounded-2xl p-3.5 flex items-center justify-between gap-3 shadow-[2px_3px_0px_#4A3B39]">
+                    <div>
+                        <h4 class="font-heading font-bold text-sm text-cocoa">${item.name}</h4>
+                        <span class="text-xs font-semibold text-sakuraDark">€${(item.price * item.qty).toFixed(2)}</span>
+                    </div>
+                    <div class="flex items-center gap-2 bg-cream border-2 border-cocoa rounded-full px-2 py-0.5">
+                        <button onclick="changeQty('${item.id}', -1)" class="w-5 h-5 font-bold text-xs">-</button>
+                        <span class="font-heading font-bold text-xs">${item.qty}</span>
+                        <button onclick="changeQty('${item.id}', 1)" class="w-5 h-5 font-bold text-xs">+</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleCart(open) {
+            const drawer = document.getElementById('cartDrawer');
+            const backdrop = document.getElementById('cartDrawerBackdrop');
+            if (open) {
+                backdrop.classList.remove('hidden');
+                drawer.classList.remove('translate-x-full');
+            } else {
+                backdrop.classList.add('hidden');
+                drawer.classList.add('translate-x-full');
+            }
+        }
+
+        function handleCheckout() {
+            if (cart.length === 0) {
+                showToast('🧺 Add a cutie to your cart first!');
+                return;
+            }
+            playPopSound(820);
+            cart = [];
+            updateCartUI();
+            toggleCart(false);
+            showToast('🎉 Thank you for your order at @nabiko.creates! Getting my crochet hook ready! 💕');
+        }
+
+        // Toast Helper
+        let toastTimeout = null;
+        function showToast(msg) {
+            const box = document.getElementById('toastBox');
+            document.getElementById('toastMessage').textContent = msg;
+            box.classList.remove('opacity-0', 'translate-y-4');
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                box.classList.add('opacity-0', 'translate-y-4');
+            }, 2800);
+        }
+
+        // Initialize Shop on Load
+        window.onload = function () {
+            renderProducts();
+            renderBouquetPreview();
+            updateCartUI();
+        };
+    </script>
+</body>
+</html>
